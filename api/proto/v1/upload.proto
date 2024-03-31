@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package v1;
+
+import "third_party/tagger/tagger.proto";
+
+option go_package = "./v1;api_v1";
+
+message UploadAvatarResponse{
+    string avatar = 1;
+}
+
+message UploadImagerRequest{}
+
+message UploadImageResponse{
+    string src = 1;
+}
+
+message UploadInitiateMultipartRequest{
+    string file_name = 1 [(tagger.tags) = "binding:\"required\""];
+    int64 file_size = 2 [(tagger.tags) = "binding:\"required\""];
+}
+
+message UploadInitiateMultipartResponse{
+    string upload_id = 1;
+    int32 split_size = 2;
+    string upload_id_md5 = 3;
+}
+
+message UploadMultipartRequest{
+    string upload_id = 1 [(tagger.tags) = "form:\"upload_id\" binding:\"required\""];
+    int32 split_index = 2 [(tagger.tags) = "form:\"split_index\" binding:\"min=0\""];
+    int32 split_num = 3 [(tagger.tags) = "form:\"split_num\" binding:\"required,min=1\""];
+}
+
+message UploadMultipartResponse{
+    string upload_id = 1;
+    bool is_merge = 2;
+}

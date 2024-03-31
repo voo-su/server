@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package v1;
+
+import "third_party/tagger/tagger.proto";
+
+option go_package = "./v1;api_v1";
+
+message AccountDetailResponse{
+    int32 id = 1;
+    string username = 3;
+    string email = 4;
+    string avatar = 2;
+    string name = 5;
+    string surname = 6;
+    int32 gender = 7;
+    string birthday = 8;
+    string about = 9;
+}
+
+message AccountSettingResponse{
+    message UserInfo{
+        int32 uid = 1;
+        string username = 2;
+        string email = 3;
+        string avatar = 4;
+        string name = 5;
+        string surname = 6;
+        string about = 7;
+        int32 gender = 8;
+        // bool is_qiye = 7;
+    }
+
+    UserInfo user_info = 1;
+}
+
+message AccountDetailUpdateRequest{
+    string avatar = 1;
+    string name = 2 [(tagger.tags) = "binding:\"required,max=30\""];
+    string surname = 3 [(tagger.tags) = "binding:\"required,max=30\""];
+    int32 gender = 4 [(tagger.tags) = "binding:\"oneof=0 1 2\""];
+    string birthday = 5 [(tagger.tags) = "binding:\"max=10\""];
+    string about = 6 [(tagger.tags) = "binding:\"max=255\""];
+}
+
+message AccountDetailUpdateResponse{}
+
+message AccountUsernameUpdateRequest{
+    string username = 1 [(tagger.tags) = "binding:\"required,min=3,max=20\""];
+}
+
+message AccountUsernameUpdateResponse{}
+
+message AccountEmailUpdateRequest{
+    string email = 1 [(tagger.tags) = "binding:\"required\""];
+}
+
+message AccountEmailUpdateResponse{}

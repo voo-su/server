@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package v1;
+
+import "third_party/tagger/tagger.proto";
+
+option go_package = "./v1;api_v1";
+
+message AuthLoginRequest{
+    string email = 1 [(tagger.tags) = "binding:\"required\""];
+    string platform = 2 [(tagger.tags) = "binding:\"required,oneof=android ios web http\""];
+}
+
+message AuthLoginResponse{
+    string token = 1;
+    int32 expiresIn = 2;
+}
+
+message AuthVerifyRequest{
+    string token = 1 [(tagger.tags) = "binding:\"required\""];
+    string code = 2 [(tagger.tags) = "binding:\"required,len=6\""];
+}
+
+message AuthVerifyResponse{
+    string type = 1;
+    string accessToken = 2;
+    int32 expiresIn = 3;
+}
+
+//message AuthRefreshRequest{}
+//
+//message AuthRefreshResponse{
+//  string type = 1;
+//  string accessToken = 2;
+//  int32 expiresIn = 3;
+//}

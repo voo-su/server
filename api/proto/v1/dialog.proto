@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package v1;
+
+import "third_party/tagger/tagger.proto";
+
+option go_package = "./v1;api_v1";
+
+message DialogSessionItem{
+    int32 id = 1;
+    int32 dialog_type = 2;
+    int32 receiver_id = 3;
+    string username = 4;
+    string avatar = 5;
+    string name = 6;
+    string surname = 7;
+    int32 unread_num = 8;
+    string msg_text = 9;
+    string updated_at = 10;
+    int32 is_top = 11;
+    int32 is_disturb = 12;
+    int32 is_online = 13;
+    int32 is_bot = 14;
+    // string remark = 15;
+}
+
+message DialogSessionCreateRequest{
+    int32 dialog_type = 1 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+    int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\""];
+}
+
+message DialogSessionCreateResponse{
+    int32 id = 1;
+    int32 dialog_type = 2;
+    int32 receiver_id = 3;
+    int32 is_top = 4;
+    int32 is_disturb = 5;
+    int32 is_online = 6;
+    int32 is_bot = 7;
+    string username = 8;
+    string name = 9;
+    string surname = 10;
+    string avatar = 11;
+    // string remark_name = 10;
+    int32 unread_num = 12;
+    string msg_text = 13;
+    string updated_at = 14;
+}
+
+message DialogSessionDeleteRequest{
+    int32 list_id = 1 [(tagger.tags) = "binding:\"required\""];
+}
+
+message DialogSessionDeleteResponse{}
+
+message DialogSessionTopRequest{
+    int32 list_id = 1 [(tagger.tags) = "binding:\"required\""];
+    int32 type = 2 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+}
+
+message DialogSessionTopResponse{}
+
+message DialogSessionDisturbRequest{
+    int32 dialog_type = 1 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+    int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\""];
+    int32 is_disturb = 3 [(tagger.tags) = "binding:\"oneof=0 1\""];
+}
+
+message DialogSessionDisturbResponse{}
+
+message DialogSessionListRequest{}
+
+message DialogSessionListResponse{
+    repeated DialogSessionItem items = 1;
+}
+
+message DialogSessionClearUnreadNumRequest{
+    int32 dialog_type = 1 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+    int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\""];
+}
+
+message DialogSessionClearUnreadNumResponse{}

@@ -1,0 +1,46 @@
+app:
+  http: 8000
+  ws: 8001
+  tcp: 9002
+  env: dev
+  debug: false
+  log: ./runtime/log
+
+postgresql:
+  host: 192.168.0.100
+  port: 5432
+  username: postgres
+  password: postgres
+  database: voo_su
+
+redis:
+  host: 192.168.0.100:6379
+  auth:
+  database: 0
+
+jwt:
+  secret: g56KFY0q17rg6PoMGJF0MjsrTCjh2vBFHUphE4wJGtjeg9HxnTsnuWa157Oa
+  expires_time: 2678400
+  buffer_time: 2678400
+
+cors:
+  origin: "*"
+  headers: "Content-Type,Cache-Control,User-Agent,Keep-Alive,DNT,AccessToken,Authorization"
+  methods: "OPTIONS,GET,POST,PUT,DELETE"
+  credentials: false
+  max_age: 600
+
+file:
+  default: local
+  local:
+    root: ./runtime/voo-su-media
+    domain:
+
+email:
+  host: 127.0.0.1
+  port: 25
+  username:
+  password:
+  from: info@voo.su
+  name: Voo.su
+  report: info@magomedcoder.ru

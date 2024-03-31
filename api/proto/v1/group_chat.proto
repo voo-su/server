@@ -1,0 +1,240 @@
+syntax = "proto3";
+
+package v1;
+
+import "third_party/tagger/tagger.proto";
+
+option go_package = "./v1;api_v1";
+
+message GroupChatListResponse{
+    message Item{
+        int32 id = 1;
+        string group_name = 2;
+        string avatar = 3;
+        string description = 4;
+        int32 leader = 5;
+        int32 is_disturb = 6;
+        int32 creator_id = 7;
+    }
+    repeated Item items = 1;
+}
+
+message GroupChatCreateRequest{
+    string name = 1 [(tagger.tags) = "binding:\"required\""];
+    string ids = 2 [(tagger.tags) = "binding:\"required,ids\""];
+    string avatar = 3;
+}
+
+message GroupChatCreateResponse{
+    int32 group_id = 1;
+}
+
+message GroupChatDetailRequest{
+    int32 group_id = 1 [(tagger.tags) = "form:\"group_id\" binding:\"required\""];
+}
+
+message GroupChatDetailResponse{
+    int32 group_id = 1;
+    string group_name = 2;
+    string description = 3;
+    string avatar = 4;
+    string created_at = 5;
+    bool is_manager = 6;
+    int32 is_disturb = 7;
+    //    string visit_card = 8;
+    int32 is_mute = 9;
+    int32 is_overt = 10;
+}
+
+message GroupChatMemberListRequest{
+    int32 group_id = 1 [(tagger.tags) = "form:\"group_id\" binding:\"required\""];
+}
+
+message GroupChatMemberListResponse{
+    message Item{
+        int32 user_id = 1;
+        string username = 2;
+        string avatar = 3;
+        int32 gender = 4;
+        int32 leader = 5;
+        int32 is_mute = 6;
+        string remark = 7;
+    }
+
+    repeated Item items = 1;
+}
+
+message GroupChatDismissRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+}
+
+message GroupDismissResponse{}
+
+message GroupChatInviteRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    string ids = 2 [(tagger.tags) = "binding:\"required,ids\""];
+}
+
+message GroupChatInviteResponse{}
+
+message GroupChatGetInviteFriendsRequest{
+    int32 group_id = 1 [(tagger.tags) = "form:\"group_id\""];
+}
+
+message GroupChatSecedeRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+}
+
+message GroupSettingRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    string group_name = 2 [(tagger.tags) = "binding:\"required\""];
+    string avatar = 3;
+    string description = 4 [(tagger.tags) = "binding:\"max=255\""];
+}
+
+message GroupChatSettingResponse{}
+
+message GroupChatRemoveMemberRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    string members_ids = 2 [(tagger.tags) = "binding:\"required,ids\""];
+}
+
+message GroupChatRemoveMemberResponse{}
+
+message GroupChatOvertListRequest{
+    int32 page = 1 [(tagger.tags) = "form:\"page\" binding:\"required\""];
+    string name = 2 [(tagger.tags) = "form:\"name\" binding:\"max=50\""];
+}
+
+message GroupChatOvertListResponse{
+    message Item{
+        int32 id = 1;
+        int32 type = 2;
+        string name = 3;
+        string avatar = 4;
+        string description = 5;
+        int32 count = 6;
+        int32 max_num = 7;
+        bool is_member = 8;
+        string created_at = 9;
+    }
+
+    repeated Item items = 1;
+    bool next = 2;
+}
+
+message GroupChatHandoverRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    int32 user_id = 2 [(tagger.tags) = "binding:\"required\""];
+}
+
+message GroupChatAssignAdminRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    int32 user_id = 2 [(tagger.tags) = "binding:\"required\""];
+    int32 mode = 3 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+}
+
+message GroupChatNoSpeakRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    int32 user_id = 2 [(tagger.tags) = "binding:\"required\""];
+    int32 mode = 3 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+}
+
+message GroupChatMuteRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    int32 mode = 3 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+}
+
+message GroupChatMuteResponse{}
+
+message GroupChatOvertRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    int32 mode = 3 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+}
+
+message GroupChatOvertResponse{}
+
+message GroupChatRequestCreateRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    string remark = 2 [(tagger.tags) = "binding:\"required\""];
+}
+
+message GroupChatRequestAgreeRequest{
+    int32 apply_id = 1 [(tagger.tags) = "binding:\"required\""];
+}
+
+message GroupChatRequestDeclineRequest{
+    int32 apply_id = 1 [(tagger.tags) = "binding:\"required\""];
+    string remark = 2 [(tagger.tags) = "binding:\"required\""];
+}
+
+message GroupChatRequestDeclineResponse{}
+
+message GroupRequestListRequest{
+    int32 group_id = 1 [(tagger.tags) = "form:\"group_id\" binding:\"required\""];
+}
+
+message GroupChatRequestListResponse{
+    message Item{
+        int32 id = 1;
+        int32 user_id = 2;
+        int32 group_id = 3;
+        // string remark = 4;
+        string avatar = 5;
+        string username = 6;
+        string created_at = 7;
+    }
+
+    repeated Item items = 1;
+}
+
+message GroupChatRequestAllResponse{
+
+    message Item{
+        int32 id = 1;
+        int32 user_id = 2;
+        int32 group_id = 3;
+        string group_name = 4;
+        // string remark = 5;
+        string avatar = 6;
+        string username = 7;
+        string created_at = 8;
+    }
+
+    repeated Item items = 1;
+}
+
+message GroupChatNoticeDeleteRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    int32 notice_id = 2 [(tagger.tags) = "binding:\"required\""];
+}
+
+message GroupChatNoticeEditRequest{
+    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+    int32 notice_id = 2;
+    string title = 3 [(tagger.tags) = "binding:\"required\""];
+    string content = 4 [(tagger.tags) = "binding:\"required\""];
+    int32 is_top = 5 [(tagger.tags) = "binding:\"oneof=0 1\""];
+    int32 is_confirm = 6 [(tagger.tags) = "binding:\"oneof=0 1\""];
+}
+
+message GroupChatNoticeListRequest{
+    int32 group_id = 1 [(tagger.tags) = "form:\"group_id\" binding:\"required\""];
+}
+
+message GroupChatNoticeListResponse{
+    message Item{
+        int32 id = 1;
+        string title = 2;
+        string content = 3;
+        int32 is_top = 4;
+        int32 is_confirm = 5;
+        string confirm_users = 6;
+        string avatar = 7;
+        int32 creator_id = 8;
+        string created_at = 9;
+        string updated_at = 10;
+    }
+
+    repeated Item items = 1;
+}
