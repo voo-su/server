@@ -631,6 +631,127 @@ ALTER SEQUENCE public.splits_id_seq OWNED BY public.splits.id;
 
 
 --
+-- Name: sticker_items; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.sticker_items
+(
+    id          integer                                              NOT NULL,
+    sticker_id  integer                DEFAULT 0                     NOT NULL,
+    user_id     integer                DEFAULT 0                     NOT NULL,
+    description character varying(20)  DEFAULT ''::character varying NOT NULL,
+    url         character varying(255) DEFAULT ''::character varying NOT NULL,
+    file_suffix character varying(10)  DEFAULT ''::character varying NOT NULL,
+    file_size   bigint                 DEFAULT 0                     NOT NULL,
+    created_at  timestamp without time zone                          NOT NULL,
+    updated_at  timestamp without time zone                          NOT NULL
+);
+
+
+ALTER TABLE public.sticker_items
+    OWNER TO postgres;
+
+--
+-- Name: sticker_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.sticker_items_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.sticker_items_id_seq OWNER TO postgres;
+
+--
+-- Name: sticker_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.sticker_items_id_seq OWNED BY public.sticker_items.id;
+
+
+--
+-- Name: sticker_user; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.sticker_user
+(
+    id          integer                                              NOT NULL,
+    user_id     integer                                              NOT NULL,
+    sticker_ids character varying(255) DEFAULT ''::character varying NOT NULL,
+    created_at  timestamp without time zone                          NOT NULL
+);
+
+
+ALTER TABLE public.sticker_user
+    OWNER TO postgres;
+
+--
+-- Name: sticker_user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.sticker_user_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.sticker_user_id_seq OWNER TO postgres;
+
+--
+-- Name: sticker_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.sticker_user_id_seq OWNED BY public.sticker_user.id;
+
+
+--
+-- Name: stickers; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.stickers
+(
+    id         integer                                              NOT NULL,
+    name       character varying(50)  DEFAULT ''::character varying NOT NULL,
+    icon       character varying(255) DEFAULT ''::character varying NOT NULL,
+    status     smallint               DEFAULT 0                     NOT NULL,
+    created_at timestamp without time zone                          NOT NULL,
+    updated_at timestamp without time zone                          NOT NULL
+);
+
+
+ALTER TABLE public.stickers
+    OWNER TO postgres;
+
+--
+-- Name: stickers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.stickers_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.stickers_id_seq OWNER TO postgres;
+
+--
+-- Name: stickers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.stickers_id_seq OWNED BY public.stickers.id;
+
+
+--
 -- Name: user_sessions; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -830,6 +951,31 @@ ALTER TABLE ONLY public.messages
 ALTER TABLE ONLY public.splits
     ALTER COLUMN id SET DEFAULT nextval('public.splits_id_seq'::regclass);
 
+
+--
+-- Name: sticker_items id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sticker_items
+ALTER COLUMN id SET DEFAULT nextval('public.sticker_items_id_seq'::regclass);
+
+
+--
+-- Name: sticker_user id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sticker_user
+ALTER COLUMN id SET DEFAULT nextval('public.sticker_user_id_seq'::regclass);
+
+
+--
+-- Name: stickers id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.stickers
+ALTER COLUMN id SET DEFAULT nextval('public.stickers_id_seq'::regclass);
+
+
 --
 -- Name: user_sessions id; Type: DEFAULT; Schema: public; Owner: postgres
 --
@@ -957,6 +1103,31 @@ ALTER TABLE ONLY public.messages
 ALTER TABLE ONLY public.splits
     ADD CONSTRAINT splits_pkey PRIMARY KEY (id);
 
+
+--
+-- Name: sticker_items sticker_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sticker_items
+    ADD CONSTRAINT sticker_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sticker_user sticker_user_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.sticker_user
+    ADD CONSTRAINT sticker_user_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: stickers stickers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.stickers
+    ADD CONSTRAINT stickers_pkey PRIMARY KEY (id);
+
+
 --
 -- Name: user_sessions user_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -983,4 +1154,3 @@ CREATE INDEX dialogs_dialog_type_user_id_receiver_id_idx ON public.dialogs USING
 --
 -- PostgreSQL database dump complete
 --
-

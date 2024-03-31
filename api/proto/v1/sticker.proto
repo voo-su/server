@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package v1;
+
+import "third_party/tagger/tagger.proto";
+
+option go_package = "./v1;api_v1";
+
+message StickerListItem{
+    int32 media_id = 1;
+    string src = 2;
+}
+
+message StickerSetSystemRequest{
+    int32 sticker_id = 1 [(tagger.tags) = "binding:\"required\""];
+    int32 type = 2 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+}
+
+message StickerSetSystemResponse{
+    int32 sticker_id = 1;
+    string url = 2;
+    string name = 3;
+    repeated StickerListItem list = 4;
+}
+
+message StickerDeleteRequest{
+    string ids = 1 [(tagger.tags) = "form:\"ids\" binding:\"required,ids\""];
+}
+
+message StickerSysListResponse{
+    message Item{
+        int32 id = 1;
+        string name = 2;
+        string icon = 3;
+        int32 status = 4;
+    }
+
+    repeated Item items = 1;
+}
+
+message StickerListResponse{
+    message SysSticker{
+        int32 sticker_id = 1;
+        string url = 2;
+        string name = 3;
+        repeated StickerListItem list = 4;
+    }
+
+    repeated SysSticker sys_sticker = 1;
+    repeated StickerListItem collect_sticker = 2;
+}
+
+message StickerUploadResponse{
+    int32 media_id = 1;
+    string src = 2;
+}

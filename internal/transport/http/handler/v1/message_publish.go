@@ -218,10 +218,25 @@ func (c *Publish) transfer(ctx *core.Context, typeValue string) error {
 		mapping["card"] = c.onSendCard
 		mapping["forward"] = c.onSendForward
 		mapping["mixed"] = c.onMixedMessage
+		mapping["sticker"] = c.onSendSticker
 	}
 	if call, ok := mapping[typeValue]; ok {
 		return call(ctx)
 	}
 
 	return nil
+}
+
+func (c *Publish) onSendSticker(ctx *core.Context) error {
+	params := &api_v1.StickerMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	err := c.MessageSendService.SendSticker(ctx.Ctx(), ctx.UserId(), params)
+	if err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
 }

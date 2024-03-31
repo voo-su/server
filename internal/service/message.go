@@ -44,6 +44,7 @@ type MessageSendService interface {
 	Revoke(ctx context.Context, uid int, msgId string) error
 	Vote(ctx context.Context, uid int, msgId int, optionsValue string) (*repo.VoteStatistics, error)
 	SendLogin(ctx context.Context, uid int, req *api_v1.LoginMessageRequest) error
+	SendSticker(ctx context.Context, uid int, req *api_v1.StickerMessageRequest) error
 }
 
 type MessageService struct {
@@ -904,6 +905,30 @@ func (m *MessageService) SendLogin(ctx context.Context, uid int, req *api_v1.Log
 			//Platform: req.Platform,
 			//Address:  req.Address,
 			//Reason:   req.Reason,
+		}),
+	}
+
+	return m.save(ctx, data)
+}
+
+func (m *MessageService) SendSticker(ctx context.Context, uid int, req *api_v1.StickerMessageRequest) error {
+	var sticker model.StickerItem
+	if err := m.Source.Db().First(&sticker, "id = ? and user_id = ?", req.StickerId, uid).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("информация о смайлик не существует")
+		}
+		return err
+	}
+
+	data := &model.Message{
+		DialogType: int(req.Receiver.DialogType),
+		MsgType:    entity.ChatMsgTypeImage,
+		UserId:     uid,
+		ReceiverId: int(req.Receiver.ReceiverId),
+		Extra: jsonutil.Encode(&model.DialogRecordExtraImage{
+			Url:    sticker.Url,
+			Width:  0,
+			Height: 0,
 		}),
 	}
 

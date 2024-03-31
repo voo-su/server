@@ -408,3 +408,38 @@ func (c *Message) Download(ctx *core.Context) error {
 
 	return nil
 }
+
+type StickerMessageRequest struct {
+	DialogType int `form:"dialog_type" json:"dialog_type" binding:"required,oneof=1 2" label:"dialog_type"`
+	ReceiverId int `form:"receiver_id" json:"receiver_id" binding:"required,numeric,gt=0" label:"receiver_id"`
+	StickerId  int `form:"sticker_id" json:"sticker_id" binding:"required,numeric,gt=0"`
+}
+
+func (c *Message) Sticker(ctx *core.Context) error {
+	params := &StickerMessageRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	uid := ctx.UserId()
+	if err := c.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
+		DialogType:        params.DialogType,
+		UserId:            uid,
+		ReceiverId:        params.ReceiverId,
+		IsVerifyGroupMute: true,
+	}); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	if err := c.MessageSendService.SendSticker(ctx.Ctx(), uid, &api_v1.StickerMessageRequest{
+		StickerId: int32(params.StickerId),
+		Receiver: &api_v1.MessageReceiver{
+			DialogType: int32(params.DialogType),
+			ReceiverId: int32(params.ReceiverId),
+		},
+	}); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}

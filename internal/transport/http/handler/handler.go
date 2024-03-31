@@ -14,6 +14,7 @@ type V1 struct {
 	Upload           *v1.Upload
 	GroupChat        *v1.GroupChat
 	GroupChatRequest *v1.GroupChatRequest
+	Sticker          *v1.Sticker
 }
 
 type Handler struct {

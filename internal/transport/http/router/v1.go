@@ -90,6 +90,12 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 			message.POST("/image", core.HandlerFunc(handler.V1.Message.Image))
 			message.POST("/vote", core.HandlerFunc(handler.V1.Message.Vote))
 			message.POST("/vote/handle", core.HandlerFunc(handler.V1.Message.HandleVote))
+			message.POST("/sticker", core.HandlerFunc(handler.V1.Message.Sticker))
+			message.GET("/stickers", core.HandlerFunc(handler.V1.Sticker.CollectList))
+			message.POST("/sticker/create", core.HandlerFunc(handler.V1.Sticker.Upload))
+			message.POST("/sticker/delete", core.HandlerFunc(handler.V1.Sticker.DeleteCollect))
+			message.GET("/sticker/system/list", core.HandlerFunc(handler.V1.Sticker.SystemList))
+			message.POST("/sticker/system/install", core.HandlerFunc(handler.V1.Sticker.SetSystemSticker))
 		}
 		upload := v1.Group("/upload").Use(authorize)
 		{
