@@ -45,6 +45,7 @@ var ProviderSet = wire.NewSet(
 	repo.NewContact,
 	repo.NewFileSplit,
 	repo.NewSequence,
+	repo.NewBot,
 
 	logic.NewMessageForwardLogic,
 

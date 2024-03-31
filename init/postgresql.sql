@@ -21,6 +21,46 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: bots; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.bots
+(
+    id          integer                                              NOT NULL,
+    user_id     integer                DEFAULT 0                     NOT NULL,
+    bot_type    integer                DEFAULT 0,
+    name        character varying(255) DEFAULT ''::character varying NOT NULL,
+    description character varying(255) DEFAULT ''::character varying NOT NULL,
+    avatar      character varying(255) DEFAULT ''::character varying NOT NULL,
+    created_at  timestamp without time zone                          NOT NULL
+);
+
+ALTER TABLE public.bots
+    OWNER TO postgres;
+
+--
+-- Name: bots_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.bots_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.bots_id_seq OWNER TO postgres;
+
+--
+-- Name: bots_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.bots_id_seq OWNED BY public.bots.id;
+
+
+--
 -- Name: contact_groups; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -678,6 +718,15 @@ ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
+
+--
+-- Name: bots id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bots
+ALTER COLUMN id SET DEFAULT nextval('public.bots_id_seq'::regclass);
+
+
 --
 -- Name: contact_groups id; Type: DEFAULT; Schema: public; Owner: postgres
 --
@@ -794,7 +843,16 @@ ALTER TABLE ONLY public.user_sessions
 --
 
 ALTER TABLE ONLY public.users
-    ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: bots bots_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bots
+    ADD CONSTRAINT bots_pkey PRIMARY KEY (id);
+
 
 --
 -- Name: contact_groups contact_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres

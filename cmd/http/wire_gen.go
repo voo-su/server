@@ -41,6 +41,7 @@ func Initialize(conf *config.Config) *AppProvider {
 	ipAddressService := service.NewIpAddressService(source, conf, requestClient)
 	dialog := repo.NewDialog(db)
 	dialogService := service.NewDialogService(source, dialog, groupChatMember)
+	bot := repo.NewBot(db)
 	sequence := cache.NewSequence(client)
 	repoSequence := repo.NewSequence(db, sequence)
 	messageForwardLogic := logic.NewMessageForwardLogic(db, repoSequence)
@@ -67,6 +68,7 @@ func Initialize(conf *config.Config) *AppProvider {
 		Sequence:            repoSequence,
 		DialogVoteCache:     vote,
 		MessageRepo:         message,
+		BotRepo:             bot,
 	}
 	userSession := repo.NewUserSession(db)
 	auth := &v1.Auth{
@@ -76,6 +78,7 @@ func Initialize(conf *config.Config) *AppProvider {
 		RedisLock:          redisLock,
 		IpAddressService:   ipAddressService,
 		DialogService:      dialogService,
+		BotRepo:            bot,
 		MessageSendService: messageService,
 		UserSession:        userSession,
 	}

@@ -22,6 +22,7 @@ var ProviderSet = wire.NewSet(
 	repo.NewMessageVote,
 	repo.NewFileSplit,
 	repo.NewSequence,
+	repo.NewBot,
 
 	wire.Struct(new(service.MessageService), "*"),
 	wire.Bind(new(service.MessageSendService), new(*service.MessageService)),
@@ -36,6 +37,7 @@ var ProviderSet = wire.NewSet(
 	service.NewGroupRequestService,
 	service.NewSplitService,
 	service.NewIpAddressService,
+
 	// v1
 	wire.Struct(new(V1), "*"),
 	wire.Struct(new(v1.Auth), "*"),

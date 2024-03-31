@@ -45,6 +45,7 @@ func Initialize(conf *config.Config) *AppProvider {
 	unreadStorage := cache.NewUnreadStorage(client)
 	messageStorage := cache.NewMessageStorage(client)
 	message := repo.NewMessage(db)
+	bot := repo.NewBot(db)
 	messageService := &service.MessageService{
 		Source:              source,
 		MessageForwardLogic: messageForwardLogic,
@@ -59,6 +60,7 @@ func Initialize(conf *config.Config) *AppProvider {
 		Sequence:            repoSequence,
 		DialogVoteCache:     vote,
 		MessageRepo:         message,
+		BotRepo:             bot,
 	}
 	chatHandler := chat.NewHandler(client, groupChatMemberService, messageService)
 	chatEvent := &event.ChatEvent{
@@ -107,4 +109,4 @@ func Initialize(conf *config.Config) *AppProvider {
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(wire.Struct(new(service.MessageService), "*"), wire.Bind(new(service.MessageSendService), new(*service.MessageService)), wire.Struct(new(handler.Handler), "*"), wire.Struct(new(AppProvider), "*"), wire.Struct(new(process.SubServers), "*"), provider.NewPostgresqlClient, provider.NewRedisClient, provider.NewFilesystem, provider.NewEmailClient, provider.NewProviders, router.NewRouter, process.NewServer, process.NewHealthSubscribe, process.NewMessageSubscribe, repo.NewSource, repo.NewDialog, repo.NewMessage, repo.NewMessageVote, repo.NewGroupMember, repo.NewContact, repo.NewFileSplit, repo.NewSequence, logic.NewMessageForwardLogic, service.NewDialogService, service.NewGroupMemberService, service.NewContactService)
+var ProviderSet = wire.NewSet(wire.Struct(new(service.MessageService), "*"), wire.Bind(new(service.MessageSendService), new(*service.MessageService)), wire.Struct(new(handler.Handler), "*"), wire.Struct(new(AppProvider), "*"), wire.Struct(new(process.SubServers), "*"), provider.NewPostgresqlClient, provider.NewRedisClient, provider.NewFilesystem, provider.NewEmailClient, provider.NewProviders, router.NewRouter, process.NewServer, process.NewHealthSubscribe, process.NewMessageSubscribe, repo.NewSource, repo.NewDialog, repo.NewMessage, repo.NewMessageVote, repo.NewGroupMember, repo.NewContact, repo.NewFileSplit, repo.NewSequence, repo.NewBot, logic.NewMessageForwardLogic, service.NewDialogService, service.NewGroupMemberService, service.NewContactService)

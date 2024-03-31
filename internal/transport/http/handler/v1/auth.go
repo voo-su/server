@@ -22,6 +22,7 @@ type Auth struct {
 	RedisLock          *cache.RedisLock
 	IpAddressService   *service.IpAddressService
 	DialogService      *service.DialogService
+	BotRepo            *repo.Bot
 	MessageSendService service.MessageSendService
 	UserSession        *repo.UserSession
 }
@@ -77,6 +78,24 @@ func (a *Auth) Verify(ctx *core.Context) error {
 	a.AuthService.Delete(ctx.Ctx(), entity.LoginChannel, params.Token)
 
 	ip := ctx.Context.ClientIP()
+	root, _ := a.BotRepo.GetLoginBot(ctx.Ctx())
+	if root != nil {
+		//address, _ := a.IpAddressService.FindAddress(ip)
+		_, _ = a.DialogService.Create(ctx.Ctx(), &service.DialogCreateOpt{
+			UserId:     user.Id,
+			DialogType: entity.ChatPrivateMode,
+			ReceiverId: root.UserId,
+			IsBoot:     true,
+		})
+		_ = a.MessageSendService.SendLogin(ctx.Ctx(), user.Id, &api_v1.LoginMessageRequest{
+			Ip:    ip,
+			Agent: ctx.Context.GetHeader("user-agent"),
+			//Address: address,
+			//Platform: params.Platform,
+			//Platform: "web",
+			//Reason:   "Вход с обычного устройства",
+		})
+	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(a.Config.Jwt.ExpiresTime))
 	token := jwt.GenerateToken("api", a.Config.Jwt.Secret, &jwt.Options{

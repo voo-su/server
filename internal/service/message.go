@@ -43,6 +43,7 @@ type MessageSendService interface {
 	SendMixedMessage(ctx context.Context, uid int, req *api_v1.MixedMessageRequest) error
 	Revoke(ctx context.Context, uid int, msgId string) error
 	Vote(ctx context.Context, uid int, msgId int, optionsValue string) (*repo.VoteStatistics, error)
+	SendLogin(ctx context.Context, uid int, req *api_v1.LoginMessageRequest) error
 }
 
 type MessageService struct {
@@ -59,6 +60,7 @@ type MessageService struct {
 	Sequence            *repo.Sequence
 	DialogVoteCache     *cache.Vote
 	MessageRepo         *repo.Message
+	BotRepo             *repo.Bot
 }
 
 type DialogRecordsItem struct {
@@ -882,4 +884,28 @@ func (m *MessageService) afterHandle(ctx context.Context, record *model.Message,
 	if err := m.Source.Redis().Publish(ctx, entity.ImTopicChat, content).Err(); err != nil {
 		logger.Errorf("Ошибка отправки уведомления %s", err.Error())
 	}
+}
+
+func (m *MessageService) SendLogin(ctx context.Context, uid int, req *api_v1.LoginMessageRequest) error {
+	bot, err := m.BotRepo.GetLoginBot(ctx)
+	if err != nil {
+		return err
+	}
+
+	data := &model.Message{
+		DialogType: entity.ChatPrivateMode,
+		MsgType:    entity.ChatMsgTypeLogin,
+		UserId:     bot.UserId,
+		ReceiverId: uid,
+		Extra: jsonutil.Encode(&model.DialogRecordExtraLogin{
+			IP:       req.Ip,
+			Agent:    req.Agent,
+			Datetime: timeutil.DateTime(),
+			//Platform: req.Platform,
+			//Address:  req.Address,
+			//Reason:   req.Reason,
+		}),
+	}
+
+	return m.save(ctx, data)
 }
