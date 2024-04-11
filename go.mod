@@ -16,6 +16,7 @@ require (
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/redis/go-redis/v9 v9.5.1
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/sourcegraph/conc v0.3.0
 	github.com/srikrsna/protoc-gen-gotag v0.6.2
 	github.com/urfave/cli/v2 v2.27.1
