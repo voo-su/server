@@ -60,6 +60,7 @@ func (c *App) command(cm Command) *cli.Command {
 		if !isConfig {
 			cd.Flags = append(cd.Flags, &cli.StringFlag{
 				Name:        "config",
+				Aliases:     []string{"c"},
 				Value:       "/etc/voo-su/voo-su.yaml",
 				Usage:       "Путь к файлу конфигурации",
 				DefaultText: "/etc/voo-su/voo-su.yaml",

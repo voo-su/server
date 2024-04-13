@@ -1,20 +1,19 @@
 app:
+  env: dev
   http: 8000
   ws: 8001
-  tcp: 9002
-  env: dev
-  debug: false
+  tcp: 8002
   log: ./runtime/log
 
 postgresql:
-  host: 192.168.0.100
+  host: postgres
   port: 5432
   username: postgres
   password: postgres
   database: voo_su
 
 redis:
-  host: 192.168.0.100:6379
+  host: redis:6379
   auth:
   database: 0
 
