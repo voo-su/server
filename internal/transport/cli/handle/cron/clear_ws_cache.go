@@ -7,11 +7,11 @@ import (
 )
 
 type ClearWsCache struct {
-	storage *cache.ServerStorage
+	Storage *cache.ServerStorage
 }
 
 func NewClearWsCache(storage *cache.ServerStorage) *ClearWsCache {
-	return &ClearWsCache{storage: storage}
+	return &ClearWsCache{Storage: storage}
 }
 
 func (c *ClearWsCache) Name() string {
@@ -27,7 +27,7 @@ func (c *ClearWsCache) Enable() bool {
 }
 
 func (c *ClearWsCache) Handle(ctx context.Context) error {
-	for _, sid := range c.storage.GetExpireServerAll(ctx) {
+	for _, sid := range c.Storage.GetExpireServerAll(ctx) {
 		c.clear(ctx, sid)
 	}
 	return nil
@@ -38,14 +38,14 @@ func (c *ClearWsCache) clear(ctx context.Context, sid string) {
 	for {
 		var keys []string
 		var err error
-		keys, cursor, err = c.storage.Redis().Scan(ctx, cursor, fmt.Sprintf("ws:%s:*", sid), 200).Result()
+		keys, cursor, err = c.Storage.Redis().Scan(ctx, cursor, fmt.Sprintf("ws:%s:*", sid), 200).Result()
 		if err != nil {
 			return
 		}
 
-		c.storage.Redis().Del(ctx, keys...)
+		c.Storage.Redis().Del(ctx, keys...)
 		if cursor == 0 {
-			_ = c.storage.DelExpireServer(ctx, sid)
+			_ = c.Storage.DelExpireServer(ctx, sid)
 			break
 		}
 	}

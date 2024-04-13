@@ -14,14 +14,25 @@ import (
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
 	"voo.su/internal/service"
+	"voo.su/internal/transport/cli"
+	"voo.su/internal/transport/cli/handle/cron"
+	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/http/handler"
 	"voo.su/internal/transport/http/handler/v1"
 	"voo.su/internal/transport/http/router"
+	"voo.su/internal/transport/ws"
+	"voo.su/internal/transport/ws/consume"
+	chat2 "voo.su/internal/transport/ws/consume/chat"
+	"voo.su/internal/transport/ws/event"
+	"voo.su/internal/transport/ws/event/chat"
+	handler2 "voo.su/internal/transport/ws/handler"
+	"voo.su/internal/transport/ws/process"
+	router2 "voo.su/internal/transport/ws/router"
 )
 
 // Injectors from wire.go:
 
-func Initialize(conf *config.Config) *AppProvider {
+func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	client := provider.NewRedisClient(conf)
 	smsStorage := cache.NewSmsStorage(client)
 	db := provider.NewPostgresqlClient(conf)
@@ -170,6 +181,29 @@ func Initialize(conf *config.Config) *AppProvider {
 		GroupChatService:        groupChatService,
 		Redis:                   client,
 	}
+	sticker := repo.NewSticker(db)
+	stickerService := service.NewStickerService(source, sticker, filesystem)
+	v1Sticker := &v1.Sticker{
+		StickerRepo:    sticker,
+		Filesystem:     filesystem,
+		StickerService: stickerService,
+		RedisLock:      redisLock,
+	}
+	contactGroup := repo.NewContactGroup(db)
+	contactGroupService := service.NewContactGroupService(source, contactGroup)
+	v1ContactGroup := &v1.ContactGroup{
+		ContactGroupService: contactGroupService,
+		ContactService:      contactService,
+		ContactRepo:         contact,
+		ContactGroupRepo:    contactGroup,
+	}
+	v1GroupChatNotice := &v1.GroupChatNotice{
+		GroupNoticeService:  groupChatNoticeService,
+		GroupMemberService:  groupChatMemberService,
+		MessageSendService:  messageService,
+		GroupChatMemberRepo: groupChatMember,
+		GroupChatNoticeRepo: groupChatNotice,
+	}
 	handlerV1 := &handler.V1{
 		Auth:             auth,
 		Account:          account,
@@ -182,18 +216,125 @@ func Initialize(conf *config.Config) *AppProvider {
 		Upload:           upload,
 		GroupChat:        v1GroupChat,
 		GroupChatRequest: v1GroupChatRequest,
+		Sticker:          v1Sticker,
+		ContactGroup:     v1ContactGroup,
+		GroupChatNotice:  v1GroupChatNotice,
 	}
 	handlerHandler := &handler.Handler{
 		V1: handlerV1,
 	}
 	engine := router.NewRouter(conf, handlerHandler, jwtTokenStorage)
-	appProvider := &AppProvider{
+	appProvider := &http.AppProvider{
 		Config: conf,
 		Engine: engine,
 	}
 	return appProvider
 }
 
+func NewWsInjector(conf *config.Config) *ws.AppProvider {
+	client := provider.NewRedisClient(conf)
+	serverStorage := cache.NewSidStorage(client)
+	clientStorage := cache.NewClientStorage(client, conf, serverStorage)
+	roomStorage := cache.NewRoomStorage(client)
+	db := provider.NewPostgresqlClient(conf)
+	relation := cache.NewRelation(client)
+	groupChatMember := repo.NewGroupMember(db, relation)
+	source := repo.NewSource(db, client)
+	groupChatMemberService := service.NewGroupMemberService(source, groupChatMember)
+	sequence := cache.NewSequence(client)
+	repoSequence := repo.NewSequence(db, sequence)
+	messageForwardLogic := logic.NewMessageForwardLogic(db, repoSequence)
+	split := repo.NewFileSplit(db)
+	vote := cache.NewVote(client)
+	messageVote := repo.NewMessageVote(db, vote)
+	filesystem := provider.NewFilesystem(conf)
+	unreadStorage := cache.NewUnreadStorage(client)
+	messageStorage := cache.NewMessageStorage(client)
+	message := repo.NewMessage(db)
+	bot := repo.NewBot(db)
+	messageService := &service.MessageService{
+		Source:              source,
+		MessageForwardLogic: messageForwardLogic,
+		GroupChatMemberRepo: groupChatMember,
+		SplitRepo:           split,
+		MessageVoteRepo:     messageVote,
+		Filesystem:          filesystem,
+		UnreadStorage:       unreadStorage,
+		MessageStorage:      messageStorage,
+		ServerStorage:       serverStorage,
+		ClientStorage:       clientStorage,
+		Sequence:            repoSequence,
+		DialogVoteCache:     vote,
+		MessageRepo:         message,
+		BotRepo:             bot,
+	}
+	chatHandler := chat.NewHandler(client, groupChatMemberService, messageService)
+	chatEvent := &event.ChatEvent{
+		Redis:                  client,
+		Config:                 conf,
+		RoomStorage:            roomStorage,
+		GroupChatMemberRepo:    groupChatMember,
+		GroupChatMemberService: groupChatMemberService,
+		Handler:                chatHandler,
+	}
+	chatChannel := &handler2.ChatChannel{
+		Storage: clientStorage,
+		Event:   chatEvent,
+	}
+	handlerHandler := &handler2.Handler{
+		Chat:   chatChannel,
+		Config: conf,
+	}
+	jwtTokenStorage := cache.NewTokenSessionStorage(client)
+	engine := router2.NewRouter(conf, handlerHandler, jwtTokenStorage)
+	healthSubscribe := process.NewHealthSubscribe(conf, serverStorage)
+	dialog := repo.NewDialog(db)
+	dialogService := service.NewDialogService(source, dialog, groupChatMember)
+	contactRemark := cache.NewContactRemark(client)
+	contact := repo.NewContact(db, contactRemark, relation)
+	contactService := service.NewContactService(source, contact)
+	handler3 := chat2.NewHandler(conf, clientStorage, roomStorage, dialogService, messageService, contactService, source)
+	chatSubscribe := consume.NewChatSubscribe(handler3)
+	messageSubscribe := process.NewMessageSubscribe(conf, client, chatSubscribe)
+	subServers := &process.SubServers{
+		HealthSubscribe:  healthSubscribe,
+		MessageSubscribe: messageSubscribe,
+	}
+	server := process.NewServer(subServers)
+	emailClient := provider.NewEmailClient(conf)
+	providers := &provider.Providers{
+		EmailClient: emailClient,
+	}
+	appProvider := &ws.AppProvider{
+		Config:    conf,
+		Engine:    engine,
+		Coroutine: server,
+		Handler:   handlerHandler,
+		Providers: providers,
+	}
+	return appProvider
+}
+
+func NewCronInjector(conf *config.Config) *cli.CronProvider {
+	client := provider.NewRedisClient(conf)
+	serverStorage := cache.NewSidStorage(client)
+	clearWsCache := cron.NewClearWsCache(serverStorage)
+	db := provider.NewPostgresqlClient(conf)
+	filesystem := provider.NewFilesystem(conf)
+	clearTmpFile := cron.NewClearTmpFile(db, filesystem)
+	clearExpireServer := cron.NewClearExpireServer(serverStorage)
+	crontab := &cli.Crontab{
+		ClearWsCache:      clearWsCache,
+		ClearTmpFile:      clearTmpFile,
+		ClearExpireServer: clearExpireServer,
+	}
+	cronProvider := &cli.CronProvider{
+		Config:  conf,
+		Crontab: crontab,
+	}
+	return cronProvider
+}
+
 // wire.go:
 
-var ProviderSet = wire.NewSet(wire.Struct(new(AppProvider), "*"), router.NewRouter, provider.NewPostgresqlClient, provider.NewRedisClient, provider.NewHttpClient, provider.NewEmailClient, provider.NewFilesystem, provider.NewRequestClient, wire.Struct(new(handler.Handler), "*"))
+var providerSet = wire.NewSet(provider.NewPostgresqlClient, provider.NewRedisClient, provider.NewHttpClient, provider.NewEmailClient, provider.NewFilesystem, provider.NewRequestClient, wire.Struct(new(provider.Providers), "*"), cache.ProviderSet, logic.ProviderSet)

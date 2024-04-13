@@ -14,7 +14,6 @@ type App struct {
 	Websocket int    `yaml:"ws"`
 	Tcp       int    `yaml:"tcp"`
 	Env       string `yaml:"env"`
-	Debug     bool   `yaml:"debug"`
 	Log       string `yaml:"log"`
 }
 
@@ -51,12 +50,4 @@ func New(filename string) *Config {
 
 func (c *Config) ServerId() string {
 	return c.sid
-}
-
-func (c *Config) Debug() bool {
-	return c.App.Debug
-}
-
-func (c *Config) LogPath() string {
-	return c.App.Log
 }

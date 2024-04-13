@@ -1,71 +1,70 @@
-package main
+package ws
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli/v2"
-	"golang.org/x/sync/errgroup"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/urfave/cli/v2"
+	"golang.org/x/sync/errgroup"
 	"voo.su/internal/config"
+	"voo.su/internal/provider"
+	"voo.su/internal/transport/ws/handler"
+	"voo.su/internal/transport/ws/process"
 	"voo.su/pkg/core/socket"
 	"voo.su/pkg/email"
-	"voo.su/pkg/logger"
 )
 
 var ErrServerClosed = errors.New("закрытие сервера")
 
-func main() {
-	cmd := cli.NewApp()
-	cmd.Name = "Voo.su"
-	cmd.Usage = "WebSocket-сервер"
-	cmd.Flags = []cli.Flag{
-		&cli.StringFlag{
-			Name:        "config",
-			Aliases:     []string{"c"},
-			Value:       "./init/voo-su.yaml",
-			Usage:       "Путь к файлу конфигурации",
-			DefaultText: "./init/voo-su.yaml",
-		},
-	}
-	cmd.Action = newApp
-	_ = cmd.Run(os.Args)
+type AppProvider struct {
+	Config    *config.Config
+	Engine    *gin.Engine
+	Coroutine *process.Server
+	Handler   *handler.Handler
+	Providers *provider.Providers
 }
 
-func newApp(tx *cli.Context) error {
-	eg, groupCtx := errgroup.WithContext(tx.Context)
-	conf := config.New(tx.String("config"))
-	logger.InitLogger(fmt.Sprintf("%s/ws.log", conf.LogPath()), logger.LevelInfo, "ws")
-	if !conf.Debug() {
+func Run(ctx *cli.Context, app *AppProvider) error {
+	eg, groupCtx := errgroup.WithContext(ctx.Context)
+
+	if app.Config.App.Env == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	app := Initialize(conf)
+
 	socket.Initialize(groupCtx, eg, func(name string) {
 		emailClient := app.Providers.EmailClient
-		if conf.App.Env == "prod" {
+		if app.Config.App.Env == "prod" {
 			_ = emailClient.SendMail(&email.Option{
-				To:      conf.Email.Report,
-				Subject: fmt.Sprintf("%s Проблема с демоном", conf.App.Env),
+				To:      app.Config.Email.Report,
+				Subject: fmt.Sprintf("%s Проблема с демоном", app.Config.App.Env),
 				Body:    fmt.Sprintf("Проблема с демоном %s", name),
 			})
 		}
 	})
+
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
+
 	time.AfterFunc(3*time.Second, func() {
 		app.Coroutine.Start(eg, groupCtx)
 	})
-	log.Printf("ID сервера: %s", conf.ServerId())
+
+	log.Printf("ID сервера: %s", app.Config.ServerId())
 	log.Printf("PID сервера: %d", os.Getpid())
-	log.Printf("Порт прослушивания Websocket: %d", conf.App.Websocket)
-	log.Printf("Порт прослушивания TCP: %d", conf.App.Tcp)
+	log.Printf("Порт прослушивания Websocket: %d", app.Config.App.Websocket)
+	log.Printf("Порт прослушивания TCP: %d", app.Config.App.Tcp)
+
 	go NewTcpServer(app)
+
 	return start(c, eg, groupCtx, app)
 }
 
@@ -78,6 +77,7 @@ func start(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppPr
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			return err
 		}
+
 		return nil
 	})
 	eg.Go(func() (err error) {
@@ -90,6 +90,7 @@ func start(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppPr
 			}
 			err = ErrServerClosed
 		}()
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -97,9 +98,33 @@ func start(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppPr
 			return nil
 		}
 	})
+
 	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) && !errors.Is(err, ErrServerClosed) {
 		log.Fatalf("Принудительное завершение сервера: %s", err)
 	}
+
 	log.Println("Выход из сервера")
+
 	return nil
+}
+
+func NewTcpServer(app *AppProvider) {
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", app.Config.App.Tcp))
+	if err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		_ = listener.Close()
+	}()
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Println("Ошибка при принятии соединения:", err)
+			continue
+		}
+
+		go app.Handler.Dispatch(conn)
+	}
 }

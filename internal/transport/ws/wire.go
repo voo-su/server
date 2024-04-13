@@ -1,14 +1,7 @@
-//go:build wireinject
-// +build wireinject
-
-package main
+package ws
 
 import (
 	"github.com/google/wire"
-	"voo.su/internal/config"
-	"voo.su/internal/logic"
-	"voo.su/internal/provider"
-	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
 	"voo.su/internal/service"
 	"voo.su/internal/transport/ws/consume"
@@ -25,13 +18,15 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(AppProvider), "*"),
 	wire.Struct(new(process.SubServers), "*"),
 
-	provider.NewPostgresqlClient,
-	provider.NewRedisClient,
-	provider.NewFilesystem,
-	provider.NewEmailClient,
-	provider.NewProviders,
-
 	router.NewRouter,
+
+	service.NewDialogService,
+	service.NewGroupMemberService,
+	service.NewContactService,
+
+	handler.ProviderSet,
+	event.ProviderSet,
+	consume.ProviderSet,
 
 	process.NewServer,
 	process.NewHealthSubscribe,
@@ -46,20 +41,4 @@ var ProviderSet = wire.NewSet(
 	repo.NewFileSplit,
 	repo.NewSequence,
 	repo.NewBot,
-
-	logic.NewMessageForwardLogic,
-
-	service.NewDialogService,
-	service.NewGroupMemberService,
-	service.NewContactService,
 )
-
-func Initialize(conf *config.Config) *AppProvider {
-	panic(wire.Build(
-		ProviderSet,
-		cache.ProviderSet,
-		handler.ProviderSet,
-		event.ProviderSet,
-		consume.ProviderSet,
-	))
-}

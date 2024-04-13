@@ -9,16 +9,19 @@ install:
 
 .PHONY: http
 http:
-	go run ./cmd/http
+	go run ./cmd/voo-su http
 
 .PHONY: ws
 ws:
-	go run ./cmd/ws
+	go run ./cmd/voo-su ws
+
+.PHONY: cli-cron
+cli-cron:
+	go run ./cmd/voo-su cli-cron
 
 .PHONY: build
 build:
-	go build -o ./build/voo-su-http ./cmd/http
-	go build -o ./build/voo-su-ws ./cmd/ws
+	go build -o ./build/voo-su ./cmd/voo-su
 
 .PHONY: proto
 proto:
