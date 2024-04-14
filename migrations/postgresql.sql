@@ -60,51 +60,6 @@ ALTER SEQUENCE public.bots_id_seq OWNER TO postgres;
 ALTER SEQUENCE public.bots_id_seq OWNED BY public.bots.id;
 
 
---
--- Name: contact_groups; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.contact_groups
-(
-    id         integer                                             NOT NULL,
-    user_id    integer               DEFAULT 0                     NOT NULL,
-    name       character varying(50) DEFAULT ''::character varying NOT NULL,
-    num        integer               DEFAULT 0                     NOT NULL,
-    sort       integer               DEFAULT 0                     NOT NULL,
-    created_at timestamp without time zone                         NOT NULL,
-    updated_at timestamp without time zone                         NOT NULL
-);
-
-
-ALTER TABLE public.contact_groups
-    OWNER TO postgres;
-
---
--- Name: contact_groups_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.contact_groups_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.contact_groups_id_seq OWNER TO postgres;
-
---
--- Name: contact_groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.contact_groups_id_seq OWNED BY public.contact_groups.id;
-
-
---
--- Name: contact_requests; Type: TABLE; Schema: public; Owner: postgres
---
-
 CREATE TABLE public.contact_requests
 (
     id         integer                                             NOT NULL,
@@ -849,14 +804,6 @@ ALTER COLUMN id SET DEFAULT nextval('public.bots_id_seq'::regclass);
 
 
 --
--- Name: contact_groups id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.contact_groups
-    ALTER COLUMN id SET DEFAULT nextval('public.contact_groups_id_seq'::regclass);
-
-
---
 -- Name: contact_requests id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -998,14 +945,6 @@ ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 ALTER TABLE ONLY public.bots
     ADD CONSTRAINT bots_pkey PRIMARY KEY (id);
-
-
---
--- Name: contact_groups contact_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.contact_groups
-    ADD CONSTRAINT contact_groups_pkey PRIMARY KEY (id);
 
 
 --

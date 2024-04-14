@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-type MessageVoteAnswer struct {
+type MessageVoteAnswers struct {
 	Id        int       `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
 	VoteId    int       `gorm:"column:vote_id;default:0;NOT NULL" json:"vote_id"`
 	UserId    int       `gorm:"column:user_id;default:0;NOT NULL" json:"user_id"`
