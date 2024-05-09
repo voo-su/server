@@ -189,6 +189,11 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		StickerService: stickerService,
 		RedisLock:      redisLock,
 	}
+	contactFolder := repo.NewContactFolder(db)
+	contactFolderService := service.NewContactFolderService(source, contact, contactFolder)
+	v1ContactFolder := &v1.ContactFolder{
+		ContactFolderService: contactFolderService,
+	}
 	v1GroupChatNotice := &v1.GroupChatNotice{
 		GroupNoticeService:  groupChatNoticeService,
 		GroupMemberService:  groupChatMemberService,
@@ -209,6 +214,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChat:        v1GroupChat,
 		GroupChatRequest: v1GroupChatRequest,
 		Sticker:          v1Sticker,
+		ContactFolder:    v1ContactFolder,
 		GroupChatNotice:  v1GroupChatNotice,
 	}
 	handlerHandler := &handler.Handler{

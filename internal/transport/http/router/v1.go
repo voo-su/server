@@ -46,15 +46,20 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 		{
 			user.GET("/search", core.HandlerFunc(handler.V1.User.Search))
 		}
-		contact := v1.Group("/contact").Use(authorize)
+		contact := v1.Group("/contacts").Use(authorize)
 		{
-			contact.GET("/list", core.HandlerFunc(handler.V1.Contact.List))
-			contact.GET("/detail", core.HandlerFunc(handler.V1.Contact.Detail))
-			contact.GET("/request/records", core.HandlerFunc(handler.V1.ContactRequest.List))
-			contact.POST("/request/create", core.HandlerFunc(handler.V1.ContactRequest.Create))
-			contact.POST("/request/accept", core.HandlerFunc(handler.V1.ContactRequest.Accept))
-			contact.POST("/request/decline", core.HandlerFunc(handler.V1.ContactRequest.Decline))
-			contact.GET("/request/unread-num", core.HandlerFunc(handler.V1.ContactRequest.ApplyUnreadNum))
+			contact.GET("", core.HandlerFunc(handler.V1.Contact.List))
+			contact.GET("/get", core.HandlerFunc(handler.V1.Contact.Get))
+			//contact.POST("/delete", core.HandlerFunc(handler.V1.Contact.Delete))
+			//contact.POST("/edit-remark", core.HandlerFunc(handler.V1.Contact.Remark))
+			contact.GET("/requests", core.HandlerFunc(handler.V1.ContactRequest.List))
+			contact.POST("/requests/create", core.HandlerFunc(handler.V1.ContactRequest.Create))
+			contact.POST("/requests/accept", core.HandlerFunc(handler.V1.ContactRequest.Accept))
+			contact.POST("/requests/decline", core.HandlerFunc(handler.V1.ContactRequest.Decline))
+			contact.GET("/requests/unread-num", core.HandlerFunc(handler.V1.ContactRequest.ApplyUnreadNum))
+			contact.GET("/folders", core.HandlerFunc(handler.V1.ContactFolder.List))
+			contact.POST("/folders", core.HandlerFunc(handler.V1.ContactFolder.Save))
+			contact.POST("/folders/move", core.HandlerFunc(handler.V1.ContactFolder.Move))
 		}
 		chat := v1.Group("/chat").Use(authorize)
 		{

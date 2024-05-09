@@ -1673,6 +1673,1353 @@ var _ interface {
 	ErrorName() string
 } = ContactRequestListResponseValidationError{}
 
+// Validate checks the field values on ContactFolderCreateRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderCreateRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderCreateRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderCreateRequestMultiError, or nil if none found.
+func (m *ContactFolderCreateRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderCreateRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Name
+
+	// no validation rules for Sort
+
+	if len(errors) > 0 {
+		return ContactFolderCreateRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderCreateRequestMultiError is an error wrapping multiple
+// validation errors returned by ContactFolderCreateRequest.ValidateAll() if
+// the designated constraints aren't met.
+type ContactFolderCreateRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderCreateRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderCreateRequestMultiError) AllErrors() []error { return m }
+
+// ContactFolderCreateRequestValidationError is the validation error returned
+// by ContactFolderCreateRequest.Validate if the designated constraints aren't met.
+type ContactFolderCreateRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderCreateRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderCreateRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderCreateRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderCreateRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderCreateRequestValidationError) ErrorName() string {
+	return "ContactFolderCreateRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderCreateRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderCreateRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderCreateRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderCreateRequestValidationError{}
+
+// Validate checks the field values on ContactFolderCreateResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderCreateResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderCreateResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderCreateResponseMultiError, or nil if none found.
+func (m *ContactFolderCreateResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderCreateResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return ContactFolderCreateResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderCreateResponseMultiError is an error wrapping multiple
+// validation errors returned by ContactFolderCreateResponse.ValidateAll() if
+// the designated constraints aren't met.
+type ContactFolderCreateResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderCreateResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderCreateResponseMultiError) AllErrors() []error { return m }
+
+// ContactFolderCreateResponseValidationError is the validation error returned
+// by ContactFolderCreateResponse.Validate if the designated constraints
+// aren't met.
+type ContactFolderCreateResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderCreateResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderCreateResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderCreateResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderCreateResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderCreateResponseValidationError) ErrorName() string {
+	return "ContactFolderCreateResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderCreateResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderCreateResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderCreateResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderCreateResponseValidationError{}
+
+// Validate checks the field values on ContactFolderUpdateRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderUpdateRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderUpdateRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderUpdateRequestMultiError, or nil if none found.
+func (m *ContactFolderUpdateRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderUpdateRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	// no validation rules for Sort
+
+	if len(errors) > 0 {
+		return ContactFolderUpdateRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderUpdateRequestMultiError is an error wrapping multiple
+// validation errors returned by ContactFolderUpdateRequest.ValidateAll() if
+// the designated constraints aren't met.
+type ContactFolderUpdateRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderUpdateRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderUpdateRequestMultiError) AllErrors() []error { return m }
+
+// ContactFolderUpdateRequestValidationError is the validation error returned
+// by ContactFolderUpdateRequest.Validate if the designated constraints aren't met.
+type ContactFolderUpdateRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderUpdateRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderUpdateRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderUpdateRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderUpdateRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderUpdateRequestValidationError) ErrorName() string {
+	return "ContactFolderUpdateRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderUpdateRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderUpdateRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderUpdateRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderUpdateRequestValidationError{}
+
+// Validate checks the field values on ContactFolderUpdateResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderUpdateResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderUpdateResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderUpdateResponseMultiError, or nil if none found.
+func (m *ContactFolderUpdateResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderUpdateResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return ContactFolderUpdateResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderUpdateResponseMultiError is an error wrapping multiple
+// validation errors returned by ContactFolderUpdateResponse.ValidateAll() if
+// the designated constraints aren't met.
+type ContactFolderUpdateResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderUpdateResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderUpdateResponseMultiError) AllErrors() []error { return m }
+
+// ContactFolderUpdateResponseValidationError is the validation error returned
+// by ContactFolderUpdateResponse.Validate if the designated constraints
+// aren't met.
+type ContactFolderUpdateResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderUpdateResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderUpdateResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderUpdateResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderUpdateResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderUpdateResponseValidationError) ErrorName() string {
+	return "ContactFolderUpdateResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderUpdateResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderUpdateResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderUpdateResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderUpdateResponseValidationError{}
+
+// Validate checks the field values on ContactFolderDeleteRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderDeleteRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderDeleteRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderDeleteRequestMultiError, or nil if none found.
+func (m *ContactFolderDeleteRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderDeleteRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return ContactFolderDeleteRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderDeleteRequestMultiError is an error wrapping multiple
+// validation errors returned by ContactFolderDeleteRequest.ValidateAll() if
+// the designated constraints aren't met.
+type ContactFolderDeleteRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderDeleteRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderDeleteRequestMultiError) AllErrors() []error { return m }
+
+// ContactFolderDeleteRequestValidationError is the validation error returned
+// by ContactFolderDeleteRequest.Validate if the designated constraints aren't met.
+type ContactFolderDeleteRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderDeleteRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderDeleteRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderDeleteRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderDeleteRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderDeleteRequestValidationError) ErrorName() string {
+	return "ContactFolderDeleteRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderDeleteRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderDeleteRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderDeleteRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderDeleteRequestValidationError{}
+
+// Validate checks the field values on ContactFolderDeleteResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderDeleteResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderDeleteResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderDeleteResponseMultiError, or nil if none found.
+func (m *ContactFolderDeleteResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderDeleteResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return ContactFolderDeleteResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderDeleteResponseMultiError is an error wrapping multiple
+// validation errors returned by ContactFolderDeleteResponse.ValidateAll() if
+// the designated constraints aren't met.
+type ContactFolderDeleteResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderDeleteResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderDeleteResponseMultiError) AllErrors() []error { return m }
+
+// ContactFolderDeleteResponseValidationError is the validation error returned
+// by ContactFolderDeleteResponse.Validate if the designated constraints
+// aren't met.
+type ContactFolderDeleteResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderDeleteResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderDeleteResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderDeleteResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderDeleteResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderDeleteResponseValidationError) ErrorName() string {
+	return "ContactFolderDeleteResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderDeleteResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderDeleteResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderDeleteResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderDeleteResponseValidationError{}
+
+// Validate checks the field values on ContactFolderSortRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderSortRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderSortRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderSortRequestMultiError, or nil if none found.
+func (m *ContactFolderSortRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderSortRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ContactFolderSortRequestValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ContactFolderSortRequestValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContactFolderSortRequestValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ContactFolderSortRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderSortRequestMultiError is an error wrapping multiple validation
+// errors returned by ContactFolderSortRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ContactFolderSortRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderSortRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderSortRequestMultiError) AllErrors() []error { return m }
+
+// ContactFolderSortRequestValidationError is the validation error returned by
+// ContactFolderSortRequest.Validate if the designated constraints aren't met.
+type ContactFolderSortRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderSortRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderSortRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderSortRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderSortRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderSortRequestValidationError) ErrorName() string {
+	return "ContactFolderSortRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderSortRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderSortRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderSortRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderSortRequestValidationError{}
+
+// Validate checks the field values on ContactFolderSortResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderSortResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderSortResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderSortResponseMultiError, or nil if none found.
+func (m *ContactFolderSortResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderSortResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return ContactFolderSortResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderSortResponseMultiError is an error wrapping multiple validation
+// errors returned by ContactFolderSortResponse.ValidateAll() if the
+// designated constraints aren't met.
+type ContactFolderSortResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderSortResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderSortResponseMultiError) AllErrors() []error { return m }
+
+// ContactFolderSortResponseValidationError is the validation error returned by
+// ContactFolderSortResponse.Validate if the designated constraints aren't met.
+type ContactFolderSortResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderSortResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderSortResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderSortResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderSortResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderSortResponseValidationError) ErrorName() string {
+	return "ContactFolderSortResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderSortResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderSortResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderSortResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderSortResponseValidationError{}
+
+// Validate checks the field values on ContactFolderListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderListRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderListRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderListRequestMultiError, or nil if none found.
+func (m *ContactFolderListRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderListRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return ContactFolderListRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderListRequestMultiError is an error wrapping multiple validation
+// errors returned by ContactFolderListRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ContactFolderListRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderListRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderListRequestMultiError) AllErrors() []error { return m }
+
+// ContactFolderListRequestValidationError is the validation error returned by
+// ContactFolderListRequest.Validate if the designated constraints aren't met.
+type ContactFolderListRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderListRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderListRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderListRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderListRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderListRequestValidationError) ErrorName() string {
+	return "ContactFolderListRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderListRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderListRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderListRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderListRequestValidationError{}
+
+// Validate checks the field values on ContactFolderListResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderListResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderListResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderListResponseMultiError, or nil if none found.
+func (m *ContactFolderListResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderListResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ContactFolderListResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ContactFolderListResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContactFolderListResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ContactFolderListResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderListResponseMultiError is an error wrapping multiple validation
+// errors returned by ContactFolderListResponse.ValidateAll() if the
+// designated constraints aren't met.
+type ContactFolderListResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderListResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderListResponseMultiError) AllErrors() []error { return m }
+
+// ContactFolderListResponseValidationError is the validation error returned by
+// ContactFolderListResponse.Validate if the designated constraints aren't met.
+type ContactFolderListResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderListResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderListResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderListResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderListResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderListResponseValidationError) ErrorName() string {
+	return "ContactFolderListResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderListResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderListResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderListResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderListResponseValidationError{}
+
+// Validate checks the field values on ContactFolderSaveRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderSaveRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderSaveRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderSaveRequestMultiError, or nil if none found.
+func (m *ContactFolderSaveRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderSaveRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ContactFolderSaveRequestValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ContactFolderSaveRequestValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ContactFolderSaveRequestValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ContactFolderSaveRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderSaveRequestMultiError is an error wrapping multiple validation
+// errors returned by ContactFolderSaveRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ContactFolderSaveRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderSaveRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderSaveRequestMultiError) AllErrors() []error { return m }
+
+// ContactFolderSaveRequestValidationError is the validation error returned by
+// ContactFolderSaveRequest.Validate if the designated constraints aren't met.
+type ContactFolderSaveRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderSaveRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderSaveRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderSaveRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderSaveRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderSaveRequestValidationError) ErrorName() string {
+	return "ContactFolderSaveRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderSaveRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderSaveRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderSaveRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderSaveRequestValidationError{}
+
+// Validate checks the field values on ContactFolderSaveResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderSaveResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderSaveResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactFolderSaveResponseMultiError, or nil if none found.
+func (m *ContactFolderSaveResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderSaveResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return ContactFolderSaveResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderSaveResponseMultiError is an error wrapping multiple validation
+// errors returned by ContactFolderSaveResponse.ValidateAll() if the
+// designated constraints aren't met.
+type ContactFolderSaveResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderSaveResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderSaveResponseMultiError) AllErrors() []error { return m }
+
+// ContactFolderSaveResponseValidationError is the validation error returned by
+// ContactFolderSaveResponse.Validate if the designated constraints aren't met.
+type ContactFolderSaveResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderSaveResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderSaveResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderSaveResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderSaveResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderSaveResponseValidationError) ErrorName() string {
+	return "ContactFolderSaveResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderSaveResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderSaveResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderSaveResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderSaveResponseValidationError{}
+
 // Validate checks the field values on ContactListResponse_Item with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -1909,3 +3256,330 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ContactRequestListResponse_ItemValidationError{}
+
+// Validate checks the field values on ContactFolderSortRequest_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderSortRequest_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderSortRequest_Item with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// ContactFolderSortRequest_ItemMultiError, or nil if none found.
+func (m *ContactFolderSortRequest_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderSortRequest_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Sort
+
+	if len(errors) > 0 {
+		return ContactFolderSortRequest_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderSortRequest_ItemMultiError is an error wrapping multiple
+// validation errors returned by ContactFolderSortRequest_Item.ValidateAll()
+// if the designated constraints aren't met.
+type ContactFolderSortRequest_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderSortRequest_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderSortRequest_ItemMultiError) AllErrors() []error { return m }
+
+// ContactFolderSortRequest_ItemValidationError is the validation error
+// returned by ContactFolderSortRequest_Item.Validate if the designated
+// constraints aren't met.
+type ContactFolderSortRequest_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderSortRequest_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderSortRequest_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderSortRequest_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderSortRequest_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderSortRequest_ItemValidationError) ErrorName() string {
+	return "ContactFolderSortRequest_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderSortRequest_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderSortRequest_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderSortRequest_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderSortRequest_ItemValidationError{}
+
+// Validate checks the field values on ContactFolderListResponse_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderListResponse_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderListResponse_Item with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// ContactFolderListResponse_ItemMultiError, or nil if none found.
+func (m *ContactFolderListResponse_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderListResponse_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	// no validation rules for Count
+
+	// no validation rules for Sort
+
+	if len(errors) > 0 {
+		return ContactFolderListResponse_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderListResponse_ItemMultiError is an error wrapping multiple
+// validation errors returned by ContactFolderListResponse_Item.ValidateAll()
+// if the designated constraints aren't met.
+type ContactFolderListResponse_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderListResponse_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderListResponse_ItemMultiError) AllErrors() []error { return m }
+
+// ContactFolderListResponse_ItemValidationError is the validation error
+// returned by ContactFolderListResponse_Item.Validate if the designated
+// constraints aren't met.
+type ContactFolderListResponse_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderListResponse_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderListResponse_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderListResponse_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderListResponse_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderListResponse_ItemValidationError) ErrorName() string {
+	return "ContactFolderListResponse_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderListResponse_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderListResponse_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderListResponse_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderListResponse_ItemValidationError{}
+
+// Validate checks the field values on ContactFolderSaveRequest_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactFolderSaveRequest_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactFolderSaveRequest_Item with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// ContactFolderSaveRequest_ItemMultiError, or nil if none found.
+func (m *ContactFolderSaveRequest_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactFolderSaveRequest_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Sort
+
+	// no validation rules for Name
+
+	if len(errors) > 0 {
+		return ContactFolderSaveRequest_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactFolderSaveRequest_ItemMultiError is an error wrapping multiple
+// validation errors returned by ContactFolderSaveRequest_Item.ValidateAll()
+// if the designated constraints aren't met.
+type ContactFolderSaveRequest_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactFolderSaveRequest_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactFolderSaveRequest_ItemMultiError) AllErrors() []error { return m }
+
+// ContactFolderSaveRequest_ItemValidationError is the validation error
+// returned by ContactFolderSaveRequest_Item.Validate if the designated
+// constraints aren't met.
+type ContactFolderSaveRequest_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactFolderSaveRequest_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactFolderSaveRequest_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactFolderSaveRequest_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactFolderSaveRequest_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactFolderSaveRequest_ItemValidationError) ErrorName() string {
+	return "ContactFolderSaveRequest_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactFolderSaveRequest_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactFolderSaveRequest_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactFolderSaveRequest_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactFolderSaveRequest_ItemValidationError{}

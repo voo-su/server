@@ -15,6 +15,8 @@ type V1 struct {
 	GroupChat        *v1.GroupChat
 	GroupChatRequest *v1.GroupChatRequest
 	Sticker          *v1.Sticker
+	ContactFolder    *v1.ContactFolder
+	GroupChatNotice  *v1.GroupChatNotice
 }
 
 type Handler struct {

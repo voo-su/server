@@ -100,3 +100,63 @@ message ContactRequestListResponse{
 
     repeated Item items = 1;
 }
+
+message ContactFolderCreateRequest{
+    string name = 1 [(tagger.tags) = "binding:\"required\""];
+    int32 sort = 2 [(tagger.tags) = "binding:\"required\""];
+}
+
+message ContactFolderCreateResponse{
+    int32 id = 1;
+}
+
+message ContactFolderUpdateRequest{
+    int32 id = 1 [(tagger.tags) = "binding:\"required\""];
+    string name = 2 [(tagger.tags) = "binding:\"required\""];
+    int32 sort = 3 [(tagger.tags) = "binding:\"required\""];
+}
+
+message ContactFolderUpdateResponse{
+    int32 id = 1;
+}
+
+message ContactFolderDeleteRequest{
+    int32 id = 1 [(tagger.tags) = "binding:\"required\""];
+}
+
+message ContactFolderDeleteResponse{
+    int32 id = 1;
+}
+
+message ContactFolderSortRequest{
+    message Item{
+        int32 id = 1 [(tagger.tags) = "binding:\"required\""];
+        int32 sort = 2 [(tagger.tags) = "binding:\"required\""];
+    }
+    repeated Item items = 1 [(tagger.tags) = "binding:\"required\""];
+}
+
+message ContactFolderSortResponse{}
+
+message ContactFolderListRequest{}
+
+message ContactFolderListResponse{
+    message Item{
+        int32 id = 1;
+        string name = 2;
+        int32 count = 3;
+        int32 sort = 4;
+    }
+    repeated Item items = 1;
+}
+
+message ContactFolderSaveRequest{
+    message Item{
+        int32 id = 1 [(tagger.tags) = "binding:\"required\""];
+        int32 sort = 2 [(tagger.tags) = "binding:\"required\""];
+        string name = 3 [(tagger.tags) = "binding:\"required\""];
+    }
+    repeated Item items = 1 [(tagger.tags) = "binding:\"required\""];
+}
+
+message ContactFolderSaveResponse{}

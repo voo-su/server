@@ -6,10 +6,9 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/repository/repo"
 	"voo.su/internal/service"
-	handler2 "voo.su/internal/transport/http/handler"
-	"voo.su/internal/transport/http/handler/v1"
+	"voo.su/internal/transport/http/handler"
+	v1 "voo.su/internal/transport/http/handler/v1"
 	"voo.su/internal/transport/http/router"
-	"voo.su/internal/transport/ws/handler"
 )
 
 type AppProvider struct {
@@ -24,7 +23,7 @@ var ProviderSet = wire.NewSet(
 	router.NewRouter,
 
 	// v1
-	wire.Struct(new(handler2.V1), "*"),
+	wire.Struct(new(handler.V1), "*"),
 	wire.Struct(new(v1.Auth), "*"),
 	wire.Struct(new(v1.Account), "*"),
 	wire.Struct(new(v1.User), "*"),
@@ -37,7 +36,7 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(v1.Message), "*"),
 	wire.Struct(new(v1.Publish), "*"),
 	wire.Struct(new(v1.Sticker), "*"),
-	wire.Struct(new(v1.ContactGroup), "*"),
+	wire.Struct(new(v1.ContactFolder), "*"),
 	wire.Struct(new(v1.GroupChatNotice), "*"),
 
 	wire.Struct(new(service.MessageService), "*"),
@@ -46,7 +45,7 @@ var ProviderSet = wire.NewSet(
 	service.NewDialogService,
 	service.NewContactService,
 	service.NewContactApplyService,
-	service.NewContactGroupService,
+	service.NewContactFolderService,
 	service.NewGroupChatService,
 	service.NewGroupMemberService,
 	service.NewGroupChatNoticeService,
@@ -58,7 +57,7 @@ var ProviderSet = wire.NewSet(
 	repo.NewUserSession,
 	repo.NewSource,
 	repo.NewContact,
-	repo.NewContactGroup,
+	repo.NewContactFolder,
 	repo.NewGroupMember,
 	repo.NewUser,
 	repo.NewGroupChat,

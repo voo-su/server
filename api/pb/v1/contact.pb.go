@@ -754,6 +754,567 @@ func (x *ContactRequestListResponse) GetItems() []*ContactRequestListResponse_It
 	return nil
 }
 
+type ContactFolderCreateRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty" binding:"required"`
+	Sort int32  `protobuf:"varint,2,opt,name=sort,proto3" json:"sort,omitempty" binding:"required"`
+}
+
+func (x *ContactFolderCreateRequest) Reset() {
+	*x = ContactFolderCreateRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderCreateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderCreateRequest) ProtoMessage() {}
+
+func (x *ContactFolderCreateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderCreateRequest.ProtoReflect.Descriptor instead.
+func (*ContactFolderCreateRequest) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ContactFolderCreateRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ContactFolderCreateRequest) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type ContactFolderCreateResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (x *ContactFolderCreateResponse) Reset() {
+	*x = ContactFolderCreateResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderCreateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderCreateResponse) ProtoMessage() {}
+
+func (x *ContactFolderCreateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderCreateResponse.ProtoReflect.Descriptor instead.
+func (*ContactFolderCreateResponse) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ContactFolderCreateResponse) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ContactFolderUpdateRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id   int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" binding:"required"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty" binding:"required"`
+	Sort int32  `protobuf:"varint,3,opt,name=sort,proto3" json:"sort,omitempty" binding:"required"`
+}
+
+func (x *ContactFolderUpdateRequest) Reset() {
+	*x = ContactFolderUpdateRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderUpdateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderUpdateRequest) ProtoMessage() {}
+
+func (x *ContactFolderUpdateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderUpdateRequest.ProtoReflect.Descriptor instead.
+func (*ContactFolderUpdateRequest) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ContactFolderUpdateRequest) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ContactFolderUpdateRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ContactFolderUpdateRequest) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type ContactFolderUpdateResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (x *ContactFolderUpdateResponse) Reset() {
+	*x = ContactFolderUpdateResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderUpdateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderUpdateResponse) ProtoMessage() {}
+
+func (x *ContactFolderUpdateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderUpdateResponse.ProtoReflect.Descriptor instead.
+func (*ContactFolderUpdateResponse) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ContactFolderUpdateResponse) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ContactFolderDeleteRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" binding:"required"`
+}
+
+func (x *ContactFolderDeleteRequest) Reset() {
+	*x = ContactFolderDeleteRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderDeleteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderDeleteRequest) ProtoMessage() {}
+
+func (x *ContactFolderDeleteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderDeleteRequest.ProtoReflect.Descriptor instead.
+func (*ContactFolderDeleteRequest) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ContactFolderDeleteRequest) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ContactFolderDeleteResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (x *ContactFolderDeleteResponse) Reset() {
+	*x = ContactFolderDeleteResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderDeleteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderDeleteResponse) ProtoMessage() {}
+
+func (x *ContactFolderDeleteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderDeleteResponse.ProtoReflect.Descriptor instead.
+func (*ContactFolderDeleteResponse) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ContactFolderDeleteResponse) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ContactFolderSortRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Items []*ContactFolderSortRequest_Item `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty" binding:"required"`
+}
+
+func (x *ContactFolderSortRequest) Reset() {
+	*x = ContactFolderSortRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[21]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderSortRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderSortRequest) ProtoMessage() {}
+
+func (x *ContactFolderSortRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[21]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderSortRequest.ProtoReflect.Descriptor instead.
+func (*ContactFolderSortRequest) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ContactFolderSortRequest) GetItems() []*ContactFolderSortRequest_Item {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type ContactFolderSortResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ContactFolderSortResponse) Reset() {
+	*x = ContactFolderSortResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[22]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderSortResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderSortResponse) ProtoMessage() {}
+
+func (x *ContactFolderSortResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[22]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderSortResponse.ProtoReflect.Descriptor instead.
+func (*ContactFolderSortResponse) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{22}
+}
+
+type ContactFolderListRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ContactFolderListRequest) Reset() {
+	*x = ContactFolderListRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[23]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderListRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderListRequest) ProtoMessage() {}
+
+func (x *ContactFolderListRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[23]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderListRequest.ProtoReflect.Descriptor instead.
+func (*ContactFolderListRequest) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{23}
+}
+
+type ContactFolderListResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Items []*ContactFolderListResponse_Item `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+}
+
+func (x *ContactFolderListResponse) Reset() {
+	*x = ContactFolderListResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[24]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderListResponse) ProtoMessage() {}
+
+func (x *ContactFolderListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[24]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderListResponse.ProtoReflect.Descriptor instead.
+func (*ContactFolderListResponse) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ContactFolderListResponse) GetItems() []*ContactFolderListResponse_Item {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type ContactFolderSaveRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Items []*ContactFolderSaveRequest_Item `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty" binding:"required"`
+}
+
+func (x *ContactFolderSaveRequest) Reset() {
+	*x = ContactFolderSaveRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[25]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderSaveRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderSaveRequest) ProtoMessage() {}
+
+func (x *ContactFolderSaveRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[25]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderSaveRequest.ProtoReflect.Descriptor instead.
+func (*ContactFolderSaveRequest) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ContactFolderSaveRequest) GetItems() []*ContactFolderSaveRequest_Item {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type ContactFolderSaveResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ContactFolderSaveResponse) Reset() {
+	*x = ContactFolderSaveResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[26]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderSaveResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderSaveResponse) ProtoMessage() {}
+
+func (x *ContactFolderSaveResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[26]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderSaveResponse.ProtoReflect.Descriptor instead.
+func (*ContactFolderSaveResponse) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{26}
+}
+
 type ContactListResponse_Item struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -774,7 +1335,7 @@ type ContactListResponse_Item struct {
 func (x *ContactListResponse_Item) Reset() {
 	*x = ContactListResponse_Item{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_contact_proto_msgTypes[15]
+		mi := &file_v1_contact_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -787,7 +1348,7 @@ func (x *ContactListResponse_Item) String() string {
 func (*ContactListResponse_Item) ProtoMessage() {}
 
 func (x *ContactListResponse_Item) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_contact_proto_msgTypes[15]
+	mi := &file_v1_contact_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -884,7 +1445,7 @@ type ContactRequestListResponse_Item struct {
 func (x *ContactRequestListResponse_Item) Reset() {
 	*x = ContactRequestListResponse_Item{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_contact_proto_msgTypes[16]
+		mi := &file_v1_contact_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -897,7 +1458,7 @@ func (x *ContactRequestListResponse_Item) String() string {
 func (*ContactRequestListResponse_Item) ProtoMessage() {}
 
 func (x *ContactRequestListResponse_Item) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_contact_proto_msgTypes[16]
+	mi := &file_v1_contact_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -958,6 +1519,195 @@ func (x *ContactRequestListResponse_Item) GetName() string {
 func (x *ContactRequestListResponse_Item) GetSurname() string {
 	if x != nil {
 		return x.Surname
+	}
+	return ""
+}
+
+type ContactFolderSortRequest_Item struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id   int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" binding:"required"`
+	Sort int32 `protobuf:"varint,2,opt,name=sort,proto3" json:"sort,omitempty" binding:"required"`
+}
+
+func (x *ContactFolderSortRequest_Item) Reset() {
+	*x = ContactFolderSortRequest_Item{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[29]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderSortRequest_Item) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderSortRequest_Item) ProtoMessage() {}
+
+func (x *ContactFolderSortRequest_Item) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[29]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderSortRequest_Item.ProtoReflect.Descriptor instead.
+func (*ContactFolderSortRequest_Item) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{21, 0}
+}
+
+func (x *ContactFolderSortRequest_Item) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ContactFolderSortRequest_Item) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type ContactFolderListResponse_Item struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id    int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name  string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Count int32  `protobuf:"varint,3,opt,name=count,proto3" json:"count,omitempty"`
+	Sort  int32  `protobuf:"varint,4,opt,name=sort,proto3" json:"sort,omitempty"`
+}
+
+func (x *ContactFolderListResponse_Item) Reset() {
+	*x = ContactFolderListResponse_Item{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[30]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderListResponse_Item) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderListResponse_Item) ProtoMessage() {}
+
+func (x *ContactFolderListResponse_Item) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[30]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderListResponse_Item.ProtoReflect.Descriptor instead.
+func (*ContactFolderListResponse_Item) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{24, 0}
+}
+
+func (x *ContactFolderListResponse_Item) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ContactFolderListResponse_Item) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ContactFolderListResponse_Item) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *ContactFolderListResponse_Item) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type ContactFolderSaveRequest_Item struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id   int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty" binding:"required"`
+	Sort int32  `protobuf:"varint,2,opt,name=sort,proto3" json:"sort,omitempty" binding:"required"`
+	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty" binding:"required"`
+}
+
+func (x *ContactFolderSaveRequest_Item) Reset() {
+	*x = ContactFolderSaveRequest_Item{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_contact_proto_msgTypes[31]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ContactFolderSaveRequest_Item) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactFolderSaveRequest_Item) ProtoMessage() {}
+
+func (x *ContactFolderSaveRequest_Item) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_contact_proto_msgTypes[31]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactFolderSaveRequest_Item.ProtoReflect.Descriptor instead.
+func (*ContactFolderSaveRequest_Item) Descriptor() ([]byte, []int) {
+	return file_v1_contact_proto_rawDescGZIP(), []int{25, 0}
+}
+
+func (x *ContactFolderSaveRequest_Item) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ContactFolderSaveRequest_Item) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+func (x *ContactFolderSaveRequest_Item) GetName() string {
+	if x != nil {
+		return x.Name
 	}
 	return ""
 }
@@ -1067,8 +1817,84 @@ var file_v1_contact_proto_rawDesc = []byte{
 	0x74, 0x61, 0x72, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x75, 0x72, 0x6e, 0x61,
 	0x6d, 0x65, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x73, 0x75, 0x72, 0x6e, 0x61, 0x6d,
-	0x65, 0x42, 0x0d, 0x5a, 0x0b, 0x2e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70, 0x69, 0x5f, 0x76, 0x31,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x22, 0x76, 0x0a, 0x1a, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64,
+	0x65, 0x72, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x2b, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x17, 0x9a,
+	0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71,
+	0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x2b, 0x0a, 0x04,
+	0x73, 0x6f, 0x72, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x42, 0x17, 0x9a, 0x84, 0x9e, 0x03,
+	0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72,
+	0x65, 0x64, 0x22, 0x52, 0x04, 0x73, 0x6f, 0x72, 0x74, 0x22, 0x2d, 0x0a, 0x1b, 0x43, 0x6f, 0x6e,
+	0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x22, 0x9f, 0x01, 0x0a, 0x1a, 0x43, 0x6f, 0x6e,
+	0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x27, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x05, 0x42, 0x17, 0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e,
+	0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x02, 0x69, 0x64,
+	0x12, 0x2b, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x17,
+	0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65,
+	0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x2b, 0x0a,
+	0x04, 0x73, 0x6f, 0x72, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x42, 0x17, 0x9a, 0x84, 0x9e,
+	0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69,
+	0x72, 0x65, 0x64, 0x22, 0x52, 0x04, 0x73, 0x6f, 0x72, 0x74, 0x22, 0x2d, 0x0a, 0x1b, 0x43, 0x6f,
+	0x6e, 0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x22, 0x45, 0x0a, 0x1a, 0x43, 0x6f, 0x6e,
+	0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x27, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x05, 0x42, 0x17, 0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e,
+	0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x02, 0x69, 0x64,
+	0x22, 0x2d, 0x0a, 0x1b, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65,
+	0x72, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x22,
+	0xca, 0x01, 0x0a, 0x18, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65,
+	0x72, 0x53, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x50, 0x0a, 0x05,
+	0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x76, 0x31,
+	0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x53, 0x6f,
+	0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x42, 0x17,
+	0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65,
+	0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x1a, 0x5c,
+	0x0a, 0x04, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x27, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x05, 0x42, 0x17, 0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67,
+	0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x02, 0x69, 0x64, 0x12,
+	0x2b, 0x0a, 0x04, 0x73, 0x6f, 0x72, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x42, 0x17, 0x9a,
+	0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71,
+	0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x04, 0x73, 0x6f, 0x72, 0x74, 0x22, 0x1b, 0x0a, 0x19,
+	0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x53, 0x6f, 0x72,
+	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1a, 0x0a, 0x18, 0x43, 0x6f, 0x6e,
+	0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0xab, 0x01, 0x0a, 0x19, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63,
+	0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x38, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x22, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x46,
+	0x6f, 0x6c, 0x64, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x1a, 0x54, 0x0a,
+	0x04, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75,
+	0x6e, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12,
+	0x12, 0x0a, 0x04, 0x73, 0x6f, 0x72, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x73,
+	0x6f, 0x72, 0x74, 0x22, 0xf8, 0x01, 0x0a, 0x18, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x46,
+	0x6f, 0x6c, 0x64, 0x65, 0x72, 0x53, 0x61, 0x76, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x50, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x21, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64,
+	0x65, 0x72, 0x53, 0x61, 0x76, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x49, 0x74,
+	0x65, 0x6d, 0x42, 0x17, 0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67,
+	0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x05, 0x69, 0x74, 0x65,
+	0x6d, 0x73, 0x1a, 0x89, 0x01, 0x0a, 0x04, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x27, 0x0a, 0x02, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x42, 0x17, 0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69,
+	0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22,
+	0x52, 0x02, 0x69, 0x64, 0x12, 0x2b, 0x0a, 0x04, 0x73, 0x6f, 0x72, 0x74, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x05, 0x42, 0x17, 0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67,
+	0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x04, 0x73, 0x6f, 0x72,
+	0x74, 0x12, 0x2b, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42,
+	0x17, 0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72,
+	0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x1b,
+	0x0a, 0x19, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x46, 0x6f, 0x6c, 0x64, 0x65, 0x72, 0x53,
+	0x61, 0x76, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x0d, 0x5a, 0x0b, 0x2e,
+	0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70, 0x69, 0x5f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -1083,7 +1909,7 @@ func file_v1_contact_proto_rawDescGZIP() []byte {
 	return file_v1_contact_proto_rawDescData
 }
 
-var file_v1_contact_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_v1_contact_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_v1_contact_proto_goTypes = []interface{}{
 	(*ContactListRequest)(nil),              // 0: v1.ContactListRequest
 	(*ContactListResponse)(nil),             // 1: v1.ContactListResponse
@@ -1100,17 +1926,35 @@ var file_v1_contact_proto_goTypes = []interface{}{
 	(*ContactRequestDeclineRequest)(nil),    // 12: v1.ContactRequestDeclineRequest
 	(*ContactRequestDeclineResponse)(nil),   // 13: v1.ContactRequestDeclineResponse
 	(*ContactRequestListResponse)(nil),      // 14: v1.ContactRequestListResponse
-	(*ContactListResponse_Item)(nil),        // 15: v1.ContactListResponse.Item
-	(*ContactRequestListResponse_Item)(nil), // 16: v1.ContactRequestListResponse.Item
+	(*ContactFolderCreateRequest)(nil),      // 15: v1.ContactFolderCreateRequest
+	(*ContactFolderCreateResponse)(nil),     // 16: v1.ContactFolderCreateResponse
+	(*ContactFolderUpdateRequest)(nil),      // 17: v1.ContactFolderUpdateRequest
+	(*ContactFolderUpdateResponse)(nil),     // 18: v1.ContactFolderUpdateResponse
+	(*ContactFolderDeleteRequest)(nil),      // 19: v1.ContactFolderDeleteRequest
+	(*ContactFolderDeleteResponse)(nil),     // 20: v1.ContactFolderDeleteResponse
+	(*ContactFolderSortRequest)(nil),        // 21: v1.ContactFolderSortRequest
+	(*ContactFolderSortResponse)(nil),       // 22: v1.ContactFolderSortResponse
+	(*ContactFolderListRequest)(nil),        // 23: v1.ContactFolderListRequest
+	(*ContactFolderListResponse)(nil),       // 24: v1.ContactFolderListResponse
+	(*ContactFolderSaveRequest)(nil),        // 25: v1.ContactFolderSaveRequest
+	(*ContactFolderSaveResponse)(nil),       // 26: v1.ContactFolderSaveResponse
+	(*ContactListResponse_Item)(nil),        // 27: v1.ContactListResponse.Item
+	(*ContactRequestListResponse_Item)(nil), // 28: v1.ContactRequestListResponse.Item
+	(*ContactFolderSortRequest_Item)(nil),   // 29: v1.ContactFolderSortRequest.Item
+	(*ContactFolderListResponse_Item)(nil),  // 30: v1.ContactFolderListResponse.Item
+	(*ContactFolderSaveRequest_Item)(nil),   // 31: v1.ContactFolderSaveRequest.Item
 }
 var file_v1_contact_proto_depIdxs = []int32{
-	15, // 0: v1.ContactListResponse.items:type_name -> v1.ContactListResponse.Item
-	16, // 1: v1.ContactRequestListResponse.items:type_name -> v1.ContactRequestListResponse.Item
-	2,  // [2:2] is the sub-list for method output_type
-	2,  // [2:2] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	27, // 0: v1.ContactListResponse.items:type_name -> v1.ContactListResponse.Item
+	28, // 1: v1.ContactRequestListResponse.items:type_name -> v1.ContactRequestListResponse.Item
+	29, // 2: v1.ContactFolderSortRequest.items:type_name -> v1.ContactFolderSortRequest.Item
+	30, // 3: v1.ContactFolderListResponse.items:type_name -> v1.ContactFolderListResponse.Item
+	31, // 4: v1.ContactFolderSaveRequest.items:type_name -> v1.ContactFolderSaveRequest.Item
+	5,  // [5:5] is the sub-list for method output_type
+	5,  // [5:5] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_v1_contact_proto_init() }
@@ -1300,7 +2144,7 @@ func file_v1_contact_proto_init() {
 			}
 		}
 		file_v1_contact_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ContactListResponse_Item); i {
+			switch v := v.(*ContactFolderCreateRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1312,7 +2156,187 @@ func file_v1_contact_proto_init() {
 			}
 		}
 		file_v1_contact_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderCreateResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderUpdateRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderUpdateResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderDeleteRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderDeleteResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderSortRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderSortResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderListRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderListResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderSaveRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderSaveResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactListResponse_Item); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ContactRequestListResponse_Item); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderSortRequest_Item); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderListResponse_Item); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_contact_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ContactFolderSaveRequest_Item); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1330,7 +2354,7 @@ func file_v1_contact_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_v1_contact_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

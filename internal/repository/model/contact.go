@@ -13,7 +13,7 @@ type Contact struct {
 	FriendId  int       `gorm:"column:friend_id;default:0;NOT NULL" json:"friend_id"`
 	Remark    string    `gorm:"column:remark;NOT NULL" json:"remark"`
 	Status    int       `gorm:"column:status;default:0;NOT NULL" json:"status"`
-	GroupId   int       `gorm:"column:group_id;default:0;NOT NULL" json:"group_id"`
+	FolderId  int       `gorm:"column:group_id;default:0;NOT NULL" json:"group_id"`
 	CreatedAt time.Time `gorm:"column:created_at;default:CURRENT_TIMESTAMP;NOT NULL" json:"created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at;default:CURRENT_TIMESTAMP;NOT NULL" json:"updated_at"`
 }
