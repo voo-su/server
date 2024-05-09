@@ -29,13 +29,12 @@ RUN mkdir /opt/voo-su
 
 WORKDIR /opt/voo-su
 
-COPY . /opt/voo-su
+#COPY . /opt/voo-su
 
-RUN ln -sf /opt/voo-su/configs/voo-su.yaml /opt/voo-su/runtime/voo-su.yaml
+#RUN ln -sf /opt/voo-su/configs/voo-su.yaml /etc/voo-su/voo-su.yaml
 
 EXPOSE 22
 EXPOSE 8000
 EXPOSE 8001
-EXPOSE 8002
 
 CMD ["/usr/sbin/sshd", "-D"]

@@ -9,15 +9,15 @@ install:
 
 .PHONY: http
 http:
-	go run ./cmd/voo-su http --c ./runtime/voo-su.yaml
+	go run ./cmd/voo-su http --c ./configs/voo-su.yaml
 
 .PHONY: ws
 ws:
-	go run ./cmd/voo-su ws --c ./runtime/voo-su.yaml
+	go run ./cmd/voo-su ws --c ./configs/voo-su.yaml
 
 .PHONY: cli-cron
 cli-cron:
-	go run ./cmd/voo-su cli-cron --c ./runtime/voo-su.yaml
+	go run ./cmd/voo-su cli-cron --c ./configs/voo-su.yaml
 
 .PHONY: build
 build:
