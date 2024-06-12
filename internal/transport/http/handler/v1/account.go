@@ -14,13 +14,13 @@ type Account struct {
 	UserRepo *repo.User
 }
 
-func (a *Account) Detail(ctx *core.Context) error {
+func (a *Account) Get(ctx *core.Context) error {
 	user, err := a.UserRepo.FindById(ctx.Ctx(), ctx.UserId())
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
 
-	return ctx.Success(&api_v1.AccountDetailResponse{
+	return ctx.Success(&api_v1.AccountResponse{
 		Id:       int32(user.Id),
 		Username: user.Username,
 		Email:    user.Email,
@@ -30,27 +30,6 @@ func (a *Account) Detail(ctx *core.Context) error {
 		Gender:   int32(user.Gender),
 		Birthday: user.Birthday,
 		About:    user.About,
-	})
-}
-
-func (a *Account) Get(ctx *core.Context) error {
-	uid := ctx.UserId()
-	user, err := a.UserRepo.FindById(ctx.Ctx(), uid)
-	if err != nil {
-		return ctx.Error(err.Error())
-	}
-
-	return ctx.Success(&api_v1.AccountSettingResponse{
-		UserInfo: &api_v1.AccountSettingResponse_UserInfo{
-			Uid:      int32(user.Id),
-			Username: user.Username,
-			Email:    user.Email,
-			Avatar:   user.Avatar,
-			Name:     user.Name,
-			Surname:  user.Surname,
-			About:    user.About,
-			Gender:   int32(user.Gender),
-		},
 	})
 }
 

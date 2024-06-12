@@ -20,17 +20,17 @@ import (
 )
 
 type AuthService struct {
-	sms             *cache.SmsStorage
-	contact         *repo.Contact
-	groupChatMember *repo.GroupChatMember
-	groupChat       *repo.GroupChat
-	conf            *config.Config
-	email           *email.Client
-	user            *repo.User
+	SmsStorage      *cache.SmsStorage
+	Contact         *repo.Contact
+	GroupChatMember *repo.GroupChatMember
+	GroupChat       *repo.GroupChat
+	Conf            *config.Config
+	Email           *email.Client
+	User            *repo.User
 }
 
 func NewAuthService(
-	codeCache *cache.SmsStorage,
+	smsStorage *cache.SmsStorage,
 	contact *repo.Contact,
 	groupChatMember *repo.GroupChatMember,
 	groupChat *repo.GroupChat,
@@ -39,13 +39,13 @@ func NewAuthService(
 	repo *repo.User,
 ) *AuthService {
 	return &AuthService{
-		sms:             codeCache,
-		contact:         contact,
-		groupChatMember: groupChatMember,
-		groupChat:       groupChat,
-		conf:            conf,
-		email:           email,
-		user:            repo,
+		SmsStorage:      smsStorage,
+		Contact:         contact,
+		GroupChatMember: groupChatMember,
+		GroupChat:       groupChat,
+		Conf:            conf,
+		Email:           email,
+		User:            repo,
 	}
 }
 
@@ -58,13 +58,13 @@ type AuthOption struct {
 
 func (a *AuthService) IsAuth(ctx context.Context, opt *AuthOption) error {
 	if opt.DialogType == entity.ChatPrivateMode {
-		if a.contact.IsFriend(ctx, opt.UserId, opt.ReceiverId, false) {
+		if a.Contact.IsFriend(ctx, opt.UserId, opt.ReceiverId, false) {
 			return nil
 		}
 		return errors.New("нет прав на отправку сообщений")
 	}
 
-	groupInfo, err := a.groupChat.FindById(ctx, opt.ReceiverId)
+	groupInfo, err := a.GroupChat.FindById(ctx, opt.ReceiverId)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (a *AuthService) IsAuth(ctx context.Context, opt *AuthOption) error {
 		return errors.New("эта групповая беседа распущена")
 	}
 
-	memberInfo, err := a.groupChatMember.FindByUserId(ctx, opt.ReceiverId, opt.UserId)
+	memberInfo, err := a.GroupChatMember.FindByUserId(ctx, opt.ReceiverId, opt.UserId)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return errors.New("нет прав на отправку сообщений")
@@ -106,20 +106,20 @@ func (a *AuthService) CodeTemplate(data map[string]string) (string, error) {
 }
 
 func (a *AuthService) Verify(ctx context.Context, channel string, token string, code string) bool {
-	return a.sms.Verify(ctx, channel, token, code)
+	return a.SmsStorage.Verify(ctx, channel, token, code)
 }
 
 func (a *AuthService) Delete(ctx context.Context, channel string, token string) {
-	_ = a.sms.Del(ctx, channel, token)
+	_ = a.SmsStorage.Del(ctx, channel, token)
 }
 
 func (a *AuthService) Send(ctx context.Context, channel string, _email string, token string) error {
 	code := strutil.GenValidateCode(6)
-	if err := a.sms.Set(ctx, channel, token, code, 15*time.Minute); err != nil {
+	if err := a.SmsStorage.Set(ctx, channel, token, code, 15*time.Minute); err != nil {
 		return err
 	}
 
-	if a.conf.App.Env == "dev" {
+	if a.Conf.App.Env == "dev" {
 		fmt.Println("Почта: ", _email)
 		fmt.Println("Код: ", code)
 		return nil
@@ -129,7 +129,7 @@ func (a *AuthService) Send(ctx context.Context, channel string, _email string, t
 		return err
 	}
 
-	_ = a.email.SendMail(&email.Option{
+	_ = a.Email.SendMail(&email.Option{
 		To:      _email,
 		Subject: "Добро пожаловать",
 		Body:    body,
@@ -139,18 +139,19 @@ func (a *AuthService) Send(ctx context.Context, channel string, _email string, t
 }
 
 func (a *AuthService) Register(ctx context.Context, email string) (*model.User, error) {
-	if a.user.IsEmailExist(ctx, email) {
-		return a.user.FindByEmail(email)
+	if a.User.IsEmailExist(ctx, email) {
+		return a.User.FindByEmail(email)
 	}
+
 	for {
 		username := uuid.New().String()
 		var user model.User
-		result := a.user.Db.Where("username = ?", username).First(&user)
+		result := a.User.Db.Where("username = ?", username).First(&user)
 		if result.Error != nil {
 			if result.Error == gorm.ErrRecordNotFound {
 				user.Email = email
 				user.Username = username
-				return a.user.Create(&user)
+				return a.User.Create(&user)
 			}
 			log.Fatal(result.Error)
 		}

@@ -47,9 +47,6 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	jwtTokenStorage := cache.NewTokenSessionStorage(client)
 	redisLock := cache.NewRedisLock(client)
 	source := repo.NewSource(db, client)
-	httpClient := provider.NewHttpClient()
-	requestClient := provider.NewRequestClient(httpClient)
-	ipAddressService := service.NewIpAddressService(source, conf, requestClient)
 	dialog := repo.NewDialog(db)
 	dialogService := service.NewDialogService(source, dialog, groupChatMember)
 	bot := repo.NewBot(db)
@@ -87,7 +84,6 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		AuthService:        authService,
 		JwtTokenStorage:    jwtTokenStorage,
 		RedisLock:          redisLock,
-		IpAddressService:   ipAddressService,
 		DialogService:      dialogService,
 		BotRepo:            bot,
 		MessageSendService: messageService,

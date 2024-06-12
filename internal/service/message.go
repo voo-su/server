@@ -731,9 +731,9 @@ func (m *MessageService) Vote(ctx context.Context, uid int, msgId int, optionsVa
 	if vote.AnswerMode == model.VoteAnswerModeSingleChoice {
 		options = options[:1]
 	}
-	answers := make([]*model.MessageVoteAnswer, 0, len(options))
+	answers := make([]*model.MessageVoteAnswers, 0, len(options))
 	for _, option := range options {
-		answers = append(answers, &model.MessageVoteAnswer{
+		answers = append(answers, &model.MessageVoteAnswers{
 			VoteId: vote.VoteId,
 			UserId: uid,
 			Option: option,

@@ -10,13 +10,16 @@ import (
 
 type GroupChatNoticeService struct {
 	*repo.Source
-	notice *repo.GroupChatNotice
+	Notice *repo.GroupChatNotice
 }
 
-func NewGroupChatNoticeService(source *repo.Source, notice *repo.GroupChatNotice) *GroupChatNoticeService {
+func NewGroupChatNoticeService(
+	source *repo.Source,
+	notice *repo.GroupChatNotice,
+) *GroupChatNoticeService {
 	return &GroupChatNoticeService{
 		Source: source,
-		notice: notice,
+		Notice: notice,
 	}
 }
 
@@ -31,7 +34,7 @@ type GroupChatNoticeEditOpt struct {
 }
 
 func (s *GroupChatNoticeService) Create(ctx context.Context, opt *GroupChatNoticeEditOpt) error {
-	return s.notice.Create(ctx, &model.GroupChatNotice{
+	return s.Notice.Create(ctx, &model.GroupChatNotice{
 		GroupId:      opt.GroupId,
 		CreatorId:    opt.UserId,
 		Title:        opt.Title,
@@ -43,21 +46,23 @@ func (s *GroupChatNoticeService) Create(ctx context.Context, opt *GroupChatNotic
 }
 
 func (s *GroupChatNoticeService) Update(ctx context.Context, opt *GroupChatNoticeEditOpt) error {
-	_, err := s.notice.UpdateWhere(ctx, map[string]any{
+	_, err := s.Notice.UpdateWhere(ctx, map[string]any{
 		"title":      opt.Title,
 		"content":    opt.Content,
 		"is_top":     opt.IsTop,
 		"is_confirm": opt.IsConfirm,
 		"updated_at": time.Now(),
 	}, "id = ? and group_id = ?", opt.NoticeId, opt.GroupId)
+
 	return err
 }
 
 func (s *GroupChatNoticeService) Delete(ctx context.Context, groupId, noticeId int) error {
-	_, err := s.notice.UpdateWhere(ctx, map[string]any{
+	_, err := s.Notice.UpdateWhere(ctx, map[string]any{
 		"is_delete":  1,
 		"deleted_at": timeutil.DateTime(),
 		"updated_at": time.Now(),
 	}, "id = ? and group_id = ?", noticeId, groupId)
+
 	return err
 }

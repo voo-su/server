@@ -9,15 +9,21 @@ import (
 
 type GroupChatRequestService struct {
 	*repo.Source
-	repo *repo.GroupChatRequest
+	Repo *repo.GroupChatRequest
 }
 
-func NewGroupRequestService(source *repo.Source, repo *repo.GroupChatRequest) *GroupChatRequestService {
-	return &GroupChatRequestService{Source: source, repo: repo}
+func NewGroupRequestService(
+	source *repo.Source,
+	repo *repo.GroupChatRequest,
+) *GroupChatRequestService {
+	return &GroupChatRequestService{
+		Source: source,
+		Repo:   repo,
+	}
 }
 
 func (s *GroupChatRequestService) Auth(ctx context.Context, id, userId int) bool {
-	info, err := s.repo.FindById(ctx, id)
+	info, err := s.Repo.FindById(ctx, id)
 	if err != nil {
 		return false
 	}
@@ -31,7 +37,7 @@ func (s *GroupChatRequestService) Auth(ctx context.Context, id, userId int) bool
 }
 
 func (s *GroupChatRequestService) Insert(ctx context.Context, groupId, userId int /*, remark string*/) error {
-	return s.repo.Create(ctx, &model.GroupChatRequest{
+	return s.Repo.Create(ctx, &model.GroupChatRequest{
 		GroupId: groupId,
 		UserId:  userId,
 		//Remark:  remark,

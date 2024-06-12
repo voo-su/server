@@ -16,7 +16,10 @@ func NewRouter(conf *config.Config, handle *handler.Handler, session *cache.JwtT
 
 	router.Use(gin.RecoveryWithWriter(gin.DefaultWriter, func(c *gin.Context, err any) {
 		log.Println(err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]any{"code": 500, "msg": "Произошла ошибка системы. Пожалуйста, повторите попытку!"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]any{
+			"code":    http.StatusInternalServerError,
+			"message": "Произошла ошибка системы. Пожалуйста, повторите попытку!",
+		})
 	}))
 
 	authorize := middleware.Auth(conf.Jwt.Secret, "api", session)
@@ -28,7 +31,9 @@ func NewRouter(conf *config.Config, handle *handler.Handler, session *cache.JwtT
 	router.GET("/ws", authorize, core.HandlerFunc(handle.Chat.Conn))
 
 	router.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, map[string]any{"msg": "Метод не найден"})
+		c.JSON(http.StatusNotFound, map[string]any{
+			"message": "Метод не найден",
+		})
 	})
 
 	return router

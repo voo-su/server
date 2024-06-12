@@ -20,9 +20,9 @@ import (
 
 type SplitService struct {
 	*repo.Source
-	split      *repo.Split
-	config     *config.Config
-	fileSystem *filesystem.Filesystem
+	Split      *repo.Split
+	Config     *config.Config
+	FileSystem *filesystem.Filesystem
 }
 
 func NewSplitService(
@@ -31,7 +31,12 @@ func NewSplitService(
 	conf *config.Config,
 	fileSystem *filesystem.Filesystem,
 ) *SplitService {
-	return &SplitService{Source: source, split: repo, config: conf, fileSystem: fileSystem}
+	return &SplitService{
+		Source:     source,
+		Split:      repo,
+		Config:     conf,
+		FileSystem: fileSystem,
+	}
 }
 
 type MultipartInitiateOpt struct {
@@ -44,7 +49,7 @@ func (s *SplitService) InitiateMultipartUpload(ctx context.Context, params *Mult
 	num := math.Ceil(float64(params.Size) / float64(3<<20))
 	m := &model.Split{
 		Type:         1,
-		Drive:        entity.FileDriveMode(s.fileSystem.Driver()),
+		Drive:        entity.FileDriveMode(s.FileSystem.Driver()),
 		UserId:       params.UserId,
 		OriginalName: params.Name,
 		SplitNum:     int(num),
@@ -53,7 +58,7 @@ func (s *SplitService) InitiateMultipartUpload(ctx context.Context, params *Mult
 		Path:         fmt.Sprintf("private-tmp/multipart/%s/%s.tmp", timeutil.DateNumber(), encrypt.Md5(strutil.Random(20))),
 		Attr:         "{}",
 	}
-	uploadId, err := s.fileSystem.Default.InitiateMultipartUpload(m.Path, m.OriginalName)
+	uploadId, err := s.FileSystem.Default.InitiateMultipartUpload(m.Path, m.OriginalName)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +80,7 @@ type MultipartUploadOpt struct {
 }
 
 func (s *SplitService) MultipartUpload(ctx context.Context, opt *MultipartUploadOpt) error {
-	info, err := s.split.FindByWhere(ctx, "upload_id = ? and type = 1", opt.UploadId)
+	info, err := s.Split.FindByWhere(ctx, "upload_id = ? and type = 1", opt.UploadId)
 	if err != nil {
 		return err
 	}
@@ -101,7 +106,7 @@ func (s *SplitService) MultipartUpload(ctx context.Context, opt *MultipartUpload
 	}
 	switch data.Drive {
 	case entity.FileDriveLocal:
-		_ = s.fileSystem.Default.Write(stream, data.Path)
+		_ = s.FileSystem.Default.Write(stream, data.Path)
 	default:
 		return errors.New("неизвестный тип драйвера файла")
 	}
@@ -116,7 +121,7 @@ func (s *SplitService) MultipartUpload(ctx context.Context, opt *MultipartUpload
 }
 
 func (s *SplitService) merge(info *model.Split) error {
-	items, err := s.split.GetSplitList(context.TODO(), info.UploadId)
+	items, err := s.Split.GetSplitList(context.TODO(), info.UploadId)
 	if err != nil {
 		return err
 	}
@@ -124,11 +129,11 @@ func (s *SplitService) merge(info *model.Split) error {
 	switch info.Drive {
 	case entity.FileDriveLocal:
 		for _, item := range items {
-			stream, err := s.fileSystem.Default.ReadStream(item.Path)
+			stream, err := s.FileSystem.Default.ReadStream(item.Path)
 			if err != nil {
 				return err
 			}
-			if err := s.fileSystem.Local.AppendWrite(stream, info.Path); err != nil {
+			if err := s.FileSystem.Local.AppendWrite(stream, info.Path); err != nil {
 				return err
 			}
 		}

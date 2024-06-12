@@ -18,10 +18,10 @@ import (
 
 type GroupChatService struct {
 	*repo.Source
-	repo     *repo.GroupChat
-	member   *repo.GroupChatMember
-	relation *cache.Relation
-	sequence *repo.Sequence
+	Repo     *repo.GroupChat
+	Member   *repo.GroupChatMember
+	Relation *cache.Relation
+	Sequence *repo.Sequence
 }
 
 func NewGroupChatService(
@@ -33,10 +33,10 @@ func NewGroupChatService(
 ) *GroupChatService {
 	return &GroupChatService{
 		Source:   source,
-		repo:     repo,
-		member:   member,
-		relation: relation,
-		sequence: sequence,
+		Repo:     repo,
+		Member:   member,
+		Relation: relation,
+		Sequence: sequence,
 	}
 }
 
@@ -108,7 +108,7 @@ func (g *GroupChatService) Create(ctx context.Context, opt *GroupCreateOpt) (int
 			DialogType: entity.ChatGroupMode,
 			ReceiverId: group.Id,
 			MsgType:    entity.ChatMsgSysGroupCreate,
-			Sequence:   g.sequence.Get(ctx, 0, group.Id),
+			Sequence:   g.Sequence.Get(ctx, 0, group.Id),
 			Extra: jsonutil.Encode(model.DialogRecordExtraGroupCreate{
 				OwnerId:   user.Id,
 				OwnerName: user.Username,
@@ -143,7 +143,7 @@ type GroupUpdateOpt struct {
 }
 
 func (g *GroupChatService) Update(ctx context.Context, opt *GroupUpdateOpt) error {
-	_, err := g.repo.UpdateById(ctx, opt.GroupId, map[string]any{
+	_, err := g.Repo.UpdateById(ctx, opt.GroupId, map[string]any{
 		"group_name":  opt.Name,
 		"avatar":      opt.Avatar,
 		"description": opt.Description,
@@ -198,7 +198,7 @@ func (g *GroupChatService) Secede(ctx context.Context, groupId int, uid int) err
 		DialogType: entity.ChatGroupMode,
 		ReceiverId: groupId,
 		MsgType:    entity.ChatMsgSysGroupMemberQuit,
-		Sequence:   g.sequence.Get(ctx, 0, groupId),
+		Sequence:   g.Sequence.Get(ctx, 0, groupId),
 		Extra: jsonutil.Encode(&model.DialogRecordExtraGroupMemberQuit{
 			OwnerId:   user.Id,
 			OwnerName: user.Username,
@@ -224,7 +224,7 @@ func (g *GroupChatService) Secede(ctx context.Context, groupId int, uid int) err
 		return err
 	}
 
-	g.relation.DelGroupRelation(ctx, uid, groupId)
+	g.Relation.DelGroupRelation(ctx, uid, groupId)
 	g.Source.Redis().Publish(ctx, entity.ImTopicChat, jsonutil.Encode(map[string]any{
 		"event": entity.SubEventGroupChatJoin,
 		"data": jsonutil.Encode(map[string]any{
@@ -263,7 +263,7 @@ func (g *GroupChatService) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		db               = g.Source.Db().WithContext(ctx)
 	)
 	m := make(map[int]struct{})
-	for _, value := range g.member.GetMemberIds(ctx, opt.GroupId) {
+	for _, value := range g.Member.GetMemberIds(ctx, opt.GroupId) {
 		m[value] = struct{}{}
 	}
 
@@ -321,7 +321,7 @@ func (g *GroupChatService) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		DialogType: entity.ChatGroupMode,
 		ReceiverId: opt.GroupId,
 		MsgType:    entity.ChatMsgSysGroupMemberJoin,
-		Sequence:   g.sequence.Get(ctx, 0, opt.GroupId),
+		Sequence:   g.Sequence.Get(ctx, 0, opt.GroupId),
 	}
 	record.Extra = jsonutil.Encode(&model.DialogRecordExtraGroupJoin{
 		OwnerId:   memberMaps[opt.UserId].Id,
@@ -420,7 +420,7 @@ func (g *GroupChatService) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 
 	record := &model.Message{
 		MsgId:      strutil.NewMsgId(),
-		Sequence:   g.sequence.Get(ctx, 0, opt.GroupId),
+		Sequence:   g.Sequence.Get(ctx, 0, opt.GroupId),
 		DialogType: entity.ChatGroupMode,
 		ReceiverId: opt.GroupId,
 		MsgType:    entity.ChatMsgSysGroupMemberKicked,
@@ -447,7 +447,7 @@ func (g *GroupChatService) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 		return err
 	}
 
-	g.relation.BatchDelGroupRelation(ctx, opt.MemberIds, opt.GroupId)
+	g.Relation.BatchDelGroupRelation(ctx, opt.MemberIds, opt.GroupId)
 
 	_, _ = g.Source.Redis().Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.Publish(ctx, entity.ImTopicChat, jsonutil.Encode(map[string]any{

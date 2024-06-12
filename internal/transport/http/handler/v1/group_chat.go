@@ -171,7 +171,7 @@ func (c *GroupChat) RemoveMembers(ctx *core.Context) error {
 	return ctx.Success(&api_v1.GroupChatRemoveMemberResponse{})
 }
 
-func (c *GroupChat) Detail(ctx *core.Context) error {
+func (c *GroupChat) Get(ctx *core.Context) error {
 	params := &api_v1.GroupChatDetailRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)

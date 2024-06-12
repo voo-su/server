@@ -17,8 +17,8 @@ import (
 
 type DialogService struct {
 	*repo.Source
-	dialog              *repo.Dialog
-	groupChatMemberRepo *repo.GroupChatMember
+	Dialog              *repo.Dialog
+	GroupChatMemberRepo *repo.GroupChatMember
 }
 
 func NewDialogService(
@@ -55,7 +55,7 @@ func (d *DialogService) DeleteRecordList(ctx context.Context, opt *RemoveRecordL
 			Where(subQuery).
 			Pluck("id", &findIds)
 	} else {
-		if !d.groupChatMemberRepo.IsMember(ctx, opt.ReceiverId, opt.UserId, false) {
+		if !d.GroupChatMemberRepo.IsMember(ctx, opt.ReceiverId, opt.UserId, false) {
 			return entity.ErrPermissionDenied
 		}
 
@@ -108,7 +108,7 @@ type DialogCreateOpt struct {
 }
 
 func (d *DialogService) Create(ctx context.Context, opt *DialogCreateOpt) (*model.Dialog, error) {
-	result, err := d.dialog.FindByWhere(ctx, "dialog_type = ? and user_id = ? and receiver_id = ?", opt.DialogType, opt.UserId, opt.ReceiverId)
+	result, err := d.Dialog.FindByWhere(ctx, "dialog_type = ? and user_id = ? and receiver_id = ?", opt.DialogType, opt.UserId, opt.ReceiverId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (d *DialogService) Create(ctx context.Context, opt *DialogCreateOpt) (*mode
 }
 
 func (d *DialogService) Delete(ctx context.Context, uid int, id int) error {
-	_, err := d.dialog.UpdateWhere(ctx, map[string]any{"is_delete": 1, "updated_at": time.Now()}, "id = ? and user_id = ?", id, uid)
+	_, err := d.Dialog.UpdateWhere(ctx, map[string]any{"is_delete": 1, "updated_at": time.Now()}, "id = ? and user_id = ?", id, uid)
 	return err
 }
 
@@ -148,7 +148,7 @@ type DialogSessionTopOpt struct {
 }
 
 func (d *DialogService) Top(ctx context.Context, opt *DialogSessionTopOpt) error {
-	_, err := d.dialog.UpdateWhere(ctx, map[string]any{
+	_, err := d.Dialog.UpdateWhere(ctx, map[string]any{
 		"is_top":     strutil.BoolToInt(opt.Type == 1),
 		"updated_at": time.Now(),
 	}, "id = ? and user_id = ?", opt.Id, opt.UserId)
@@ -163,7 +163,7 @@ type DialogSessionDisturbOpt struct {
 }
 
 func (d *DialogService) Disturb(ctx context.Context, opt *DialogSessionDisturbOpt) error {
-	_, err := d.dialog.UpdateWhere(ctx, map[string]any{
+	_, err := d.Dialog.UpdateWhere(ctx, map[string]any{
 		"is_disturb": opt.IsDisturb,
 		"updated_at": time.Now(),
 	}, "user_id = ? and receiver_id = ? and dialog_type = ?", opt.UserId, opt.ReceiverId, opt.DialogType)

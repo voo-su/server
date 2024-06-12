@@ -6,7 +6,7 @@ import "third_party/tagger/tagger.proto";
 
 option go_package = "./v1;api_v1";
 
-message AccountDetailResponse{
+message AccountResponse{
     int32 id = 1;
     string username = 3;
     string email = 4;
@@ -16,22 +16,6 @@ message AccountDetailResponse{
     int32 gender = 7;
     string birthday = 8;
     string about = 9;
-}
-
-message AccountSettingResponse{
-    message UserInfo{
-        int32 uid = 1;
-        string username = 2;
-        string email = 3;
-        string avatar = 4;
-        string name = 5;
-        string surname = 6;
-        string about = 7;
-        int32 gender = 8;
-        // bool is_qiye = 7;
-    }
-
-    UserInfo user_info = 1;
 }
 
 message AccountDetailUpdateRequest{

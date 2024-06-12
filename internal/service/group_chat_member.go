@@ -17,11 +17,17 @@ type IGroupChatMemberService interface {
 
 type GroupChatMemberService struct {
 	*repo.Source
-	member *repo.GroupChatMember
+	Member *repo.GroupChatMember
 }
 
-func NewGroupMemberService(source *repo.Source, repo *repo.GroupChatMember) *GroupChatMemberService {
-	return &GroupChatMemberService{Source: source, member: repo}
+func NewGroupMemberService(
+	source *repo.Source,
+	repo *repo.GroupChatMember,
+) *GroupChatMemberService {
+	return &GroupChatMemberService{
+		Source: source,
+		Member: repo,
+	}
 }
 
 func (g *GroupChatMemberService) Handover(ctx context.Context, groupId int, userId int, memberId int) error {
@@ -45,14 +51,14 @@ func (g *GroupChatMemberService) Handover(ctx context.Context, groupId int, user
 }
 
 func (g *GroupChatMemberService) SetLeaderStatus(ctx context.Context, groupId int, userId int, leader int) error {
-	return g.member.Model(ctx).
+	return g.Member.Model(ctx).
 		Where("group_id = ? and user_id = ?", groupId, userId).
 		UpdateColumn("leader", leader).
 		Error
 }
 
 func (g *GroupChatMemberService) SetMuteStatus(ctx context.Context, groupId int, userId int, status int) error {
-	return g.member.Model(ctx).
+	return g.Member.Model(ctx).
 		Where("group_id = ? and user_id = ?", groupId, userId).
 		UpdateColumn("is_mute", status).
 		Error

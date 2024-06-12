@@ -44,7 +44,7 @@ func (c *Contact) List(ctx *core.Context) error {
 	return ctx.Success(&api_v1.ContactListResponse{Items: items})
 }
 
-func (c *Contact) Detail(ctx *core.Context) error {
+func (c *Contact) Get(ctx *core.Context) error {
 	params := &api_v1.ContactDetailRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -81,7 +81,7 @@ func (c *Contact) Detail(ctx *core.Context) error {
 		if err == nil && contact.Status == 1 {
 			if c.ContactRepo.IsFriend(ctx.Ctx(), uid, user.Id, false) {
 				data.FriendStatus = 2
-				data.GroupId = int32(contact.GroupId)
+				data.GroupId = int32(contact.FolderId)
 				//data.Remark = contact.Remark
 			}
 		}
