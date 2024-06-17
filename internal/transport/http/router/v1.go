@@ -61,7 +61,7 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 		{
 			contact.GET("", core.HandlerFunc(handler.V1.Contact.List))
 			contact.GET("/get", core.HandlerFunc(handler.V1.Contact.Get))
-			//contact.POST("/delete", core.HandlerFunc(handler.V1.Contact.Delete))
+			contact.POST("/delete", core.HandlerFunc(handler.V1.Contact.Delete))
 			//contact.POST("/edit-remark", core.HandlerFunc(handler.V1.Contact.Remark))
 			contact.GET("/requests", core.HandlerFunc(handler.V1.ContactRequest.List))
 			contact.POST("/requests/create", core.HandlerFunc(handler.V1.ContactRequest.Create))

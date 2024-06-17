@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"voo.su/api/pb/v1"
+	"voo.su/internal/entity"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
 	"voo.su/internal/service"
@@ -88,4 +89,31 @@ func (c *Contact) Get(ctx *core.Context) error {
 	}
 
 	return ctx.Success(&data)
+}
+
+func (c *Contact) Delete(ctx *core.Context) error {
+	params := &api_v1.ContactDeleteRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	uid := ctx.UserId()
+	if err := c.ContactService.Delete(ctx.Ctx(), uid, int(params.FriendId)); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	_ = c.MessageSendService.SendSystemText(ctx.Ctx(), uid, &api_v1.TextMessageRequest{
+		Content: "Контакт удален",
+		Receiver: &api_v1.MessageReceiver{
+			DialogType: entity.ChatPrivateMode,
+			ReceiverId: params.FriendId,
+		},
+	})
+
+	sid := c.DialogRepo.FindBySessionId(uid, int(params.FriendId), entity.ChatPrivateMode)
+	if err := c.DialogService.Delete(ctx.Ctx(), ctx.UserId(), sid); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(&api_v1.ContactDeleteResponse{})
 }
