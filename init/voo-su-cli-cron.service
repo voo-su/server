@@ -1,0 +1,11 @@
+[Unit]
+Description=Voo.su cli cron
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5s
+ExecStart=/usr/bin/voo-su cli-cron
+
+[Install]
+WantedBy=multi-user.target

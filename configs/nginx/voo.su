@@ -1,0 +1,17 @@
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name voo.su;
+
+    root /var/www/voo-su/dist;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location = /favicon.ico {
+        log_not_found off;
+        access_log off;
+    }
+}

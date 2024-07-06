@@ -1,0 +1,14 @@
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name file.voo.su;
+
+    add_header 'Access-Control-Allow-Origin' 'http://voo.su';
+
+    root /var/www/voo-su-media;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
