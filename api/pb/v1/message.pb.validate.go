@@ -1570,6 +1570,8 @@ func (m *LoginMessageRequest) validate(all bool) error {
 
 	// no validation rules for Agent
 
+	// no validation rules for Address
+
 	if len(errors) > 0 {
 		return LoginMessageRequestMultiError(errors)
 	}

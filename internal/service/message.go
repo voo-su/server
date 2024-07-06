@@ -901,10 +901,8 @@ func (m *MessageService) SendLogin(ctx context.Context, uid int, req *api_v1.Log
 		Extra: jsonutil.Encode(&model.DialogRecordExtraLogin{
 			IP:       req.Ip,
 			Agent:    req.Agent,
+			Address:  req.Address,
 			Datetime: timeutil.DateTime(),
-			//Platform: req.Platform,
-			//Address:  req.Address,
-			//Reason:   req.Reason,
 		}),
 	}
 

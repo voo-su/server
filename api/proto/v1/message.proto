@@ -104,9 +104,7 @@ message VoteMessageRequest{
 message LoginMessageRequest{
     string ip = 1;
     string agent = 2;
-    // string address = 3;
-    // string platform = 4;
-    // string reason = 5;
+    string address = 3;
 }
 
 message StickerMessageRequest{

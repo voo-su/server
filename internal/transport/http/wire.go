@@ -51,6 +51,7 @@ var ProviderSet = wire.NewSet(
 	service.NewGroupChatNoticeService,
 	service.NewGroupRequestService,
 	service.NewSplitService,
+	service.NewIpAddressService,
 	service.NewStickerService,
 
 	repo.NewUserSession,

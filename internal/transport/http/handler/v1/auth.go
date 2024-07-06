@@ -20,6 +20,7 @@ type Auth struct {
 	AuthService        *service.AuthService
 	JwtTokenStorage    *cache.JwtTokenStorage
 	RedisLock          *cache.RedisLock
+	IpAddressService   *service.IpAddressService
 	DialogService      *service.DialogService
 	BotRepo            *repo.Bot
 	MessageSendService service.MessageSendService
@@ -79,6 +80,11 @@ func (a *Auth) Verify(ctx *core.Context) error {
 	ip := ctx.Context.ClientIP()
 	root, _ := a.BotRepo.GetLoginBot(ctx.Ctx())
 	if root != nil {
+		address, err := a.IpAddressService.FindAddress(ip)
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		_, _ = a.DialogService.Create(ctx.Ctx(), &service.DialogCreateOpt{
 			UserId:     user.Id,
 			DialogType: entity.ChatPrivateMode,
@@ -86,8 +92,9 @@ func (a *Auth) Verify(ctx *core.Context) error {
 			IsBoot:     true,
 		})
 		_ = a.MessageSendService.SendLogin(ctx.Ctx(), user.Id, &api_v1.LoginMessageRequest{
-			Ip:    ip,
-			Agent: ctx.Context.GetHeader("user-agent"),
+			Ip:      ip,
+			Agent:   ctx.Context.GetHeader("user-agent"),
+			Address: address,
 		})
 	}
 

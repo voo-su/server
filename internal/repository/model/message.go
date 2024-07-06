@@ -64,10 +64,8 @@ type DialogRecordExtraForward struct {
 type DialogRecordExtraLogin struct {
 	IP       string `json:"ip"`
 	Agent    string `json:"agent"`
+	Address  string `json:"address"`
 	Datetime string `json:"datetime"`
-	//Address  string `json:"address"`
-	//Platform string `json:"platform"`
-	//Reason   string `json:"reason"`
 }
 
 type DialogRecordExtraCard struct {
