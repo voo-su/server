@@ -10,9 +10,9 @@ RUN apk update && \
     rm -rf /var/cache/apk/*
 
 # Установка Go
-RUN wget https://dl.google.com/go/go$GOLANG_VERSION.src.tar.gz && \
-    tar -C /usr/local -xzf go$GOLANG_VERSION.src.tar.gz && \
-    rm go$GOLANG_VERSION.src.tar.gz
+RUN wget https://go.dev/dl/go$GOLANG_VERSION.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go$GOLANG_VERSION.linux-amd64.tar.gz && \
+    rm go$GOLANG_VERSION.linux-amd64.tar.gz
 
 # Настройка SSH
 RUN sed -i -e 's/#PermitRootLogin.*/PermitRootLogin\ yes/' \
@@ -28,8 +28,6 @@ ENV PATH=$PATH:/usr/local/go/bin
 RUN mkdir /opt/voo-su
 
 WORKDIR /opt/voo-su
-
-#COPY . /opt/voo-su
 
 #RUN ln -sf /opt/voo-su/configs/voo-su.yaml /etc/voo-su/voo-su.yaml
 
