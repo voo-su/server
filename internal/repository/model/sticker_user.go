@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-type MessageSticker struct {
+type StickerUser struct {
 	Id         int       `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
 	UserId     int       `gorm:"column:user_id;NOT NULL" json:"user_id"`
 	StickerIds string    `gorm:"column:sticker_ids;NOT NULL" json:"sticker_ids"`

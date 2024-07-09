@@ -70,7 +70,7 @@ func (a *AuthService) IsAuth(ctx context.Context, opt *AuthOption) error {
 	}
 
 	if groupInfo.IsDismiss == 1 {
-		return errors.New("эта групповая беседа распущена")
+		return errors.New("Группа удалена")
 	}
 
 	memberInfo, err := a.GroupChatMember.FindByUserId(ctx, opt.ReceiverId, opt.UserId)

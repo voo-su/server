@@ -106,7 +106,7 @@ func (c *Sticker) Upload(ctx *core.Context) error {
 
 	m := &model.StickerItem{
 		UserId:      ctx.UserId(),
-		Description: "Пользовательский набор смайликов",
+		Description: "Пользовательский набор",
 		Url:         c.Filesystem.Default.PublicUrl(src),
 		FileSuffix:  ext,
 		FileSize:    int(file.Size),

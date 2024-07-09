@@ -639,7 +639,7 @@ CREATE TABLE public.sticker_items
     id          integer                                              NOT NULL,
     sticker_id  integer                DEFAULT 0                     NOT NULL,
     user_id     integer                DEFAULT 0                     NOT NULL,
-    description character varying(20)  DEFAULT ''::character varying NOT NULL,
+    description character varying(255)  DEFAULT ''::character varying NOT NULL,
     url         character varying(255) DEFAULT ''::character varying NOT NULL,
     file_suffix character varying(10)  DEFAULT ''::character varying NOT NULL,
     file_size   bigint                 DEFAULT 0                     NOT NULL,

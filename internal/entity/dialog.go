@@ -70,7 +70,7 @@ var ChatMsgTypeMapping = map[int]string{
 	ChatMsgSysGroupMemberQuit:        "Выход из группы",
 	ChatMsgSysGroupMemberKicked:      "Исключение из группы",
 	ChatMsgSysGroupMessageRevoke:     "Отзыв сообщения",
-	ChatMsgSysGroupDismissed:         "Распуск группы",
+	ChatMsgSysGroupDismissed:         "Группа удалена",
 	ChatMsgSysGroupMuted:             "Группа замолчана",
 	ChatMsgSysGroupCancelMuted:       "Группа размолчана",
 	ChatMsgSysGroupMemberMuted:       "Замолчание участника группы",

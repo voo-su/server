@@ -338,3 +338,28 @@ func (c *GroupChat) AssignAdmin(ctx *core.Context) error {
 
 	return ctx.Success(nil)
 }
+
+func (c *GroupChat) Dismiss(ctx *core.Context) error {
+	params := &api_v1.GroupChatDismissRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	uid := ctx.UserId()
+	if !c.GroupChatMemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
+		return ctx.ErrorBusiness("У вас нет прав на расформирование группы")
+	}
+	if err := c.GroupChatService.Dismiss(ctx.Ctx(), int(params.GroupId), ctx.UserId()); err != nil {
+		return ctx.ErrorBusiness("Не удалось расформировать группу")
+	}
+
+	_ = c.MessageSendService.SendSystemText(ctx.Ctx(), uid, &api_v1.TextMessageRequest{
+		Content: "Группа была расформирована владельцем группы",
+		Receiver: &api_v1.MessageReceiver{
+			DialogType: entity.ChatGroupMode,
+			ReceiverId: params.GroupId,
+		},
+	})
+
+	return ctx.Success(nil)
+}

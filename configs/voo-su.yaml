@@ -32,7 +32,7 @@ cors:
 file:
   default: local
   local:
-    root: ./runtime/voo-su-media
+    root: ./runtime/media
     domain:
 
 email:

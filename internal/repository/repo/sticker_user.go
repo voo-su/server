@@ -17,7 +17,7 @@ func NewSticker(db *gorm.DB) *Sticker {
 }
 
 func (e *Sticker) GetUserInstallIds(uid int) []int {
-	var data model.MessageSticker
+	var data model.StickerUser
 	if err := e.Repo.Db.First(&data, "user_id = ?", uid).Error; err != nil {
 		return []int{}
 	}

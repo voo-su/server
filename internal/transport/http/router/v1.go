@@ -93,6 +93,7 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 			groupChat.GET("/members", core.HandlerFunc(handler.V1.GroupChat.Members))
 			groupChat.GET("/members/invites", core.HandlerFunc(handler.V1.GroupChat.GetInviteFriends))
 			groupChat.POST("/members/remove", core.HandlerFunc(handler.V1.GroupChat.RemoveMembers))
+			groupChat.POST("/dismiss", core.HandlerFunc(handler.V1.GroupChat.Dismiss))
 		}
 		message := v1.Group("/messages").Use(authorize)
 		{

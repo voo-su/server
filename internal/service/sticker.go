@@ -12,20 +12,24 @@ import (
 
 type StickerService struct {
 	*repo.Source
-	sticker    *repo.Sticker
-	filesystem *filesystem.Filesystem
+	Sticker    *repo.Sticker
+	Filesystem *filesystem.Filesystem
 }
 
 func NewStickerService(
-	baseService *repo.Source,
+	source *repo.Source,
 	repo *repo.Sticker,
 	fileSystem *filesystem.Filesystem,
 ) *StickerService {
-	return &StickerService{Source: baseService, sticker: repo, filesystem: fileSystem}
+	return &StickerService{
+		Source:     source,
+		Sticker:    repo,
+		Filesystem: fileSystem,
+	}
 }
 
 func (s *StickerService) RemoveUserSysSticker(uid int, stickerId int) error {
-	ids := s.sticker.GetUserInstallIds(uid)
+	ids := s.Sticker.GetUserInstallIds(uid)
 	if !sliceutil.Include(stickerId, ids) {
 		return fmt.Errorf("данных не существует")
 	}
@@ -43,7 +47,7 @@ func (s *StickerService) RemoveUserSysSticker(uid int, stickerId int) error {
 }
 
 func (s *StickerService) AddUserSysSticker(uid int, stickerId int) error {
-	ids := s.sticker.GetUserInstallIds(uid)
+	ids := s.Sticker.GetUserInstallIds(uid)
 	if sliceutil.Include(stickerId, ids) {
 		return nil
 	}
