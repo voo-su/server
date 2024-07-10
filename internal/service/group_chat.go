@@ -480,8 +480,8 @@ type session struct {
 
 func (g *GroupChatService) List(userId int) ([]*model.GroupItem, error) {
 	tx := g.Source.Db().Table("group_chat_members")
-	tx.Select("`group`.id,`group`.group_name,`group`.avatar,`group`.description,group_chat_members.leader,`group`.creator_id")
-	tx.Joins("LEFT JOIN `group` on `group`.id = group_chat_members.group_id")
+	tx.Select("gc.id AS id, gc.group_name AS group_name, gc.avatar AS avatar, gc.description AS description, group_chat_members.leader AS leader, gc.creator_id AS creator_id")
+	tx.Joins("LEFT JOIN group_chats gc on gc.id = group_chat_members.group_id")
 	tx.Where("group_chat_members.user_id = ? and group_chat_members.is_quit = ?", userId, 0)
 	tx.Order("group_chat_members.created_at desc")
 

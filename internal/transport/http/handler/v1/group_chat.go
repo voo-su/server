@@ -9,6 +9,7 @@ import (
 	"voo.su/internal/repository/repo"
 	"voo.su/internal/service"
 	"voo.su/pkg/core"
+	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/timeutil"
@@ -362,4 +363,105 @@ func (c *GroupChat) Dismiss(ctx *core.Context) error {
 	})
 
 	return ctx.Success(nil)
+}
+
+func (c *GroupChat) Mute(ctx *core.Context) error {
+	params := &api_v1.GroupChatMuteRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	uid := ctx.UserId()
+	group, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
+	if err != nil {
+		return ctx.ErrorBusiness("Ошибка сети. Пожалуйста, попробуйте еще раз")
+	}
+
+	if group.IsDismiss == 1 {
+		return ctx.ErrorBusiness("Эта группа была расформирована")
+	}
+	if !c.GroupChatMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
+		return ctx.ErrorBusiness("У вас нет прав доступа")
+	}
+
+	data := make(map[string]any)
+	if params.Mode == 1 {
+		data["is_mute"] = 1
+	} else {
+		data["is_mute"] = 0
+	}
+
+	affected, err := c.GroupChatRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.GroupId)
+	if err != nil {
+		return ctx.Error("Серверная ошибка. Пожалуйста, попробуйте еще раз")
+	}
+	if affected == 0 {
+		return ctx.Success(api_v1.GroupChatMuteResponse{})
+	}
+
+	user, err := c.UserRepo.FindById(ctx.Ctx(), uid)
+	if err != nil {
+		return err
+	}
+
+	var extra any
+	var msgType int
+	if params.Mode == 1 {
+		msgType = entity.ChatMsgSysGroupMuted
+		extra = model.DialogRecordExtraGroupMuted{
+			OwnerId:   user.Id,
+			OwnerName: user.Username,
+		}
+	} else {
+		msgType = entity.ChatMsgSysGroupCancelMuted
+		extra = model.DialogRecordExtraGroupCancelMuted{
+			OwnerId:   user.Id,
+			OwnerName: user.Username,
+		}
+	}
+
+	_ = c.MessageSendService.SendSysOther(ctx.Ctx(), &model.Message{
+		MsgType:    msgType,
+		DialogType: model.DialogRecordDialogTypeGroup,
+		UserId:     uid,
+		ReceiverId: int(params.GroupId),
+		Extra:      jsonutil.Encode(extra),
+	})
+
+	return ctx.Success(api_v1.GroupChatMuteResponse{})
+}
+
+func (c *GroupChat) Overt(ctx *core.Context) error {
+	params := &api_v1.GroupChatOvertRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	uid := ctx.UserId()
+	group, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
+	if err != nil {
+		return ctx.ErrorBusiness("Ошибка сети. Пожалуйста, попробуйте еще раз")
+	}
+
+	if group.IsDismiss == 1 {
+		return ctx.ErrorBusiness("Эта группа была расформирована")
+	}
+
+	if !c.GroupChatMemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
+		return ctx.ErrorBusiness("У вас нет прав доступа")
+	}
+
+	data := make(map[string]any)
+	if params.Mode == 1 {
+		data["is_overt"] = 1
+	} else {
+		data["is_overt"] = 0
+	}
+
+	_, err = c.GroupChatRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.GroupId)
+	if err != nil {
+		return ctx.Error("Серверная ошибка. Пожалуйста, попробуйте еще раз")
+	}
+
+	return ctx.Success(api_v1.GroupChatOvertResponse{})
 }
