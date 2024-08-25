@@ -2902,8 +2902,6 @@ func (m *GroupChatRequestCreateRequest) validate(all bool) error {
 
 	// no validation rules for GroupId
 
-	// no validation rules for Remark
-
 	if len(errors) > 0 {
 		return GroupChatRequestCreateRequestMultiError(errors)
 	}
@@ -3113,8 +3111,6 @@ func (m *GroupChatRequestDeclineRequest) validate(all bool) error {
 	var errors []error
 
 	// no validation rules for ApplyId
-
-	// no validation rules for Remark
 
 	if len(errors) > 0 {
 		return GroupChatRequestDeclineRequestMultiError(errors)
@@ -4290,8 +4286,6 @@ func (m *GroupChatMemberListResponse_Item) validate(all bool) error {
 	// no validation rules for Leader
 
 	// no validation rules for IsMute
-
-	// no validation rules for Remark
 
 	if len(errors) > 0 {
 		return GroupChatMemberListResponse_ItemMultiError(errors)

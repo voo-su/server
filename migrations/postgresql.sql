@@ -328,8 +328,6 @@ CREATE TABLE public.group_chat_requests
     group_id   integer                DEFAULT 0                     NOT NULL,
     user_id    integer                DEFAULT 0                     NOT NULL,
     status     integer                DEFAULT 1                     NOT NULL,
-    remark     character varying(255) DEFAULT ''::character varying NOT NULL,
-    reason     character varying(255) DEFAULT ''::character varying NOT NULL,
     created_at timestamp without time zone                          NOT NULL,
     updated_at timestamp without time zone                          NOT NULL
 );

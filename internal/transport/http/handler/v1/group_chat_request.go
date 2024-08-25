@@ -44,11 +44,9 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 			GroupId: int(params.GroupId),
 			UserId:  uid,
 			Status:  model.GroupChatRequestStatusWait,
-			Remark:  params.Remark,
 		})
 	} else {
 		data := map[string]interface{}{
-			"remark":     params.Remark,
 			"updated_at": timeutil.DateTime(),
 		}
 
@@ -152,7 +150,6 @@ func (g *GroupChatRequest) Decline(ctx *core.Context) error {
 
 	data := map[string]interface{}{
 		"status":     model.GroupChatRequestStatusRefuse,
-		"reason":     params.Remark,
 		"updated_at": timeutil.DateTime(),
 	}
 
@@ -182,10 +179,9 @@ func (g *GroupChatRequest) List(ctx *core.Context) error {
 	items := make([]*api_v1.GroupChatRequestListResponse_Item, 0)
 	for _, item := range list {
 		items = append(items, &api_v1.GroupChatRequestListResponse_Item{
-			Id:      int32(item.Id),
-			UserId:  int32(item.UserId),
-			GroupId: int32(item.GroupId),
-			//Remark:    item.Remark,
+			Id:        int32(item.Id),
+			UserId:    int32(item.UserId),
+			GroupId:   int32(item.GroupId),
 			Avatar:    item.Avatar,
 			Username:  item.Username,
 			CreatedAt: timeutil.FormatDatetime(item.CreatedAt),
@@ -241,8 +237,7 @@ func (g *GroupChatRequest) All(ctx *core.Context) error {
 			UserId:    int32(item.UserId),
 			GroupName: groupMap[item.GroupId].Name,
 			GroupId:   int32(item.GroupId),
-			//Remark:    item.Remark,
-			Avatar: item.Avatar,
+			Avatar:    item.Avatar,
 			//Nickname:  item.Nickname,
 			CreatedAt: timeutil.FormatDatetime(item.CreatedAt),
 		})

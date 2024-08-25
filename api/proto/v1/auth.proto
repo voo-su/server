@@ -8,7 +8,7 @@ option go_package = "./v1;api_v1";
 
 message AuthLoginRequest{
     string email = 1 [(tagger.tags) = "binding:\"required\""];
-    string platform = 2 [(tagger.tags) = "binding:\"required,oneof=android ios web http\""];
+    string platform = 2 [(tagger.tags) = "binding:\"required,oneof=web android ios linux macos windows\""];
 }
 
 message AuthLoginResponse{

@@ -58,7 +58,6 @@ message GroupChatMemberListResponse{
         int32 gender = 4;
         int32 leader = 5;
         int32 is_mute = 6;
-        string remark = 7;
     }
 
     repeated Item items = 1;
@@ -156,7 +155,6 @@ message GroupChatOvertResponse{}
 
 message GroupChatRequestCreateRequest{
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
-    string remark = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
 message GroupChatRequestAgreeRequest{
@@ -165,7 +163,6 @@ message GroupChatRequestAgreeRequest{
 
 message GroupChatRequestDeclineRequest{
     int32 apply_id = 1 [(tagger.tags) = "binding:\"required\""];
-    string remark = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
 message GroupChatRequestDeclineResponse{}
@@ -179,10 +176,9 @@ message GroupChatRequestListResponse{
         int32 id = 1;
         int32 user_id = 2;
         int32 group_id = 3;
-        // string remark = 4;
-        string avatar = 5;
-        string username = 6;
-        string created_at = 7;
+        string avatar = 4;
+        string username = 5;
+        string created_at = 6;
     }
 
     repeated Item items = 1;
@@ -195,10 +191,9 @@ message GroupChatRequestAllResponse{
         int32 user_id = 2;
         int32 group_id = 3;
         string group_name = 4;
-        // string remark = 5;
-        string avatar = 6;
-        string username = 7;
-        string created_at = 8;
+        string avatar = 5;
+        string username = 6;
+        string created_at = 7;
     }
 
     repeated Item items = 1;
