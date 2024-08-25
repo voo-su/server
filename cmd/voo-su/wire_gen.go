@@ -152,8 +152,6 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Filesystem:   filesystem,
 		SplitService: splitService,
 	}
-	groupChatNotice := repo.NewGroupChatNotice(db)
-	groupChatNoticeService := service.NewGroupChatNoticeService(source, groupChatNotice)
 	v1GroupChat := &v1.GroupChat{
 		Repo:                   source,
 		UserRepo:               user,
@@ -164,7 +162,6 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatMemberService: groupChatMemberService,
 		DialogService:          dialogService,
 		ContactService:         contactService,
-		GroupNoticeService:     groupChatNoticeService,
 		MessageSendService:     messageService,
 		RedisLock:              redisLock,
 	}
@@ -194,12 +191,14 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	v1ContactFolder := &v1.ContactFolder{
 		ContactFolderService: contactFolderService,
 	}
-	v1GroupChatNotice := &v1.GroupChatNotice{
-		GroupNoticeService:  groupChatNoticeService,
+	groupChatAds := repo.NewGroupChatAds(db)
+	groupChatAdsService := service.NewGroupChatAdsService(source, groupChatAds)
+	v1GroupChatAds := &v1.GroupChatAds{
+		GroupAdsService:     groupChatAdsService,
 		GroupMemberService:  groupChatMemberService,
 		MessageSendService:  messageService,
 		GroupChatMemberRepo: groupChatMember,
-		GroupChatNoticeRepo: groupChatNotice,
+		GroupChatAdsRepo:    groupChatAds,
 	}
 	handlerV1 := &handler.V1{
 		Auth:             auth,
@@ -215,7 +214,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatRequest: v1GroupChatRequest,
 		Sticker:          v1Sticker,
 		ContactFolder:    v1ContactFolder,
-		GroupChatNotice:  v1GroupChatNotice,
+		GroupChatAds:     v1GroupChatAds,
 	}
 	handlerHandler := &handler.Handler{
 		V1: handlerV1,

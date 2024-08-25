@@ -169,7 +169,7 @@ type DialogRecordExtraGroupMessageRevoke struct {
 	RevokeMessageId string `json:"revoke_message_id"`
 }
 
-type DialogRecordExtraGroupNotice struct {
+type DialogRecordExtraGroupAds struct {
 	OwnerId   int    `json:"owner_id"`
 	OwnerName string `json:"owner_name"`
 	Title     string `json:"title"`

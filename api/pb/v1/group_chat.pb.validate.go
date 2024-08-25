@@ -3674,22 +3674,22 @@ var _ interface {
 	ErrorName() string
 } = GroupChatRequestAllResponseValidationError{}
 
-// Validate checks the field values on GroupChatNoticeDeleteRequest with the
-// rules defined in the proto definition for this message. If any rules are
+// Validate checks the field values on GroupChatAdsDeleteRequest with the rules
+// defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GroupChatNoticeDeleteRequest) Validate() error {
+func (m *GroupChatAdsDeleteRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on GroupChatNoticeDeleteRequest with the
+// ValidateAll checks the field values on GroupChatAdsDeleteRequest with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// GroupChatNoticeDeleteRequestMultiError, or nil if none found.
-func (m *GroupChatNoticeDeleteRequest) ValidateAll() error {
+// GroupChatAdsDeleteRequestMultiError, or nil if none found.
+func (m *GroupChatAdsDeleteRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *GroupChatNoticeDeleteRequest) validate(all bool) error {
+func (m *GroupChatAdsDeleteRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -3698,22 +3698,22 @@ func (m *GroupChatNoticeDeleteRequest) validate(all bool) error {
 
 	// no validation rules for GroupId
 
-	// no validation rules for NoticeId
+	// no validation rules for AdsId
 
 	if len(errors) > 0 {
-		return GroupChatNoticeDeleteRequestMultiError(errors)
+		return GroupChatAdsDeleteRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// GroupChatNoticeDeleteRequestMultiError is an error wrapping multiple
-// validation errors returned by GroupChatNoticeDeleteRequest.ValidateAll() if
-// the designated constraints aren't met.
-type GroupChatNoticeDeleteRequestMultiError []error
+// GroupChatAdsDeleteRequestMultiError is an error wrapping multiple validation
+// errors returned by GroupChatAdsDeleteRequest.ValidateAll() if the
+// designated constraints aren't met.
+type GroupChatAdsDeleteRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m GroupChatNoticeDeleteRequestMultiError) Error() string {
+func (m GroupChatAdsDeleteRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -3722,12 +3722,11 @@ func (m GroupChatNoticeDeleteRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m GroupChatNoticeDeleteRequestMultiError) AllErrors() []error { return m }
+func (m GroupChatAdsDeleteRequestMultiError) AllErrors() []error { return m }
 
-// GroupChatNoticeDeleteRequestValidationError is the validation error returned
-// by GroupChatNoticeDeleteRequest.Validate if the designated constraints
-// aren't met.
-type GroupChatNoticeDeleteRequestValidationError struct {
+// GroupChatAdsDeleteRequestValidationError is the validation error returned by
+// GroupChatAdsDeleteRequest.Validate if the designated constraints aren't met.
+type GroupChatAdsDeleteRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -3735,24 +3734,24 @@ type GroupChatNoticeDeleteRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e GroupChatNoticeDeleteRequestValidationError) Field() string { return e.field }
+func (e GroupChatAdsDeleteRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GroupChatNoticeDeleteRequestValidationError) Reason() string { return e.reason }
+func (e GroupChatAdsDeleteRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GroupChatNoticeDeleteRequestValidationError) Cause() error { return e.cause }
+func (e GroupChatAdsDeleteRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GroupChatNoticeDeleteRequestValidationError) Key() bool { return e.key }
+func (e GroupChatAdsDeleteRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GroupChatNoticeDeleteRequestValidationError) ErrorName() string {
-	return "GroupChatNoticeDeleteRequestValidationError"
+func (e GroupChatAdsDeleteRequestValidationError) ErrorName() string {
+	return "GroupChatAdsDeleteRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GroupChatNoticeDeleteRequestValidationError) Error() string {
+func (e GroupChatAdsDeleteRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -3764,14 +3763,14 @@ func (e GroupChatNoticeDeleteRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGroupChatNoticeDeleteRequest.%s: %s%s",
+		"invalid %sGroupChatAdsDeleteRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GroupChatNoticeDeleteRequestValidationError{}
+var _ error = GroupChatAdsDeleteRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -3779,24 +3778,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GroupChatNoticeDeleteRequestValidationError{}
+} = GroupChatAdsDeleteRequestValidationError{}
 
-// Validate checks the field values on GroupChatNoticeEditRequest with the
-// rules defined in the proto definition for this message. If any rules are
+// Validate checks the field values on GroupChatAdsEditRequest with the rules
+// defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GroupChatNoticeEditRequest) Validate() error {
+func (m *GroupChatAdsEditRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on GroupChatNoticeEditRequest with the
+// ValidateAll checks the field values on GroupChatAdsEditRequest with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// GroupChatNoticeEditRequestMultiError, or nil if none found.
-func (m *GroupChatNoticeEditRequest) ValidateAll() error {
+// GroupChatAdsEditRequestMultiError, or nil if none found.
+func (m *GroupChatAdsEditRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *GroupChatNoticeEditRequest) validate(all bool) error {
+func (m *GroupChatAdsEditRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -3805,7 +3804,7 @@ func (m *GroupChatNoticeEditRequest) validate(all bool) error {
 
 	// no validation rules for GroupId
 
-	// no validation rules for NoticeId
+	// no validation rules for AdsId
 
 	// no validation rules for Title
 
@@ -3816,19 +3815,19 @@ func (m *GroupChatNoticeEditRequest) validate(all bool) error {
 	// no validation rules for IsConfirm
 
 	if len(errors) > 0 {
-		return GroupChatNoticeEditRequestMultiError(errors)
+		return GroupChatAdsEditRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// GroupChatNoticeEditRequestMultiError is an error wrapping multiple
-// validation errors returned by GroupChatNoticeEditRequest.ValidateAll() if
-// the designated constraints aren't met.
-type GroupChatNoticeEditRequestMultiError []error
+// GroupChatAdsEditRequestMultiError is an error wrapping multiple validation
+// errors returned by GroupChatAdsEditRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GroupChatAdsEditRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m GroupChatNoticeEditRequestMultiError) Error() string {
+func (m GroupChatAdsEditRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -3837,11 +3836,11 @@ func (m GroupChatNoticeEditRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m GroupChatNoticeEditRequestMultiError) AllErrors() []error { return m }
+func (m GroupChatAdsEditRequestMultiError) AllErrors() []error { return m }
 
-// GroupChatNoticeEditRequestValidationError is the validation error returned
-// by GroupChatNoticeEditRequest.Validate if the designated constraints aren't met.
-type GroupChatNoticeEditRequestValidationError struct {
+// GroupChatAdsEditRequestValidationError is the validation error returned by
+// GroupChatAdsEditRequest.Validate if the designated constraints aren't met.
+type GroupChatAdsEditRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -3849,24 +3848,24 @@ type GroupChatNoticeEditRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e GroupChatNoticeEditRequestValidationError) Field() string { return e.field }
+func (e GroupChatAdsEditRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GroupChatNoticeEditRequestValidationError) Reason() string { return e.reason }
+func (e GroupChatAdsEditRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GroupChatNoticeEditRequestValidationError) Cause() error { return e.cause }
+func (e GroupChatAdsEditRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GroupChatNoticeEditRequestValidationError) Key() bool { return e.key }
+func (e GroupChatAdsEditRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GroupChatNoticeEditRequestValidationError) ErrorName() string {
-	return "GroupChatNoticeEditRequestValidationError"
+func (e GroupChatAdsEditRequestValidationError) ErrorName() string {
+	return "GroupChatAdsEditRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GroupChatNoticeEditRequestValidationError) Error() string {
+func (e GroupChatAdsEditRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -3878,14 +3877,14 @@ func (e GroupChatNoticeEditRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGroupChatNoticeEditRequest.%s: %s%s",
+		"invalid %sGroupChatAdsEditRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GroupChatNoticeEditRequestValidationError{}
+var _ error = GroupChatAdsEditRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -3893,24 +3892,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GroupChatNoticeEditRequestValidationError{}
+} = GroupChatAdsEditRequestValidationError{}
 
-// Validate checks the field values on GroupChatNoticeListRequest with the
-// rules defined in the proto definition for this message. If any rules are
+// Validate checks the field values on GroupChatAdsListRequest with the rules
+// defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GroupChatNoticeListRequest) Validate() error {
+func (m *GroupChatAdsListRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on GroupChatNoticeListRequest with the
+// ValidateAll checks the field values on GroupChatAdsListRequest with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// GroupChatNoticeListRequestMultiError, or nil if none found.
-func (m *GroupChatNoticeListRequest) ValidateAll() error {
+// GroupChatAdsListRequestMultiError, or nil if none found.
+func (m *GroupChatAdsListRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *GroupChatNoticeListRequest) validate(all bool) error {
+func (m *GroupChatAdsListRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -3920,19 +3919,19 @@ func (m *GroupChatNoticeListRequest) validate(all bool) error {
 	// no validation rules for GroupId
 
 	if len(errors) > 0 {
-		return GroupChatNoticeListRequestMultiError(errors)
+		return GroupChatAdsListRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// GroupChatNoticeListRequestMultiError is an error wrapping multiple
-// validation errors returned by GroupChatNoticeListRequest.ValidateAll() if
-// the designated constraints aren't met.
-type GroupChatNoticeListRequestMultiError []error
+// GroupChatAdsListRequestMultiError is an error wrapping multiple validation
+// errors returned by GroupChatAdsListRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GroupChatAdsListRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m GroupChatNoticeListRequestMultiError) Error() string {
+func (m GroupChatAdsListRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -3941,11 +3940,11 @@ func (m GroupChatNoticeListRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m GroupChatNoticeListRequestMultiError) AllErrors() []error { return m }
+func (m GroupChatAdsListRequestMultiError) AllErrors() []error { return m }
 
-// GroupChatNoticeListRequestValidationError is the validation error returned
-// by GroupChatNoticeListRequest.Validate if the designated constraints aren't met.
-type GroupChatNoticeListRequestValidationError struct {
+// GroupChatAdsListRequestValidationError is the validation error returned by
+// GroupChatAdsListRequest.Validate if the designated constraints aren't met.
+type GroupChatAdsListRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -3953,24 +3952,24 @@ type GroupChatNoticeListRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e GroupChatNoticeListRequestValidationError) Field() string { return e.field }
+func (e GroupChatAdsListRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GroupChatNoticeListRequestValidationError) Reason() string { return e.reason }
+func (e GroupChatAdsListRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GroupChatNoticeListRequestValidationError) Cause() error { return e.cause }
+func (e GroupChatAdsListRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GroupChatNoticeListRequestValidationError) Key() bool { return e.key }
+func (e GroupChatAdsListRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GroupChatNoticeListRequestValidationError) ErrorName() string {
-	return "GroupChatNoticeListRequestValidationError"
+func (e GroupChatAdsListRequestValidationError) ErrorName() string {
+	return "GroupChatAdsListRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GroupChatNoticeListRequestValidationError) Error() string {
+func (e GroupChatAdsListRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -3982,14 +3981,14 @@ func (e GroupChatNoticeListRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGroupChatNoticeListRequest.%s: %s%s",
+		"invalid %sGroupChatAdsListRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GroupChatNoticeListRequestValidationError{}
+var _ error = GroupChatAdsListRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -3997,24 +3996,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GroupChatNoticeListRequestValidationError{}
+} = GroupChatAdsListRequestValidationError{}
 
-// Validate checks the field values on GroupChatNoticeListResponse with the
-// rules defined in the proto definition for this message. If any rules are
+// Validate checks the field values on GroupChatAdsListResponse with the rules
+// defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GroupChatNoticeListResponse) Validate() error {
+func (m *GroupChatAdsListResponse) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on GroupChatNoticeListResponse with the
+// ValidateAll checks the field values on GroupChatAdsListResponse with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// GroupChatNoticeListResponseMultiError, or nil if none found.
-func (m *GroupChatNoticeListResponse) ValidateAll() error {
+// GroupChatAdsListResponseMultiError, or nil if none found.
+func (m *GroupChatAdsListResponse) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *GroupChatNoticeListResponse) validate(all bool) error {
+func (m *GroupChatAdsListResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -4028,7 +4027,7 @@ func (m *GroupChatNoticeListResponse) validate(all bool) error {
 			switch v := interface{}(item).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, GroupChatNoticeListResponseValidationError{
+					errors = append(errors, GroupChatAdsListResponseValidationError{
 						field:  fmt.Sprintf("Items[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -4036,7 +4035,7 @@ func (m *GroupChatNoticeListResponse) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, GroupChatNoticeListResponseValidationError{
+					errors = append(errors, GroupChatAdsListResponseValidationError{
 						field:  fmt.Sprintf("Items[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -4045,7 +4044,7 @@ func (m *GroupChatNoticeListResponse) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return GroupChatNoticeListResponseValidationError{
+				return GroupChatAdsListResponseValidationError{
 					field:  fmt.Sprintf("Items[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -4056,19 +4055,19 @@ func (m *GroupChatNoticeListResponse) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return GroupChatNoticeListResponseMultiError(errors)
+		return GroupChatAdsListResponseMultiError(errors)
 	}
 
 	return nil
 }
 
-// GroupChatNoticeListResponseMultiError is an error wrapping multiple
-// validation errors returned by GroupChatNoticeListResponse.ValidateAll() if
-// the designated constraints aren't met.
-type GroupChatNoticeListResponseMultiError []error
+// GroupChatAdsListResponseMultiError is an error wrapping multiple validation
+// errors returned by GroupChatAdsListResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GroupChatAdsListResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m GroupChatNoticeListResponseMultiError) Error() string {
+func (m GroupChatAdsListResponseMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -4077,12 +4076,11 @@ func (m GroupChatNoticeListResponseMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m GroupChatNoticeListResponseMultiError) AllErrors() []error { return m }
+func (m GroupChatAdsListResponseMultiError) AllErrors() []error { return m }
 
-// GroupChatNoticeListResponseValidationError is the validation error returned
-// by GroupChatNoticeListResponse.Validate if the designated constraints
-// aren't met.
-type GroupChatNoticeListResponseValidationError struct {
+// GroupChatAdsListResponseValidationError is the validation error returned by
+// GroupChatAdsListResponse.Validate if the designated constraints aren't met.
+type GroupChatAdsListResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -4090,24 +4088,24 @@ type GroupChatNoticeListResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e GroupChatNoticeListResponseValidationError) Field() string { return e.field }
+func (e GroupChatAdsListResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GroupChatNoticeListResponseValidationError) Reason() string { return e.reason }
+func (e GroupChatAdsListResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GroupChatNoticeListResponseValidationError) Cause() error { return e.cause }
+func (e GroupChatAdsListResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GroupChatNoticeListResponseValidationError) Key() bool { return e.key }
+func (e GroupChatAdsListResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GroupChatNoticeListResponseValidationError) ErrorName() string {
-	return "GroupChatNoticeListResponseValidationError"
+func (e GroupChatAdsListResponseValidationError) ErrorName() string {
+	return "GroupChatAdsListResponseValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GroupChatNoticeListResponseValidationError) Error() string {
+func (e GroupChatAdsListResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -4119,14 +4117,14 @@ func (e GroupChatNoticeListResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGroupChatNoticeListResponse.%s: %s%s",
+		"invalid %sGroupChatAdsListResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GroupChatNoticeListResponseValidationError{}
+var _ error = GroupChatAdsListResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -4134,7 +4132,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GroupChatNoticeListResponseValidationError{}
+} = GroupChatAdsListResponseValidationError{}
 
 // Validate checks the field values on GroupChatListResponse_Item with the
 // rules defined in the proto definition for this message. If any rules are
@@ -4726,23 +4724,22 @@ var _ interface {
 	ErrorName() string
 } = GroupChatRequestAllResponse_ItemValidationError{}
 
-// Validate checks the field values on GroupChatNoticeListResponse_Item with
-// the rules defined in the proto definition for this message. If any rules
-// are violated, the first error encountered is returned, or nil if there are
-// no violations.
-func (m *GroupChatNoticeListResponse_Item) Validate() error {
+// Validate checks the field values on GroupChatAdsListResponse_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GroupChatAdsListResponse_Item) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on GroupChatNoticeListResponse_Item with
+// ValidateAll checks the field values on GroupChatAdsListResponse_Item with
 // the rules defined in the proto definition for this message. If any rules
 // are violated, the result is a list of violation errors wrapped in
-// GroupChatNoticeListResponse_ItemMultiError, or nil if none found.
-func (m *GroupChatNoticeListResponse_Item) ValidateAll() error {
+// GroupChatAdsListResponse_ItemMultiError, or nil if none found.
+func (m *GroupChatAdsListResponse_Item) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *GroupChatNoticeListResponse_Item) validate(all bool) error {
+func (m *GroupChatAdsListResponse_Item) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -4770,20 +4767,19 @@ func (m *GroupChatNoticeListResponse_Item) validate(all bool) error {
 	// no validation rules for UpdatedAt
 
 	if len(errors) > 0 {
-		return GroupChatNoticeListResponse_ItemMultiError(errors)
+		return GroupChatAdsListResponse_ItemMultiError(errors)
 	}
 
 	return nil
 }
 
-// GroupChatNoticeListResponse_ItemMultiError is an error wrapping multiple
-// validation errors returned by
-// GroupChatNoticeListResponse_Item.ValidateAll() if the designated
-// constraints aren't met.
-type GroupChatNoticeListResponse_ItemMultiError []error
+// GroupChatAdsListResponse_ItemMultiError is an error wrapping multiple
+// validation errors returned by GroupChatAdsListResponse_Item.ValidateAll()
+// if the designated constraints aren't met.
+type GroupChatAdsListResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m GroupChatNoticeListResponse_ItemMultiError) Error() string {
+func (m GroupChatAdsListResponse_ItemMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -4792,12 +4788,12 @@ func (m GroupChatNoticeListResponse_ItemMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m GroupChatNoticeListResponse_ItemMultiError) AllErrors() []error { return m }
+func (m GroupChatAdsListResponse_ItemMultiError) AllErrors() []error { return m }
 
-// GroupChatNoticeListResponse_ItemValidationError is the validation error
-// returned by GroupChatNoticeListResponse_Item.Validate if the designated
+// GroupChatAdsListResponse_ItemValidationError is the validation error
+// returned by GroupChatAdsListResponse_Item.Validate if the designated
 // constraints aren't met.
-type GroupChatNoticeListResponse_ItemValidationError struct {
+type GroupChatAdsListResponse_ItemValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -4805,24 +4801,24 @@ type GroupChatNoticeListResponse_ItemValidationError struct {
 }
 
 // Field function returns field value.
-func (e GroupChatNoticeListResponse_ItemValidationError) Field() string { return e.field }
+func (e GroupChatAdsListResponse_ItemValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GroupChatNoticeListResponse_ItemValidationError) Reason() string { return e.reason }
+func (e GroupChatAdsListResponse_ItemValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GroupChatNoticeListResponse_ItemValidationError) Cause() error { return e.cause }
+func (e GroupChatAdsListResponse_ItemValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GroupChatNoticeListResponse_ItemValidationError) Key() bool { return e.key }
+func (e GroupChatAdsListResponse_ItemValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GroupChatNoticeListResponse_ItemValidationError) ErrorName() string {
-	return "GroupChatNoticeListResponse_ItemValidationError"
+func (e GroupChatAdsListResponse_ItemValidationError) ErrorName() string {
+	return "GroupChatAdsListResponse_ItemValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GroupChatNoticeListResponse_ItemValidationError) Error() string {
+func (e GroupChatAdsListResponse_ItemValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -4834,14 +4830,14 @@ func (e GroupChatNoticeListResponse_ItemValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGroupChatNoticeListResponse_Item.%s: %s%s",
+		"invalid %sGroupChatAdsListResponse_Item.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GroupChatNoticeListResponse_ItemValidationError{}
+var _ error = GroupChatAdsListResponse_ItemValidationError{}
 
 var _ interface {
 	Field() string
@@ -4849,4 +4845,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GroupChatNoticeListResponse_ItemValidationError{}
+} = GroupChatAdsListResponse_ItemValidationError{}

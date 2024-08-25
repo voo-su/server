@@ -48,7 +48,7 @@ const (
 	ChatMsgSysGroupCancelMuted       = 1108
 	ChatMsgSysGroupMemberMuted       = 1109
 	ChatMsgSysGroupMemberCancelMuted = 1110
-	ChatMsgSysGroupNotice            = 1111
+	ChatMsgSysGroupAds               = 1111
 	ChatMsgSysGroupTransfer          = 1113
 )
 
@@ -57,12 +57,12 @@ var ChatMsgTypeMapping = map[int]string{
 	ChatMsgTypeAudio:                 "Аудиозапись",
 	ChatMsgTypeVideo:                 "Видео",
 	ChatMsgTypeFile:                  "Файл",
-	ChatMsgTypeLocation:              "Сообщение с местоположением",
-	ChatMsgTypeCard:                  "Сообщение с контактной информацией",
+	ChatMsgTypeLocation:              "Местоположение",
+	ChatMsgTypeCard:                  "Контактная информация",
 	ChatMsgTypeForward:               "Пересланное сообщение",
 	ChatMsgTypeLogin:                 "Уведомление о входе в систему",
 	ChatMsgTypeVote:                  "Опрос",
-	ChatMsgTypeCode:                  "Сообщение с кодом",
+	ChatMsgTypeCode:                  "Код",
 	ChatMsgTypeMixed:                 "Фотографии",
 	ChatMsgSysText:                   "Системное сообщение",
 	ChatMsgSysGroupCreate:            "Создание группы",
@@ -70,10 +70,10 @@ var ChatMsgTypeMapping = map[int]string{
 	ChatMsgSysGroupMemberQuit:        "Выход из группы",
 	ChatMsgSysGroupMemberKicked:      "Исключение из группы",
 	ChatMsgSysGroupMessageRevoke:     "Отзыв сообщения",
-	ChatMsgSysGroupDismissed:         "Группа удалена",
-	ChatMsgSysGroupMuted:             "Группа замолчана",
-	ChatMsgSysGroupCancelMuted:       "Группа размолчана",
-	ChatMsgSysGroupMemberMuted:       "Замолчание участника группы",
-	ChatMsgSysGroupMemberCancelMuted: "Размолчание участника группы отменено",
-	ChatMsgSysGroupNotice:            "Объявление в группе",
+	ChatMsgSysGroupDismissed:         "Удаление группы",
+	ChatMsgSysGroupMuted:             "Отключение уведомлений в группе",
+	ChatMsgSysGroupCancelMuted:       "Включение уведомлений в группе",
+	ChatMsgSysGroupMemberMuted:       "Отключение уведомлений для участника группы",
+	ChatMsgSysGroupMemberCancelMuted: "Включение уведомлений для участника группы",
+	ChatMsgSysGroupAds:               "Объявление в группе",
 }

@@ -25,7 +25,6 @@ type GroupChat struct {
 	GroupChatMemberService *service.GroupChatMemberService
 	DialogService          *service.DialogService
 	ContactService         *service.ContactService
-	GroupNoticeService     *service.GroupChatNoticeService
 	MessageSendService     service.MessageSendService
 	RedisLock              *cache.RedisLock
 }

@@ -272,10 +272,10 @@ ALTER SEQUENCE public.group_chat_members_id_seq OWNED BY public.group_chat_membe
 
 
 --
--- Name: group_chat_notice; Type: TABLE; Schema: public; Owner: postgres
+-- Name: group_chat_ads; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.group_chat_notice
+CREATE TABLE public.group_chat_ads
 (
     id            integer                                             NOT NULL,
     group_id      integer               DEFAULT 0                     NOT NULL,
@@ -293,14 +293,14 @@ CREATE TABLE public.group_chat_notice
 );
 
 
-ALTER TABLE public.group_chat_notice
+ALTER TABLE public.group_chat_ads
     OWNER TO postgres;
 
 --
--- Name: group_chat_notice_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: group_chat_ads_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.group_chat_notice_id_seq
+CREATE SEQUENCE public.group_chat_ads_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -309,13 +309,13 @@ CREATE SEQUENCE public.group_chat_notice_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.group_chat_notice_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.group_chat_ads_id_seq OWNER TO postgres;
 
 --
--- Name: group_chat_notice_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: group_chat_ads_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.group_chat_notice_id_seq OWNED BY public.group_chat_notice.id;
+ALTER SEQUENCE public.group_chat_ads_id_seq OWNED BY public.group_chat_ads.id;
 
 
 --
@@ -887,11 +887,11 @@ ALTER TABLE ONLY public.group_chat_members
 
 
 --
--- Name: group_chat_notice id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: group_chat_ads id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.group_chat_notice
-    ALTER COLUMN id SET DEFAULT nextval('public.group_chat_notice_id_seq'::regclass);
+ALTER TABLE ONLY public.group_chat_ads
+    ALTER COLUMN id SET DEFAULT nextval('public.group_chat_ads_id_seq'::regclass);
 
 
 --
@@ -1039,11 +1039,11 @@ ALTER TABLE ONLY public.group_chat_members
 
 
 --
--- Name: group_chat_notice group_chat_notice_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: group_chat_ads group_chat_ads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.group_chat_notice
-    ADD CONSTRAINT group_chat_notice_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.group_chat_ads
+    ADD CONSTRAINT group_chat_ads_pkey PRIMARY KEY (id);
 
 
 --

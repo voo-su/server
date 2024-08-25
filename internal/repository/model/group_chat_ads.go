@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type GroupChatNotice struct {
+type GroupChatAds struct {
 	Id           int          `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
 	GroupId      int          `gorm:"column:group_id;default:0;NOT NULL" json:"group_id"`
 	CreatorId    int          `gorm:"column:creator_id;default:0;NOT NULL" json:"creator_id"`
@@ -20,11 +20,11 @@ type GroupChatNotice struct {
 	DeletedAt    sql.NullTime `gorm:"column:deleted_at" json:"deleted_at"`
 }
 
-func (GroupChatNotice) TableName() string {
-	return "group_chat_notice"
+func (GroupChatAds) TableName() string {
+	return "group_chat_ads"
 }
 
-type SearchNoticeItem struct {
+type SearchAdsItem struct {
 	Id           int       `json:"id" grom:"column:id"`
 	CreatorId    int       `json:"creator_id"`
 	Title        string    `json:"title"`

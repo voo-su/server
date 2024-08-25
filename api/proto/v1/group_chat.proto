@@ -199,25 +199,25 @@ message GroupChatRequestAllResponse{
     repeated Item items = 1;
 }
 
-message GroupChatNoticeDeleteRequest{
+message GroupChatAdsDeleteRequest{
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
-    int32 notice_id = 2 [(tagger.tags) = "binding:\"required\""];
+    int32 ads_id = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
-message GroupChatNoticeEditRequest{
+message GroupChatAdsEditRequest{
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
-    int32 notice_id = 2;
+    int32 ads_id = 2;
     string title = 3 [(tagger.tags) = "binding:\"required\""];
     string content = 4 [(tagger.tags) = "binding:\"required\""];
     int32 is_top = 5 [(tagger.tags) = "binding:\"oneof=0 1\""];
     int32 is_confirm = 6 [(tagger.tags) = "binding:\"oneof=0 1\""];
 }
 
-message GroupChatNoticeListRequest{
+message GroupChatAdsListRequest{
     int32 group_id = 1 [(tagger.tags) = "form:\"group_id\" binding:\"required\""];
 }
 
-message GroupChatNoticeListResponse{
+message GroupChatAdsListResponse{
     message Item{
         int32 id = 1;
         string title = 2;

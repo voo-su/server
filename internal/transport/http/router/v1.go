@@ -96,6 +96,16 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 			groupChat.POST("/dismiss", core.HandlerFunc(handler.V1.GroupChat.Dismiss))
 			groupChat.POST("/overt", core.HandlerFunc(handler.V1.GroupChat.Overt))
 			groupChat.POST("/mute", core.HandlerFunc(handler.V1.GroupChat.Mute))
+			groupChat.GET("/overt/list", core.HandlerFunc(handler.V1.GroupChat.OvertList))
+			groupChat.GET("/ads", core.HandlerFunc(handler.V1.GroupChatAds.List))
+			groupChat.POST("/ads/edit", core.HandlerFunc(handler.V1.GroupChatAds.CreateAndUpdate))
+			groupChat.POST("/ads/delete", core.HandlerFunc(handler.V1.GroupChatAds.Delete))
+			groupChat.GET("/requests", core.HandlerFunc(handler.V1.GroupChatRequest.List))
+			groupChat.POST("/requests/create", core.HandlerFunc(handler.V1.GroupChatRequest.Create))
+			groupChat.POST("/requests/decline", core.HandlerFunc(handler.V1.GroupChatRequest.Decline))
+			groupChat.POST("/requests/agree", core.HandlerFunc(handler.V1.GroupChatRequest.Agree))
+			groupChat.GET("/requests/all", core.HandlerFunc(handler.V1.GroupChatRequest.All))
+			groupChat.GET("/requests/unread", core.HandlerFunc(handler.V1.GroupChatRequest.RequestUnreadNum))
 		}
 		message := v1.Group("/messages").Use(authorize)
 		{
@@ -115,6 +125,11 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 			message.POST("/stickers/delete", core.HandlerFunc(handler.V1.Sticker.DeleteCollect))
 			message.GET("/stickers/system/list", core.HandlerFunc(handler.V1.Sticker.SystemList))
 			message.POST("/stickers/system/install", core.HandlerFunc(handler.V1.Sticker.SetSystemSticker))
+			//message.GET("/forward/list", core.HandlerFunc(handler.V1.Message.GetForwardRecords))
+			//message.POST("/forward", core.HandlerFunc(handler.V1.Message.Forward))
+			//message.POST("/card", core.HandlerFunc(handler.V1.Message.Card))
+			//message.POST("/location", core.HandlerFunc(handler.V1.Message.Location))
+			//message.POST("/collect", core.HandlerFunc(handler.V1.Message.Collect))
 		}
 		upload := v1.Group("/upload").Use(authorize)
 		{
