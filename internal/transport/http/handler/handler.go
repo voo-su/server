@@ -17,6 +17,7 @@ type V1 struct {
 	Sticker          *v1.Sticker
 	ContactFolder    *v1.ContactFolder
 	GroupChatAds     *v1.GroupChatAds
+	Project          *v1.Project
 }
 
 type Handler struct {

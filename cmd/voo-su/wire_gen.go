@@ -200,6 +200,11 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatMemberRepo: groupChatMember,
 		GroupChatAdsRepo:    groupChatAds,
 	}
+	project := repo.NewProject(db)
+	projectService := service.NewProjectService(source, project)
+	v1Project := &v1.Project{
+		ProjectService: projectService,
+	}
 	handlerV1 := &handler.V1{
 		Auth:             auth,
 		Account:          account,
@@ -215,6 +220,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Sticker:          v1Sticker,
 		ContactFolder:    v1ContactFolder,
 		GroupChatAds:     v1GroupChatAds,
+		Project:          v1Project,
 	}
 	handlerHandler := &handler.Handler{
 		V1: handlerV1,

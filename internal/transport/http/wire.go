@@ -38,6 +38,7 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(v1.Sticker), "*"),
 	wire.Struct(new(v1.ContactFolder), "*"),
 	wire.Struct(new(v1.GroupChatAds), "*"),
+	wire.Struct(new(v1.Project), "*"),
 
 	wire.Struct(new(service.MessageService), "*"),
 	wire.Bind(new(service.MessageSendService), new(*service.MessageService)),
@@ -53,6 +54,7 @@ var ProviderSet = wire.NewSet(
 	service.NewSplitService,
 	service.NewIpAddressService,
 	service.NewStickerService,
+	service.NewProjectService,
 
 	repo.NewUserSession,
 	repo.NewSource,
@@ -70,4 +72,5 @@ var ProviderSet = wire.NewSet(
 	repo.NewSequence,
 	repo.NewBot,
 	repo.NewSticker,
+	repo.NewProject,
 )

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package v1;
+
+import "third_party/tagger/tagger.proto";
+
+option go_package = "./v1;api_v1";
+
+message ProjectCreateRequest{
+    string title = 1;
+}
+
+message ProjectCreateResponse{
+    int64 id = 1;
+}
+
+message ProjectListRequest{}
+
+message ProjectListResponse{
+    message Item{
+        int64 id = 1;
+        string title = 2;
+    }
+
+    repeated Item items = 1;
+}

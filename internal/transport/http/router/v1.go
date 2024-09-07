@@ -138,6 +138,11 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 			upload.POST("/multipart/initiate", core.HandlerFunc(handler.V1.Upload.InitiateMultipart))
 			upload.POST("/multipart", core.HandlerFunc(handler.V1.Upload.MultipartUpload))
 		}
+		project := v1.Group("/projects").Use(authorize)
+		{
+			project.GET("", core.HandlerFunc(handler.V1.Project.Projects))
+			project.POST("/create", core.HandlerFunc(handler.V1.Project.Create))
+		}
 	}
 
 	router.NoRoute(func(c *gin.Context) {
