@@ -18,6 +18,8 @@ type V1 struct {
 	ContactFolder    *v1.ContactFolder
 	GroupChatAds     *v1.GroupChatAds
 	Project          *v1.Project
+	ProjectTask      *v1.ProjectTask
+	ProjectComment   *v1.ProjectTaskComment
 }
 
 type Handler struct {

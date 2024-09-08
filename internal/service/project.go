@@ -9,16 +9,22 @@ import (
 
 type ProjectService struct {
 	*repo.Source
-	Project *repo.Project
+	Project            *repo.Project
+	ProjectTask        *repo.ProjectTask
+	ProjectTaskComment *repo.ProjectTaskComment
 }
 
 func NewProjectService(
 	source *repo.Source,
 	project *repo.Project,
+	projectTask *repo.ProjectTask,
+	projectTaskComment *repo.ProjectTaskComment,
 ) *ProjectService {
 	return &ProjectService{
-		Source:  source,
-		Project: project,
+		Source:             source,
+		Project:            project,
+		ProjectTask:        projectTask,
+		ProjectTaskComment: projectTaskComment,
 	}
 }
 

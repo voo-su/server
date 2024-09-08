@@ -24,3 +24,48 @@ message ProjectListResponse{
 
     repeated Item items = 1;
 }
+
+message ProjectTaskCreateRequest{
+    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\""];
+    string title = 2;
+    string description = 3;
+}
+
+message ProjectTaskCreateResponse{
+    int64 id = 1;
+}
+
+message ProjectTaskRequest{
+    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\""];
+}
+
+message ProjectTaskResponse{
+    message Item{
+        int64 id = 1;
+        string title = 2;
+    }
+
+    repeated Item items = 1;
+}
+
+message ProjectCommentCreateRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    string comment = 2;
+}
+
+message ProjectCommentCreateResponse{
+    int64 id = 1;
+}
+
+message ProjectCommentRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+}
+
+message ProjectCommentResponse{
+    message Item{
+        int64 id = 1;
+        string comment = 2;
+    }
+
+    repeated Item items = 1;
+}
