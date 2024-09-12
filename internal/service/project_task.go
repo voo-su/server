@@ -31,9 +31,21 @@ func (p *ProjectService) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (i
 	return int64(task.Id), nil
 }
 
-func (p *ProjectService) Tasks(ctx context.Context, projectId int64) ([]*model.ProjectTask, error) {
-	query := p.Db().WithContext(ctx).Table("project_tasks")
+func (p *ProjectService) TypeTasks(ctx context.Context, projectId int64) ([]*model.ProjectTask, error) {
+	query := p.Db().WithContext(ctx).Table("project_task_types")
 	query.Where("project_id = ?", projectId)
+
+	var items []*model.ProjectTask
+	if err := query.Scan(&items).Error; err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+func (p *ProjectService) Tasks(ctx context.Context, projectId int64, typeId int) ([]*model.ProjectTask, error) {
+	query := p.Db().WithContext(ctx).Table("project_tasks")
+	query.Where("project_id = ? AND type_id = ?", projectId, typeId)
 
 	var items []*model.ProjectTask
 	if err := query.Scan(&items).Error; err != nil {

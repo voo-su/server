@@ -15,11 +15,20 @@ CREATE TABLE project_members
     created_at TIMESTAMPTZ
 );
 
+CREATE TABLE project_task_types
+(
+    id         SERIAL PRIMARY KEY,
+    project_id INT,
+    title      VARCHAR(255),
+    created_by INT,
+    created_at TIMESTAMPTZ
+);
+
 CREATE TABLE project_tasks
 (
     id          SERIAL PRIMARY KEY,
     project_id  INT,
-    task_type   INT,
+    type_id     INT,
     title       VARCHAR(255),
     description TEXT,
     created_by  INT,

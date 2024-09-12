@@ -27,8 +27,29 @@ func (p *ProjectTask) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже" + err.Error())
 	}
 
-	return ctx.Success(&api_v1.ProjectTaskCreateResponse{
-		Id: taskId,
+	return ctx.Success(&api_v1.ProjectTaskCreateResponse{Id: taskId})
+}
+
+func (p *ProjectTask) Types(ctx *core.Context) error {
+	params := &api_v1.ProjectTaskTypeRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	data, err := p.ProjectService.TypeTasks(ctx.Ctx(), params.ProjectId)
+	if err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+	items := make([]*api_v1.ProjectTaskTypeResponse_Item, 0)
+	for _, item := range data {
+		items = append(items, &api_v1.ProjectTaskTypeResponse_Item{
+			Id:    int64(item.Id),
+			Title: item.Title,
+		})
+	}
+
+	return ctx.Success(api_v1.ProjectTaskTypeResponse{
+		Items: items,
 	})
 }
 
@@ -38,7 +59,7 @@ func (p *ProjectTask) Tasks(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	data, err := p.ProjectService.Tasks(ctx.Ctx(), params.ProjectId)
+	data, err := p.ProjectService.Tasks(ctx.Ctx(), params.ProjectId, int(params.TypeId))
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}

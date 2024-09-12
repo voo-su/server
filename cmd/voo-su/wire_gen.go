@@ -201,9 +201,10 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatAdsRepo:    groupChatAds,
 	}
 	project := repo.NewProject(db)
+	projectTaskType := repo.NewProjectTaskType(db)
 	projectTask := repo.NewProjectTask(db)
 	projectTaskComment := repo.NewProjectTaskComment(db)
-	projectService := service.NewProjectService(source, project, projectTask, projectTaskComment)
+	projectService := service.NewProjectService(source, project, projectTaskType, projectTask, projectTaskComment)
 	v1Project := &v1.Project{
 		ProjectService: projectService,
 	}

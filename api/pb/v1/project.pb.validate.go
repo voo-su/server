@@ -693,6 +693,246 @@ var _ interface {
 	ErrorName() string
 } = ProjectTaskCreateResponseValidationError{}
 
+// Validate checks the field values on ProjectTaskTypeRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ProjectTaskTypeRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectTaskTypeRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ProjectTaskTypeRequestMultiError, or nil if none found.
+func (m *ProjectTaskTypeRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectTaskTypeRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for ProjectId
+
+	if len(errors) > 0 {
+		return ProjectTaskTypeRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectTaskTypeRequestMultiError is an error wrapping multiple validation
+// errors returned by ProjectTaskTypeRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ProjectTaskTypeRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectTaskTypeRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectTaskTypeRequestMultiError) AllErrors() []error { return m }
+
+// ProjectTaskTypeRequestValidationError is the validation error returned by
+// ProjectTaskTypeRequest.Validate if the designated constraints aren't met.
+type ProjectTaskTypeRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectTaskTypeRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectTaskTypeRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectTaskTypeRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectTaskTypeRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectTaskTypeRequestValidationError) ErrorName() string {
+	return "ProjectTaskTypeRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectTaskTypeRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectTaskTypeRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectTaskTypeRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectTaskTypeRequestValidationError{}
+
+// Validate checks the field values on ProjectTaskTypeResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ProjectTaskTypeResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectTaskTypeResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ProjectTaskTypeResponseMultiError, or nil if none found.
+func (m *ProjectTaskTypeResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectTaskTypeResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ProjectTaskTypeResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ProjectTaskTypeResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ProjectTaskTypeResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ProjectTaskTypeResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectTaskTypeResponseMultiError is an error wrapping multiple validation
+// errors returned by ProjectTaskTypeResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ProjectTaskTypeResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectTaskTypeResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectTaskTypeResponseMultiError) AllErrors() []error { return m }
+
+// ProjectTaskTypeResponseValidationError is the validation error returned by
+// ProjectTaskTypeResponse.Validate if the designated constraints aren't met.
+type ProjectTaskTypeResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectTaskTypeResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectTaskTypeResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectTaskTypeResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectTaskTypeResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectTaskTypeResponseValidationError) ErrorName() string {
+	return "ProjectTaskTypeResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectTaskTypeResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectTaskTypeResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectTaskTypeResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectTaskTypeResponseValidationError{}
+
 // Validate checks the field values on ProjectTaskRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -716,6 +956,8 @@ func (m *ProjectTaskRequest) validate(all bool) error {
 	var errors []error
 
 	// no validation rules for ProjectId
+
+	// no validation rules for TypeId
 
 	if len(errors) > 0 {
 		return ProjectTaskRequestMultiError(errors)
@@ -1490,6 +1732,113 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ProjectListResponse_ItemValidationError{}
+
+// Validate checks the field values on ProjectTaskTypeResponse_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ProjectTaskTypeResponse_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectTaskTypeResponse_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ProjectTaskTypeResponse_ItemMultiError, or nil if none found.
+func (m *ProjectTaskTypeResponse_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectTaskTypeResponse_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Title
+
+	if len(errors) > 0 {
+		return ProjectTaskTypeResponse_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectTaskTypeResponse_ItemMultiError is an error wrapping multiple
+// validation errors returned by ProjectTaskTypeResponse_Item.ValidateAll() if
+// the designated constraints aren't met.
+type ProjectTaskTypeResponse_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectTaskTypeResponse_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectTaskTypeResponse_ItemMultiError) AllErrors() []error { return m }
+
+// ProjectTaskTypeResponse_ItemValidationError is the validation error returned
+// by ProjectTaskTypeResponse_Item.Validate if the designated constraints
+// aren't met.
+type ProjectTaskTypeResponse_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectTaskTypeResponse_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectTaskTypeResponse_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectTaskTypeResponse_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectTaskTypeResponse_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectTaskTypeResponse_ItemValidationError) ErrorName() string {
+	return "ProjectTaskTypeResponse_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectTaskTypeResponse_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectTaskTypeResponse_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectTaskTypeResponse_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectTaskTypeResponse_ItemValidationError{}
 
 // Validate checks the field values on ProjectTaskResponse_Item with the rules
 // defined in the proto definition for this message. If any rules are

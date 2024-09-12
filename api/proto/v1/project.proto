@@ -35,8 +35,22 @@ message ProjectTaskCreateResponse{
     int64 id = 1;
 }
 
+message ProjectTaskTypeRequest{
+    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\""];
+}
+
+message ProjectTaskTypeResponse{
+    message Item{
+        int64 id = 1;
+        string title = 2;
+    }
+
+    repeated Item items = 1;
+}
+
 message ProjectTaskRequest{
     int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\""];
+    int32 type_id = 2 [(tagger.tags) = "form:\"type_id\" binding:\"required\""];
 }
 
 message ProjectTaskResponse{

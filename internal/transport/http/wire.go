@@ -76,6 +76,7 @@ var ProviderSet = wire.NewSet(
 	repo.NewSticker,
 	repo.NewProject,
 	repo.NewProjectMember,
+	repo.NewProjectTaskType,
 	repo.NewProjectTask,
 	repo.NewProjectTaskComment,
 )
