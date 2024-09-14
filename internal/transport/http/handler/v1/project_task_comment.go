@@ -22,7 +22,7 @@ func (p *ProjectTaskComment) Create(ctx *core.Context) error {
 		CreatedBy:   ctx.UserId(),
 	})
 	if err != nil {
-		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже" + err.Error())
+		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже: " + err.Error())
 	}
 
 	return ctx.Success(&api_v1.ProjectCreateResponse{Id: commentId})

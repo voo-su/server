@@ -18,7 +18,7 @@ func (p *ProjectTask) Create(ctx *core.Context) error {
 
 	taskId, err := p.ProjectService.CreateTask(ctx.Ctx(), &service.ProjectTaskOpt{
 		ProjectId:   params.ProjectId,
-		TaskType:    1,
+		TypeId:      1,
 		Title:       params.Title,
 		Description: params.Description,
 		CreatedBy:   ctx.UserId(),
@@ -27,29 +27,8 @@ func (p *ProjectTask) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже" + err.Error())
 	}
 
-	return ctx.Success(&api_v1.ProjectTaskCreateResponse{Id: taskId})
-}
-
-func (p *ProjectTask) Types(ctx *core.Context) error {
-	params := &api_v1.ProjectTaskTypeRequest{}
-	if err := ctx.Context.ShouldBind(params); err != nil {
-		return ctx.InvalidParams(err)
-	}
-
-	data, err := p.ProjectService.TypeTasks(ctx.Ctx(), params.ProjectId)
-	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
-	}
-	items := make([]*api_v1.ProjectTaskTypeResponse_Item, 0)
-	for _, item := range data {
-		items = append(items, &api_v1.ProjectTaskTypeResponse_Item{
-			Id:    int64(item.Id),
-			Title: item.Title,
-		})
-	}
-
-	return ctx.Success(api_v1.ProjectTaskTypeResponse{
-		Items: items,
+	return ctx.Success(&api_v1.ProjectTaskCreateResponse{
+		Id: taskId,
 	})
 }
 
@@ -59,20 +38,49 @@ func (p *ProjectTask) Tasks(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	data, err := p.ProjectService.Tasks(ctx.Ctx(), params.ProjectId, int(params.TypeId))
+	data, err := p.ProjectService.TypeTasks(ctx.Ctx(), params.ProjectId)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	items := make([]*api_v1.ProjectTaskResponse_Item, 0)
+	categories := make([]*api_v1.ProjectTaskResponse_Categories, 0)
 	for _, item := range data {
-		items = append(items, &api_v1.ProjectTaskResponse_Item{
-			Id:    int64(item.Id),
+
+		tasks, _err := p.ProjectService.Tasks(ctx.Ctx(), params.ProjectId, item.Id)
+		if _err != nil {
+			return ctx.ErrorBusiness(_err.Error())
+		}
+
+		taskItems := make([]*api_v1.ProjectTaskResponse_Tasks, 0)
+		for _, taskItem := range tasks {
+			taskItems = append(taskItems, &api_v1.ProjectTaskResponse_Tasks{
+				Id:    taskItem.Id,
+				Title: taskItem.Title,
+			})
+		}
+
+		categories = append(categories, &api_v1.ProjectTaskResponse_Categories{
+			Id:    item.Id,
 			Title: item.Title,
+			Tasks: taskItems,
 		})
 	}
 
 	return ctx.Success(api_v1.ProjectTaskResponse{
-		Items: items,
+		Categories: categories,
 	})
+}
+
+func (p *ProjectTask) TaskMove(ctx *core.Context) error {
+	params := &api_v1.ProjectTaskMoveRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	err := p.ProjectService.TaskMove(ctx.Ctx(), params.ProjectId, params.TaskId, params.FromId, params.ToId)
+	if err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(api_v1.ProjectTaskMoveResponse{})
 }
