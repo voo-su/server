@@ -4,6 +4,7 @@ import (
 	"voo.su/api/pb/v1"
 	"voo.su/internal/service"
 	"voo.su/pkg/core"
+	"voo.su/pkg/timeutil"
 )
 
 type ProjectTask struct {
@@ -68,6 +69,24 @@ func (p *ProjectTask) Tasks(ctx *core.Context) error {
 
 	return ctx.Success(api_v1.ProjectTaskResponse{
 		Categories: categories,
+	})
+}
+
+func (p *ProjectTask) TaskDetail(ctx *core.Context) error {
+	params := &api_v1.ProjectTaskDetailRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	task, err := p.ProjectService.TaskDetail(ctx.Ctx(), params.TaskId)
+	if err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(api_v1.ProjectTaskDetailResponse{
+		Title:       task.Title,
+		Description: task.Description,
+		CreatedAt:   timeutil.FormatDatetime(task.CreatedAt),
 	})
 }
 

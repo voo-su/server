@@ -7,23 +7,25 @@ import (
 )
 
 type ProjectCommentOpt struct {
-	TaskId      int64
-	CommentText string
-	CreatedBy   int
+	TaskId    int64
+	Comment   string
+	CreatedBy int
 }
 
 func (p *ProjectService) CreateComment(ctx context.Context, opt *ProjectCommentOpt) (int64, error) {
 	comment := &model.ProjectTaskComment{
-		TaskId:    int(opt.TaskId),
+		TaskId:    opt.TaskId,
+		Comment:   opt.Comment,
 		CreatedBy: opt.CreatedBy,
 		CreatedAt: time.Now(),
 	}
 
-	if err := p.ProjectTaskComment.Create(ctx, comment); err != nil {
-		return int64(comment.Id), err
+	err := p.ProjectTaskCommentRepo.Create(ctx, comment)
+	if err != nil {
+		return comment.Id, err
 	}
 
-	return int64(comment.Id), nil
+	return comment.Id, nil
 }
 
 func (p *ProjectService) Comments(ctx context.Context, TaskId int64) ([]*model.ProjectTaskComment, error) {

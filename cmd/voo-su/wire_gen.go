@@ -204,7 +204,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	projectTaskType := repo.NewProjectTaskType(db)
 	projectTask := repo.NewProjectTask(db)
 	projectTaskComment := repo.NewProjectTaskComment(db)
-	projectService := service.NewProjectService(source, project, projectTaskType, projectTask, projectTaskComment)
+	projectService := service.NewProjectService(source, project, projectTaskType, projectTask, projectTaskComment, user)
 	v1Project := &v1.Project{
 		ProjectService: projectService,
 	}

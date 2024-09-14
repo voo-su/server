@@ -9,25 +9,28 @@ import (
 
 type ProjectService struct {
 	*repo.Source
-	Project            *repo.Project
-	ProjectTaskType    *repo.ProjectTaskType
-	ProjectTask        *repo.ProjectTask
-	ProjectTaskComment *repo.ProjectTaskComment
+	ProjectRepo            *repo.Project
+	ProjectTaskTypeRepo    *repo.ProjectTaskType
+	ProjectTaskRepo        *repo.ProjectTask
+	ProjectTaskCommentRepo *repo.ProjectTaskComment
+	UserRepo               *repo.User
 }
 
 func NewProjectService(
 	source *repo.Source,
-	project *repo.Project,
-	projectTaskType *repo.ProjectTaskType,
-	projectTask *repo.ProjectTask,
-	projectTaskComment *repo.ProjectTaskComment,
+	projectRepo *repo.Project,
+	projectTaskTypeRepo *repo.ProjectTaskType,
+	projectTaskRepo *repo.ProjectTask,
+	projectTaskCommentRepo *repo.ProjectTaskComment,
+	userRepo *repo.User,
 ) *ProjectService {
 	return &ProjectService{
-		Source:             source,
-		Project:            project,
-		ProjectTaskType:    projectTaskType,
-		ProjectTask:        projectTask,
-		ProjectTaskComment: projectTaskComment,
+		Source:                 source,
+		ProjectRepo:            projectRepo,
+		ProjectTaskTypeRepo:    projectTaskTypeRepo,
+		ProjectTaskRepo:        projectTaskRepo,
+		ProjectTaskCommentRepo: projectTaskCommentRepo,
+		UserRepo:               userRepo,
 	}
 }
 
@@ -43,7 +46,7 @@ func (p *ProjectService) CreateProject(ctx context.Context, opt *ProjectOpt) (in
 		CreatedAt: time.Now(),
 	}
 
-	if err := p.Project.Create(ctx, project); err != nil {
+	if err := p.ProjectRepo.Create(ctx, project); err != nil {
 		return int64(project.Id), err
 	}
 

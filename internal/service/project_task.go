@@ -24,8 +24,7 @@ func (p *ProjectService) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (i
 		CreatedAt:   time.Now(),
 	}
 
-	err := p.ProjectTask.Create(ctx, task)
-	if err != nil {
+	if err := p.ProjectTaskRepo.Create(ctx, task); err != nil {
 		return task.Id, err
 	}
 
@@ -56,8 +55,17 @@ func (p *ProjectService) Tasks(ctx context.Context, projectId int64, typeId int6
 	return items, nil
 }
 
+func (p *ProjectService) TaskDetail(ctx context.Context, taskId int64) (*model.ProjectTask, error) {
+	task, err := p.ProjectTaskRepo.FindById(ctx, int(taskId))
+	if err != nil {
+		return nil, err
+	}
+
+	return task, nil
+}
+
 func (p *ProjectService) TaskMove(ctx context.Context, projectId int64, taskId int64, fromId int64, toId int64) error {
-	_, err := p.ProjectTask.UpdateWhere(ctx, map[string]any{
+	_, err := p.ProjectTaskRepo.UpdateWhere(ctx, map[string]any{
 		"type_id": toId,
 	}, "id = ? AND project_id = ? AND type_id = ?", taskId, projectId, fromId)
 

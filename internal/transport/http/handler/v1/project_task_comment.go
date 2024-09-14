@@ -4,6 +4,7 @@ import (
 	"voo.su/api/pb/v1"
 	"voo.su/internal/service"
 	"voo.su/pkg/core"
+	"voo.su/pkg/timeutil"
 )
 
 type ProjectTaskComment struct {
@@ -17,9 +18,9 @@ func (p *ProjectTaskComment) Create(ctx *core.Context) error {
 	}
 
 	commentId, err := p.ProjectService.CreateComment(ctx.Ctx(), &service.ProjectCommentOpt{
-		TaskId:      params.TaskId,
-		CommentText: params.Comment,
-		CreatedBy:   ctx.UserId(),
+		TaskId:    params.TaskId,
+		Comment:   params.Comment,
+		CreatedBy: ctx.UserId(),
 	})
 	if err != nil {
 		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже: " + err.Error())
@@ -41,9 +42,22 @@ func (p *ProjectTaskComment) Comments(ctx *core.Context) error {
 
 	items := make([]*api_v1.ProjectCommentResponse_Item, 0)
 	for _, item := range data {
+		user, err := p.ProjectService.UserRepo.FindById(ctx.Ctx(), item.CreatedBy)
+		if err != nil {
+			return ctx.ErrorBusiness(err.Error())
+		}
+
 		items = append(items, &api_v1.ProjectCommentResponse_Item{
-			Id:      int64(item.Id),
-			Comment: item.Text,
+			Id:      item.Id,
+			Comment: item.Comment,
+			User: &api_v1.ProjectCommentResponse_User{
+				Id:       1,
+				Avatar:   user.Avatar,
+				Username: user.Username,
+				Name:     user.Name,
+				Surname:  user.Surname,
+			},
+			CreatedAt: timeutil.FormatDatetime(item.CreatedAt),
 		})
 	}
 

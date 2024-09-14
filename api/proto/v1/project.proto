@@ -63,6 +63,15 @@ message ProjectTaskMoveRequest{
 
 message ProjectTaskMoveResponse{}
 
+message ProjectTaskDetailRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+}
+
+message ProjectTaskDetailResponse{
+    string title = 1;
+    string description = 2;
+    string created_at = 3;
+}
 
 message ProjectCommentCreateRequest{
     int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
@@ -78,9 +87,19 @@ message ProjectCommentRequest{
 }
 
 message ProjectCommentResponse{
+    message User{
+        int64 id = 1;
+        string avatar = 2;
+        string username = 3;
+        string name = 4;
+        string surname = 5;
+    }
+
     message Item{
         int64 id = 1;
         string comment = 2;
+        User user = 3;
+        string created_at = 4;
     }
 
     repeated Item items = 1;

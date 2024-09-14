@@ -513,6 +513,116 @@ func (*ProjectTaskMoveResponse) Descriptor() ([]byte, []int) {
 	return file_v1_project_proto_rawDescGZIP(), []int{9}
 }
 
+type ProjectTaskDetailRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TaskId int64 `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty" form:"task_id" binding:"required"`
+}
+
+func (x *ProjectTaskDetailRequest) Reset() {
+	*x = ProjectTaskDetailRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_project_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProjectTaskDetailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectTaskDetailRequest) ProtoMessage() {}
+
+func (x *ProjectTaskDetailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_project_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectTaskDetailRequest.ProtoReflect.Descriptor instead.
+func (*ProjectTaskDetailRequest) Descriptor() ([]byte, []int) {
+	return file_v1_project_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ProjectTaskDetailRequest) GetTaskId() int64 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
+}
+
+type ProjectTaskDetailResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Title       string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	CreatedAt   string `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+}
+
+func (x *ProjectTaskDetailResponse) Reset() {
+	*x = ProjectTaskDetailResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_project_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProjectTaskDetailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectTaskDetailResponse) ProtoMessage() {}
+
+func (x *ProjectTaskDetailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_project_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectTaskDetailResponse.ProtoReflect.Descriptor instead.
+func (*ProjectTaskDetailResponse) Descriptor() ([]byte, []int) {
+	return file_v1_project_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ProjectTaskDetailResponse) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ProjectTaskDetailResponse) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *ProjectTaskDetailResponse) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
 type ProjectCommentCreateRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -525,7 +635,7 @@ type ProjectCommentCreateRequest struct {
 func (x *ProjectCommentCreateRequest) Reset() {
 	*x = ProjectCommentCreateRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_proto_msgTypes[10]
+		mi := &file_v1_project_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -538,7 +648,7 @@ func (x *ProjectCommentCreateRequest) String() string {
 func (*ProjectCommentCreateRequest) ProtoMessage() {}
 
 func (x *ProjectCommentCreateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_proto_msgTypes[10]
+	mi := &file_v1_project_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -551,7 +661,7 @@ func (x *ProjectCommentCreateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCommentCreateRequest.ProtoReflect.Descriptor instead.
 func (*ProjectCommentCreateRequest) Descriptor() ([]byte, []int) {
-	return file_v1_project_proto_rawDescGZIP(), []int{10}
+	return file_v1_project_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ProjectCommentCreateRequest) GetTaskId() int64 {
@@ -579,7 +689,7 @@ type ProjectCommentCreateResponse struct {
 func (x *ProjectCommentCreateResponse) Reset() {
 	*x = ProjectCommentCreateResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_proto_msgTypes[11]
+		mi := &file_v1_project_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -592,7 +702,7 @@ func (x *ProjectCommentCreateResponse) String() string {
 func (*ProjectCommentCreateResponse) ProtoMessage() {}
 
 func (x *ProjectCommentCreateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_proto_msgTypes[11]
+	mi := &file_v1_project_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -605,7 +715,7 @@ func (x *ProjectCommentCreateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCommentCreateResponse.ProtoReflect.Descriptor instead.
 func (*ProjectCommentCreateResponse) Descriptor() ([]byte, []int) {
-	return file_v1_project_proto_rawDescGZIP(), []int{11}
+	return file_v1_project_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ProjectCommentCreateResponse) GetId() int64 {
@@ -626,7 +736,7 @@ type ProjectCommentRequest struct {
 func (x *ProjectCommentRequest) Reset() {
 	*x = ProjectCommentRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_proto_msgTypes[12]
+		mi := &file_v1_project_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -639,7 +749,7 @@ func (x *ProjectCommentRequest) String() string {
 func (*ProjectCommentRequest) ProtoMessage() {}
 
 func (x *ProjectCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_proto_msgTypes[12]
+	mi := &file_v1_project_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -652,7 +762,7 @@ func (x *ProjectCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCommentRequest.ProtoReflect.Descriptor instead.
 func (*ProjectCommentRequest) Descriptor() ([]byte, []int) {
-	return file_v1_project_proto_rawDescGZIP(), []int{12}
+	return file_v1_project_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ProjectCommentRequest) GetTaskId() int64 {
@@ -673,7 +783,7 @@ type ProjectCommentResponse struct {
 func (x *ProjectCommentResponse) Reset() {
 	*x = ProjectCommentResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_proto_msgTypes[13]
+		mi := &file_v1_project_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -686,7 +796,7 @@ func (x *ProjectCommentResponse) String() string {
 func (*ProjectCommentResponse) ProtoMessage() {}
 
 func (x *ProjectCommentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_proto_msgTypes[13]
+	mi := &file_v1_project_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -699,7 +809,7 @@ func (x *ProjectCommentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCommentResponse.ProtoReflect.Descriptor instead.
 func (*ProjectCommentResponse) Descriptor() ([]byte, []int) {
-	return file_v1_project_proto_rawDescGZIP(), []int{13}
+	return file_v1_project_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ProjectCommentResponse) GetItems() []*ProjectCommentResponse_Item {
@@ -721,7 +831,7 @@ type ProjectListResponse_Item struct {
 func (x *ProjectListResponse_Item) Reset() {
 	*x = ProjectListResponse_Item{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_proto_msgTypes[14]
+		mi := &file_v1_project_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -734,7 +844,7 @@ func (x *ProjectListResponse_Item) String() string {
 func (*ProjectListResponse_Item) ProtoMessage() {}
 
 func (x *ProjectListResponse_Item) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_proto_msgTypes[14]
+	mi := &file_v1_project_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -776,7 +886,7 @@ type ProjectTaskResponse_Tasks struct {
 func (x *ProjectTaskResponse_Tasks) Reset() {
 	*x = ProjectTaskResponse_Tasks{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_proto_msgTypes[15]
+		mi := &file_v1_project_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -789,7 +899,7 @@ func (x *ProjectTaskResponse_Tasks) String() string {
 func (*ProjectTaskResponse_Tasks) ProtoMessage() {}
 
 func (x *ProjectTaskResponse_Tasks) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_proto_msgTypes[15]
+	mi := &file_v1_project_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -832,7 +942,7 @@ type ProjectTaskResponse_Categories struct {
 func (x *ProjectTaskResponse_Categories) Reset() {
 	*x = ProjectTaskResponse_Categories{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_proto_msgTypes[16]
+		mi := &file_v1_project_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -845,7 +955,7 @@ func (x *ProjectTaskResponse_Categories) String() string {
 func (*ProjectTaskResponse_Categories) ProtoMessage() {}
 
 func (x *ProjectTaskResponse_Categories) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_proto_msgTypes[16]
+	mi := &file_v1_project_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -882,19 +992,100 @@ func (x *ProjectTaskResponse_Categories) GetTasks() []*ProjectTaskResponse_Tasks
 	return nil
 }
 
+type ProjectCommentResponse_User struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id       int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Avatar   string `protobuf:"bytes,2,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Username string `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	Name     string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Surname  string `protobuf:"bytes,5,opt,name=surname,proto3" json:"surname,omitempty"`
+}
+
+func (x *ProjectCommentResponse_User) Reset() {
+	*x = ProjectCommentResponse_User{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_project_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProjectCommentResponse_User) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectCommentResponse_User) ProtoMessage() {}
+
+func (x *ProjectCommentResponse_User) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_project_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectCommentResponse_User.ProtoReflect.Descriptor instead.
+func (*ProjectCommentResponse_User) Descriptor() ([]byte, []int) {
+	return file_v1_project_proto_rawDescGZIP(), []int{15, 0}
+}
+
+func (x *ProjectCommentResponse_User) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ProjectCommentResponse_User) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *ProjectCommentResponse_User) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *ProjectCommentResponse_User) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ProjectCommentResponse_User) GetSurname() string {
+	if x != nil {
+		return x.Surname
+	}
+	return ""
+}
+
 type ProjectCommentResponse_Item struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id      int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Comment string `protobuf:"bytes,2,opt,name=comment,proto3" json:"comment,omitempty"`
+	Id        int64                        `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Comment   string                       `protobuf:"bytes,2,opt,name=comment,proto3" json:"comment,omitempty"`
+	User      *ProjectCommentResponse_User `protobuf:"bytes,3,opt,name=user,proto3" json:"user,omitempty"`
+	CreatedAt string                       `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 }
 
 func (x *ProjectCommentResponse_Item) Reset() {
 	*x = ProjectCommentResponse_Item{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_proto_msgTypes[17]
+		mi := &file_v1_project_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -907,7 +1098,7 @@ func (x *ProjectCommentResponse_Item) String() string {
 func (*ProjectCommentResponse_Item) ProtoMessage() {}
 
 func (x *ProjectCommentResponse_Item) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_proto_msgTypes[17]
+	mi := &file_v1_project_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -920,7 +1111,7 @@ func (x *ProjectCommentResponse_Item) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCommentResponse_Item.ProtoReflect.Descriptor instead.
 func (*ProjectCommentResponse_Item) Descriptor() ([]byte, []int) {
-	return file_v1_project_proto_rawDescGZIP(), []int{13, 0}
+	return file_v1_project_proto_rawDescGZIP(), []int{15, 1}
 }
 
 func (x *ProjectCommentResponse_Item) GetId() int64 {
@@ -933,6 +1124,20 @@ func (x *ProjectCommentResponse_Item) GetId() int64 {
 func (x *ProjectCommentResponse_Item) GetComment() string {
 	if x != nil {
 		return x.Comment
+	}
+	return ""
+}
+
+func (x *ProjectCommentResponse_Item) GetUser() *ProjectCommentResponse_User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *ProjectCommentResponse_Item) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
 	}
 	return ""
 }
@@ -1011,32 +1216,58 @@ var file_v1_project_proto_rawDesc = []byte{
 	0x74, 0x6f, 0x5f, 0x69, 0x64, 0x22, 0x20, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22,
 	0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x04, 0x74, 0x6f, 0x49, 0x64, 0x22,
 	0x19, 0x0a, 0x17, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x54, 0x61, 0x73, 0x6b, 0x4d, 0x6f,
-	0x76, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x78, 0x0a, 0x1b, 0x50, 0x72,
-	0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x43, 0x72, 0x65, 0x61,
-	0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3f, 0x0a, 0x07, 0x74, 0x61, 0x73,
-	0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x26, 0x9a, 0x84, 0x9e, 0x03,
-	0x21, 0x66, 0x6f, 0x72, 0x6d, 0x3a, 0x22, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x22, 0x20,
-	0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65,
-	0x64, 0x22, 0x52, 0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f,
-	0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6d,
-	0x6d, 0x65, 0x6e, 0x74, 0x22, 0x2e, 0x0a, 0x1c, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43,
-	0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03,
-	0x52, 0x02, 0x69, 0x64, 0x22, 0x58, 0x0a, 0x15, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43,
-	0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3f, 0x0a,
-	0x07, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x26,
-	0x9a, 0x84, 0x9e, 0x03, 0x21, 0x66, 0x6f, 0x72, 0x6d, 0x3a, 0x22, 0x74, 0x61, 0x73, 0x6b, 0x5f,
-	0x69, 0x64, 0x22, 0x20, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71,
-	0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x22, 0x81,
-	0x01, 0x0a, 0x16, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e,
-	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x35, 0x0a, 0x05, 0x69, 0x74, 0x65,
-	0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x72,
-	0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73,
-	0x1a, 0x30, 0x0a, 0x04, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6d, 0x6d,
-	0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x65,
-	0x6e, 0x74, 0x42, 0x0d, 0x5a, 0x0b, 0x2e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70, 0x69, 0x5f, 0x76,
+	0x76, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x5b, 0x0a, 0x18, 0x50, 0x72,
+	0x6f, 0x6a, 0x65, 0x63, 0x74, 0x54, 0x61, 0x73, 0x6b, 0x44, 0x65, 0x74, 0x61, 0x69, 0x6c, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3f, 0x0a, 0x07, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x26, 0x9a, 0x84, 0x9e, 0x03, 0x21, 0x66, 0x6f,
+	0x72, 0x6d, 0x3a, 0x22, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x22, 0x20, 0x62, 0x69, 0x6e,
+	0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52,
+	0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x22, 0x72, 0x0a, 0x19, 0x50, 0x72, 0x6f, 0x6a, 0x65,
+	0x63, 0x74, 0x54, 0x61, 0x73, 0x6b, 0x44, 0x65, 0x74, 0x61, 0x69, 0x6c, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x64, 0x65,
+	0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1d, 0x0a, 0x0a,
+	0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x22, 0x78, 0x0a, 0x1b, 0x50,
+	0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x43, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3f, 0x0a, 0x07, 0x74, 0x61,
+	0x73, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x26, 0x9a, 0x84, 0x9e,
+	0x03, 0x21, 0x66, 0x6f, 0x72, 0x6d, 0x3a, 0x22, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x22,
+	0x20, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72,
+	0x65, 0x64, 0x22, 0x52, 0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x63,
+	0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f,
+	0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x22, 0x2e, 0x0a, 0x1c, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74,
+	0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x02, 0x69, 0x64, 0x22, 0x58, 0x0a, 0x15, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74,
+	0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3f,
+	0x0a, 0x07, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42,
+	0x26, 0x9a, 0x84, 0x9e, 0x03, 0x21, 0x66, 0x6f, 0x72, 0x6d, 0x3a, 0x22, 0x74, 0x61, 0x73, 0x6b,
+	0x5f, 0x69, 0x64, 0x22, 0x20, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65,
+	0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x22,
+	0xd0, 0x02, 0x0a, 0x16, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x6d, 0x6d, 0x65,
+	0x6e, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x35, 0x0a, 0x05, 0x69, 0x74,
+	0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x76, 0x31, 0x2e, 0x50,
+	0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d,
+	0x73, 0x1a, 0x78, 0x0a, 0x04, 0x55, 0x73, 0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x76, 0x61,
+	0x74, 0x61, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x76, 0x61, 0x74, 0x61,
+	0x72, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a,
+	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d,
+	0x65, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x75, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x05, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x73, 0x75, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x1a, 0x84, 0x01, 0x0a, 0x04,
+	0x49, 0x74, 0x65, 0x6d, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x02, 0x69, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x33,
+	0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x76,
+	0x31, 0x2e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x6d, 0x6d, 0x65, 0x6e, 0x74,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04, 0x75,
+	0x73, 0x65, 0x72, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61,
+	0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64,
+	0x41, 0x74, 0x42, 0x0d, 0x5a, 0x0b, 0x2e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70, 0x69, 0x5f, 0x76,
 	0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
@@ -1052,7 +1283,7 @@ func file_v1_project_proto_rawDescGZIP() []byte {
 	return file_v1_project_proto_rawDescData
 }
 
-var file_v1_project_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_v1_project_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_v1_project_proto_goTypes = []interface{}{
 	(*ProjectCreateRequest)(nil),           // 0: v1.ProjectCreateRequest
 	(*ProjectCreateResponse)(nil),          // 1: v1.ProjectCreateResponse
@@ -1064,25 +1295,29 @@ var file_v1_project_proto_goTypes = []interface{}{
 	(*ProjectTaskResponse)(nil),            // 7: v1.ProjectTaskResponse
 	(*ProjectTaskMoveRequest)(nil),         // 8: v1.ProjectTaskMoveRequest
 	(*ProjectTaskMoveResponse)(nil),        // 9: v1.ProjectTaskMoveResponse
-	(*ProjectCommentCreateRequest)(nil),    // 10: v1.ProjectCommentCreateRequest
-	(*ProjectCommentCreateResponse)(nil),   // 11: v1.ProjectCommentCreateResponse
-	(*ProjectCommentRequest)(nil),          // 12: v1.ProjectCommentRequest
-	(*ProjectCommentResponse)(nil),         // 13: v1.ProjectCommentResponse
-	(*ProjectListResponse_Item)(nil),       // 14: v1.ProjectListResponse.Item
-	(*ProjectTaskResponse_Tasks)(nil),      // 15: v1.ProjectTaskResponse.Tasks
-	(*ProjectTaskResponse_Categories)(nil), // 16: v1.ProjectTaskResponse.Categories
-	(*ProjectCommentResponse_Item)(nil),    // 17: v1.ProjectCommentResponse.Item
+	(*ProjectTaskDetailRequest)(nil),       // 10: v1.ProjectTaskDetailRequest
+	(*ProjectTaskDetailResponse)(nil),      // 11: v1.ProjectTaskDetailResponse
+	(*ProjectCommentCreateRequest)(nil),    // 12: v1.ProjectCommentCreateRequest
+	(*ProjectCommentCreateResponse)(nil),   // 13: v1.ProjectCommentCreateResponse
+	(*ProjectCommentRequest)(nil),          // 14: v1.ProjectCommentRequest
+	(*ProjectCommentResponse)(nil),         // 15: v1.ProjectCommentResponse
+	(*ProjectListResponse_Item)(nil),       // 16: v1.ProjectListResponse.Item
+	(*ProjectTaskResponse_Tasks)(nil),      // 17: v1.ProjectTaskResponse.Tasks
+	(*ProjectTaskResponse_Categories)(nil), // 18: v1.ProjectTaskResponse.Categories
+	(*ProjectCommentResponse_User)(nil),    // 19: v1.ProjectCommentResponse.User
+	(*ProjectCommentResponse_Item)(nil),    // 20: v1.ProjectCommentResponse.Item
 }
 var file_v1_project_proto_depIdxs = []int32{
-	14, // 0: v1.ProjectListResponse.items:type_name -> v1.ProjectListResponse.Item
-	16, // 1: v1.ProjectTaskResponse.categories:type_name -> v1.ProjectTaskResponse.Categories
-	17, // 2: v1.ProjectCommentResponse.items:type_name -> v1.ProjectCommentResponse.Item
-	15, // 3: v1.ProjectTaskResponse.Categories.tasks:type_name -> v1.ProjectTaskResponse.Tasks
-	4,  // [4:4] is the sub-list for method output_type
-	4,  // [4:4] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	16, // 0: v1.ProjectListResponse.items:type_name -> v1.ProjectListResponse.Item
+	18, // 1: v1.ProjectTaskResponse.categories:type_name -> v1.ProjectTaskResponse.Categories
+	20, // 2: v1.ProjectCommentResponse.items:type_name -> v1.ProjectCommentResponse.Item
+	17, // 3: v1.ProjectTaskResponse.Categories.tasks:type_name -> v1.ProjectTaskResponse.Tasks
+	19, // 4: v1.ProjectCommentResponse.Item.user:type_name -> v1.ProjectCommentResponse.User
+	5,  // [5:5] is the sub-list for method output_type
+	5,  // [5:5] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_v1_project_proto_init() }
@@ -1212,7 +1447,7 @@ func file_v1_project_proto_init() {
 			}
 		}
 		file_v1_project_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectCommentCreateRequest); i {
+			switch v := v.(*ProjectTaskDetailRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1224,7 +1459,7 @@ func file_v1_project_proto_init() {
 			}
 		}
 		file_v1_project_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectCommentCreateResponse); i {
+			switch v := v.(*ProjectTaskDetailResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1236,7 +1471,7 @@ func file_v1_project_proto_init() {
 			}
 		}
 		file_v1_project_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectCommentRequest); i {
+			switch v := v.(*ProjectCommentCreateRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1248,7 +1483,7 @@ func file_v1_project_proto_init() {
 			}
 		}
 		file_v1_project_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectCommentResponse); i {
+			switch v := v.(*ProjectCommentCreateResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1260,7 +1495,7 @@ func file_v1_project_proto_init() {
 			}
 		}
 		file_v1_project_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectListResponse_Item); i {
+			switch v := v.(*ProjectCommentRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1272,7 +1507,7 @@ func file_v1_project_proto_init() {
 			}
 		}
 		file_v1_project_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectTaskResponse_Tasks); i {
+			switch v := v.(*ProjectCommentResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1284,7 +1519,7 @@ func file_v1_project_proto_init() {
 			}
 		}
 		file_v1_project_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectTaskResponse_Categories); i {
+			switch v := v.(*ProjectListResponse_Item); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1296,6 +1531,42 @@ func file_v1_project_proto_init() {
 			}
 		}
 		file_v1_project_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProjectTaskResponse_Tasks); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_project_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProjectTaskResponse_Categories); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_project_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProjectCommentResponse_User); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_project_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ProjectCommentResponse_Item); i {
 			case 0:
 				return &v.state
@@ -1314,7 +1585,7 @@ func file_v1_project_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_v1_project_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
