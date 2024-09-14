@@ -50,6 +50,18 @@ func (p *ProjectService) CreateProject(ctx context.Context, opt *ProjectOpt) (in
 		return int64(project.Id), err
 	}
 
+	var projectTaskTypes = &[]model.ProjectTaskType{
+		{ProjectId: project.Id, Title: "Новые", CreatedBy: opt.UserId},
+		{ProjectId: project.Id, Title: "Выполняются", CreatedBy: opt.UserId},
+		{ProjectId: project.Id, Title: "Тест", CreatedBy: opt.UserId},
+		{ProjectId: project.Id, Title: "Сделаны", CreatedBy: opt.UserId},
+	}
+
+	err := p.ProjectTaskTypeRepo.Db.WithContext(ctx).Create(&projectTaskTypes).Error
+	if err != nil {
+		return int64(project.Id), err
+	}
+
 	return int64(project.Id), nil
 }
 

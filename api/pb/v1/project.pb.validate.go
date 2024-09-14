@@ -505,6 +505,8 @@ func (m *ProjectTaskCreateRequest) validate(all bool) error {
 
 	// no validation rules for ProjectId
 
+	// no validation rules for TypeId
+
 	// no validation rules for Title
 
 	// no validation rules for Description

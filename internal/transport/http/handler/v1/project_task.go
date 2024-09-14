@@ -19,7 +19,7 @@ func (p *ProjectTask) Create(ctx *core.Context) error {
 
 	taskId, err := p.ProjectService.CreateTask(ctx.Ctx(), &service.ProjectTaskOpt{
 		ProjectId:   params.ProjectId,
-		TypeId:      1,
+		TypeId:      int(params.TypeId),
 		Title:       params.Title,
 		Description: params.Description,
 		CreatedBy:   ctx.UserId(),

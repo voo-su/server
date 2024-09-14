@@ -27,8 +27,9 @@ message ProjectListResponse{
 
 message ProjectTaskCreateRequest{
     int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\""];
-    string title = 2;
-    string description = 3;
+    int64 type_id = 2;
+    string title = 3;
+    string description = 4;
 }
 
 message ProjectTaskCreateResponse{
