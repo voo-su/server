@@ -32,7 +32,7 @@ func (p *Project) Create(ctx *core.Context) error {
 }
 
 func (p *Project) Projects(ctx *core.Context) error {
-	data, err := p.ProjectService.Projects(ctx.Ctx())
+	data, err := p.ProjectService.Projects(ctx.UserId())
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}

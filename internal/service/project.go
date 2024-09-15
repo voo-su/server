@@ -95,12 +95,26 @@ func (p *ProjectService) CreateProject(ctx context.Context, opt *ProjectOpt) (in
 	return int64(project.Id), nil
 }
 
-func (p *ProjectService) Projects(ctx context.Context) ([]*model.Project, error) {
-	query := p.Db().WithContext(ctx).Table("projects")
+func (p *ProjectService) Projects(userId int) ([]*model.ProjectItem, error) {
+	tx := p.Source.Db().Table("project_members")
+	tx.Select("p.id AS id, p.name AS name")
+	tx.Joins("LEFT JOIN projects p on p.id = project_members.project_id")
+	tx.Where("project_members.user_id = ?", userId)
+	tx.Order("project_members.created_at desc")
 
-	var items []*model.Project
-	if err := query.Scan(&items).Error; err != nil {
+	items := make([]*model.ProjectItem, 0)
+	if err := tx.Scan(&items).Error; err != nil {
 		return nil, err
+	}
+
+	length := len(items)
+	if length == 0 {
+		return items, nil
+	}
+
+	ids := make([]int, 0, length)
+	for i := range items {
+		ids = append(ids, items[i].Id)
 	}
 
 	return items, nil
@@ -108,14 +122,14 @@ func (p *ProjectService) Projects(ctx context.Context) ([]*model.Project, error)
 
 func (p *ProjectService) GetMembers(ctx context.Context, projectId int64) []*model.ProjectMemberItem {
 	fields := []string{
-		"project_members.id",
-		"project_members.user_id",
-		"users.username",
+		"project_members.id AS id",
+		"project_members.user_id AS user_id",
+		"users.username AS username",
 	}
 	tx := p.Db().WithContext(ctx).Table("project_members")
 	tx.Joins("LEFT JOIN users on users.id = project_members.user_id")
 	tx.Where("project_members.project_id = ?", projectId)
-	tx.Order("project_members.leader desc")
+	//tx.Order("project_members.leader desc")
 	var items []*model.ProjectMemberItem
 	tx.Unscoped().Select(fields).Scan(&items)
 

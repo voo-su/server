@@ -12,3 +12,8 @@ type Project struct {
 func (Project) TableName() string {
 	return "projects"
 }
+
+type ProjectItem struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+}
