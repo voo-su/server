@@ -13,3 +13,9 @@ type ProjectMember struct {
 func (ProjectMember) TableName() string {
 	return "project_members"
 }
+
+type ProjectMemberItem struct {
+	Id       int64  `json:"id"`
+	UserId   int64  `json:"user_id"`
+	Username string `json:"username"`
+}
