@@ -452,6 +452,99 @@ func (x *ProjectTaskDetailResponse) GetCreatedAt() string {
 	return ""
 }
 
+type ProjectTaskTypeNameRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TaskId int64  `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty" form:"task_id" binding:"required"`
+	Name   string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty" form:"name" binding:"required"`
+}
+
+func (x *ProjectTaskTypeNameRequest) Reset() {
+	*x = ProjectTaskTypeNameRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_project_task_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProjectTaskTypeNameRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectTaskTypeNameRequest) ProtoMessage() {}
+
+func (x *ProjectTaskTypeNameRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_project_task_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectTaskTypeNameRequest.ProtoReflect.Descriptor instead.
+func (*ProjectTaskTypeNameRequest) Descriptor() ([]byte, []int) {
+	return file_v1_project_task_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ProjectTaskTypeNameRequest) GetTaskId() int64 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
+}
+
+func (x *ProjectTaskTypeNameRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type ProjectTaskTypeNameResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ProjectTaskTypeNameResponse) Reset() {
+	*x = ProjectTaskTypeNameResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_project_task_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProjectTaskTypeNameResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectTaskTypeNameResponse) ProtoMessage() {}
+
+func (x *ProjectTaskTypeNameResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_project_task_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectTaskTypeNameResponse.ProtoReflect.Descriptor instead.
+func (*ProjectTaskTypeNameResponse) Descriptor() ([]byte, []int) {
+	return file_v1_project_task_proto_rawDescGZIP(), []int{9}
+}
+
 type ProjectTaskResponse_Tasks struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -464,7 +557,7 @@ type ProjectTaskResponse_Tasks struct {
 func (x *ProjectTaskResponse_Tasks) Reset() {
 	*x = ProjectTaskResponse_Tasks{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[8]
+		mi := &file_v1_project_task_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -477,7 +570,7 @@ func (x *ProjectTaskResponse_Tasks) String() string {
 func (*ProjectTaskResponse_Tasks) ProtoMessage() {}
 
 func (x *ProjectTaskResponse_Tasks) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[8]
+	mi := &file_v1_project_task_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -520,7 +613,7 @@ type ProjectTaskResponse_Categories struct {
 func (x *ProjectTaskResponse_Categories) Reset() {
 	*x = ProjectTaskResponse_Categories{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[9]
+		mi := &file_v1_project_task_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -533,7 +626,7 @@ func (x *ProjectTaskResponse_Categories) String() string {
 func (*ProjectTaskResponse_Categories) ProtoMessage() {}
 
 func (x *ProjectTaskResponse_Categories) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[9]
+	mi := &file_v1_project_task_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -645,8 +738,20 @@ var file_v1_project_task_proto_rawDesc = []byte{
 	0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70,
 	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f,
 	0x61, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65,
-	0x64, 0x41, 0x74, 0x42, 0x0d, 0x5a, 0x0b, 0x2e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70, 0x69, 0x5f,
-	0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x64, 0x41, 0x74, 0x22, 0x96, 0x01, 0x0a, 0x1a, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x54,
+	0x61, 0x73, 0x6b, 0x54, 0x79, 0x70, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x3f, 0x0a, 0x07, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x03, 0x42, 0x26, 0x9a, 0x84, 0x9e, 0x03, 0x21, 0x66, 0x6f, 0x72, 0x6d, 0x3a, 0x22,
+	0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x22, 0x20, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67,
+	0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x06, 0x74, 0x61, 0x73,
+	0x6b, 0x49, 0x64, 0x12, 0x37, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x42, 0x23, 0x9a, 0x84, 0x9e, 0x03, 0x1e, 0x66, 0x6f, 0x72, 0x6d, 0x3a, 0x22, 0x6e, 0x61,
+	0x6d, 0x65, 0x22, 0x20, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71,
+	0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x1d, 0x0a, 0x1b,
+	0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x54, 0x61, 0x73, 0x6b, 0x54, 0x79, 0x70, 0x65, 0x4e,
+	0x61, 0x6d, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x0d, 0x5a, 0x0b, 0x2e,
+	0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70, 0x69, 0x5f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -661,7 +766,7 @@ func file_v1_project_task_proto_rawDescGZIP() []byte {
 	return file_v1_project_task_proto_rawDescData
 }
 
-var file_v1_project_task_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_v1_project_task_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_v1_project_task_proto_goTypes = []interface{}{
 	(*ProjectTaskCreateRequest)(nil),       // 0: v1.ProjectTaskCreateRequest
 	(*ProjectTaskCreateResponse)(nil),      // 1: v1.ProjectTaskCreateResponse
@@ -671,17 +776,19 @@ var file_v1_project_task_proto_goTypes = []interface{}{
 	(*ProjectTaskMoveResponse)(nil),        // 5: v1.ProjectTaskMoveResponse
 	(*ProjectTaskDetailRequest)(nil),       // 6: v1.ProjectTaskDetailRequest
 	(*ProjectTaskDetailResponse)(nil),      // 7: v1.ProjectTaskDetailResponse
-	(*ProjectTaskResponse_Tasks)(nil),      // 8: v1.ProjectTaskResponse.Tasks
-	(*ProjectTaskResponse_Categories)(nil), // 9: v1.ProjectTaskResponse.Categories
+	(*ProjectTaskTypeNameRequest)(nil),     // 8: v1.ProjectTaskTypeNameRequest
+	(*ProjectTaskTypeNameResponse)(nil),    // 9: v1.ProjectTaskTypeNameResponse
+	(*ProjectTaskResponse_Tasks)(nil),      // 10: v1.ProjectTaskResponse.Tasks
+	(*ProjectTaskResponse_Categories)(nil), // 11: v1.ProjectTaskResponse.Categories
 }
 var file_v1_project_task_proto_depIdxs = []int32{
-	9, // 0: v1.ProjectTaskResponse.categories:type_name -> v1.ProjectTaskResponse.Categories
-	8, // 1: v1.ProjectTaskResponse.Categories.tasks:type_name -> v1.ProjectTaskResponse.Tasks
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	11, // 0: v1.ProjectTaskResponse.categories:type_name -> v1.ProjectTaskResponse.Categories
+	10, // 1: v1.ProjectTaskResponse.Categories.tasks:type_name -> v1.ProjectTaskResponse.Tasks
+	2,  // [2:2] is the sub-list for method output_type
+	2,  // [2:2] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_v1_project_task_proto_init() }
@@ -787,7 +894,7 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectTaskResponse_Tasks); i {
+			switch v := v.(*ProjectTaskTypeNameRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -799,6 +906,30 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProjectTaskTypeNameResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_project_task_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProjectTaskResponse_Tasks); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_project_task_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ProjectTaskResponse_Categories); i {
 			case 0:
 				return &v.state
@@ -817,7 +948,7 @@ func file_v1_project_task_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_v1_project_task_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

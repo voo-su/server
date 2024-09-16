@@ -96,10 +96,32 @@ func (p *ProjectTask) TaskMove(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := p.ProjectService.TaskMove(ctx.Ctx(), params.ProjectId, params.TaskId, params.FromId, params.ToId)
-	if err != nil {
+	if err := p.ProjectService.TaskMove(
+		ctx.Ctx(),
+		params.ProjectId,
+		params.TaskId,
+		params.FromId,
+		params.ToId,
+	); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(api_v1.ProjectTaskMoveResponse{})
+}
+
+func (p *ProjectTask) TaskTypeName(ctx *core.Context) error {
+	params := &api_v1.ProjectTaskTypeNameRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := p.ProjectService.TaskTypeName(
+		ctx.Ctx(),
+		params.TaskId,
+		params.Name,
+	); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(api_v1.ProjectTaskTypeNameResponse{})
 }

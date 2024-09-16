@@ -49,9 +49,10 @@ func (p *ProjectTaskComment) Comments(ctx *core.Context) error {
 
 		items = append(items, &api_v1.ProjectCommentResponse_Item{
 			Id:      item.Id,
+			TaskId:  item.TaskId,
 			Comment: item.Comment,
 			User: &api_v1.ProjectCommentResponse_User{
-				Id:       1,
+				Id:       int64(user.Id),
 				Avatar:   user.Avatar,
 				Username: user.Username,
 				Name:     user.Name,

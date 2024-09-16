@@ -624,6 +624,8 @@ func (m *ProjectCommentResponse_Item) validate(all bool) error {
 
 	// no validation rules for Id
 
+	// no validation rules for TaskId
+
 	// no validation rules for Comment
 
 	if all {

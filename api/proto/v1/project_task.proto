@@ -54,3 +54,10 @@ message ProjectTaskDetailResponse{
     string description = 2;
     string created_at = 3;
 }
+
+message ProjectTaskTypeNameRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    string name = 2 [(tagger.tags) = "form:\"name\" binding:\"required\""];
+}
+
+message ProjectTaskTypeNameResponse{}

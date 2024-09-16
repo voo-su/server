@@ -30,9 +30,10 @@ message ProjectCommentResponse{
 
     message Item{
         int64 id = 1;
-        string comment = 2;
-        User user = 3;
-        string created_at = 4;
+        int64 taskId = 2;
+        string comment = 3;
+        User user = 4;
+        string created_at = 5;
     }
 
     repeated Item items = 1;

@@ -68,7 +68,17 @@ func (p *ProjectService) TaskMove(ctx context.Context, projectId int64, taskId i
 	_, err := p.ProjectTaskRepo.UpdateWhere(ctx, map[string]any{
 		"type_id": toId,
 	}, "id = ? AND project_id = ? AND type_id = ?", taskId, projectId, fromId)
+	if err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (p *ProjectService) TaskTypeName(ctx context.Context, taskId int64, name string) error {
+	_, err := p.ProjectTaskTypeRepo.UpdateWhere(ctx, map[string]any{
+		"title": name,
+	}, "id = ?", taskId)
 	if err != nil {
 		return err
 	}
