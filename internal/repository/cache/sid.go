@@ -14,15 +14,15 @@ const (
 )
 
 type ServerStorage struct {
-	redis *redis.Client
+	RedisClient *redis.Client
 }
 
 func NewSidStorage(rds *redis.Client) *ServerStorage {
-	return &ServerStorage{redis: rds}
+	return &ServerStorage{RedisClient: rds}
 }
 
 func (s *ServerStorage) Set(ctx context.Context, server string, time int64) error {
-	_, err := s.redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+	_, err := s.RedisClient.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.SRem(ctx, ServerKeyExpire, server)
 		pipe.HSet(ctx, ServerKey, server, time)
 		return nil
@@ -31,7 +31,7 @@ func (s *ServerStorage) Set(ctx context.Context, server string, time int64) erro
 }
 
 func (s *ServerStorage) Del(ctx context.Context, server string) error {
-	return s.redis.HDel(ctx, ServerKey, server).Err()
+	return s.RedisClient.HDel(ctx, ServerKey, server).Err()
 }
 
 func (s *ServerStorage) All(ctx context.Context, status int) []string {
@@ -39,7 +39,7 @@ func (s *ServerStorage) All(ctx context.Context, status int) []string {
 		unix  = time.Now().Unix()
 		slice = make([]string, 0)
 	)
-	all, err := s.redis.HGetAll(ctx, ServerKey).Result()
+	all, err := s.RedisClient.HGetAll(ctx, ServerKey).Result()
 	if err != nil {
 		return slice
 	}
@@ -65,17 +65,17 @@ func (s *ServerStorage) All(ctx context.Context, status int) []string {
 }
 
 func (s *ServerStorage) SetExpireServer(ctx context.Context, server string) error {
-	return s.redis.SAdd(ctx, ServerKeyExpire, server).Err()
+	return s.RedisClient.SAdd(ctx, ServerKeyExpire, server).Err()
 }
 
 func (s *ServerStorage) DelExpireServer(ctx context.Context, server string) error {
-	return s.redis.SRem(ctx, ServerKeyExpire, server).Err()
+	return s.RedisClient.SRem(ctx, ServerKeyExpire, server).Err()
 }
 
 func (s *ServerStorage) GetExpireServerAll(ctx context.Context) []string {
-	return s.redis.SMembers(ctx, ServerKeyExpire).Val()
+	return s.RedisClient.SMembers(ctx, ServerKeyExpire).Val()
 }
 
 func (s *ServerStorage) Redis() *redis.Client {
-	return s.redis
+	return s.RedisClient
 }

@@ -11,20 +11,18 @@ import (
 
 type MessageVote struct {
 	core.Repo[model.MessageVote]
-	cache *cache.Vote
-}
-
-type VoteStatistics struct {
-	Count   int            `json:"count"`
-	Options map[string]int `json:"options"`
+	Cache *cache.Vote
 }
 
 func NewMessageVote(db *gorm.DB, cache *cache.Vote) *MessageVote {
-	return &MessageVote{Repo: core.NewRepo[model.MessageVote](db), cache: cache}
+	return &MessageVote{
+		Repo:  core.NewRepo[model.MessageVote](db),
+		Cache: cache,
+	}
 }
 
 func (t *MessageVote) GetVoteAnswerUser(ctx context.Context, vid int) ([]int, error) {
-	if uids, err := t.cache.GetVoteAnswerUser(ctx, vid); err == nil {
+	if uids, err := t.Cache.GetVoteAnswerUser(ctx, vid); err == nil {
 		return uids, nil
 	}
 
@@ -43,12 +41,17 @@ func (t *MessageVote) SetVoteAnswerUser(ctx context.Context, vid int) ([]int, er
 		return nil, err
 	}
 
-	_ = t.cache.SetVoteAnswerUser(ctx, vid, uids)
+	_ = t.Cache.SetVoteAnswerUser(ctx, vid, uids)
 	return uids, nil
 }
 
+type VoteStatistics struct {
+	Count   int            `json:"count"`
+	Options map[string]int `json:"options"`
+}
+
 func (t *MessageVote) GetVoteStatistics(ctx context.Context, vid int) (*VoteStatistics, error) {
-	value, err := t.cache.GetVoteStatistics(ctx, vid)
+	value, err := t.Cache.GetVoteStatistics(ctx, vid)
 	if err != nil {
 		return t.SetVoteStatistics(ctx, vid)
 	}
@@ -92,7 +95,7 @@ func (t *MessageVote) SetVoteStatistics(ctx context.Context, vid int) (*VoteStat
 		Count:   len(options),
 	}
 
-	_ = t.cache.SetVoteStatistics(ctx, vid, jsonutil.Encode(statistic))
+	_ = t.Cache.SetVoteStatistics(ctx, vid, jsonutil.Encode(statistic))
 
 	return statistic, nil
 }

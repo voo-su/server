@@ -10,11 +10,14 @@ import (
 
 type GroupChatMember struct {
 	core.Repo[model.GroupChatMember]
-	relation *cache.Relation
+	Relation *cache.Relation
 }
 
 func NewGroupMember(db *gorm.DB, relation *cache.Relation) *GroupChatMember {
-	return &GroupChatMember{Repo: core.NewRepo[model.GroupChatMember](db), relation: relation}
+	return &GroupChatMember{
+		Repo:     core.NewRepo[model.GroupChatMember](db),
+		Relation: relation,
+	}
 }
 
 func (g *GroupChatMember) IsMaster(ctx context.Context, gid, uid int) bool {
@@ -30,7 +33,7 @@ func (g *GroupChatMember) IsLeader(ctx context.Context, gid, uid int) bool {
 }
 
 func (g *GroupChatMember) IsMember(ctx context.Context, gid, uid int, cache bool) bool {
-	if cache && g.relation.IsGroupRelation(ctx, uid, gid) == nil {
+	if cache && g.Relation.IsGroupRelation(ctx, uid, gid) == nil {
 		return true
 	}
 
@@ -39,7 +42,7 @@ func (g *GroupChatMember) IsMember(ctx context.Context, gid, uid int, cache bool
 		return false
 	}
 	if exist {
-		g.relation.SetGroupRelation(ctx, uid, gid)
+		g.Relation.SetGroupRelation(ctx, uid, gid)
 	}
 
 	return exist

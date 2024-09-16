@@ -14,15 +14,15 @@ const (
 )
 
 type Vote struct {
-	redis *redis.Client
+	Redis *redis.Client
 }
 
 func NewVote(rds *redis.Client) *Vote {
-	return &Vote{redis: rds}
+	return &Vote{Redis: rds}
 }
 
 func (t *Vote) GetVoteAnswerUser(ctx context.Context, voteId int) ([]int, error) {
-	val, err := t.redis.Get(ctx, fmt.Sprintf(VoteUsersCache, voteId)).Result()
+	val, err := t.Redis.Get(ctx, fmt.Sprintf(VoteUsersCache, voteId)).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -36,13 +36,13 @@ func (t *Vote) GetVoteAnswerUser(ctx context.Context, voteId int) ([]int, error)
 }
 
 func (t *Vote) SetVoteAnswerUser(ctx context.Context, vid int, uids []int) error {
-	return t.redis.Set(ctx, fmt.Sprintf(VoteUsersCache, vid), jsonutil.Encode(uids), time.Hour*24).Err()
+	return t.Redis.Set(ctx, fmt.Sprintf(VoteUsersCache, vid), jsonutil.Encode(uids), time.Hour*24).Err()
 }
 
 func (t *Vote) GetVoteStatistics(ctx context.Context, vid int) (string, error) {
-	return t.redis.Get(ctx, fmt.Sprintf(VoteStatisticCache, vid)).Result()
+	return t.Redis.Get(ctx, fmt.Sprintf(VoteStatisticCache, vid)).Result()
 }
 
 func (t *Vote) SetVoteStatistics(ctx context.Context, vid int, value string) error {
-	return t.redis.Set(ctx, fmt.Sprintf(VoteStatisticCache, vid), value, time.Hour*24).Err()
+	return t.Redis.Set(ctx, fmt.Sprintf(VoteStatisticCache, vid), value, time.Hour*24).Err()
 }

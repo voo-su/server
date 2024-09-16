@@ -6,12 +6,15 @@ import (
 )
 
 type Source struct {
-	db    *gorm.DB
-	redis *redis.Client
+	db          *gorm.DB
+	RedisClient *redis.Client
 }
 
 func NewSource(db *gorm.DB, redis *redis.Client) *Source {
-	return &Source{db: db, redis: redis}
+	return &Source{
+		db:          db,
+		RedisClient: redis,
+	}
 }
 
 func (s *Source) Db() *gorm.DB {
@@ -19,5 +22,5 @@ func (s *Source) Db() *gorm.DB {
 }
 
 func (s *Source) Redis() *redis.Client {
-	return s.redis
+	return s.RedisClient
 }

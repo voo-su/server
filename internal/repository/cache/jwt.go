@@ -9,7 +9,7 @@ import (
 )
 
 type JwtTokenStorage struct {
-	redis *redis.Client
+	Redis *redis.Client
 }
 
 func NewTokenSessionStorage(redis *redis.Client) *JwtTokenStorage {
@@ -17,11 +17,11 @@ func NewTokenSessionStorage(redis *redis.Client) *JwtTokenStorage {
 }
 
 func (s *JwtTokenStorage) SetBlackList(ctx context.Context, token string, exp time.Duration) error {
-	return s.redis.Set(ctx, s.name(token), 1, exp).Err()
+	return s.Redis.Set(ctx, s.name(token), 1, exp).Err()
 }
 
 func (s *JwtTokenStorage) IsBlackList(ctx context.Context, token string) bool {
-	return s.redis.Get(ctx, s.name(token)).Val() != ""
+	return s.Redis.Get(ctx, s.name(token)).Val() != ""
 }
 
 func (s *JwtTokenStorage) name(token string) string {
