@@ -61,3 +61,29 @@ message ProjectTaskTypeNameRequest{
 }
 
 message ProjectTaskTypeNameResponse{}
+
+message ProjectCoexecutorsRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+}
+
+message ProjectCoexecutorsResponse{
+    message Item {
+        int64 id = 1;
+        string username = 2;
+    }
+
+    repeated Item items = 1;
+}
+
+message ProjectWatchersRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+}
+
+message ProjectWatchersResponse{
+    message Item {
+        int64 id = 1;
+        string username = 2;
+    }
+
+    repeated Item items = 1;
+}

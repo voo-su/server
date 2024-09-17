@@ -31,8 +31,28 @@ CREATE TABLE project_tasks
     type_id     INT,
     title       VARCHAR(255),
     description TEXT,
+    assigner_id INT,
+    executor_id INT,
     created_by  INT,
     created_at  TIMESTAMPTZ
+);
+
+CREATE TABLE project_task_coexecutors
+(
+    id         SERIAL PRIMARY KEY,
+    task_id    INT,
+    member_id  INT,
+    created_by INT,
+    created_at TIMESTAMPTZ
+);
+
+CREATE TABLE project_task_watchers
+(
+    id         SERIAL PRIMARY KEY,
+    task_id    INT,
+    member_id  INT,
+    created_by INT,
+    created_at TIMESTAMPTZ
 );
 
 CREATE TABLE project_task_comments

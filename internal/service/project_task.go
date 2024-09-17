@@ -85,3 +85,37 @@ func (p *ProjectService) TaskTypeName(ctx context.Context, taskId int64, name st
 
 	return nil
 }
+
+func (p *ProjectService) GetCoexecutors(ctx context.Context, taskId int64) []*model.ProjectMemberItem {
+	fields := []string{
+		"project_members.id AS id",
+		"project_members.user_id AS user_id",
+		"users.username AS username",
+	}
+	tx := p.Db().WithContext(ctx).Table("project_task_coexecutors")
+	tx.Joins("LEFT JOIN project_members ON project_members.id = project_task_coexecutors.member_id")
+	tx.Joins("LEFT JOIN users ON users.id = project_task_coexecutors.member_id")
+	tx.Where("project_task_coexecutors.task_id = ?", taskId)
+
+	var items []*model.ProjectMemberItem
+	tx.Unscoped().Select(fields).Scan(&items)
+
+	return items
+}
+
+func (p *ProjectService) GetWatchers(ctx context.Context, taskId int64) []*model.ProjectMemberItem {
+	fields := []string{
+		"project_members.id AS id",
+		"project_members.user_id AS user_id",
+		"users.username AS username",
+	}
+	tx := p.Db().WithContext(ctx).Table("project_task_watchers")
+	tx.Joins("LEFT JOIN project_members ON project_members.id = project_task_watchers.member_id")
+	tx.Joins("LEFT JOIN users ON users.id = project_task_watchers.member_id")
+	tx.Where("project_task_watchers.task_id = ?", taskId)
+
+	var items []*model.ProjectMemberItem
+	tx.Unscoped().Select(fields).Scan(&items)
+
+	return items
+}

@@ -8,6 +8,8 @@ type ProjectTask struct {
 	TypeId      int       `gorm:"column:type_id" json:"type_id"`
 	Title       string    `gorm:"column:title" json:"title"`
 	Description string    `gorm:"column:description" json:"description"`
+	AssignerId  int64     `gorm:"column:assigner_id" json:"assigner_id"`
+	ExecutorId  int64     `gorm:"column:executor_id" json:"executor_id"`
 	CreatedBy   int       `gorm:"column:created_by" json:"created_by"`
 	CreatedAt   time.Time `gorm:"column:created_at" json:"created_at"`
 }

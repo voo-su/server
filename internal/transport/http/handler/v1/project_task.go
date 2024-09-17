@@ -125,3 +125,45 @@ func (p *ProjectTask) TaskTypeName(ctx *core.Context) error {
 
 	return ctx.Success(api_v1.ProjectTaskTypeNameResponse{})
 }
+
+func (p *ProjectTask) TaskCoexecutors(ctx *core.Context) error {
+	params := &api_v1.ProjectCoexecutorsRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	list := p.ProjectService.GetCoexecutors(ctx.Ctx(), params.TaskId)
+
+	items := make([]*api_v1.ProjectCoexecutorsResponse_Item, 0)
+	for _, item := range list {
+		items = append(items, &api_v1.ProjectCoexecutorsResponse_Item{
+			Id:       item.Id,
+			Username: item.Username,
+		})
+	}
+
+	return ctx.Success(api_v1.ProjectCoexecutorsResponse{
+		Items: items,
+	})
+}
+
+func (p *ProjectTask) TaskWatchers(ctx *core.Context) error {
+	params := &api_v1.ProjectWatchersRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	list := p.ProjectService.GetWatchers(ctx.Ctx(), params.TaskId)
+
+	items := make([]*api_v1.ProjectWatchersResponse_Item, 0)
+	for _, item := range list {
+		items = append(items, &api_v1.ProjectWatchersResponse_Item{
+			Id:       item.Id,
+			Username: item.Username,
+		})
+	}
+
+	return ctx.Success(api_v1.ProjectWatchersResponse{
+		Items: items,
+	})
+}
