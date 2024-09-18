@@ -50,9 +50,16 @@ message ProjectTaskDetailRequest{
 }
 
 message ProjectTaskDetailResponse{
+    message Member{
+        int64 id = 1;
+        string username = 2;
+    }
+
     string title = 1;
     string description = 2;
     string created_at = 3;
+    Member assigner = 4;
+    Member executor = 5;
 }
 
 message ProjectTaskTypeNameRequest{

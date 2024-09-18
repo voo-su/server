@@ -32,11 +32,11 @@ func (p *ProjectService) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (i
 }
 
 func (p *ProjectService) TypeTasks(ctx context.Context, projectId int64) ([]*model.ProjectTaskType, error) {
-	query := p.Db().WithContext(ctx).Table("project_task_types")
-	query.Where("project_id = ?", projectId)
+	tx := p.Db().WithContext(ctx).Table("project_task_types")
+	tx.Where("project_id = ?", projectId)
 
 	var items []*model.ProjectTaskType
-	if err := query.Scan(&items).Error; err != nil {
+	if err := tx.Scan(&items).Error; err != nil {
 		return nil, err
 	}
 
@@ -44,24 +44,39 @@ func (p *ProjectService) TypeTasks(ctx context.Context, projectId int64) ([]*mod
 }
 
 func (p *ProjectService) Tasks(ctx context.Context, projectId int64, typeId int64) ([]*model.ProjectTask, error) {
-	query := p.Db().WithContext(ctx).Table("project_tasks")
-	query.Where("project_id = ? AND type_id = ?", projectId, typeId)
+	tx := p.Db().WithContext(ctx).Table("project_tasks")
+	tx.Where("project_id = ? AND type_id = ?", projectId, typeId)
 
 	var items []*model.ProjectTask
-	if err := query.Scan(&items).Error; err != nil {
+	if err := tx.Scan(&items).Error; err != nil {
 		return nil, err
 	}
 
 	return items, nil
 }
 
-func (p *ProjectService) TaskDetail(ctx context.Context, taskId int64) (*model.ProjectTask, error) {
-	task, err := p.ProjectTaskRepo.FindById(ctx, int(taskId))
-	if err != nil {
+func (p *ProjectService) TaskDetail(ctx context.Context, taskId int64) (*model.ProjectTaskDetailWithMember, error) {
+	fields := []string{
+		"project_tasks.*",
+		"assigner.id AS assigner_id",
+		"assigner_user.username AS assigner_username",
+		"executor_member.id AS executor_member_id",
+		"executor_user.username AS executor_username",
+	}
+
+	tx := p.Db().WithContext(ctx).Table("project_tasks").
+		Joins("LEFT JOIN project_members AS assigner ON assigner.id = project_tasks.assigner_id").
+		Joins("LEFT JOIN users AS assigner_user ON assigner_user.id = assigner.user_id").
+		Joins("LEFT JOIN project_members AS executor_member ON executor_member.id = project_tasks.executor_id").
+		Joins("LEFT JOIN users AS executor_user ON executor_user.id = executor_member.user_id").
+		Where("project_tasks.id = ?", taskId)
+
+	var taskDetail model.ProjectTaskDetailWithMember
+	if err := tx.Select(fields).Scan(&taskDetail).Error; err != nil {
 		return nil, err
 	}
 
-	return task, nil
+	return &taskDetail, nil
 }
 
 func (p *ProjectService) TaskMove(ctx context.Context, projectId int64, taskId int64, fromId int64, toId int64) error {
@@ -86,36 +101,40 @@ func (p *ProjectService) TaskTypeName(ctx context.Context, taskId int64, name st
 	return nil
 }
 
-func (p *ProjectService) GetCoexecutors(ctx context.Context, taskId int64) []*model.ProjectMemberItem {
+func (p *ProjectService) GetCoexecutors(ctx context.Context, taskId int64) ([]*model.ProjectMemberItem, error) {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",
 		"users.username AS username",
 	}
-	tx := p.Db().WithContext(ctx).Table("project_task_coexecutors")
-	tx.Joins("LEFT JOIN project_members ON project_members.id = project_task_coexecutors.member_id")
-	tx.Joins("LEFT JOIN users ON users.id = project_task_coexecutors.member_id")
-	tx.Where("project_task_coexecutors.task_id = ?", taskId)
+	tx := p.Db().WithContext(ctx).Table("project_task_coexecutors").
+		Joins("LEFT JOIN project_members ON project_members.id = project_task_coexecutors.member_id").
+		Joins("LEFT JOIN users ON users.id = project_task_coexecutors.member_id").
+		Where("project_task_coexecutors.task_id = ?", taskId)
 
 	var items []*model.ProjectMemberItem
-	tx.Unscoped().Select(fields).Scan(&items)
+	if err := tx.Unscoped().Select(fields).Scan(&items).Error; err != nil {
+		return nil, err
+	}
 
-	return items
+	return items, nil
 }
 
-func (p *ProjectService) GetWatchers(ctx context.Context, taskId int64) []*model.ProjectMemberItem {
+func (p *ProjectService) GetWatchers(ctx context.Context, taskId int64) ([]*model.ProjectMemberItem, error) {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",
 		"users.username AS username",
 	}
-	tx := p.Db().WithContext(ctx).Table("project_task_watchers")
-	tx.Joins("LEFT JOIN project_members ON project_members.id = project_task_watchers.member_id")
-	tx.Joins("LEFT JOIN users ON users.id = project_task_watchers.member_id")
-	tx.Where("project_task_watchers.task_id = ?", taskId)
+	tx := p.Db().WithContext(ctx).Table("project_task_watchers").
+		Joins("LEFT JOIN project_members ON project_members.id = project_task_watchers.member_id").
+		Joins("LEFT JOIN users ON users.id = project_task_watchers.member_id").
+		Where("project_task_watchers.task_id = ?", taskId)
 
 	var items []*model.ProjectMemberItem
-	tx.Unscoped().Select(fields).Scan(&items)
+	if err := tx.Unscoped().Select(fields).Scan(&items).Error; err != nil {
+		return nil, err
+	}
 
-	return items
+	return items, nil
 }

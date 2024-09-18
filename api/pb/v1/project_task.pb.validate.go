@@ -833,6 +833,64 @@ func (m *ProjectTaskDetailResponse) validate(all bool) error {
 
 	// no validation rules for CreatedAt
 
+	if all {
+		switch v := interface{}(m.GetAssigner()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ProjectTaskDetailResponseValidationError{
+					field:  "Assigner",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ProjectTaskDetailResponseValidationError{
+					field:  "Assigner",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetAssigner()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ProjectTaskDetailResponseValidationError{
+				field:  "Assigner",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetExecutor()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ProjectTaskDetailResponseValidationError{
+					field:  "Executor",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ProjectTaskDetailResponseValidationError{
+					field:  "Executor",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetExecutor()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ProjectTaskDetailResponseValidationError{
+				field:  "Executor",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	if len(errors) > 0 {
 		return ProjectTaskDetailResponseMultiError(errors)
 	}
@@ -1848,6 +1906,115 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ProjectTaskResponse_CategoriesValidationError{}
+
+// Validate checks the field values on ProjectTaskDetailResponse_Member with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *ProjectTaskDetailResponse_Member) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectTaskDetailResponse_Member with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// ProjectTaskDetailResponse_MemberMultiError, or nil if none found.
+func (m *ProjectTaskDetailResponse_Member) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectTaskDetailResponse_Member) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Username
+
+	if len(errors) > 0 {
+		return ProjectTaskDetailResponse_MemberMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectTaskDetailResponse_MemberMultiError is an error wrapping multiple
+// validation errors returned by
+// ProjectTaskDetailResponse_Member.ValidateAll() if the designated
+// constraints aren't met.
+type ProjectTaskDetailResponse_MemberMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectTaskDetailResponse_MemberMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectTaskDetailResponse_MemberMultiError) AllErrors() []error { return m }
+
+// ProjectTaskDetailResponse_MemberValidationError is the validation error
+// returned by ProjectTaskDetailResponse_Member.Validate if the designated
+// constraints aren't met.
+type ProjectTaskDetailResponse_MemberValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectTaskDetailResponse_MemberValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectTaskDetailResponse_MemberValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectTaskDetailResponse_MemberValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectTaskDetailResponse_MemberValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectTaskDetailResponse_MemberValidationError) ErrorName() string {
+	return "ProjectTaskDetailResponse_MemberValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectTaskDetailResponse_MemberValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectTaskDetailResponse_Member.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectTaskDetailResponse_MemberValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectTaskDetailResponse_MemberValidationError{}
 
 // Validate checks the field values on ProjectCoexecutorsResponse_Item with the
 // rules defined in the proto definition for this message. If any rules are

@@ -29,11 +29,11 @@ func (p *ProjectService) CreateComment(ctx context.Context, opt *ProjectCommentO
 }
 
 func (p *ProjectService) Comments(ctx context.Context, TaskId int64) ([]*model.ProjectTaskComment, error) {
-	query := p.Db().WithContext(ctx).Table("project_task_comments")
-	query.Where("task_id = ?", TaskId)
+	tx := p.Db().WithContext(ctx).Table("project_task_comments")
+	tx.Where("task_id = ?", TaskId)
 
 	var items []*model.ProjectTaskComment
-	if err := query.Scan(&items).Error; err != nil {
+	if err := tx.Scan(&items).Error; err != nil {
 		return nil, err
 	}
 

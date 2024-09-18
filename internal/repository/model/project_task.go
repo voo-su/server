@@ -17,3 +17,11 @@ type ProjectTask struct {
 func (ProjectTask) TableName() string {
 	return "project_tasks"
 }
+
+type ProjectTaskDetailWithMember struct {
+	ProjectTask
+	AssignerId       int64  `gorm:"column:assigner_id" json:"assigner_id"`
+	AssignerUsername string `gorm:"column:assigner_username" json:"assigner_username"`
+	ExecutorId       int64  `gorm:"column:executor_id" json:"executor_id"`
+	ExecutorUsername string `gorm:"column:executor_username" json:"executor_username"`
+}

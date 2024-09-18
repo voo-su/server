@@ -126,10 +126,11 @@ func (p *ProjectService) GetMembers(ctx context.Context, projectId int64) []*mod
 		"project_members.user_id AS user_id",
 		"users.username AS username",
 	}
-	tx := p.Db().WithContext(ctx).Table("project_members")
-	tx.Joins("LEFT JOIN users on users.id = project_members.user_id")
-	tx.Where("project_members.project_id = ?", projectId)
-	//tx.Order("project_members.leader desc")
+	tx := p.Db().WithContext(ctx).Table("project_members").
+		Joins("LEFT JOIN users on users.id = project_members.user_id").
+		Where("project_members.project_id = ?", projectId)
+	//.Order("project_members.leader desc")
+
 	var items []*model.ProjectMemberItem
 	tx.Unscoped().Select(fields).Scan(&items)
 

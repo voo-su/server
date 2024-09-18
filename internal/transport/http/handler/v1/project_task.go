@@ -87,6 +87,14 @@ func (p *ProjectTask) TaskDetail(ctx *core.Context) error {
 		Title:       task.Title,
 		Description: task.Description,
 		CreatedAt:   timeutil.FormatDatetime(task.CreatedAt),
+		Assigner: &api_v1.ProjectTaskDetailResponse_Member{
+			Id:       task.AssignerId,
+			Username: task.AssignerUsername,
+		},
+		Executor: &api_v1.ProjectTaskDetailResponse_Member{
+			Id:       task.ExecutorId,
+			Username: task.ExecutorUsername,
+		},
 	})
 }
 
@@ -132,7 +140,7 @@ func (p *ProjectTask) TaskCoexecutors(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	list := p.ProjectService.GetCoexecutors(ctx.Ctx(), params.TaskId)
+	list, _ := p.ProjectService.GetCoexecutors(ctx.Ctx(), params.TaskId)
 
 	items := make([]*api_v1.ProjectCoexecutorsResponse_Item, 0)
 	for _, item := range list {
@@ -153,7 +161,7 @@ func (p *ProjectTask) TaskWatchers(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	list := p.ProjectService.GetWatchers(ctx.Ctx(), params.TaskId)
+	list, _ := p.ProjectService.GetWatchers(ctx.Ctx(), params.TaskId)
 
 	items := make([]*api_v1.ProjectWatchersResponse_Item, 0)
 	for _, item := range list {
