@@ -69,6 +69,13 @@ message ProjectTaskTypeNameRequest{
 
 message ProjectTaskTypeNameResponse{}
 
+message ProjectCoexecutorInviteRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    string member_ids = 2 [(tagger.tags) = "form:\"member_ids\" binding:\"required\""];
+}
+
+message ProjectCoexecutorInviteResponse{}
+
 message ProjectCoexecutorsRequest{
     int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
 }
@@ -81,6 +88,13 @@ message ProjectCoexecutorsResponse{
 
     repeated Item items = 1;
 }
+
+message ProjectWatcherInviteRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    string member_ids = 2 [(tagger.tags) = "form:\"member_ids\" binding:\"required\""];
+}
+
+message ProjectWatcherInviteResponse{}
 
 message ProjectWatchersRequest{
     int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];

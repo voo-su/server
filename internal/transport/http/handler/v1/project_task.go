@@ -4,6 +4,7 @@ import (
 	"voo.su/api/pb/v1"
 	"voo.su/internal/service"
 	"voo.su/pkg/core"
+	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/timeutil"
 )
 
@@ -134,6 +135,29 @@ func (p *ProjectTask) TaskTypeName(ctx *core.Context) error {
 	return ctx.Success(api_v1.ProjectTaskTypeNameResponse{})
 }
 
+func (p *ProjectTask) TaskCoexecutorInvite(ctx *core.Context) error {
+	params := &api_v1.ProjectCoexecutorInviteRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	mids := sliceutil.Unique(sliceutil.ParseIds(params.MemberIds))
+	if len(mids) == 0 {
+		return ctx.ErrorBusiness("Список приглашенных не может быть пустым")
+	}
+
+	uid := ctx.UserId()
+	if !p.ProjectService.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
+		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать")
+	}
+
+	if err := p.ProjectService.InviteCoexecutor(ctx.Ctx(), params.TaskId, mids, uid); err != nil {
+		return ctx.ErrorBusiness("Не удалось пригласить: " + err.Error())
+	}
+
+	return ctx.Success(api_v1.ProjectCoexecutorInviteResponse{})
+}
+
 func (p *ProjectTask) TaskCoexecutors(ctx *core.Context) error {
 	params := &api_v1.ProjectCoexecutorsRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
@@ -153,6 +177,29 @@ func (p *ProjectTask) TaskCoexecutors(ctx *core.Context) error {
 	return ctx.Success(api_v1.ProjectCoexecutorsResponse{
 		Items: items,
 	})
+}
+
+func (p *ProjectTask) TaskWatcherInvite(ctx *core.Context) error {
+	params := &api_v1.ProjectWatcherInviteRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	mids := sliceutil.Unique(sliceutil.ParseIds(params.MemberIds))
+	if len(mids) == 0 {
+		return ctx.ErrorBusiness("Список приглашенных не может быть пустым")
+	}
+
+	uid := ctx.UserId()
+	if !p.ProjectService.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
+		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать")
+	}
+
+	if err := p.ProjectService.InviteWatcher(ctx.Ctx(), params.TaskId, mids, uid); err != nil {
+		return ctx.ErrorBusiness("Не удалось пригласить: " + err.Error())
+	}
+
+	return ctx.Success(api_v1.ProjectWatcherInviteResponse{})
 }
 
 func (p *ProjectTask) TaskWatchers(ctx *core.Context) error {

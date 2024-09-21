@@ -561,6 +561,99 @@ func (*ProjectTaskTypeNameResponse) Descriptor() ([]byte, []int) {
 	return file_v1_project_task_proto_rawDescGZIP(), []int{9}
 }
 
+type ProjectCoexecutorInviteRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TaskId    int64  `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty" form:"task_id" binding:"required"`
+	MemberIds string `protobuf:"bytes,2,opt,name=member_ids,json=memberIds,proto3" json:"member_ids,omitempty" form:"member_ids" binding:"required"`
+}
+
+func (x *ProjectCoexecutorInviteRequest) Reset() {
+	*x = ProjectCoexecutorInviteRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_project_task_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProjectCoexecutorInviteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectCoexecutorInviteRequest) ProtoMessage() {}
+
+func (x *ProjectCoexecutorInviteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_project_task_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectCoexecutorInviteRequest.ProtoReflect.Descriptor instead.
+func (*ProjectCoexecutorInviteRequest) Descriptor() ([]byte, []int) {
+	return file_v1_project_task_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ProjectCoexecutorInviteRequest) GetTaskId() int64 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
+}
+
+func (x *ProjectCoexecutorInviteRequest) GetMemberIds() string {
+	if x != nil {
+		return x.MemberIds
+	}
+	return ""
+}
+
+type ProjectCoexecutorInviteResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ProjectCoexecutorInviteResponse) Reset() {
+	*x = ProjectCoexecutorInviteResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_project_task_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProjectCoexecutorInviteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectCoexecutorInviteResponse) ProtoMessage() {}
+
+func (x *ProjectCoexecutorInviteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_project_task_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectCoexecutorInviteResponse.ProtoReflect.Descriptor instead.
+func (*ProjectCoexecutorInviteResponse) Descriptor() ([]byte, []int) {
+	return file_v1_project_task_proto_rawDescGZIP(), []int{11}
+}
+
 type ProjectCoexecutorsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -572,7 +665,7 @@ type ProjectCoexecutorsRequest struct {
 func (x *ProjectCoexecutorsRequest) Reset() {
 	*x = ProjectCoexecutorsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[10]
+		mi := &file_v1_project_task_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -585,7 +678,7 @@ func (x *ProjectCoexecutorsRequest) String() string {
 func (*ProjectCoexecutorsRequest) ProtoMessage() {}
 
 func (x *ProjectCoexecutorsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[10]
+	mi := &file_v1_project_task_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -598,7 +691,7 @@ func (x *ProjectCoexecutorsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCoexecutorsRequest.ProtoReflect.Descriptor instead.
 func (*ProjectCoexecutorsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_project_task_proto_rawDescGZIP(), []int{10}
+	return file_v1_project_task_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ProjectCoexecutorsRequest) GetTaskId() int64 {
@@ -619,7 +712,7 @@ type ProjectCoexecutorsResponse struct {
 func (x *ProjectCoexecutorsResponse) Reset() {
 	*x = ProjectCoexecutorsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[11]
+		mi := &file_v1_project_task_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -632,7 +725,7 @@ func (x *ProjectCoexecutorsResponse) String() string {
 func (*ProjectCoexecutorsResponse) ProtoMessage() {}
 
 func (x *ProjectCoexecutorsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[11]
+	mi := &file_v1_project_task_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -645,7 +738,7 @@ func (x *ProjectCoexecutorsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCoexecutorsResponse.ProtoReflect.Descriptor instead.
 func (*ProjectCoexecutorsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_project_task_proto_rawDescGZIP(), []int{11}
+	return file_v1_project_task_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ProjectCoexecutorsResponse) GetItems() []*ProjectCoexecutorsResponse_Item {
@@ -653,6 +746,99 @@ func (x *ProjectCoexecutorsResponse) GetItems() []*ProjectCoexecutorsResponse_It
 		return x.Items
 	}
 	return nil
+}
+
+type ProjectWatcherInviteRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TaskId    int64  `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty" form:"task_id" binding:"required"`
+	MemberIds string `protobuf:"bytes,2,opt,name=member_ids,json=memberIds,proto3" json:"member_ids,omitempty" form:"member_ids" binding:"required"`
+}
+
+func (x *ProjectWatcherInviteRequest) Reset() {
+	*x = ProjectWatcherInviteRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_project_task_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProjectWatcherInviteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectWatcherInviteRequest) ProtoMessage() {}
+
+func (x *ProjectWatcherInviteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_project_task_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectWatcherInviteRequest.ProtoReflect.Descriptor instead.
+func (*ProjectWatcherInviteRequest) Descriptor() ([]byte, []int) {
+	return file_v1_project_task_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ProjectWatcherInviteRequest) GetTaskId() int64 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
+}
+
+func (x *ProjectWatcherInviteRequest) GetMemberIds() string {
+	if x != nil {
+		return x.MemberIds
+	}
+	return ""
+}
+
+type ProjectWatcherInviteResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ProjectWatcherInviteResponse) Reset() {
+	*x = ProjectWatcherInviteResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_project_task_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProjectWatcherInviteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectWatcherInviteResponse) ProtoMessage() {}
+
+func (x *ProjectWatcherInviteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_project_task_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectWatcherInviteResponse.ProtoReflect.Descriptor instead.
+func (*ProjectWatcherInviteResponse) Descriptor() ([]byte, []int) {
+	return file_v1_project_task_proto_rawDescGZIP(), []int{15}
 }
 
 type ProjectWatchersRequest struct {
@@ -666,7 +852,7 @@ type ProjectWatchersRequest struct {
 func (x *ProjectWatchersRequest) Reset() {
 	*x = ProjectWatchersRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[12]
+		mi := &file_v1_project_task_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -679,7 +865,7 @@ func (x *ProjectWatchersRequest) String() string {
 func (*ProjectWatchersRequest) ProtoMessage() {}
 
 func (x *ProjectWatchersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[12]
+	mi := &file_v1_project_task_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -692,7 +878,7 @@ func (x *ProjectWatchersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectWatchersRequest.ProtoReflect.Descriptor instead.
 func (*ProjectWatchersRequest) Descriptor() ([]byte, []int) {
-	return file_v1_project_task_proto_rawDescGZIP(), []int{12}
+	return file_v1_project_task_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ProjectWatchersRequest) GetTaskId() int64 {
@@ -713,7 +899,7 @@ type ProjectWatchersResponse struct {
 func (x *ProjectWatchersResponse) Reset() {
 	*x = ProjectWatchersResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[13]
+		mi := &file_v1_project_task_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -726,7 +912,7 @@ func (x *ProjectWatchersResponse) String() string {
 func (*ProjectWatchersResponse) ProtoMessage() {}
 
 func (x *ProjectWatchersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[13]
+	mi := &file_v1_project_task_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -739,7 +925,7 @@ func (x *ProjectWatchersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectWatchersResponse.ProtoReflect.Descriptor instead.
 func (*ProjectWatchersResponse) Descriptor() ([]byte, []int) {
-	return file_v1_project_task_proto_rawDescGZIP(), []int{13}
+	return file_v1_project_task_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ProjectWatchersResponse) GetItems() []*ProjectWatchersResponse_Item {
@@ -761,7 +947,7 @@ type ProjectTaskResponse_Tasks struct {
 func (x *ProjectTaskResponse_Tasks) Reset() {
 	*x = ProjectTaskResponse_Tasks{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[14]
+		mi := &file_v1_project_task_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -774,7 +960,7 @@ func (x *ProjectTaskResponse_Tasks) String() string {
 func (*ProjectTaskResponse_Tasks) ProtoMessage() {}
 
 func (x *ProjectTaskResponse_Tasks) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[14]
+	mi := &file_v1_project_task_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -817,7 +1003,7 @@ type ProjectTaskResponse_Categories struct {
 func (x *ProjectTaskResponse_Categories) Reset() {
 	*x = ProjectTaskResponse_Categories{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[15]
+		mi := &file_v1_project_task_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -830,7 +1016,7 @@ func (x *ProjectTaskResponse_Categories) String() string {
 func (*ProjectTaskResponse_Categories) ProtoMessage() {}
 
 func (x *ProjectTaskResponse_Categories) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[15]
+	mi := &file_v1_project_task_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -879,7 +1065,7 @@ type ProjectTaskDetailResponse_Member struct {
 func (x *ProjectTaskDetailResponse_Member) Reset() {
 	*x = ProjectTaskDetailResponse_Member{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[16]
+		mi := &file_v1_project_task_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -892,7 +1078,7 @@ func (x *ProjectTaskDetailResponse_Member) String() string {
 func (*ProjectTaskDetailResponse_Member) ProtoMessage() {}
 
 func (x *ProjectTaskDetailResponse_Member) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[16]
+	mi := &file_v1_project_task_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -934,7 +1120,7 @@ type ProjectCoexecutorsResponse_Item struct {
 func (x *ProjectCoexecutorsResponse_Item) Reset() {
 	*x = ProjectCoexecutorsResponse_Item{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[17]
+		mi := &file_v1_project_task_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -947,7 +1133,7 @@ func (x *ProjectCoexecutorsResponse_Item) String() string {
 func (*ProjectCoexecutorsResponse_Item) ProtoMessage() {}
 
 func (x *ProjectCoexecutorsResponse_Item) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[17]
+	mi := &file_v1_project_task_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -960,7 +1146,7 @@ func (x *ProjectCoexecutorsResponse_Item) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCoexecutorsResponse_Item.ProtoReflect.Descriptor instead.
 func (*ProjectCoexecutorsResponse_Item) Descriptor() ([]byte, []int) {
-	return file_v1_project_task_proto_rawDescGZIP(), []int{11, 0}
+	return file_v1_project_task_proto_rawDescGZIP(), []int{13, 0}
 }
 
 func (x *ProjectCoexecutorsResponse_Item) GetId() int64 {
@@ -989,7 +1175,7 @@ type ProjectWatchersResponse_Item struct {
 func (x *ProjectWatchersResponse_Item) Reset() {
 	*x = ProjectWatchersResponse_Item{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_project_task_proto_msgTypes[18]
+		mi := &file_v1_project_task_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1002,7 +1188,7 @@ func (x *ProjectWatchersResponse_Item) String() string {
 func (*ProjectWatchersResponse_Item) ProtoMessage() {}
 
 func (x *ProjectWatchersResponse_Item) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_task_proto_msgTypes[18]
+	mi := &file_v1_project_task_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1015,7 +1201,7 @@ func (x *ProjectWatchersResponse_Item) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectWatchersResponse_Item.ProtoReflect.Descriptor instead.
 func (*ProjectWatchersResponse_Item) Descriptor() ([]byte, []int) {
-	return file_v1_project_task_proto_rawDescGZIP(), []int{13, 0}
+	return file_v1_project_task_proto_rawDescGZIP(), []int{17, 0}
 }
 
 func (x *ProjectWatchersResponse_Item) GetId() int64 {
@@ -1130,37 +1316,63 @@ var file_v1_project_task_proto_rawDesc = []byte{
 	0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64,
 	0x22, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x1d, 0x0a, 0x1b, 0x50, 0x72, 0x6f, 0x6a, 0x65,
 	0x63, 0x74, 0x54, 0x61, 0x73, 0x6b, 0x54, 0x79, 0x70, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x5c, 0x0a, 0x19, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63,
-	0x74, 0x43, 0x6f, 0x65, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xab, 0x01, 0x0a, 0x1e, 0x50, 0x72, 0x6f, 0x6a, 0x65,
+	0x63, 0x74, 0x43, 0x6f, 0x65, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x49, 0x6e, 0x76, 0x69,
+	0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3f, 0x0a, 0x07, 0x74, 0x61, 0x73,
+	0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x26, 0x9a, 0x84, 0x9e, 0x03,
+	0x21, 0x66, 0x6f, 0x72, 0x6d, 0x3a, 0x22, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x22, 0x20,
+	0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65,
+	0x64, 0x22, 0x52, 0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x12, 0x48, 0x0a, 0x0a, 0x6d, 0x65,
+	0x6d, 0x62, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x29,
+	0x9a, 0x84, 0x9e, 0x03, 0x24, 0x66, 0x6f, 0x72, 0x6d, 0x3a, 0x22, 0x6d, 0x65, 0x6d, 0x62, 0x65,
+	0x72, 0x5f, 0x69, 0x64, 0x73, 0x22, 0x20, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22,
+	0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x09, 0x6d, 0x65, 0x6d, 0x62, 0x65,
+	0x72, 0x49, 0x64, 0x73, 0x22, 0x21, 0x0a, 0x1f, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43,
+	0x6f, 0x65, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x5c, 0x0a, 0x19, 0x50, 0x72, 0x6f, 0x6a, 0x65,
+	0x63, 0x74, 0x43, 0x6f, 0x65, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x73, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x3f, 0x0a, 0x07, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x26, 0x9a, 0x84, 0x9e, 0x03, 0x21, 0x66, 0x6f, 0x72, 0x6d,
+	0x3a, 0x22, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x22, 0x20, 0x62, 0x69, 0x6e, 0x64, 0x69,
+	0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x06, 0x74,
+	0x61, 0x73, 0x6b, 0x49, 0x64, 0x22, 0x8b, 0x01, 0x0a, 0x1a, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63,
+	0x74, 0x43, 0x6f, 0x65, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x39, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74,
+	0x43, 0x6f, 0x65, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x1a,
+	0x32, 0x0a, 0x04, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e,
+	0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e,
+	0x61, 0x6d, 0x65, 0x22, 0xa8, 0x01, 0x0a, 0x1b, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x57,
+	0x61, 0x74, 0x63, 0x68, 0x65, 0x72, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75,
 	0x65, 0x73, 0x74, 0x12, 0x3f, 0x0a, 0x07, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x03, 0x42, 0x26, 0x9a, 0x84, 0x9e, 0x03, 0x21, 0x66, 0x6f, 0x72, 0x6d, 0x3a,
 	0x22, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x22, 0x20, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e,
 	0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x06, 0x74, 0x61,
-	0x73, 0x6b, 0x49, 0x64, 0x22, 0x8b, 0x01, 0x0a, 0x1a, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74,
-	0x43, 0x6f, 0x65, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x12, 0x39, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03,
-	0x28, 0x0b, 0x32, 0x23, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43,
-	0x6f, 0x65, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x1a, 0x32,
-	0x0a, 0x04, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61,
-	0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61,
-	0x6d, 0x65, 0x22, 0x59, 0x0a, 0x16, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x57, 0x61, 0x74,
-	0x63, 0x68, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3f, 0x0a, 0x07,
-	0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x26, 0x9a,
-	0x84, 0x9e, 0x03, 0x21, 0x66, 0x6f, 0x72, 0x6d, 0x3a, 0x22, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69,
-	0x64, 0x22, 0x20, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75,
-	0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x22, 0x85, 0x01,
-	0x0a, 0x17, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x57, 0x61, 0x74, 0x63, 0x68, 0x65, 0x72,
-	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x36, 0x0a, 0x05, 0x69, 0x74, 0x65,
-	0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x20, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x72,
+	0x73, 0x6b, 0x49, 0x64, 0x12, 0x48, 0x0a, 0x0a, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x5f, 0x69,
+	0x64, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x29, 0x9a, 0x84, 0x9e, 0x03, 0x24, 0x66,
+	0x6f, 0x72, 0x6d, 0x3a, 0x22, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x73, 0x22,
+	0x20, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72,
+	0x65, 0x64, 0x22, 0x52, 0x09, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x49, 0x64, 0x73, 0x22, 0x1e,
+	0x0a, 0x1c, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x57, 0x61, 0x74, 0x63, 0x68, 0x65, 0x72,
+	0x49, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x59,
+	0x0a, 0x16, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x57, 0x61, 0x74, 0x63, 0x68, 0x65, 0x72,
+	0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3f, 0x0a, 0x07, 0x74, 0x61, 0x73, 0x6b,
+	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x26, 0x9a, 0x84, 0x9e, 0x03, 0x21,
+	0x66, 0x6f, 0x72, 0x6d, 0x3a, 0x22, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x22, 0x20, 0x62,
+	0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64,
+	0x22, 0x52, 0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x22, 0x85, 0x01, 0x0a, 0x17, 0x50, 0x72,
 	0x6f, 0x6a, 0x65, 0x63, 0x74, 0x57, 0x61, 0x74, 0x63, 0x68, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d,
-	0x73, 0x1a, 0x32, 0x0a, 0x04, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65,
-	0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65,
-	0x72, 0x6e, 0x61, 0x6d, 0x65, 0x42, 0x0d, 0x5a, 0x0b, 0x2e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70,
-	0x69, 0x5f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x36, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x20, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63,
+	0x74, 0x57, 0x61, 0x74, 0x63, 0x68, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x1a, 0x32, 0x0a,
+	0x04, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d,
+	0x65, 0x42, 0x0d, 0x5a, 0x0b, 0x2e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70, 0x69, 0x5f, 0x76, 0x31,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1175,7 +1387,7 @@ func file_v1_project_task_proto_rawDescGZIP() []byte {
 	return file_v1_project_task_proto_rawDescData
 }
 
-var file_v1_project_task_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_v1_project_task_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_v1_project_task_proto_goTypes = []interface{}{
 	(*ProjectTaskCreateRequest)(nil),         // 0: v1.ProjectTaskCreateRequest
 	(*ProjectTaskCreateResponse)(nil),        // 1: v1.ProjectTaskCreateResponse
@@ -1187,23 +1399,27 @@ var file_v1_project_task_proto_goTypes = []interface{}{
 	(*ProjectTaskDetailResponse)(nil),        // 7: v1.ProjectTaskDetailResponse
 	(*ProjectTaskTypeNameRequest)(nil),       // 8: v1.ProjectTaskTypeNameRequest
 	(*ProjectTaskTypeNameResponse)(nil),      // 9: v1.ProjectTaskTypeNameResponse
-	(*ProjectCoexecutorsRequest)(nil),        // 10: v1.ProjectCoexecutorsRequest
-	(*ProjectCoexecutorsResponse)(nil),       // 11: v1.ProjectCoexecutorsResponse
-	(*ProjectWatchersRequest)(nil),           // 12: v1.ProjectWatchersRequest
-	(*ProjectWatchersResponse)(nil),          // 13: v1.ProjectWatchersResponse
-	(*ProjectTaskResponse_Tasks)(nil),        // 14: v1.ProjectTaskResponse.Tasks
-	(*ProjectTaskResponse_Categories)(nil),   // 15: v1.ProjectTaskResponse.Categories
-	(*ProjectTaskDetailResponse_Member)(nil), // 16: v1.ProjectTaskDetailResponse.Member
-	(*ProjectCoexecutorsResponse_Item)(nil),  // 17: v1.ProjectCoexecutorsResponse.Item
-	(*ProjectWatchersResponse_Item)(nil),     // 18: v1.ProjectWatchersResponse.Item
+	(*ProjectCoexecutorInviteRequest)(nil),   // 10: v1.ProjectCoexecutorInviteRequest
+	(*ProjectCoexecutorInviteResponse)(nil),  // 11: v1.ProjectCoexecutorInviteResponse
+	(*ProjectCoexecutorsRequest)(nil),        // 12: v1.ProjectCoexecutorsRequest
+	(*ProjectCoexecutorsResponse)(nil),       // 13: v1.ProjectCoexecutorsResponse
+	(*ProjectWatcherInviteRequest)(nil),      // 14: v1.ProjectWatcherInviteRequest
+	(*ProjectWatcherInviteResponse)(nil),     // 15: v1.ProjectWatcherInviteResponse
+	(*ProjectWatchersRequest)(nil),           // 16: v1.ProjectWatchersRequest
+	(*ProjectWatchersResponse)(nil),          // 17: v1.ProjectWatchersResponse
+	(*ProjectTaskResponse_Tasks)(nil),        // 18: v1.ProjectTaskResponse.Tasks
+	(*ProjectTaskResponse_Categories)(nil),   // 19: v1.ProjectTaskResponse.Categories
+	(*ProjectTaskDetailResponse_Member)(nil), // 20: v1.ProjectTaskDetailResponse.Member
+	(*ProjectCoexecutorsResponse_Item)(nil),  // 21: v1.ProjectCoexecutorsResponse.Item
+	(*ProjectWatchersResponse_Item)(nil),     // 22: v1.ProjectWatchersResponse.Item
 }
 var file_v1_project_task_proto_depIdxs = []int32{
-	15, // 0: v1.ProjectTaskResponse.categories:type_name -> v1.ProjectTaskResponse.Categories
-	16, // 1: v1.ProjectTaskDetailResponse.assigner:type_name -> v1.ProjectTaskDetailResponse.Member
-	16, // 2: v1.ProjectTaskDetailResponse.executor:type_name -> v1.ProjectTaskDetailResponse.Member
-	17, // 3: v1.ProjectCoexecutorsResponse.items:type_name -> v1.ProjectCoexecutorsResponse.Item
-	18, // 4: v1.ProjectWatchersResponse.items:type_name -> v1.ProjectWatchersResponse.Item
-	14, // 5: v1.ProjectTaskResponse.Categories.tasks:type_name -> v1.ProjectTaskResponse.Tasks
+	19, // 0: v1.ProjectTaskResponse.categories:type_name -> v1.ProjectTaskResponse.Categories
+	20, // 1: v1.ProjectTaskDetailResponse.assigner:type_name -> v1.ProjectTaskDetailResponse.Member
+	20, // 2: v1.ProjectTaskDetailResponse.executor:type_name -> v1.ProjectTaskDetailResponse.Member
+	21, // 3: v1.ProjectCoexecutorsResponse.items:type_name -> v1.ProjectCoexecutorsResponse.Item
+	22, // 4: v1.ProjectWatchersResponse.items:type_name -> v1.ProjectWatchersResponse.Item
+	18, // 5: v1.ProjectTaskResponse.Categories.tasks:type_name -> v1.ProjectTaskResponse.Tasks
 	6,  // [6:6] is the sub-list for method output_type
 	6,  // [6:6] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
@@ -1338,7 +1554,7 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectCoexecutorsRequest); i {
+			switch v := v.(*ProjectCoexecutorInviteRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1350,7 +1566,7 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectCoexecutorsResponse); i {
+			switch v := v.(*ProjectCoexecutorInviteResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1362,7 +1578,7 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectWatchersRequest); i {
+			switch v := v.(*ProjectCoexecutorsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1374,7 +1590,7 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectWatchersResponse); i {
+			switch v := v.(*ProjectCoexecutorsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1386,7 +1602,7 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectTaskResponse_Tasks); i {
+			switch v := v.(*ProjectWatcherInviteRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1398,7 +1614,7 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectTaskResponse_Categories); i {
+			switch v := v.(*ProjectWatcherInviteResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1410,7 +1626,7 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectTaskDetailResponse_Member); i {
+			switch v := v.(*ProjectWatchersRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1422,7 +1638,7 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ProjectCoexecutorsResponse_Item); i {
+			switch v := v.(*ProjectWatchersResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1434,6 +1650,54 @@ func file_v1_project_task_proto_init() {
 			}
 		}
 		file_v1_project_task_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProjectTaskResponse_Tasks); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_project_task_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProjectTaskResponse_Categories); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_project_task_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProjectTaskDetailResponse_Member); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_project_task_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProjectCoexecutorsResponse_Item); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_project_task_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ProjectWatchersResponse_Item); i {
 			case 0:
 				return &v.state
@@ -1452,7 +1716,7 @@ func file_v1_project_task_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_v1_project_task_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   19,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

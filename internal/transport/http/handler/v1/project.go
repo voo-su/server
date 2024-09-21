@@ -75,27 +75,28 @@ func (p *Project) Invite(ctx *core.Context) error {
 
 	key := fmt.Sprintf("project-join:%d", params.ProjectId)
 	if !p.RedisLock.Lock(ctx.Ctx(), key, 20) {
-		return ctx.ErrorBusiness("Ошибка сети, повторите попытку позже")
+		return ctx.ErrorBusiness("Ошибка сети, попробуйте повторить попытку позже")
 	}
 
 	defer p.RedisLock.UnLock(ctx.Ctx(), key)
+
 	project, err := p.ProjectService.ProjectRepo.FindById(ctx.Ctx(), int(params.ProjectId))
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка сети, повторите попытку позже")
+		return ctx.ErrorBusiness("Ошибка сети, попробуйте повторить попытку позже")
 	}
 
 	if project == nil {
-		return ctx.ErrorBusiness("Проект была расформирована")
+		return ctx.ErrorBusiness("Проект был расформирован")
+	}
+
+	uids := sliceutil.Unique(sliceutil.ParseIds(params.Ids))
+	if len(uids) == 0 {
+		return ctx.ErrorBusiness("Список приглашённых не может быть пустым")
 	}
 
 	uid := ctx.UserId()
-	uids := sliceutil.Unique(sliceutil.ParseIds(params.Ids))
-	if len(uids) == 0 {
-		return ctx.ErrorBusiness("Список приглашенных не может быть пустым")
-	}
-
 	if !p.ProjectService.IsMember(ctx.Ctx(), int(params.ProjectId), uid, true) {
-		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать")
+		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать других")
 	}
 
 	if err := p.ProjectService.Invite(ctx.Ctx(), &service.ProjectInviteOpt{
@@ -103,7 +104,7 @@ func (p *Project) Invite(ctx *core.Context) error {
 		UserId:    uid,
 		MemberIds: uids,
 	}); err != nil {
-		return ctx.ErrorBusiness("Не удалось пригласить: " + err.Error())
+		return ctx.ErrorBusiness("Не удалось отправить приглашения: " + err.Error())
 	}
 
 	return ctx.Success(&api_v1.ProjectInviteResponse{})

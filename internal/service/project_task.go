@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"errors"
+	"gorm.io/gorm"
 	"time"
 	"voo.su/internal/repository/model"
 )
@@ -101,6 +103,59 @@ func (p *ProjectService) TaskTypeName(ctx context.Context, taskId int64, name st
 	return nil
 }
 
+func (p *ProjectService) IsMemberProjectByTask(ctx context.Context, taskId int64, uid int) bool {
+	tx := p.Db().WithContext(ctx).
+		Table("project_tasks").
+		Joins("INNER JOIN project_members ON project_members.project_id = project_tasks.project_id").
+		Where("project_tasks.id = ? AND project_members.user_id = ?", taskId, uid)
+
+	var count int64
+	if err := tx.Count(&count).Error; err != nil {
+		return false
+	}
+
+	return count > 0
+}
+
+func (p *ProjectService) InviteCoexecutor(ctx context.Context, taskId int64, memberIds []int, uid int) error {
+	var (
+		err            error
+		addCoexecutors []*model.ProjectTaskCoexecutor
+		db             = p.Source.Db().WithContext(ctx)
+	)
+	m := make(map[int]struct{})
+	for _, value := range p.ProjectTaskCoexecutorRepo.GetCoexecutorIds(ctx, taskId) {
+		m[value] = struct{}{}
+	}
+
+	for _, value := range memberIds {
+		if _, ok := m[value]; !ok {
+			addCoexecutors = append(addCoexecutors, &model.ProjectTaskCoexecutor{
+				TaskId:    int(taskId),
+				MemberId:  value,
+				CreatedBy: uid,
+			})
+		}
+	}
+
+	if len(addCoexecutors) == 0 {
+		return errors.New("все приглашённые контакты стали соисполнителями задачи")
+	}
+
+	err = db.Transaction(func(tx *gorm.DB) error {
+		if err = tx.Create(&addCoexecutors).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (p *ProjectService) GetCoexecutors(ctx context.Context, taskId int64) ([]*model.ProjectMemberItem, error) {
 	fields := []string{
 		"project_members.id AS id",
@@ -118,6 +173,45 @@ func (p *ProjectService) GetCoexecutors(ctx context.Context, taskId int64) ([]*m
 	}
 
 	return items, nil
+}
+
+func (p *ProjectService) InviteWatcher(ctx context.Context, taskId int64, memberIds []int, uid int) error {
+	var (
+		err         error
+		addWatchers []*model.ProjectTaskWatcher
+		db          = p.Source.Db().WithContext(ctx)
+	)
+	m := make(map[int]struct{})
+	for _, value := range p.ProjectTaskWatcherRepo.GetWatcherIds(ctx, taskId) {
+		m[value] = struct{}{}
+	}
+
+	for _, value := range memberIds {
+		if _, ok := m[value]; !ok {
+			addWatchers = append(addWatchers, &model.ProjectTaskWatcher{
+				TaskId:    int(taskId),
+				MemberId:  value,
+				CreatedBy: uid,
+			})
+		}
+	}
+
+	if len(addWatchers) == 0 {
+		return errors.New("все приглашённые контакты стали наблюдателями задачи")
+	}
+
+	err = db.Transaction(func(tx *gorm.DB) error {
+		if err = tx.Create(&addWatchers).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p *ProjectService) GetWatchers(ctx context.Context, taskId int64) ([]*model.ProjectMemberItem, error) {

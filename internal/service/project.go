@@ -12,13 +12,15 @@ import (
 
 type ProjectService struct {
 	*repo.Source
-	ProjectRepo            *repo.Project
-	ProjectMemberRepo      *repo.ProjectMember
-	ProjectTaskTypeRepo    *repo.ProjectTaskType
-	ProjectTaskRepo        *repo.ProjectTask
-	ProjectTaskCommentRepo *repo.ProjectTaskComment
-	UserRepo               *repo.User
-	Relation               *cache.Relation
+	ProjectRepo               *repo.Project
+	ProjectMemberRepo         *repo.ProjectMember
+	ProjectTaskTypeRepo       *repo.ProjectTaskType
+	ProjectTaskRepo           *repo.ProjectTask
+	ProjectTaskCommentRepo    *repo.ProjectTaskComment
+	UserRepo                  *repo.User
+	Relation                  *cache.Relation
+	ProjectTaskCoexecutorRepo *repo.ProjectTaskCoexecutor
+	ProjectTaskWatcherRepo    *repo.ProjectTaskWatcher
 }
 
 func NewProjectService(
@@ -30,16 +32,20 @@ func NewProjectService(
 	projectTaskCommentRepo *repo.ProjectTaskComment,
 	userRepo *repo.User,
 	relation *cache.Relation,
+	projectTaskCoexecutorRepo *repo.ProjectTaskCoexecutor,
+	projectTaskWatcherRepo *repo.ProjectTaskWatcher,
 ) *ProjectService {
 	return &ProjectService{
-		Source:                 source,
-		ProjectRepo:            projectRepo,
-		ProjectMemberRepo:      projectMemberRepo,
-		ProjectTaskTypeRepo:    projectTaskTypeRepo,
-		ProjectTaskRepo:        projectTaskRepo,
-		ProjectTaskCommentRepo: projectTaskCommentRepo,
-		UserRepo:               userRepo,
-		Relation:               relation,
+		Source:                    source,
+		ProjectRepo:               projectRepo,
+		ProjectMemberRepo:         projectMemberRepo,
+		ProjectTaskTypeRepo:       projectTaskTypeRepo,
+		ProjectTaskRepo:           projectTaskRepo,
+		ProjectTaskCommentRepo:    projectTaskCommentRepo,
+		UserRepo:                  userRepo,
+		Relation:                  relation,
+		ProjectTaskCoexecutorRepo: projectTaskCoexecutorRepo,
+		ProjectTaskWatcherRepo:    projectTaskWatcherRepo,
 	}
 }
 
@@ -98,7 +104,7 @@ func (p *ProjectService) CreateProject(ctx context.Context, opt *ProjectOpt) (in
 func (p *ProjectService) Projects(userId int) ([]*model.ProjectItem, error) {
 	tx := p.Source.Db().Table("project_members")
 	tx.Select("p.id AS id, p.name AS name")
-	tx.Joins("LEFT JOIN projects p on p.id = project_members.project_id")
+	tx.Joins("LEFT JOIN projects p ON p.id = project_members.project_id")
 	tx.Where("project_members.user_id = ?", userId)
 	tx.Order("project_members.created_at desc")
 
@@ -127,7 +133,7 @@ func (p *ProjectService) GetMembers(ctx context.Context, projectId int64) []*mod
 		"users.username AS username",
 	}
 	tx := p.Db().WithContext(ctx).Table("project_members").
-		Joins("LEFT JOIN users on users.id = project_members.user_id").
+		Joins("LEFT JOIN users ON users.id = project_members.user_id").
 		Where("project_members.project_id = ?", projectId)
 	//.Order("project_members.leader desc")
 
@@ -170,30 +176,7 @@ func (p *ProjectService) Invite(ctx context.Context, opt *ProjectInviteOpt) erro
 		m[value] = struct{}{}
 	}
 
-	mids := make([]int, 0)
-	mids = append(mids, opt.MemberIds...)
-	mids = append(mids, opt.UserId)
-
-	memberItems := make([]*model.User, 0)
-	err = db.Table("users").
-		Select("id, username").
-		Where("id in ?", mids).
-		Scan(&memberItems).Error
-	if err != nil {
-		return err
-	}
-
-	memberMaps := make(map[int]*model.User)
-	for _, item := range memberItems {
-		memberMaps[item.Id] = item
-	}
-
-	members := make([]model.ProjectMemberItem, 0)
 	for _, value := range opt.MemberIds {
-		members = append(members, model.ProjectMemberItem{
-			UserId:   int64(value),
-			Username: memberMaps[value].Username,
-		})
 		if _, ok := m[value]; !ok {
 			addMembers = append(addMembers, &model.ProjectMember{
 				ProjectId: opt.ProjectId,
@@ -203,11 +186,11 @@ func (p *ProjectService) Invite(ctx context.Context, opt *ProjectInviteOpt) erro
 		}
 	}
 	if len(addMembers) == 0 {
-		return errors.New("все приглашенные контакты стали участниками проекта")
+		return errors.New("все приглашённые контакты уже являются участниками проекта")
 	}
 
 	err = db.Transaction(func(tx *gorm.DB) error {
-		tx.Delete(&model.ProjectMember{}, "project_id = ? and user_id in ?", opt.ProjectId, opt.MemberIds)
+		tx.Delete(&model.ProjectMember{}, "project_id = ? AND user_id in ?", opt.ProjectId, opt.MemberIds)
 		if err = tx.Create(&addMembers).Error; err != nil {
 			return err
 		}
