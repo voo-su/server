@@ -22,6 +22,8 @@ func (p *ProjectService) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (i
 		TypeId:      opt.TypeId,
 		Title:       opt.Title,
 		Description: opt.Description,
+		AssignerId:  opt.CreatedBy,
+		ExecutorId:  opt.CreatedBy,
 		CreatedBy:   opt.CreatedBy,
 		CreatedAt:   time.Now(),
 	}
@@ -79,6 +81,17 @@ func (p *ProjectService) TaskDetail(ctx context.Context, taskId int64) (*model.P
 	}
 
 	return &taskDetail, nil
+}
+
+func (p *ProjectService) TaskExecutor(ctx context.Context, taskId int64, memberId int64) error {
+	_, err := p.ProjectTaskRepo.UpdateById(ctx, taskId, map[string]any{
+		"executor_id": memberId,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p *ProjectService) TaskMove(ctx context.Context, projectId int64, taskId int64, fromId int64, toId int64) error {

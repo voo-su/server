@@ -489,6 +489,214 @@ var _ interface {
 	ErrorName() string
 } = ProjectTaskResponseValidationError{}
 
+// Validate checks the field values on ProjectExecutorRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ProjectExecutorRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectExecutorRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ProjectExecutorRequestMultiError, or nil if none found.
+func (m *ProjectExecutorRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectExecutorRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for TaskId
+
+	// no validation rules for MemberId
+
+	if len(errors) > 0 {
+		return ProjectExecutorRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectExecutorRequestMultiError is an error wrapping multiple validation
+// errors returned by ProjectExecutorRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ProjectExecutorRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectExecutorRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectExecutorRequestMultiError) AllErrors() []error { return m }
+
+// ProjectExecutorRequestValidationError is the validation error returned by
+// ProjectExecutorRequest.Validate if the designated constraints aren't met.
+type ProjectExecutorRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectExecutorRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectExecutorRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectExecutorRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectExecutorRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectExecutorRequestValidationError) ErrorName() string {
+	return "ProjectExecutorRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectExecutorRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectExecutorRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectExecutorRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectExecutorRequestValidationError{}
+
+// Validate checks the field values on ProjectExecutorResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ProjectExecutorResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectExecutorResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ProjectExecutorResponseMultiError, or nil if none found.
+func (m *ProjectExecutorResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectExecutorResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return ProjectExecutorResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectExecutorResponseMultiError is an error wrapping multiple validation
+// errors returned by ProjectExecutorResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ProjectExecutorResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectExecutorResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectExecutorResponseMultiError) AllErrors() []error { return m }
+
+// ProjectExecutorResponseValidationError is the validation error returned by
+// ProjectExecutorResponse.Validate if the designated constraints aren't met.
+type ProjectExecutorResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectExecutorResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectExecutorResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectExecutorResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectExecutorResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectExecutorResponseValidationError) ErrorName() string {
+	return "ProjectExecutorResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectExecutorResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectExecutorResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectExecutorResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectExecutorResponseValidationError{}
+
 // Validate checks the field values on ProjectTaskMoveRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

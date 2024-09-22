@@ -36,6 +36,13 @@ message ProjectTaskResponse{
     repeated Categories categories = 1;
 }
 
+message ProjectExecutorRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    int64 member_id = 2 [(tagger.tags) = "form:\"member_id\" binding:\"required\""];
+}
+
+message ProjectExecutorResponse{}
+
 message ProjectTaskMoveRequest{
     int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\""];
     int64 task_id = 2 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];

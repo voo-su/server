@@ -148,6 +148,7 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 			project.GET("/tasks", core.HandlerFunc(handler.V1.ProjectTask.Tasks))
 			project.POST("/tasks/create", core.HandlerFunc(handler.V1.ProjectTask.Create))
 			project.GET("/tasks/detail", core.HandlerFunc(handler.V1.ProjectTask.TaskDetail))
+			project.PUT("/tasks/executor", core.HandlerFunc(handler.V1.ProjectTask.Executor))
 			project.PUT("/tasks/move", core.HandlerFunc(handler.V1.ProjectTask.TaskMove))
 			project.GET("/tasks/coexecutors", core.HandlerFunc(handler.V1.ProjectTask.TaskCoexecutors))
 			project.POST("/tasks/coexecutors/invite", core.HandlerFunc(handler.V1.ProjectTask.TaskCoexecutorInvite))

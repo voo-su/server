@@ -99,6 +99,28 @@ func (p *ProjectTask) TaskDetail(ctx *core.Context) error {
 	})
 }
 
+func (p *ProjectTask) Executor(ctx *core.Context) error {
+	params := &api_v1.ProjectExecutorRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	uid := ctx.UserId()
+	if !p.ProjectService.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
+		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать")
+	}
+
+	if err := p.ProjectService.TaskExecutor(
+		ctx.Ctx(),
+		params.TaskId,
+		params.MemberId,
+	); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(api_v1.ProjectExecutorResponse{})
+}
+
 func (p *ProjectTask) TaskMove(ctx *core.Context) error {
 	params := &api_v1.ProjectTaskMoveRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
