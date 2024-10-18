@@ -1,26 +1,26 @@
 app:
   env: dev
-  http: 8000
-  ws: 8001
-  tcp: 8002
+  http: xxxx
+  ws: xxxx
+  tcp: xxxx
   log: ./runtime/log
 
 postgresql:
-  host: postgres
+  host: xxx.xxx.xxx.xxx
   port: 5432
   username: postgres
   password: postgres
   database: voo_su
 
 redis:
-  host: redis:6379
+  host: xxx.xxx.xxx.xxx:6379
   auth:
   database: 0
 
 jwt:
-  secret: g56KFY0q17rg6PoMGJF0MjsrTCjh2vBFHUphE4wJGtjeg9HxnTsnuWa157Oa
-  expires_time: 2678400
-  buffer_time: 2678400
+  secret: xxxxxxxxxxxxxxxxxx
+  expires_time: xxxxxxx
+  buffer_time: xxxxxxx
 
 cors:
   origin: "*"
@@ -36,10 +36,10 @@ file:
     domain:
 
 email:
-  host: 127.0.0.1
+  host: xxx.xxx.xxx.xxx
   port: 25
   username:
   password:
-  from: info@voo.su
+  from: xxx@xxx.xxx
   name: Voo.su
-  report: info@magomedcoder.ru
+  report: xxx@xxx.xxx
