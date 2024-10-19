@@ -6,6 +6,16 @@ import "third_party/tagger/tagger.proto";
 
 option go_package = "./v1;api_v1";
 
+message GroupChatCreateRequest{
+    string name = 1 [(tagger.tags) = "binding:\"required\""];
+    string ids = 2 [(tagger.tags) = "binding:\"required,ids\""];
+    string avatar = 3;
+}
+
+message GroupChatCreateResponse{
+    int32 group_id = 1;
+}
+
 message GroupChatListResponse{
     message Item{
         int32 id = 1;
@@ -17,16 +27,6 @@ message GroupChatListResponse{
         int32 creator_id = 7;
     }
     repeated Item items = 1;
-}
-
-message GroupChatCreateRequest{
-    string name = 1 [(tagger.tags) = "binding:\"required\""];
-    string ids = 2 [(tagger.tags) = "binding:\"required,ids\""];
-    string avatar = 3;
-}
-
-message GroupChatCreateResponse{
-    int32 group_id = 1;
 }
 
 message GroupChatDetailRequest{
@@ -100,11 +100,6 @@ message GroupChatRemoveMemberRequest{
 
 message GroupChatRemoveMemberResponse{}
 
-message GroupChatOvertListRequest{
-    int32 page = 1 [(tagger.tags) = "form:\"page\" binding:\"required\""];
-    string name = 2 [(tagger.tags) = "form:\"name\" binding:\"max=50\""];
-}
-
 message GroupChatOvertListResponse{
     message Item{
         int32 id = 1;
@@ -122,18 +117,7 @@ message GroupChatOvertListResponse{
     bool next = 2;
 }
 
-message GroupChatHandoverRequest{
-    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
-    int32 user_id = 2 [(tagger.tags) = "binding:\"required\""];
-}
-
 message GroupChatAssignAdminRequest{
-    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
-    int32 user_id = 2 [(tagger.tags) = "binding:\"required\""];
-    int32 mode = 3 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
-}
-
-message GroupChatNoSpeakRequest{
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
     int32 user_id = 2 [(tagger.tags) = "binding:\"required\""];
     int32 mode = 3 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
@@ -185,7 +169,6 @@ message GroupChatRequestListResponse{
 }
 
 message GroupChatRequestAllResponse{
-
     message Item{
         int32 id = 1;
         int32 user_id = 2;

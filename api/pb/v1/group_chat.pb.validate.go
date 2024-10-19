@@ -35,142 +35,6 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on GroupChatListResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GroupChatListResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on GroupChatListResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// GroupChatListResponseMultiError, or nil if none found.
-func (m *GroupChatListResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *GroupChatListResponse) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	for idx, item := range m.GetItems() {
-		_, _ = idx, item
-
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, GroupChatListResponseValidationError{
-						field:  fmt.Sprintf("Items[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, GroupChatListResponseValidationError{
-						field:  fmt.Sprintf("Items[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return GroupChatListResponseValidationError{
-					field:  fmt.Sprintf("Items[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	if len(errors) > 0 {
-		return GroupChatListResponseMultiError(errors)
-	}
-
-	return nil
-}
-
-// GroupChatListResponseMultiError is an error wrapping multiple validation
-// errors returned by GroupChatListResponse.ValidateAll() if the designated
-// constraints aren't met.
-type GroupChatListResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m GroupChatListResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m GroupChatListResponseMultiError) AllErrors() []error { return m }
-
-// GroupChatListResponseValidationError is the validation error returned by
-// GroupChatListResponse.Validate if the designated constraints aren't met.
-type GroupChatListResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e GroupChatListResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e GroupChatListResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e GroupChatListResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e GroupChatListResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e GroupChatListResponseValidationError) ErrorName() string {
-	return "GroupChatListResponseValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e GroupChatListResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sGroupChatListResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = GroupChatListResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = GroupChatListResponseValidationError{}
-
 // Validate checks the field values on GroupChatCreateRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -382,6 +246,142 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GroupChatCreateResponseValidationError{}
+
+// Validate checks the field values on GroupChatListResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GroupChatListResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GroupChatListResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GroupChatListResponseMultiError, or nil if none found.
+func (m *GroupChatListResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GroupChatListResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GroupChatListResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GroupChatListResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GroupChatListResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GroupChatListResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GroupChatListResponseMultiError is an error wrapping multiple validation
+// errors returned by GroupChatListResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GroupChatListResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GroupChatListResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GroupChatListResponseMultiError) AllErrors() []error { return m }
+
+// GroupChatListResponseValidationError is the validation error returned by
+// GroupChatListResponse.Validate if the designated constraints aren't met.
+type GroupChatListResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GroupChatListResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GroupChatListResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GroupChatListResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GroupChatListResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GroupChatListResponseValidationError) ErrorName() string {
+	return "GroupChatListResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GroupChatListResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGroupChatListResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GroupChatListResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GroupChatListResponseValidationError{}
 
 // Validate checks the field values on GroupChatDetailRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -1895,112 +1895,6 @@ var _ interface {
 	ErrorName() string
 } = GroupChatRemoveMemberResponseValidationError{}
 
-// Validate checks the field values on GroupChatOvertListRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GroupChatOvertListRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on GroupChatOvertListRequest with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// GroupChatOvertListRequestMultiError, or nil if none found.
-func (m *GroupChatOvertListRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *GroupChatOvertListRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Page
-
-	// no validation rules for Name
-
-	if len(errors) > 0 {
-		return GroupChatOvertListRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// GroupChatOvertListRequestMultiError is an error wrapping multiple validation
-// errors returned by GroupChatOvertListRequest.ValidateAll() if the
-// designated constraints aren't met.
-type GroupChatOvertListRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m GroupChatOvertListRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m GroupChatOvertListRequestMultiError) AllErrors() []error { return m }
-
-// GroupChatOvertListRequestValidationError is the validation error returned by
-// GroupChatOvertListRequest.Validate if the designated constraints aren't met.
-type GroupChatOvertListRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e GroupChatOvertListRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e GroupChatOvertListRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e GroupChatOvertListRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e GroupChatOvertListRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e GroupChatOvertListRequestValidationError) ErrorName() string {
-	return "GroupChatOvertListRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e GroupChatOvertListRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sGroupChatOvertListRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = GroupChatOvertListRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = GroupChatOvertListRequestValidationError{}
-
 // Validate checks the field values on GroupChatOvertListResponse with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -2139,112 +2033,6 @@ var _ interface {
 	ErrorName() string
 } = GroupChatOvertListResponseValidationError{}
 
-// Validate checks the field values on GroupChatHandoverRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GroupChatHandoverRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on GroupChatHandoverRequest with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// GroupChatHandoverRequestMultiError, or nil if none found.
-func (m *GroupChatHandoverRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *GroupChatHandoverRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for GroupId
-
-	// no validation rules for UserId
-
-	if len(errors) > 0 {
-		return GroupChatHandoverRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// GroupChatHandoverRequestMultiError is an error wrapping multiple validation
-// errors returned by GroupChatHandoverRequest.ValidateAll() if the designated
-// constraints aren't met.
-type GroupChatHandoverRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m GroupChatHandoverRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m GroupChatHandoverRequestMultiError) AllErrors() []error { return m }
-
-// GroupChatHandoverRequestValidationError is the validation error returned by
-// GroupChatHandoverRequest.Validate if the designated constraints aren't met.
-type GroupChatHandoverRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e GroupChatHandoverRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e GroupChatHandoverRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e GroupChatHandoverRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e GroupChatHandoverRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e GroupChatHandoverRequestValidationError) ErrorName() string {
-	return "GroupChatHandoverRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e GroupChatHandoverRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sGroupChatHandoverRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = GroupChatHandoverRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = GroupChatHandoverRequestValidationError{}
-
 // Validate checks the field values on GroupChatAssignAdminRequest with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -2353,114 +2141,6 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GroupChatAssignAdminRequestValidationError{}
-
-// Validate checks the field values on GroupChatNoSpeakRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GroupChatNoSpeakRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on GroupChatNoSpeakRequest with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// GroupChatNoSpeakRequestMultiError, or nil if none found.
-func (m *GroupChatNoSpeakRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *GroupChatNoSpeakRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for GroupId
-
-	// no validation rules for UserId
-
-	// no validation rules for Mode
-
-	if len(errors) > 0 {
-		return GroupChatNoSpeakRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// GroupChatNoSpeakRequestMultiError is an error wrapping multiple validation
-// errors returned by GroupChatNoSpeakRequest.ValidateAll() if the designated
-// constraints aren't met.
-type GroupChatNoSpeakRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m GroupChatNoSpeakRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m GroupChatNoSpeakRequestMultiError) AllErrors() []error { return m }
-
-// GroupChatNoSpeakRequestValidationError is the validation error returned by
-// GroupChatNoSpeakRequest.Validate if the designated constraints aren't met.
-type GroupChatNoSpeakRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e GroupChatNoSpeakRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e GroupChatNoSpeakRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e GroupChatNoSpeakRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e GroupChatNoSpeakRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e GroupChatNoSpeakRequestValidationError) ErrorName() string {
-	return "GroupChatNoSpeakRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e GroupChatNoSpeakRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sGroupChatNoSpeakRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = GroupChatNoSpeakRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = GroupChatNoSpeakRequestValidationError{}
 
 // Validate checks the field values on GroupChatMuteRequest with the rules
 // defined in the proto definition for this message. If any rules are

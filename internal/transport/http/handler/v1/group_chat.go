@@ -183,22 +183,6 @@ func (c *GroupChat) Get(ctx *core.Context) error {
 	return ctx.Success(resp)
 }
 
-//func (c *GroupChat) UpdateMemberRemark(ctx *core.Context) error {
-//	params := &api_v1.GroupChatRemarkUpdateRequest{}
-//	if err := ctx.Context.ShouldBind(params); err != nil {
-//		return ctx.InvalidParams(err)
-//	}
-//
-//	_, err := c.GroupChatMemberRepo.UpdateWhere(ctx.Ctx(), map[string]any{
-//		"user_card": params.VisitCard,
-//	}, "group_id = ? and user_id = ?", params.GroupId, ctx.UserId())
-//	if err != nil {
-//		return ctx.ErrorBusiness("Не удалось изменить заметку в группе")
-//	}
-//
-//	return ctx.Success(nil)
-//}
-
 func (c *GroupChat) GetInviteFriends(ctx *core.Context) error {
 	params := &api_v1.GroupChatGetInviteFriendsRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
@@ -288,6 +272,30 @@ func (c *GroupChat) Members(ctx *core.Context) error {
 	}
 
 	return ctx.Success(&api_v1.GroupChatMemberListResponse{Items: items})
+}
+
+func (c *GroupChat) RemoveMembers(ctx *core.Context) error {
+	params := &api_v1.GroupChatRemoveMemberRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	uid := ctx.UserId()
+	if !c.GroupChatMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
+		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
+	}
+
+	err := c.GroupChatService.RemoveMember(ctx.Ctx(), &service.GroupRemoveMembersOpt{
+		UserId:    uid,
+		GroupId:   int(params.GroupId),
+		MemberIds: sliceutil.ParseIds(params.MembersIds),
+	})
+
+	if err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(&api_v1.GroupChatRemoveMemberResponse{})
 }
 
 func (c *GroupChat) AssignAdmin(ctx *core.Context) error {
