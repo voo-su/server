@@ -64,7 +64,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	unreadStorage := cache.NewUnreadStorage(client)
 	messageStorage := cache.NewMessageStorage(client)
 	serverStorage := cache.NewSidStorage(client)
-	clientStorage := cache.NewClientStorage(client, conf, serverStorage)
+	clientStorage := cache.NewClientStorage(conf, client, serverStorage)
 	message := repo.NewMessage(db)
 	messageService := &service.MessageService{
 		Source:              source,
@@ -84,7 +84,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	}
 	userSession := repo.NewUserSession(db)
 	auth := &v1.Auth{
-		Config:             conf,
+		Conf:               conf,
 		AuthService:        authService,
 		JwtTokenStorage:    jwtTokenStorage,
 		RedisLock:          redisLock,
@@ -149,7 +149,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	}
 	splitService := service.NewSplitService(source, split, conf, filesystem)
 	upload := &v1.Upload{
-		Config:       conf,
+		Conf:         conf,
 		Filesystem:   filesystem,
 		SplitService: splitService,
 	}
@@ -222,7 +222,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	}
 	engine := router.NewRouter(conf, handlerHandler, jwtTokenStorage)
 	appProvider := &http.AppProvider{
-		Config: conf,
+		Conf:   conf,
 		Engine: engine,
 	}
 	return appProvider
@@ -231,7 +231,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	client := provider.NewRedisClient(conf)
 	serverStorage := cache.NewSidStorage(client)
-	clientStorage := cache.NewClientStorage(client, conf, serverStorage)
+	clientStorage := cache.NewClientStorage(conf, client, serverStorage)
 	roomStorage := cache.NewRoomStorage(client)
 	db := provider.NewPostgresqlClient(conf)
 	relation := cache.NewRelation(client)
@@ -268,7 +268,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	chatHandler := chat.NewHandler(client, groupChatMemberService, messageService)
 	chatEvent := &event.ChatEvent{
 		Redis:                  client,
-		Config:                 conf,
+		Conf:                   conf,
 		RoomStorage:            roomStorage,
 		GroupChatMemberRepo:    groupChatMember,
 		GroupChatMemberService: groupChatMemberService,
@@ -279,8 +279,8 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 		Event:   chatEvent,
 	}
 	handlerHandler := &handler2.Handler{
-		Chat:   chatChannel,
-		Config: conf,
+		Chat: chatChannel,
+		Conf: conf,
 	}
 	jwtTokenStorage := cache.NewTokenSessionStorage(client)
 	engine := router2.NewRouter(conf, handlerHandler, jwtTokenStorage)
@@ -303,7 +303,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 		EmailClient: emailClient,
 	}
 	appProvider := &ws.AppProvider{
-		Config:    conf,
+		Conf:      conf,
 		Engine:    engine,
 		Coroutine: server,
 		Handler:   handlerHandler,
@@ -326,7 +326,7 @@ func NewCronInjector(conf *config.Config) *cli.CronProvider {
 		ClearExpireServer: clearExpireServer,
 	}
 	cronProvider := &cli.CronProvider{
-		Config:  conf,
+		Conf:    conf,
 		Crontab: crontab,
 	}
 	return cronProvider
@@ -334,16 +334,32 @@ func NewCronInjector(conf *config.Config) *cli.CronProvider {
 
 func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
 	db := provider.NewPostgresqlClient(conf)
-	exampleQueue := queue.ExampleQueue{}
+	client := provider.NewRedisClient(conf)
+	emailHandle := queue.EmailHandle{
+		rds: client,
+	}
+	loginHandle := queue.LoginHandle{
+		rds: client,
+	}
 	queueJobs := &cli.QueueJobs{
-		ExampleQueue: exampleQueue,
+		EmailHandle: emailHandle,
+		LoginHandle: loginHandle,
 	}
 	queueProvider := &cli.QueueProvider{
-		Config: conf,
-		DB:     db,
-		Jobs:   queueJobs,
+		Conf: conf,
+		DB:   db,
+		Jobs: queueJobs,
 	}
 	return queueProvider
+}
+
+func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
+	db := provider.NewPostgresqlClient(conf)
+	migrateProvider := &cli.MigrateProvider{
+		Conf: conf,
+		DB:   db,
+	}
+	return migrateProvider
 }
 
 // wire.go:

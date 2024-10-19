@@ -63,3 +63,12 @@ func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
 		),
 	)
 }
+
+func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
+	panic(
+		wire.Build(
+			providerSet,
+			cli.MigrateProviderSet,
+		),
+	)
+}
