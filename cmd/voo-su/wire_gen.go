@@ -16,6 +16,7 @@ import (
 	"voo.su/internal/service"
 	"voo.su/internal/transport/cli"
 	"voo.su/internal/transport/cli/handle/cron"
+	"voo.su/internal/transport/cli/handle/queue"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/http/handler"
 	"voo.su/internal/transport/http/handler/v1"
@@ -329,6 +330,20 @@ func NewCronInjector(conf *config.Config) *cli.CronProvider {
 		Crontab: crontab,
 	}
 	return cronProvider
+}
+
+func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
+	db := provider.NewPostgresqlClient(conf)
+	exampleQueue := queue.ExampleQueue{}
+	queueJobs := &cli.QueueJobs{
+		ExampleQueue: exampleQueue,
+	}
+	queueProvider := &cli.QueueProvider{
+		Config: conf,
+		DB:     db,
+		Jobs:   queueJobs,
+	}
+	return queueProvider
 }
 
 // wire.go:

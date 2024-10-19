@@ -44,10 +44,22 @@ func NewCronCommand() core.Command {
 	}
 }
 
+func NewQueueCommand() core.Command {
+	return core.Command{
+		Name: "queue",
+		Action: func(ctx *cli.Context, conf *config.Config) error {
+			logger.InitLogger(fmt.Sprintf("%s/logs/cli_queue.log", conf.App.Log), logger.LevelInfo, "queue")
+
+			return _cli.Queue(ctx, NewQueueInjector(conf))
+		},
+	}
+}
+
 func main() {
 	app := core.NewApp()
 	app.Register(NewHttpCommand())
 	app.Register(NewWsCommand())
 	app.Register(NewCronCommand())
+	app.Register(NewQueueCommand())
 	app.Run()
 }
