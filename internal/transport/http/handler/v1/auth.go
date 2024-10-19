@@ -16,7 +16,7 @@ import (
 )
 
 type Auth struct {
-	Config             *config.Config
+	Conf               *config.Config
 	AuthService        *service.AuthService
 	JwtTokenStorage    *cache.JwtTokenStorage
 	RedisLock          *cache.RedisLock
@@ -34,7 +34,7 @@ func (a *Auth) Login(ctx *core.Context) error {
 	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(entity.ExpiresTime))
-	token := jwt.GenerateToken("auth", a.Config.Jwt.Secret, &jwt.Options{
+	token := jwt.GenerateToken("auth", a.Conf.Jwt.Secret, &jwt.Options{
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		ID:        params.Email,
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -61,7 +61,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		return ctx.InvalidParams("Неверный код")
 	}
 
-	claims, err := jwt.ParseToken(params.Token, a.Config.Jwt.Secret)
+	claims, err := jwt.ParseToken(params.Token, a.Conf.Jwt.Secret)
 	if err != nil {
 		return ctx.InvalidParams("Неверный токен")
 	}
@@ -98,8 +98,8 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		})
 	}
 
-	expiresAt := time.Now().Add(time.Second * time.Duration(a.Config.Jwt.ExpiresTime))
-	token := jwt.GenerateToken("api", a.Config.Jwt.Secret, &jwt.Options{
+	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.Jwt.ExpiresTime))
+	token := jwt.GenerateToken("api", a.Conf.Jwt.Secret, &jwt.Options{
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		ID:        strconv.Itoa(user.Id),
 		Issuer:    "web",
@@ -119,7 +119,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 	return ctx.Success(&api_v1.AuthVerifyResponse{
 		Type:        "Bearer",
 		AccessToken: token,
-		ExpiresIn:   int32(a.Config.Jwt.ExpiresTime),
+		ExpiresIn:   int32(a.Conf.Jwt.ExpiresTime),
 	})
 }
 

@@ -9,22 +9,26 @@ import (
 )
 
 type ClientStorage struct {
-	redis   *redis.Client
-	config  *config.Config
-	storage *ServerStorage
+	Conf    *config.Config
+	Redis   *redis.Client
+	Storage *ServerStorage
 }
 
 func NewClientStorage(
+	conf *config.Config,
 	redis *redis.Client,
-	config *config.Config,
 	storage *ServerStorage,
 ) *ClientStorage {
-	return &ClientStorage{redis: redis, config: config, storage: storage}
+	return &ClientStorage{
+		Conf:    conf,
+		Redis:   redis,
+		Storage: storage,
+	}
 }
 
 func (c *ClientStorage) Set(ctx context.Context, channel string, fd string, uid int) error {
-	sid := c.config.ServerId()
-	_, err := c.redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+	sid := c.Conf.ServerId()
+	_, err := c.Redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.HSet(ctx, c.clientKey(sid, channel), fd, uid)
 		pipe.SAdd(ctx, c.userKey(sid, channel, strconv.Itoa(uid)), fd)
 		return nil
@@ -34,10 +38,10 @@ func (c *ClientStorage) Set(ctx context.Context, channel string, fd string, uid 
 }
 
 func (c *ClientStorage) Del(ctx context.Context, channel, fd string) error {
-	sid := c.config.ServerId()
+	sid := c.Conf.ServerId()
 	key := c.clientKey(sid, channel)
-	uid, _ := c.redis.HGet(ctx, key, fd).Result()
-	_, err := c.redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+	uid, _ := c.Redis.HGet(ctx, key, fd).Result()
+	_, err := c.Redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.HDel(ctx, key, fd)
 		pipe.SRem(ctx, c.userKey(sid, channel, uid), fd)
 		return nil
@@ -47,7 +51,7 @@ func (c *ClientStorage) Del(ctx context.Context, channel, fd string) error {
 }
 
 func (c *ClientStorage) IsOnline(ctx context.Context, channel, uid string) bool {
-	for _, sid := range c.storage.All(ctx, 1) {
+	for _, sid := range c.Storage.All(ctx, 1) {
 		if c.IsCurrentServerOnline(ctx, sid, channel, uid) {
 			return true
 		}
@@ -56,13 +60,13 @@ func (c *ClientStorage) IsOnline(ctx context.Context, channel, uid string) bool 
 }
 
 func (c *ClientStorage) IsCurrentServerOnline(ctx context.Context, sid, channel, uid string) bool {
-	val, err := c.redis.SCard(ctx, c.userKey(sid, channel, uid)).Result()
+	val, err := c.Redis.SCard(ctx, c.userKey(sid, channel, uid)).Result()
 	return err == nil && val > 0
 }
 
 func (c *ClientStorage) GetUidFromClientIds(ctx context.Context, sid, channel, uid string) []int64 {
 	cids := make([]int64, 0)
-	items, err := c.redis.SMembers(ctx, c.userKey(sid, channel, uid)).Result()
+	items, err := c.Redis.SMembers(ctx, c.userKey(sid, channel, uid)).Result()
 	if err != nil {
 		return cids
 	}
@@ -77,7 +81,7 @@ func (c *ClientStorage) GetUidFromClientIds(ctx context.Context, sid, channel, u
 }
 
 func (c *ClientStorage) GetClientIdFromUid(ctx context.Context, sid, channel, cid string) (int64, error) {
-	uid, err := c.redis.HGet(ctx, c.clientKey(sid, channel), cid).Result()
+	uid, err := c.Redis.HGet(ctx, c.clientKey(sid, channel), cid).Result()
 	if err != nil {
 		return 0, err
 	}

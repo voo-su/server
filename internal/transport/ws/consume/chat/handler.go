@@ -13,7 +13,7 @@ import (
 var handlers map[string]func(ctx context.Context, data []byte)
 
 type Handler struct {
-	Config         *config.Config
+	Conf           *config.Config
 	ClientStorage  *cache.ClientStorage
 	RoomStorage    *cache.RoomStorage
 	DialogService  *service.DialogService
@@ -23,7 +23,7 @@ type Handler struct {
 }
 
 func NewHandler(
-	config *config.Config,
+	conf *config.Config,
 	clientStorage *cache.ClientStorage,
 	roomStorage *cache.RoomStorage,
 	dialogService *service.DialogService,
@@ -32,7 +32,7 @@ func NewHandler(
 	source *repo.Source,
 ) *Handler {
 	return &Handler{
-		Config:         config,
+		Conf:           conf,
 		ClientStorage:  clientStorage,
 		RoomStorage:    roomStorage,
 		DialogService:  dialogService,

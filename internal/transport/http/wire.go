@@ -12,7 +12,7 @@ import (
 )
 
 type AppProvider struct {
-	Config *config.Config
+	Conf   *config.Config
 	Engine *gin.Engine
 }
 

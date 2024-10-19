@@ -11,15 +11,15 @@ import (
 	"voo.su/internal/transport/cli/handle/queue"
 )
 
-type QueueProvider struct {
-	Config *config.Config
-	DB     *gorm.DB
-	Jobs   *QueueJobs
-}
-
 type QueueJobs struct {
 	queue.EmailHandle
 	queue.LoginHandle
+}
+
+type QueueProvider struct {
+	Conf *config.Config
+	DB   *gorm.DB
+	Jobs *QueueJobs
 }
 
 func Queue(ctx *cli.Context, app *QueueProvider) error {

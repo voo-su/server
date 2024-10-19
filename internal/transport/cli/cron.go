@@ -21,15 +21,15 @@ type ICrontab interface {
 	Handle(ctx context.Context) error
 }
 
-type CronProvider struct {
-	Config  *config.Config
-	Crontab *Crontab
-}
-
 type Crontab struct {
 	ClearWsCache      *cron.ClearWsCache
 	ClearTmpFile      *cron.ClearTmpFile
 	ClearExpireServer *cron.ClearExpireServer
+}
+
+type CronProvider struct {
+	Conf    *config.Config
+	Crontab *Crontab
 }
 
 func Cron(ctx *cli.Context, app *CronProvider) error {

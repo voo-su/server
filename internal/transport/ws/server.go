@@ -26,7 +26,7 @@ import (
 var ErrServerClosed = errors.New("закрытие сервера")
 
 type AppProvider struct {
-	Config    *config.Config
+	Conf      *config.Config
 	Engine    *gin.Engine
 	Coroutine *process.Server
 	Handler   *handler.Handler
@@ -36,16 +36,16 @@ type AppProvider struct {
 func Run(ctx *cli.Context, app *AppProvider) error {
 	eg, groupCtx := errgroup.WithContext(ctx.Context)
 
-	if app.Config.App.Env == "prod" {
+	if app.Conf.App.Env == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	socket.Initialize(groupCtx, eg, func(name string) {
 		emailClient := app.Providers.EmailClient
-		if app.Config.App.Env == "prod" {
+		if app.Conf.App.Env == "prod" {
 			_ = emailClient.SendMail(&email.Option{
-				To:      app.Config.Email.Report,
-				Subject: fmt.Sprintf("%s Проблема с демоном", app.Config.App.Env),
+				To:      app.Conf.Email.Report,
+				Subject: fmt.Sprintf("%s Проблема с демоном", app.Conf.App.Env),
 				Body:    fmt.Sprintf("Проблема с демоном %s", name),
 			})
 		}
@@ -58,10 +58,10 @@ func Run(ctx *cli.Context, app *AppProvider) error {
 		app.Coroutine.Start(eg, groupCtx)
 	})
 
-	log.Printf("ID сервера: %s", app.Config.ServerId())
+	log.Printf("ID сервера: %s", app.Conf.ServerId())
 	log.Printf("PID сервера: %d", os.Getpid())
-	log.Printf("Порт прослушивания Websocket: %d", app.Config.App.Websocket)
-	log.Printf("Порт прослушивания TCP: %d", app.Config.App.Tcp)
+	log.Printf("Порт прослушивания Websocket: %d", app.Conf.App.Websocket)
+	log.Printf("Порт прослушивания TCP: %d", app.Conf.App.Tcp)
 
 	go NewTcpServer(app)
 
@@ -70,7 +70,7 @@ func Run(ctx *cli.Context, app *AppProvider) error {
 
 func start(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppProvider) error {
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", app.Config.App.Websocket),
+		Addr:    fmt.Sprintf(":%d", app.Conf.App.Websocket),
 		Handler: app.Engine,
 	}
 	eg.Go(func() error {
@@ -109,7 +109,7 @@ func start(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppPr
 }
 
 func NewTcpServer(app *AppProvider) {
-	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", app.Config.App.Tcp))
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", app.Conf.App.Tcp))
 	if err != nil {
 		panic(err)
 	}

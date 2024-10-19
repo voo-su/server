@@ -18,5 +18,10 @@ var CronProviderSet = wire.NewSet(
 var QueueProviderSet = wire.NewSet(
 	wire.Struct(new(QueueProvider), "*"),
 	wire.Struct(new(QueueJobs), "*"),
-	wire.Struct(new(queue.ExampleQueue), "*"),
+	wire.Struct(new(queue.EmailHandle), "*"),
+	wire.Struct(new(queue.LoginHandle), "*"),
+)
+
+var MigrateProviderSet = wire.NewSet(
+	wire.Struct(new(MigrateProvider), "*"),
 )

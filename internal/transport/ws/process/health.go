@@ -11,12 +11,18 @@ import (
 )
 
 type HealthSubscribe struct {
-	config  *config.Config
-	storage *cache.ServerStorage
+	Conf    *config.Config
+	Storage *cache.ServerStorage
 }
 
-func NewHealthSubscribe(config *config.Config, storage *cache.ServerStorage) *HealthSubscribe {
-	return &HealthSubscribe{config: config, storage: storage}
+func NewHealthSubscribe(
+	conf *config.Config,
+	storage *cache.ServerStorage,
+) *HealthSubscribe {
+	return &HealthSubscribe{
+		Conf:    conf,
+		Storage: storage,
+	}
 }
 
 func (s *HealthSubscribe) Setup(ctx context.Context) error {
@@ -26,7 +32,7 @@ func (s *HealthSubscribe) Setup(ctx context.Context) error {
 		case <-ctx.Done():
 			return nil
 		case <-time.After(10 * time.Second):
-			if err := s.storage.Set(ctx, s.config.ServerId(), time.Now().Unix()); err != nil {
+			if err := s.Storage.Set(ctx, s.Conf.ServerId(), time.Now().Unix()); err != nil {
 				logger.Std().Error(fmt.Sprintf("Ошибка отчета о подписке на состояние WebSocket %s", err.Error()))
 			}
 		}

@@ -313,7 +313,7 @@ func (g *GroupChatService) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		}
 	}
 	if len(addMembers) == 0 {
-		return errors.New("все приглашенные контакты стали участниками группы")
+		return errors.New("все приглашённые контакты уже являются участниками группы")
 	}
 
 	record := &model.Message{
