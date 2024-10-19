@@ -443,3 +443,20 @@ func (c *Message) Sticker(ctx *core.Context) error {
 
 	return ctx.Success(nil)
 }
+
+type CollectMessageRequest struct {
+	RecordId int `form:"record_id" json:"record_id" binding:"required,numeric,gt=0" label:"record_id"`
+}
+
+func (c *Message) Collect(ctx *core.Context) error {
+	params := &CollectMessageRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := c.DialogService.Collect(ctx.Ctx(), ctx.UserId(), params.RecordId); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}

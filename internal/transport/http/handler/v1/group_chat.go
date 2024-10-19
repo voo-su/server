@@ -147,30 +147,6 @@ func (c *GroupChat) Setting(ctx *core.Context) error {
 	return ctx.Success(&api_v1.GroupChatSettingResponse{})
 }
 
-func (c *GroupChat) RemoveMembers(ctx *core.Context) error {
-	params := &api_v1.GroupChatRemoveMemberRequest{}
-	if err := ctx.Context.ShouldBind(params); err != nil {
-		return ctx.InvalidParams(err)
-	}
-
-	uid := ctx.UserId()
-	if !c.GroupChatMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
-	}
-
-	err := c.GroupChatService.RemoveMember(ctx.Ctx(), &service.GroupRemoveMembersOpt{
-		UserId:    uid,
-		GroupId:   int(params.GroupId),
-		MemberIds: sliceutil.ParseIds(params.MembersIds),
-	})
-
-	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
-	}
-
-	return ctx.Success(&api_v1.GroupChatRemoveMemberResponse{})
-}
-
 func (c *GroupChat) Get(ctx *core.Context) error {
 	params := &api_v1.GroupChatDetailRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {

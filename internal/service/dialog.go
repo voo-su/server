@@ -10,6 +10,7 @@ import (
 	"voo.su/internal/entity"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
+	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
@@ -188,4 +189,41 @@ func (d *DialogService) BatchAddList(ctx context.Context, uid int, values map[st
 	}
 
 	d.Source.Db().WithContext(ctx).Exec(fmt.Sprintf("INSERT INTO dialogs (dialog_type, user_id, receiver_id, created_at, updated_at) VALUES %s ON DUPLICATE KEY UPDATE is_delete = 0, updated_at = '%s'", strings.Join(data, ","), ctime))
+}
+
+func (d *DialogService) Collect(ctx context.Context, uid int, recordId int) error {
+	var record model.Message
+	if err := d.Source.Db().First(&record, recordId).Error; err != nil {
+		return err
+	}
+
+	if record.MsgType != entity.ChatMsgTypeImage {
+		return errors.New("это сообщение нельзя добавить в избранное")
+	}
+
+	if record.IsRevoke == 1 {
+		return errors.New("это сообщение нельзя добавить в избранное")
+	}
+
+	if record.DialogType == entity.ChatPrivateMode {
+		if record.UserId != uid && record.ReceiverId != uid {
+			return entity.ErrPermissionDenied
+		}
+	} else if record.DialogType == entity.ChatGroupMode {
+		if !d.GroupChatMemberRepo.IsMember(ctx, record.ReceiverId, uid, true) {
+			return entity.ErrPermissionDenied
+		}
+	}
+
+	var file model.DialogRecordExtraImage
+	if err := jsonutil.Decode(record.Extra, &file); err != nil {
+		return err
+	}
+
+	return d.Source.Db().Create(&model.StickerItem{
+		UserId:     uid,
+		Url:        file.Url,
+		FileSuffix: file.Suffix,
+		FileSize:   file.Size,
+	}).Error
 }
