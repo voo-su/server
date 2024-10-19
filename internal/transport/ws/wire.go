@@ -20,9 +20,9 @@ var ProviderSet = wire.NewSet(
 
 	router.NewRouter,
 
-	service.NewDialogService,
-	service.NewGroupMemberService,
 	service.NewContactService,
+	service.NewChatService,
+	service.NewGroupMemberService,
 
 	handler.ProviderSet,
 	event.ProviderSet,

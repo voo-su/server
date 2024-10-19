@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"voo.su/api/pb/v1"
+	api_v1 "voo.su/api/pb/v1"
 	"voo.su/internal/entity"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
@@ -15,8 +15,8 @@ import (
 	"voo.su/pkg/timeutil"
 )
 
-type Dialog struct {
-	DialogService    *service.DialogService
+type Chat struct {
+	ChatService      *service.ChatService
 	RedisLock        *cache.RedisLock
 	ClientStorage    *cache.ClientStorage
 	MessageStorage   *cache.MessageStorage
@@ -30,9 +30,9 @@ type Dialog struct {
 	GroupChatRepo    *repo.GroupChat
 }
 
-func (d *Dialog) Create(ctx *core.Context) error {
+func (c *Chat) Create(ctx *core.Context) error {
 	var (
-		params = &api_v1.DialogSessionCreateRequest{}
+		params = &api_v1.ChatCreateRequest{}
 		uid    = ctx.UserId()
 		agent  = strings.TrimSpace(ctx.Context.GetHeader("user-agent"))
 	)
@@ -49,11 +49,11 @@ func (d *Dialog) Create(ctx *core.Context) error {
 	}
 
 	key := fmt.Sprintf("dialog:list:%d-%d-%d-%s", uid, params.ReceiverId, params.DialogType, agent)
-	if !d.RedisLock.Lock(ctx.Ctx(), key, 10) {
+	if !c.RedisLock.Lock(ctx.Ctx(), key, 10) {
 		return ctx.ErrorBusiness("Ошибка создания")
 	}
 
-	if d.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
+	if c.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
 		DialogType: int(params.DialogType),
 		UserId:     uid,
 		ReceiverId: int(params.ReceiverId),
@@ -61,7 +61,7 @@ func (d *Dialog) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Недостаточно прав")
 	}
 
-	result, err := d.DialogService.Create(ctx.Ctx(), &service.DialogCreateOpt{
+	result, err := c.ChatService.Create(ctx.Ctx(), &service.CreateChatOpt{
 		UserId:     uid,
 		DialogType: int(params.DialogType),
 		ReceiverId: int(params.ReceiverId),
@@ -70,7 +70,7 @@ func (d *Dialog) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	item := &api_v1.DialogSessionItem{
+	item := &api_v1.ChatItem{
 		Id:         int32(result.Id),
 		DialogType: int32(result.DialogType),
 		ReceiverId: int32(result.ReceiverId),
@@ -78,26 +78,26 @@ func (d *Dialog) Create(ctx *core.Context) error {
 		UpdatedAt:  timeutil.DateTime(),
 	}
 	if item.DialogType == entity.ChatPrivateMode {
-		item.UnreadNum = int32(d.UnreadStorage.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
+		item.UnreadNum = int32(c.UnreadStorage.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
 		//item.Remark = c.contactService.Dao().GetFriendRemark(ctx.Ctx(), uid, int(params.ReceiverId))
-		if user, err := d.UserRepo.FindById(ctx.Ctx(), result.ReceiverId); err == nil {
+		if user, err := c.UserRepo.FindById(ctx.Ctx(), result.ReceiverId); err == nil {
 			item.Username = user.Username
 			item.Name = user.Name
 			item.Surname = user.Surname
 			item.Avatar = user.Avatar
 		}
 	} else if result.DialogType == entity.ChatGroupMode {
-		if group, err := d.GroupChatRepo.FindById(ctx.Ctx(), int(params.ReceiverId)); err == nil {
+		if group, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.ReceiverId)); err == nil {
 			item.Name = group.Name
 		}
 	}
 
-	if msg, err := d.MessageStorage.Get(ctx.Ctx(), result.DialogType, uid, result.ReceiverId); err == nil {
+	if msg, err := c.MessageStorage.Get(ctx.Ctx(), result.DialogType, uid, result.ReceiverId); err == nil {
 		item.MsgText = msg.Content
 		item.UpdatedAt = msg.Datetime
 	}
 
-	return ctx.Success(&api_v1.DialogSessionCreateResponse{
+	return ctx.Success(&api_v1.ChatCreateResponse{
 		Id:         item.Id,
 		DialogType: item.DialogType,
 		ReceiverId: item.ReceiverId,
@@ -116,14 +116,14 @@ func (d *Dialog) Create(ctx *core.Context) error {
 	})
 }
 
-func (d *Dialog) List(ctx *core.Context) error {
+func (c *Chat) List(ctx *core.Context) error {
 	uid := ctx.UserId()
-	unReads := d.UnreadStorage.All(ctx.Ctx(), uid)
+	unReads := c.UnreadStorage.All(ctx.Ctx(), uid)
 	if len(unReads) > 0 {
-		d.DialogService.BatchAddList(ctx.Ctx(), uid, unReads)
+		c.ChatService.BatchAddList(ctx.Ctx(), uid, unReads)
 	}
 
-	data, err := d.DialogService.List(ctx.Ctx(), uid)
+	data, err := c.ChatService.List(ctx.Ctx(), uid)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -135,9 +135,9 @@ func (d *Dialog) List(ctx *core.Context) error {
 	}
 
 	//remarks, _ := c.contactService.Dao().Remarks(ctx.Ctx(), uid, friends)
-	items := make([]*api_v1.DialogSessionItem, 0)
+	items := make([]*api_v1.ChatItem, 0)
 	for _, item := range data {
-		value := &api_v1.DialogSessionItem{
+		value := &api_v1.ChatItem{
 			Id:         int32(item.Id),
 			DialogType: int32(item.DialogType),
 			ReceiverId: int32(item.ReceiverId),
@@ -156,44 +156,64 @@ func (d *Dialog) List(ctx *core.Context) error {
 		if item.DialogType == 1 {
 			value.Username = item.Username
 			value.Avatar = item.UserAvatar
+			//if item.IsBot == 1 {
+			//    bot, err := d.BotRepo.GetByUserId(ctx.Ctx(), 1)
+			//    if err != nil {
+			//
+			//    }
+			//    value.Name = bot.Name
+			//} else {
 			value.Name = item.Name
+			//}
 			value.Surname = item.Surname
-			value.IsOnline = int32(strutil.BoolToInt(d.ClientStorage.IsOnline(ctx.Ctx(), entity.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))))
+			//value.Remark = remarks[item.ReceiverId]
+			value.IsOnline = int32(strutil.BoolToInt(c.ClientStorage.IsOnline(ctx.Ctx(), entity.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))))
 		} else {
 			value.Name = item.GroupName
 			value.Avatar = item.GroupAvatar
 		}
 
-		if msg, err := d.MessageStorage.Get(ctx.Ctx(), item.DialogType, uid, item.ReceiverId); err == nil {
+		if msg, err := c.MessageStorage.Get(ctx.Ctx(), item.DialogType, uid, item.ReceiverId); err == nil {
 			value.MsgText = msg.Content
 			value.UpdatedAt = msg.Datetime
 		}
 		items = append(items, value)
 	}
 
-	return ctx.Success(&api_v1.DialogSessionListResponse{Items: items})
+	return ctx.Success(&api_v1.ChatListResponse{Items: items})
 }
 
-func (d *Dialog) Delete(ctx *core.Context) error {
-	params := &api_v1.DialogSessionDeleteRequest{}
+func (c *Chat) Delete(ctx *core.Context) error {
+	params := &api_v1.ChatDeleteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := d.DialogService.Delete(ctx.Ctx(), ctx.UserId(), int(params.ListId)); err != nil {
+	if err := c.ChatService.Delete(ctx.Ctx(), ctx.UserId(), int(params.ListId)); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.DialogSessionDeleteResponse{})
+	return ctx.Success(&api_v1.ChatDeleteResponse{})
 }
 
-func (d *Dialog) Top(ctx *core.Context) error {
-	params := &api_v1.DialogSessionTopRequest{}
+func (c *Chat) ClearUnreadMessage(ctx *core.Context) error {
+	params := &api_v1.ChatClearUnreadNumRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := d.DialogService.Top(ctx.Ctx(), &service.DialogSessionTopOpt{
+	c.UnreadStorage.Reset(ctx.Ctx(), int(params.DialogType), int(params.ReceiverId), ctx.UserId())
+
+	return ctx.Success(&api_v1.ChatClearUnreadNumResponse{})
+}
+
+func (c *Chat) Top(ctx *core.Context) error {
+	params := &api_v1.ChatTopRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := c.ChatService.Top(ctx.Ctx(), &service.ChatTopOpt{
 		UserId: ctx.UserId(),
 		Id:     int(params.ListId),
 		Type:   int(params.Type),
@@ -201,16 +221,16 @@ func (d *Dialog) Top(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.DialogSessionTopResponse{})
+	return ctx.Success(&api_v1.ChatTopResponse{})
 }
 
-func (d *Dialog) Disturb(ctx *core.Context) error {
-	params := &api_v1.DialogSessionDisturbRequest{}
+func (c *Chat) Disturb(ctx *core.Context) error {
+	params := &api_v1.ChatDisturbRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := d.DialogService.Disturb(ctx.Ctx(), &service.DialogSessionDisturbOpt{
+	if err := c.ChatService.Disturb(ctx.Ctx(), &service.ChatDisturbOpt{
 		UserId:     ctx.UserId(),
 		DialogType: int(params.DialogType),
 		ReceiverId: int(params.ReceiverId),
@@ -219,16 +239,5 @@ func (d *Dialog) Disturb(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.DialogSessionDisturbResponse{})
-}
-
-func (d *Dialog) ClearUnreadMessage(ctx *core.Context) error {
-	params := &api_v1.DialogSessionClearUnreadNumRequest{}
-	if err := ctx.Context.ShouldBind(params); err != nil {
-		return ctx.InvalidParams(err)
-	}
-
-	d.UnreadStorage.Reset(ctx.Ctx(), int(params.DialogType), int(params.ReceiverId), ctx.UserId())
-
-	return ctx.Success(&api_v1.DialogSessionClearUnreadNumResponse{})
+	return ctx.Success(&api_v1.ChatDisturbResponse{})
 }

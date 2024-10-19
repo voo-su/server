@@ -23,7 +23,7 @@ type GroupChat struct {
 	DialogRepo             *repo.Dialog
 	GroupChatService       *service.GroupChatService
 	GroupChatMemberService *service.GroupChatMemberService
-	DialogService          *service.DialogService
+	ChatService            *service.ChatService
 	ContactService         *service.ContactService
 	MessageSendService     service.MessageSendService
 	RedisLock              *cache.RedisLock
@@ -102,7 +102,7 @@ func (c *GroupChat) SignOut(ctx *core.Context) error {
 	}
 
 	sid := c.DialogRepo.FindBySessionId(uid, int(params.GroupId), entity.ChatGroupMode)
-	_ = c.DialogService.Delete(ctx.Ctx(), ctx.UserId(), sid)
+	_ = c.ChatService.Delete(ctx.Ctx(), ctx.UserId(), sid)
 
 	return ctx.Success(nil)
 }

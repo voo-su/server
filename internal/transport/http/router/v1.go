@@ -54,14 +54,13 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 		}
 		user := v1.Group("/users").Use(authorize)
 		{
-			user.GET("/search", core.HandlerFunc(handler.V1.User.Search))
+			user.GET("/search", core.HandlerFunc(handler.V1.Search.Search))
 		}
 		contact := v1.Group("/contacts").Use(authorize)
 		{
 			contact.GET("", core.HandlerFunc(handler.V1.Contact.List))
 			contact.GET("/get", core.HandlerFunc(handler.V1.Contact.Get))
 			contact.POST("/delete", core.HandlerFunc(handler.V1.Contact.Delete))
-			//contact.POST("/edit-remark", core.HandlerFunc(handler.V1.Contact.Remark))
 			contact.GET("/requests", core.HandlerFunc(handler.V1.ContactRequest.List))
 			contact.POST("/requests/create", core.HandlerFunc(handler.V1.ContactRequest.Create))
 			contact.POST("/requests/accept", core.HandlerFunc(handler.V1.ContactRequest.Accept))
@@ -73,12 +72,12 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 		}
 		chat := v1.Group("/chats").Use(authorize)
 		{
-			chat.GET("", core.HandlerFunc(handler.V1.Dialog.List))
-			chat.POST("/create", core.HandlerFunc(handler.V1.Dialog.Create))
-			chat.POST("/delete", core.HandlerFunc(handler.V1.Dialog.Delete))
-			chat.POST("/topping", core.HandlerFunc(handler.V1.Dialog.Top))
-			chat.POST("/disturb", core.HandlerFunc(handler.V1.Dialog.Disturb))
-			chat.POST("/unread/clear", core.HandlerFunc(handler.V1.Dialog.ClearUnreadMessage))
+			chat.GET("", core.HandlerFunc(handler.V1.Chat.List))
+			chat.POST("/create", core.HandlerFunc(handler.V1.Chat.Create))
+			chat.POST("/delete", core.HandlerFunc(handler.V1.Chat.Delete))
+			chat.POST("/topping", core.HandlerFunc(handler.V1.Chat.Top))
+			chat.POST("/disturb", core.HandlerFunc(handler.V1.Chat.Disturb))
+			chat.POST("/unread/clear", core.HandlerFunc(handler.V1.Chat.ClearUnreadMessage))
 		}
 		groupChat := v1.Group("/group-chats").Use(authorize)
 		{

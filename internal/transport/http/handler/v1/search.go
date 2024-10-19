@@ -8,18 +8,18 @@ import (
 	"voo.su/pkg/core"
 )
 
-type User struct {
+type Search struct {
 	UserRepo *repo.User
 }
 
-func (u *User) Search(ctx *core.Context) error {
-	params := &api_v1.UserSearchRequest{}
+func (s *Search) Search(ctx *core.Context) error {
+	params := &api_v1.SearchUserRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	uid := ctx.UserId()
-	list, err := u.UserRepo.SearchByUsername(params.Username, uid)
+	list, err := s.UserRepo.SearchByUsername(params.Username, uid)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.ErrorBusiness("Ничего не найдено.")
@@ -27,9 +27,9 @@ func (u *User) Search(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	items := make([]*api_v1.UserSearchResponse_Item, 0)
+	items := make([]*api_v1.SearchUserResponse_Item, 0)
 	for _, item := range list {
-		items = append(items, &api_v1.UserSearchResponse_Item{
+		items = append(items, &api_v1.SearchUserResponse_Item{
 			Id:       int32(item.Id),
 			Username: item.Username,
 			Avatar:   item.Avatar,
@@ -38,5 +38,5 @@ func (u *User) Search(ctx *core.Context) error {
 		})
 	}
 
-	return ctx.Success(&api_v1.UserSearchResponse{Items: items})
+	return ctx.Success(&api_v1.SearchUserResponse{Items: items})
 }

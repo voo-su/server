@@ -16,22 +16,84 @@ import (
 	"voo.su/pkg/timeutil"
 )
 
-type DialogService struct {
+type ChatService struct {
 	*repo.Source
 	Dialog              *repo.Dialog
 	GroupChatMemberRepo *repo.GroupChatMember
 }
 
-func NewDialogService(
+func NewChatService(
 	source *repo.Source,
 	dialog *repo.Dialog,
 	groupChatMemberRepo *repo.GroupChatMember,
-) *DialogService {
-	return &DialogService{
+) *ChatService {
+	return &ChatService{
 		source,
 		dialog,
 		groupChatMemberRepo,
 	}
+}
+
+func (c *ChatService) List(ctx context.Context, uid int) ([]*model.SearchChat, error) {
+	fields := []string{
+		"d.id", "d.dialog_type", "d.receiver_id", "d.updated_at", "d.is_disturb",
+		"d.is_top", "d.is_bot", "u.avatar as user_avatar", "u.username",
+		"g.group_name", "g.avatar as group_avatar", "u.name", "u.surname",
+	}
+
+	query := c.Source.Db().WithContext(ctx).Table("dialogs d")
+	query.Joins("LEFT JOIN users AS u ON d.receiver_id = u.id AND d.dialog_type = 1")
+	query.Joins("LEFT JOIN group_chats AS g ON d.receiver_id = g.id AND d.dialog_type = 2")
+	query.Where("d.user_id = ? and d.is_delete = 0", uid)
+	query.Order("d.updated_at DESC")
+
+	var items []*model.SearchChat
+	if err := query.Select(fields).Scan(&items).Error; err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+type CreateChatOpt struct {
+	UserId     int
+	DialogType int
+	ReceiverId int
+	IsBoot     bool
+}
+
+func (c *ChatService) Create(ctx context.Context, opt *CreateChatOpt) (*model.Dialog, error) {
+	result, err := c.Dialog.FindByWhere(ctx, "dialog_type = ? and user_id = ? and receiver_id = ?", opt.DialogType, opt.UserId, opt.ReceiverId)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		result = &model.Dialog{
+			DialogType: opt.DialogType,
+			UserId:     opt.UserId,
+			ReceiverId: opt.ReceiverId,
+		}
+		if opt.IsBoot {
+			result.IsBot = 1
+		}
+		c.Source.Db().WithContext(ctx).Create(result)
+	} else {
+		result.IsTop = 0
+		result.IsDelete = 0
+		result.IsDisturb = 0
+		if opt.IsBoot {
+			result.IsBot = 1
+		}
+		c.Source.Db().WithContext(ctx).Save(result)
+	}
+
+	return result, nil
+}
+
+func (c *ChatService) Delete(ctx context.Context, uid int, id int) error {
+	_, err := c.Dialog.UpdateWhere(ctx, map[string]any{"is_delete": 1, "updated_at": time.Now()}, "id = ? and user_id = ?", id, uid)
+	return err
 }
 
 type RemoveRecordListOpt struct {
@@ -41,9 +103,9 @@ type RemoveRecordListOpt struct {
 	RecordIds  string
 }
 
-func (d *DialogService) DeleteRecordList(ctx context.Context, opt *RemoveRecordListOpt) error {
+func (c *ChatService) DeleteRecordList(ctx context.Context, opt *RemoveRecordListOpt) error {
 	var (
-		db      = d.Source.Db().WithContext(ctx)
+		db      = c.Source.Db().WithContext(ctx)
 		findIds []int64
 		ids     = sliceutil.Unique(sliceutil.ParseIds(opt.RecordIds))
 	)
@@ -56,7 +118,7 @@ func (d *DialogService) DeleteRecordList(ctx context.Context, opt *RemoveRecordL
 			Where(subQuery).
 			Pluck("id", &findIds)
 	} else {
-		if !d.GroupChatMemberRepo.IsMember(ctx, opt.ReceiverId, opt.UserId, false) {
+		if !c.GroupChatMemberRepo.IsMember(ctx, opt.ReceiverId, opt.UserId, false) {
 			return entity.ErrPermissionDenied
 		}
 
@@ -80,98 +142,36 @@ func (d *DialogService) DeleteRecordList(ctx context.Context, opt *RemoveRecordL
 	return db.Create(items).Error
 }
 
-func (d *DialogService) List(ctx context.Context, uid int) ([]*model.SearchDialogSession, error) {
-	fields := []string{
-		"d.id", "d.dialog_type", "d.receiver_id", "d.updated_at", "d.is_disturb",
-		"d.is_top", "d.is_bot", "u.avatar as user_avatar", "u.username",
-		"g.group_name", "g.avatar as group_avatar", "u.name", "u.surname",
-	}
-
-	query := d.Source.Db().WithContext(ctx).Table("dialogs d")
-	query.Joins("LEFT JOIN users AS u ON d.receiver_id = u.id AND d.dialog_type = 1")
-	query.Joins("LEFT JOIN group_chats AS g ON d.receiver_id = g.id AND d.dialog_type = 2")
-	query.Where("d.user_id = ? and d.is_delete = 0", uid)
-	query.Order("d.updated_at DESC")
-
-	var items []*model.SearchDialogSession
-	if err := query.Select(fields).Scan(&items).Error; err != nil {
-		return nil, err
-	}
-
-	return items, nil
-}
-
-type DialogCreateOpt struct {
-	UserId     int
-	DialogType int
-	ReceiverId int
-	IsBoot     bool
-}
-
-func (d *DialogService) Create(ctx context.Context, opt *DialogCreateOpt) (*model.Dialog, error) {
-	result, err := d.Dialog.FindByWhere(ctx, "dialog_type = ? and user_id = ? and receiver_id = ?", opt.DialogType, opt.UserId, opt.ReceiverId)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	}
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		result = &model.Dialog{
-			DialogType: opt.DialogType,
-			UserId:     opt.UserId,
-			ReceiverId: opt.ReceiverId,
-		}
-		if opt.IsBoot {
-			result.IsBot = 1
-		}
-		d.Source.Db().WithContext(ctx).Create(result)
-	} else {
-		result.IsTop = 0
-		result.IsDelete = 0
-		result.IsDisturb = 0
-		if opt.IsBoot {
-			result.IsBot = 1
-		}
-		d.Source.Db().WithContext(ctx).Save(result)
-	}
-
-	return result, nil
-}
-
-func (d *DialogService) Delete(ctx context.Context, uid int, id int) error {
-	_, err := d.Dialog.UpdateWhere(ctx, map[string]any{"is_delete": 1, "updated_at": time.Now()}, "id = ? and user_id = ?", id, uid)
-	return err
-}
-
-type DialogSessionTopOpt struct {
+type ChatTopOpt struct {
 	UserId int
 	Id     int
 	Type   int
 }
 
-func (d *DialogService) Top(ctx context.Context, opt *DialogSessionTopOpt) error {
-	_, err := d.Dialog.UpdateWhere(ctx, map[string]any{
+func (c *ChatService) Top(ctx context.Context, opt *ChatTopOpt) error {
+	_, err := c.Dialog.UpdateWhere(ctx, map[string]any{
 		"is_top":     strutil.BoolToInt(opt.Type == 1),
 		"updated_at": time.Now(),
 	}, "id = ? and user_id = ?", opt.Id, opt.UserId)
 	return err
 }
 
-type DialogSessionDisturbOpt struct {
+type ChatDisturbOpt struct {
 	UserId     int
 	DialogType int
 	ReceiverId int
 	IsDisturb  int
 }
 
-func (d *DialogService) Disturb(ctx context.Context, opt *DialogSessionDisturbOpt) error {
-	_, err := d.Dialog.UpdateWhere(ctx, map[string]any{
+func (c *ChatService) Disturb(ctx context.Context, opt *ChatDisturbOpt) error {
+	_, err := c.Dialog.UpdateWhere(ctx, map[string]any{
 		"is_disturb": opt.IsDisturb,
 		"updated_at": time.Now(),
 	}, "user_id = ? and receiver_id = ? and dialog_type = ?", opt.UserId, opt.ReceiverId, opt.DialogType)
 	return err
 }
 
-func (d *DialogService) BatchAddList(ctx context.Context, uid int, values map[string]int) {
+func (c *ChatService) BatchAddList(ctx context.Context, uid int, values map[string]int) {
 	ctime := timeutil.DateTime()
 	data := make([]string, 0)
 	for k, v := range values {
@@ -188,12 +188,12 @@ func (d *DialogService) BatchAddList(ctx context.Context, uid int, values map[st
 		return
 	}
 
-	d.Source.Db().WithContext(ctx).Exec(fmt.Sprintf("INSERT INTO dialogs (dialog_type, user_id, receiver_id, created_at, updated_at) VALUES %s ON DUPLICATE KEY UPDATE is_delete = 0, updated_at = '%s'", strings.Join(data, ","), ctime))
+	c.Source.Db().WithContext(ctx).Exec(fmt.Sprintf("INSERT INTO dialogs (dialog_type, user_id, receiver_id, created_at, updated_at) VALUES %s ON DUPLICATE KEY UPDATE is_delete = 0, updated_at = '%s'", strings.Join(data, ","), ctime))
 }
 
-func (d *DialogService) Collect(ctx context.Context, uid int, recordId int) error {
+func (c *ChatService) Collect(ctx context.Context, uid int, recordId int) error {
 	var record model.Message
-	if err := d.Source.Db().First(&record, recordId).Error; err != nil {
+	if err := c.Source.Db().First(&record, recordId).Error; err != nil {
 		return err
 	}
 
@@ -210,7 +210,7 @@ func (d *DialogService) Collect(ctx context.Context, uid int, recordId int) erro
 			return entity.ErrPermissionDenied
 		}
 	} else if record.DialogType == entity.ChatGroupMode {
-		if !d.GroupChatMemberRepo.IsMember(ctx, record.ReceiverId, uid, true) {
+		if !c.GroupChatMemberRepo.IsMember(ctx, record.ReceiverId, uid, true) {
 			return entity.ErrPermissionDenied
 		}
 	}
@@ -220,7 +220,7 @@ func (d *DialogService) Collect(ctx context.Context, uid int, recordId int) erro
 		return err
 	}
 
-	return d.Source.Db().Create(&model.StickerItem{
+	return c.Source.Db().Create(&model.StickerItem{
 		UserId:     uid,
 		Url:        file.Url,
 		FileSuffix: file.Suffix,

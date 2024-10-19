@@ -14,7 +14,7 @@ import (
 type Contact struct {
 	ContactService     *service.ContactService
 	ClientStorage      *cache.ClientStorage
-	DialogService      *service.DialogService
+	ChatService        *service.ChatService
 	MessageSendService service.MessageSendService
 	ContactRepo        *repo.Contact
 	UserRepo           *repo.User
@@ -111,7 +111,7 @@ func (c *Contact) Delete(ctx *core.Context) error {
 	})
 
 	sid := c.DialogRepo.FindBySessionId(uid, int(params.FriendId), entity.ChatPrivateMode)
-	if err := c.DialogService.Delete(ctx.Ctx(), ctx.UserId(), sid); err != nil {
+	if err := c.ChatService.Delete(ctx.Ctx(), ctx.UserId(), sid); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

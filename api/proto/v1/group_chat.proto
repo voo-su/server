@@ -26,6 +26,7 @@ message GroupChatListResponse{
         int32 is_disturb = 6;
         int32 creator_id = 7;
     }
+
     repeated Item items = 1;
 }
 
@@ -41,9 +42,9 @@ message GroupChatDetailResponse{
     string created_at = 5;
     bool is_manager = 6;
     int32 is_disturb = 7;
-    //    string visit_card = 8;
-    int32 is_mute = 9;
-    int32 is_overt = 10;
+    int32 is_mute = 8;
+    int32 is_overt = 9;
+    // string visit_card = 10;
 }
 
 message GroupChatMemberListRequest{

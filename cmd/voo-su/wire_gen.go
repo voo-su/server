@@ -52,7 +52,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	requestClient := provider.NewRequestClient(httpClient)
 	ipAddressService := service.NewIpAddressService(source, conf, requestClient)
 	dialog := repo.NewDialog(db)
-	dialogService := service.NewDialogService(source, dialog, groupChatMember)
+	chatService := service.NewChatService(source, dialog, groupChatMember)
 	bot := repo.NewBot(db)
 	sequence := cache.NewSequence(client)
 	repoSequence := repo.NewSequence(db, sequence)
@@ -89,7 +89,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		JwtTokenStorage:    jwtTokenStorage,
 		RedisLock:          redisLock,
 		IpAddressService:   ipAddressService,
-		DialogService:      dialogService,
+		ChatService:        chatService,
 		BotRepo:            bot,
 		MessageSendService: messageService,
 		UserSession:        userSession,
@@ -97,14 +97,11 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	account := &v1.Account{
 		UserRepo: user,
 	}
-	v1User := &v1.User{
-		UserRepo: user,
-	}
 	contactService := service.NewContactService(source, contact)
 	v1Contact := &v1.Contact{
 		ContactService:     contactService,
 		ClientStorage:      clientStorage,
-		DialogService:      dialogService,
+		ChatService:        chatService,
 		MessageSendService: messageService,
 		ContactRepo:        contact,
 		UserRepo:           user,
@@ -118,8 +115,8 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		ContactRepo:           contact,
 	}
 	groupChatService := service.NewGroupChatService(source, groupChat, groupChatMember, relation, repoSequence)
-	v1Dialog := &v1.Dialog{
-		DialogService:    dialogService,
+	chat := &v1.Chat{
+		ChatService:      chatService,
 		RedisLock:        redisLock,
 		ClientStorage:    clientStorage,
 		MessageStorage:   messageStorage,
@@ -134,7 +131,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	}
 	groupChatMemberService := service.NewGroupMemberService(source, groupChatMember)
 	v1Message := &v1.Message{
-		DialogService:          dialogService,
+		ChatService:            chatService,
 		AuthService:            authService,
 		MessageSendService:     messageService,
 		Filesystem:             filesystem,
@@ -161,7 +158,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		DialogRepo:             dialog,
 		GroupChatService:       groupChatService,
 		GroupChatMemberService: groupChatMemberService,
-		DialogService:          dialogService,
+		ChatService:            chatService,
 		ContactService:         contactService,
 		MessageSendService:     messageService,
 		RedisLock:              redisLock,
@@ -201,13 +198,15 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatMemberRepo: groupChatMember,
 		GroupChatAdsRepo:    groupChatAds,
 	}
+	search := &v1.Search{
+		UserRepo: user,
+	}
 	handlerV1 := &handler.V1{
 		Auth:             auth,
 		Account:          account,
-		User:             v1User,
 		Contact:          v1Contact,
 		ContactRequest:   contactRequest,
-		Dialog:           v1Dialog,
+		Chat:             chat,
 		Message:          v1Message,
 		MessagePublish:   publish,
 		Upload:           upload,
@@ -216,6 +215,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Sticker:          v1Sticker,
 		ContactFolder:    v1ContactFolder,
 		GroupChatAds:     v1GroupChatAds,
+		Search:           search,
 	}
 	handlerHandler := &handler.Handler{
 		V1: handlerV1,
@@ -286,11 +286,11 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	engine := router2.NewRouter(conf, handlerHandler, jwtTokenStorage)
 	healthSubscribe := process.NewHealthSubscribe(conf, serverStorage)
 	dialog := repo.NewDialog(db)
-	dialogService := service.NewDialogService(source, dialog, groupChatMember)
+	chatService := service.NewChatService(source, dialog, groupChatMember)
 	contactRemark := cache.NewContactRemark(client)
 	contact := repo.NewContact(db, contactRemark, relation)
 	contactService := service.NewContactService(source, contact)
-	handler3 := chat2.NewHandler(conf, clientStorage, roomStorage, dialogService, messageService, contactService, source)
+	handler3 := chat2.NewHandler(conf, clientStorage, roomStorage, chatService, messageService, contactService, source)
 	chatSubscribe := consume.NewChatSubscribe(handler3)
 	messageSubscribe := process.NewMessageSubscribe(conf, client, chatSubscribe)
 	subServers := &process.SubServers{

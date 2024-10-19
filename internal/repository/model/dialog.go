@@ -19,7 +19,7 @@ func (Dialog) TableName() string {
 	return "dialogs"
 }
 
-type SearchDialogSession struct {
+type SearchChat struct {
 	Id          int       `json:"id" `
 	DialogType  int       `json:"dialog_type" `
 	ReceiverId  int       `json:"receiver_id" `

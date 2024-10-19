@@ -6,11 +6,11 @@ import "third_party/tagger/tagger.proto";
 
 option go_package = "./v1;api_v1";
 
-message UserSearchRequest{
+message SearchUserRequest{
     string username = 1 [(tagger.tags) = "form:\"username\" binding:\"required\""];
 }
 
-message UserSearchResponse{
+message SearchUserResponse{
     message Item{
         int32 id = 1;
         string username = 2;
@@ -21,4 +21,3 @@ message UserSearchResponse{
 
     repeated Item items = 1;
 }
-
