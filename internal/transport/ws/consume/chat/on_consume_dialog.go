@@ -27,7 +27,7 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 	var clientIds []int64
 	if in.DialogType == entity.ChatPrivateMode {
 		for _, val := range [2]int64{in.SenderID, in.ReceiverID} {
-			ids := h.ClientStorage.GetUidFromClientIds(ctx, h.Config.ServerId(), socket.Session.Chat.Name(), strconv.FormatInt(val, 10))
+			ids := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.FormatInt(val, 10))
 
 			clientIds = append(clientIds, ids...)
 		}
@@ -36,7 +36,7 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 			Channel:  socket.Session.Chat.Name(),
 			RoomType: entity.RoomImGroup,
 			Number:   strconv.Itoa(int(in.ReceiverID)),
-			Sid:      h.Config.ServerId(),
+			Sid:      h.Conf.ServerId(),
 		})
 		clientIds = append(clientIds, ids...)
 	}

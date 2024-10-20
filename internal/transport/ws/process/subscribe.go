@@ -15,8 +15,8 @@ import (
 
 type MessageSubscribe struct {
 	Conf           *config.Config
-	redis          *redis.Client
-	defaultConsume *consume.ChatSubscribe
+	Redis          *redis.Client
+	DefaultConsume *consume.ChatSubscribe
 }
 
 func NewMessageSubscribe(
@@ -26,8 +26,8 @@ func NewMessageSubscribe(
 ) *MessageSubscribe {
 	return &MessageSubscribe{
 		Conf:           conf,
-		redis:          redis,
-		defaultConsume: defaultConsume,
+		Redis:          redis,
+		DefaultConsume: defaultConsume,
 	}
 }
 
@@ -37,7 +37,7 @@ type IConsume interface {
 
 func (m *MessageSubscribe) Setup(ctx context.Context) error {
 	log.Println("Старт подписки на сообщение")
-	go m.subscribe(ctx, []string{entity.ImTopicChat, fmt.Sprintf(entity.ImTopicChatPrivate, m.Conf.ServerId())}, m.defaultConsume)
+	go m.subscribe(ctx, []string{entity.ImTopicChat, fmt.Sprintf(entity.ImTopicChatPrivate, m.Conf.ServerId())}, m.DefaultConsume)
 	<-ctx.Done()
 	return nil
 }
@@ -48,7 +48,7 @@ type SubscribeContent struct {
 }
 
 func (m *MessageSubscribe) subscribe(ctx context.Context, topic []string, consume IConsume) {
-	sub := m.redis.Subscribe(ctx, topic...)
+	sub := m.Redis.Subscribe(ctx, topic...)
 	defer sub.Close()
 	worker := pool.New().WithMaxGoroutines(10)
 	for data := range sub.Channel() {

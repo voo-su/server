@@ -73,6 +73,15 @@ message StickerMessageRequest{
     MessageReceiver receiver = 3;
 }
 
+message ForwardMessageRequest{
+    MessageReceiver receiver = 1;
+    string type = 2;
+    int32 mode = 3 [(tagger.tags) = "binding:\"required\""];
+    repeated int32 message_ids = 4 [(tagger.tags) = "binding:\"required\""];
+    repeated int32 gids = 5;
+    repeated int32 uids = 6;
+}
+
 message MixedMessageRequest{
     message Item{
         int32 type = 1;

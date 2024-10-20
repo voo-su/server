@@ -29,7 +29,7 @@ func (h *Handler) onConsumeGroupJoin(ctx context.Context, body []byte) {
 		return
 	}
 
-	sid := h.Config.ServerId()
+	sid := h.Conf.ServerId()
 	for _, uid := range in.Uids {
 
 		ids := h.ClientStorage.GetUidFromClientIds(ctx, sid, socket.Session.Chat.Name(), strconv.Itoa(uid))
@@ -38,7 +38,7 @@ func (h *Handler) onConsumeGroupJoin(ctx context.Context, body []byte) {
 				Channel:  socket.Session.Chat.Name(),
 				RoomType: entity.RoomImGroup,
 				Number:   strconv.Itoa(in.Gid),
-				Sid:      h.Config.ServerId(),
+				Sid:      h.Conf.ServerId(),
 				Cid:      cid,
 			}
 
@@ -77,7 +77,7 @@ func (h *Handler) onConsumeGroupApply(ctx context.Context, body []byte) {
 	data["group_name"] = groupDetail.Name
 	data["username"] = user.Username
 
-	clientIds := h.ClientStorage.GetUidFromClientIds(ctx, h.Config.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(groupMember.UserId))
+	clientIds := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(groupMember.UserId))
 
 	c := socket.NewSenderContent()
 	c.SetReceive(clientIds...)

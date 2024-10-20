@@ -9,7 +9,7 @@ import (
 )
 
 type SmsStorage struct {
-	redis *redis.Client
+	Redis *redis.Client
 }
 
 func NewSmsStorage(redis *redis.Client) *SmsStorage {
@@ -17,7 +17,7 @@ func NewSmsStorage(redis *redis.Client) *SmsStorage {
 }
 
 func (s *SmsStorage) Set(ctx context.Context, channel string, token string, code string, exp time.Duration) error {
-	_, err := s.redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+	_, err := s.Redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.Del(ctx, s.failName(channel, token))
 		pipe.Set(ctx, s.name(channel, token), code, exp)
 		return nil
@@ -26,11 +26,11 @@ func (s *SmsStorage) Set(ctx context.Context, channel string, token string, code
 }
 
 func (s *SmsStorage) Get(ctx context.Context, channel string, token string) (string, error) {
-	return s.redis.Get(ctx, s.name(channel, token)).Result()
+	return s.Redis.Get(ctx, s.name(channel, token)).Result()
 }
 
 func (s *SmsStorage) Del(ctx context.Context, channel string, token string) error {
-	return s.redis.Del(ctx, s.name(channel, token)).Err()
+	return s.Redis.Del(ctx, s.name(channel, token)).Err()
 }
 
 func (s *SmsStorage) Verify(ctx context.Context, channel string, token string, code string) bool {
@@ -42,15 +42,15 @@ func (s *SmsStorage) Verify(ctx context.Context, channel string, token string, c
 		return true
 	}
 
-	num := s.redis.Incr(ctx, s.failName(channel, token)).Val()
+	num := s.Redis.Incr(ctx, s.failName(channel, token)).Val()
 	if num >= 5 {
-		_, _ = s.redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+		_, _ = s.Redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 			pipe.Del(ctx, s.name(channel, token))
 			pipe.Del(ctx, s.failName(channel, token))
 			return nil
 		})
 	} else if num == 1 {
-		s.redis.Expire(ctx, s.failName(channel, token), 3*time.Minute)
+		s.Redis.Expire(ctx, s.failName(channel, token), 3*time.Minute)
 	}
 
 	return false

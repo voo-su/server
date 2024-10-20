@@ -7,7 +7,7 @@ import (
 )
 
 type GroupChatRequestStorage struct {
-	redis *redis.Client
+	Redis *redis.Client
 }
 
 func NewGroupChatRequestStorage(rds *redis.Client) *GroupChatRequestStorage {
@@ -15,11 +15,11 @@ func NewGroupChatRequestStorage(rds *redis.Client) *GroupChatRequestStorage {
 }
 
 func (g *GroupChatRequestStorage) Incr(ctx context.Context, uid int) {
-	g.redis.Incr(ctx, g.name(uid))
+	g.Redis.Incr(ctx, g.name(uid))
 }
 
 func (g *GroupChatRequestStorage) Get(ctx context.Context, uid int) int {
-	val, err := g.redis.Get(ctx, g.name(uid)).Int()
+	val, err := g.Redis.Get(ctx, g.name(uid)).Int()
 	if err != nil {
 		return 0
 	}
@@ -28,7 +28,7 @@ func (g *GroupChatRequestStorage) Get(ctx context.Context, uid int) int {
 }
 
 func (g *GroupChatRequestStorage) Del(ctx context.Context, uid int) {
-	g.redis.Del(ctx, g.name(uid))
+	g.Redis.Del(ctx, g.name(uid))
 }
 
 func (g *GroupChatRequestStorage) name(uid int) string {

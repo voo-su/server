@@ -11,10 +11,10 @@ import (
 type handle func(ctx context.Context, client socket.IClient, data []byte)
 
 type Handler struct {
-	redis         *redis.Client
-	memberService *service.GroupChatMemberService
-	handlers      map[string]func(ctx context.Context, client socket.IClient, data []byte)
-	message       service.MessageSendService
+	Redis         *redis.Client
+	MemberService *service.GroupChatMemberService
+	Handlers      map[string]func(ctx context.Context, client socket.IClient, data []byte)
+	Message       service.MessageSendService
 }
 
 func NewHandler(
@@ -22,23 +22,27 @@ func NewHandler(
 	memberService *service.GroupChatMemberService,
 	message *service.MessageService,
 ) *Handler {
-	return &Handler{redis: redis, memberService: memberService, message: message}
+	return &Handler{
+		Redis:         redis,
+		MemberService: memberService,
+		Message:       message,
+	}
 }
 
 func (h *Handler) init() {
-	h.handlers = make(map[string]func(ctx context.Context, client socket.IClient, data []byte))
-	h.handlers["voo.message.publish"] = h.onPublish
-	h.handlers["voo.message.revoke"] = h.onRevokeMessage
-	h.handlers["voo.message.delete"] = h.onDeleteMessage
-	h.handlers["voo.message.read"] = h.onReadMessage
-	h.handlers["voo.message.keyboard"] = h.onKeyboardMessage
+	h.Handlers = make(map[string]func(ctx context.Context, client socket.IClient, data []byte))
+	h.Handlers["voo.message.publish"] = h.onPublish
+	h.Handlers["voo.message.revoke"] = h.onRevokeMessage
+	h.Handlers["voo.message.delete"] = h.onDeleteMessage
+	h.Handlers["voo.message.read"] = h.onReadMessage
+	h.Handlers["voo.message.keyboard"] = h.onKeyboardMessage
 }
 
 func (h *Handler) Call(ctx context.Context, client socket.IClient, event string, data []byte) {
-	if h.handlers == nil {
+	if h.Handlers == nil {
 		h.init()
 	}
-	if call, ok := h.handlers[event]; ok {
+	if call, ok := h.Handlers[event]; ok {
 		call(ctx, client, data)
 	} else {
 		log.Printf("Событие чата: %s не зарегистрировано обратное вызов\n", event)

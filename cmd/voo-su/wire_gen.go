@@ -338,10 +338,10 @@ func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
 	db := provider.NewPostgresqlClient(conf)
 	client := provider.NewRedisClient(conf)
 	emailHandle := queue.EmailHandle{
-		rds: client,
+		Redis: client,
 	}
 	loginHandle := queue.LoginHandle{
-		rds: client,
+		Redis: client,
 	}
 	queueJobs := &cli.QueueJobs{
 		EmailHandle: emailHandle,

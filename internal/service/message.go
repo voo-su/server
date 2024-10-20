@@ -34,11 +34,8 @@ type MessageSendService interface {
 	SendVoice(ctx context.Context, uid int, req *api_v1.VoiceMessageRequest) error
 	SendVideo(ctx context.Context, uid int, req *api_v1.VideoMessageRequest) error
 	SendFile(ctx context.Context, uid int, req *api_v1.FileMessageRequest) error
-	SendCode(ctx context.Context, uid int, req *api_v1.CodeMessageRequest) error
 	SendVote(ctx context.Context, uid int, req *api_v1.VoteMessageRequest) error
 	SendForward(ctx context.Context, uid int, req *api_v1.ForwardMessageRequest) error
-	SendLocation(ctx context.Context, uid int, req *api_v1.LocationMessageRequest) error
-	SendBusinessCard(ctx context.Context, uid int, req *api_v1.CardMessageRequest) error
 	SendSysOther(ctx context.Context, data *model.Message) error
 	SendMixedMessage(ctx context.Context, uid int, req *api_v1.MixedMessageRequest) error
 	Revoke(ctx context.Context, uid int, msgId string) error
@@ -484,20 +481,6 @@ func (m *MessageService) SendFile(ctx context.Context, uid int, req *api_v1.File
 	return m.save(ctx, data)
 }
 
-func (m *MessageService) SendCode(ctx context.Context, uid int, req *api_v1.CodeMessageRequest) error {
-	data := &model.Message{
-		DialogType: int(req.Receiver.DialogType),
-		MsgType:    entity.ChatMsgTypeCode,
-		UserId:     uid,
-		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&model.DialogRecordExtraCode{
-			Lang: req.Lang,
-			Code: req.Code,
-		}),
-	}
-	return m.save(ctx, data)
-}
-
 func (m *MessageService) SendVote(ctx context.Context, uid int, req *api_v1.VoteMessageRequest) error {
 	data := &model.Message{
 		MsgId:      strutil.NewMsgId(),
@@ -585,35 +568,6 @@ func (m *MessageService) SendForward(ctx context.Context, uid int, req *api_v1.F
 	})
 
 	return nil
-}
-
-func (m *MessageService) SendLocation(ctx context.Context, uid int, req *api_v1.LocationMessageRequest) error {
-	data := &model.Message{
-		DialogType: int(req.Receiver.DialogType),
-		MsgType:    entity.ChatMsgTypeLocation,
-		UserId:     uid,
-		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&model.DialogRecordExtraLocation{
-			Longitude:   req.Longitude,
-			Latitude:    req.Latitude,
-			Description: req.Description,
-		}),
-	}
-	return m.save(ctx, data)
-}
-
-func (m *MessageService) SendBusinessCard(ctx context.Context, uid int, req *api_v1.CardMessageRequest) error {
-	data := &model.Message{
-		DialogType: int(req.Receiver.DialogType),
-		MsgType:    entity.ChatMsgTypeCard,
-		UserId:     uid,
-		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&model.DialogRecordExtraCard{
-			UserId: int(req.UserId),
-		}),
-	}
-
-	return m.save(ctx, data)
 }
 
 func (m *MessageService) SendMixedMessage(ctx context.Context, uid int, req *api_v1.MixedMessageRequest) error {
