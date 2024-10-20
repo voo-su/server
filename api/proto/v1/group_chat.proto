@@ -101,23 +101,6 @@ message GroupChatRemoveMemberRequest{
 
 message GroupChatRemoveMemberResponse{}
 
-message GroupChatOvertListResponse{
-    message Item{
-        int32 id = 1;
-        int32 type = 2;
-        string name = 3;
-        string avatar = 4;
-        string description = 5;
-        int32 count = 6;
-        int32 max_num = 7;
-        bool is_member = 8;
-        string created_at = 9;
-    }
-
-    repeated Item items = 1;
-    bool next = 2;
-}
-
 message GroupChatAssignAdminRequest{
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
     int32 user_id = 2 [(tagger.tags) = "binding:\"required\""];

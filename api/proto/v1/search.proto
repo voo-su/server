@@ -6,7 +6,7 @@ import "third_party/tagger/tagger.proto";
 
 option go_package = "./v1;api_v1";
 
-message SearchUserRequest{
+message SearchUsersRequest{
     string username = 1 [(tagger.tags) = "form:\"username\" binding:\"required\""];
 }
 
@@ -20,4 +20,26 @@ message SearchUserResponse{
     }
 
     repeated Item items = 1;
+}
+
+message SearchGroupChatsRequest{
+    int32 page = 1 [(tagger.tags) = "form:\"page\" binding:\"required\""];
+    string name = 2 [(tagger.tags) = "form:\"name\" binding:\"max=50\""];
+}
+
+message SearchGroupChatsResponse{
+    message Item{
+        int32 id = 1;
+        int32 type = 2;
+        string name = 3;
+        string avatar = 4;
+        string description = 5;
+        int32 count = 6;
+        int32 max_num = 7;
+        bool is_member = 8;
+        string created_at = 9;
+    }
+
+    repeated Item items = 1;
+    bool next = 2;
 }

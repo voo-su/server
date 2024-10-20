@@ -21,7 +21,7 @@ type Auth struct {
 	JwtTokenStorage    *cache.JwtTokenStorage
 	RedisLock          *cache.RedisLock
 	IpAddressService   *service.IpAddressService
-	DialogService      *service.DialogService
+	ChatService        *service.ChatService
 	BotRepo            *repo.Bot
 	MessageSendService service.MessageSendService
 	UserSession        *repo.UserSession
@@ -85,7 +85,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 			fmt.Println(err)
 		}
 
-		_, _ = a.DialogService.Create(ctx.Ctx(), &service.DialogCreateOpt{
+		_, _ = a.ChatService.Create(ctx.Ctx(), &service.CreateChatOpt{
 			UserId:     user.Id,
 			DialogType: entity.ChatPrivateMode,
 			ReceiverId: root.UserId,

@@ -199,7 +199,9 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatAdsRepo:    groupChatAds,
 	}
 	search := &v1.Search{
-		UserRepo: user,
+		UserRepo:            user,
+		GroupChatRepo:       groupChat,
+		GroupChatMemberRepo: groupChatMember,
 	}
 	handlerV1 := &handler.V1{
 		Auth:             auth,

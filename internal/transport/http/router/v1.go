@@ -52,9 +52,10 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 			account.PUT("", core.HandlerFunc(handler.V1.Account.ChangeDetail))
 			account.PUT("/username", core.HandlerFunc(handler.V1.Account.ChangeUsername))
 		}
-		user := v1.Group("/users").Use(authorize)
+		user := v1.Group("/search").Use(authorize)
 		{
-			user.GET("/search", core.HandlerFunc(handler.V1.Search.Search))
+			user.GET("/users", core.HandlerFunc(handler.V1.Search.Users))
+			user.GET("/group-chats", core.HandlerFunc(handler.V1.Search.GroupChats))
 		}
 		contact := v1.Group("/contacts").Use(authorize)
 		{

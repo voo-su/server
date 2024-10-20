@@ -35,22 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on SearchUserRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *SearchUserRequest) Validate() error {
+// Validate checks the field values on SearchUsersRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *SearchUsersRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on SearchUserRequest with the rules
+// ValidateAll checks the field values on SearchUsersRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// SearchUserRequestMultiError, or nil if none found.
-func (m *SearchUserRequest) ValidateAll() error {
+// SearchUsersRequestMultiError, or nil if none found.
+func (m *SearchUsersRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *SearchUserRequest) validate(all bool) error {
+func (m *SearchUsersRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -60,19 +60,19 @@ func (m *SearchUserRequest) validate(all bool) error {
 	// no validation rules for Username
 
 	if len(errors) > 0 {
-		return SearchUserRequestMultiError(errors)
+		return SearchUsersRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// SearchUserRequestMultiError is an error wrapping multiple validation errors
-// returned by SearchUserRequest.ValidateAll() if the designated constraints
+// SearchUsersRequestMultiError is an error wrapping multiple validation errors
+// returned by SearchUsersRequest.ValidateAll() if the designated constraints
 // aren't met.
-type SearchUserRequestMultiError []error
+type SearchUsersRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m SearchUserRequestMultiError) Error() string {
+func (m SearchUsersRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -81,11 +81,11 @@ func (m SearchUserRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m SearchUserRequestMultiError) AllErrors() []error { return m }
+func (m SearchUsersRequestMultiError) AllErrors() []error { return m }
 
-// SearchUserRequestValidationError is the validation error returned by
-// SearchUserRequest.Validate if the designated constraints aren't met.
-type SearchUserRequestValidationError struct {
+// SearchUsersRequestValidationError is the validation error returned by
+// SearchUsersRequest.Validate if the designated constraints aren't met.
+type SearchUsersRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -93,24 +93,24 @@ type SearchUserRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e SearchUserRequestValidationError) Field() string { return e.field }
+func (e SearchUsersRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e SearchUserRequestValidationError) Reason() string { return e.reason }
+func (e SearchUsersRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e SearchUserRequestValidationError) Cause() error { return e.cause }
+func (e SearchUsersRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e SearchUserRequestValidationError) Key() bool { return e.key }
+func (e SearchUsersRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e SearchUserRequestValidationError) ErrorName() string {
-	return "SearchUserRequestValidationError"
+func (e SearchUsersRequestValidationError) ErrorName() string {
+	return "SearchUsersRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e SearchUserRequestValidationError) Error() string {
+func (e SearchUsersRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -122,14 +122,14 @@ func (e SearchUserRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sSearchUserRequest.%s: %s%s",
+		"invalid %sSearchUsersRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = SearchUserRequestValidationError{}
+var _ error = SearchUsersRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -137,7 +137,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = SearchUserRequestValidationError{}
+} = SearchUsersRequestValidationError{}
 
 // Validate checks the field values on SearchUserResponse with the rules
 // defined in the proto definition for this message. If any rules are
@@ -275,6 +275,250 @@ var _ interface {
 	ErrorName() string
 } = SearchUserResponseValidationError{}
 
+// Validate checks the field values on SearchGroupChatsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *SearchGroupChatsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on SearchGroupChatsRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// SearchGroupChatsRequestMultiError, or nil if none found.
+func (m *SearchGroupChatsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *SearchGroupChatsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Page
+
+	// no validation rules for Name
+
+	if len(errors) > 0 {
+		return SearchGroupChatsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// SearchGroupChatsRequestMultiError is an error wrapping multiple validation
+// errors returned by SearchGroupChatsRequest.ValidateAll() if the designated
+// constraints aren't met.
+type SearchGroupChatsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SearchGroupChatsRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SearchGroupChatsRequestMultiError) AllErrors() []error { return m }
+
+// SearchGroupChatsRequestValidationError is the validation error returned by
+// SearchGroupChatsRequest.Validate if the designated constraints aren't met.
+type SearchGroupChatsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SearchGroupChatsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SearchGroupChatsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SearchGroupChatsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SearchGroupChatsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SearchGroupChatsRequestValidationError) ErrorName() string {
+	return "SearchGroupChatsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e SearchGroupChatsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSearchGroupChatsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SearchGroupChatsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SearchGroupChatsRequestValidationError{}
+
+// Validate checks the field values on SearchGroupChatsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *SearchGroupChatsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on SearchGroupChatsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// SearchGroupChatsResponseMultiError, or nil if none found.
+func (m *SearchGroupChatsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *SearchGroupChatsResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, SearchGroupChatsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, SearchGroupChatsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SearchGroupChatsResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for Next
+
+	if len(errors) > 0 {
+		return SearchGroupChatsResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// SearchGroupChatsResponseMultiError is an error wrapping multiple validation
+// errors returned by SearchGroupChatsResponse.ValidateAll() if the designated
+// constraints aren't met.
+type SearchGroupChatsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SearchGroupChatsResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SearchGroupChatsResponseMultiError) AllErrors() []error { return m }
+
+// SearchGroupChatsResponseValidationError is the validation error returned by
+// SearchGroupChatsResponse.Validate if the designated constraints aren't met.
+type SearchGroupChatsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SearchGroupChatsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SearchGroupChatsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SearchGroupChatsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SearchGroupChatsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SearchGroupChatsResponseValidationError) ErrorName() string {
+	return "SearchGroupChatsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e SearchGroupChatsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSearchGroupChatsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SearchGroupChatsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SearchGroupChatsResponseValidationError{}
+
 // Validate checks the field values on SearchUserResponse_Item with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -386,3 +630,124 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = SearchUserResponse_ItemValidationError{}
+
+// Validate checks the field values on SearchGroupChatsResponse_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *SearchGroupChatsResponse_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on SearchGroupChatsResponse_Item with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// SearchGroupChatsResponse_ItemMultiError, or nil if none found.
+func (m *SearchGroupChatsResponse_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *SearchGroupChatsResponse_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Type
+
+	// no validation rules for Name
+
+	// no validation rules for Avatar
+
+	// no validation rules for Description
+
+	// no validation rules for Count
+
+	// no validation rules for MaxNum
+
+	// no validation rules for IsMember
+
+	// no validation rules for CreatedAt
+
+	if len(errors) > 0 {
+		return SearchGroupChatsResponse_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// SearchGroupChatsResponse_ItemMultiError is an error wrapping multiple
+// validation errors returned by SearchGroupChatsResponse_Item.ValidateAll()
+// if the designated constraints aren't met.
+type SearchGroupChatsResponse_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m SearchGroupChatsResponse_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m SearchGroupChatsResponse_ItemMultiError) AllErrors() []error { return m }
+
+// SearchGroupChatsResponse_ItemValidationError is the validation error
+// returned by SearchGroupChatsResponse_Item.Validate if the designated
+// constraints aren't met.
+type SearchGroupChatsResponse_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SearchGroupChatsResponse_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SearchGroupChatsResponse_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SearchGroupChatsResponse_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SearchGroupChatsResponse_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SearchGroupChatsResponse_ItemValidationError) ErrorName() string {
+	return "SearchGroupChatsResponse_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e SearchGroupChatsResponse_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSearchGroupChatsResponse_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SearchGroupChatsResponse_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SearchGroupChatsResponse_ItemValidationError{}
