@@ -14,13 +14,21 @@ import (
 )
 
 type MessageSubscribe struct {
-	config         *config.Config
+	Conf           *config.Config
 	redis          *redis.Client
 	defaultConsume *consume.ChatSubscribe
 }
 
-func NewMessageSubscribe(config *config.Config, redis *redis.Client, defaultConsume *consume.ChatSubscribe) *MessageSubscribe {
-	return &MessageSubscribe{config: config, redis: redis, defaultConsume: defaultConsume}
+func NewMessageSubscribe(
+	conf *config.Config,
+	redis *redis.Client,
+	defaultConsume *consume.ChatSubscribe,
+) *MessageSubscribe {
+	return &MessageSubscribe{
+		Conf:           conf,
+		redis:          redis,
+		defaultConsume: defaultConsume,
+	}
 }
 
 type IConsume interface {
@@ -29,7 +37,7 @@ type IConsume interface {
 
 func (m *MessageSubscribe) Setup(ctx context.Context) error {
 	log.Println("Старт подписки на сообщение")
-	go m.subscribe(ctx, []string{entity.ImTopicChat, fmt.Sprintf(entity.ImTopicChatPrivate, m.config.ServerId())}, m.defaultConsume)
+	go m.subscribe(ctx, []string{entity.ImTopicChat, fmt.Sprintf(entity.ImTopicChatPrivate, m.Conf.ServerId())}, m.defaultConsume)
 	<-ctx.Done()
 	return nil
 }

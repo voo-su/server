@@ -51,18 +51,17 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 			account.GET("", core.HandlerFunc(handler.V1.Account.Get))
 			account.PUT("", core.HandlerFunc(handler.V1.Account.ChangeDetail))
 			account.PUT("/username", core.HandlerFunc(handler.V1.Account.ChangeUsername))
-			//account.PUT("/email", core.HandlerFunc(handler.V1.Account.ChangeEmail))
 		}
-		user := v1.Group("/users").Use(authorize)
+		user := v1.Group("/search").Use(authorize)
 		{
-			user.GET("/search", core.HandlerFunc(handler.V1.User.Search))
+			user.GET("/users", core.HandlerFunc(handler.V1.Search.Users))
+			user.GET("/group-chats", core.HandlerFunc(handler.V1.Search.GroupChats))
 		}
 		contact := v1.Group("/contacts").Use(authorize)
 		{
 			contact.GET("", core.HandlerFunc(handler.V1.Contact.List))
 			contact.GET("/get", core.HandlerFunc(handler.V1.Contact.Get))
 			contact.POST("/delete", core.HandlerFunc(handler.V1.Contact.Delete))
-			//contact.POST("/edit-remark", core.HandlerFunc(handler.V1.Contact.Remark))
 			contact.GET("/requests", core.HandlerFunc(handler.V1.ContactRequest.List))
 			contact.POST("/requests/create", core.HandlerFunc(handler.V1.ContactRequest.Create))
 			contact.POST("/requests/accept", core.HandlerFunc(handler.V1.ContactRequest.Accept))
@@ -74,12 +73,12 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 		}
 		chat := v1.Group("/chats").Use(authorize)
 		{
-			chat.GET("", core.HandlerFunc(handler.V1.Dialog.List))
-			chat.POST("/create", core.HandlerFunc(handler.V1.Dialog.Create))
-			chat.POST("/delete", core.HandlerFunc(handler.V1.Dialog.Delete))
-			chat.POST("/topping", core.HandlerFunc(handler.V1.Dialog.Top))
-			chat.POST("/disturb", core.HandlerFunc(handler.V1.Dialog.Disturb))
-			chat.POST("/unread/clear", core.HandlerFunc(handler.V1.Dialog.ClearUnreadMessage))
+			chat.GET("", core.HandlerFunc(handler.V1.Chat.List))
+			chat.POST("/create", core.HandlerFunc(handler.V1.Chat.Create))
+			chat.POST("/delete", core.HandlerFunc(handler.V1.Chat.Delete))
+			chat.POST("/topping", core.HandlerFunc(handler.V1.Chat.Top))
+			chat.POST("/disturb", core.HandlerFunc(handler.V1.Chat.Disturb))
+			chat.POST("/unread/clear", core.HandlerFunc(handler.V1.Chat.ClearUnreadMessage))
 		}
 		groupChat := v1.Group("/group-chats").Use(authorize)
 		{
@@ -96,7 +95,6 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 			groupChat.POST("/dismiss", core.HandlerFunc(handler.V1.GroupChat.Dismiss))
 			groupChat.POST("/overt", core.HandlerFunc(handler.V1.GroupChat.Overt))
 			groupChat.POST("/mute", core.HandlerFunc(handler.V1.GroupChat.Mute))
-			groupChat.GET("/overt/list", core.HandlerFunc(handler.V1.GroupChat.OvertList))
 			groupChat.GET("/ads", core.HandlerFunc(handler.V1.GroupChatAds.List))
 			groupChat.POST("/ads/edit", core.HandlerFunc(handler.V1.GroupChatAds.CreateAndUpdate))
 			groupChat.POST("/ads/delete", core.HandlerFunc(handler.V1.GroupChatAds.Delete))
@@ -125,11 +123,7 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 			message.POST("/stickers/delete", core.HandlerFunc(handler.V1.Sticker.DeleteCollect))
 			message.GET("/stickers/system/list", core.HandlerFunc(handler.V1.Sticker.SystemList))
 			message.POST("/stickers/system/install", core.HandlerFunc(handler.V1.Sticker.SetSystemSticker))
-			//message.GET("/forward/list", core.HandlerFunc(handler.V1.Message.GetForwardRecords))
-			//message.POST("/forward", core.HandlerFunc(handler.V1.Message.Forward))
-			//message.POST("/card", core.HandlerFunc(handler.V1.Message.Card))
-			//message.POST("/location", core.HandlerFunc(handler.V1.Message.Location))
-			//message.POST("/collect", core.HandlerFunc(handler.V1.Message.Collect))
+			message.POST("/collect", core.HandlerFunc(handler.V1.Message.Collect))
 		}
 		upload := v1.Group("/upload").Use(authorize)
 		{

@@ -30,6 +30,12 @@ func NewRouter(conf *config.Config, handle *handler.Handler, session *cache.JwtT
 
 	router.GET("/ws", authorize, core.HandlerFunc(handle.Chat.Conn))
 
+	//router.GET("/ws/detail", func(ctx *gin.Context) {
+	//	ctx.JSON(200, map[string]any{
+	//		"chat": socket.Session.Chat.Count(),
+	//	})
+	//})
+
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, map[string]any{
 			"message": "Метод не найден",

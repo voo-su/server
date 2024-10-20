@@ -54,3 +54,21 @@ func NewCronInjector(conf *config.Config) *cli.CronProvider {
 		),
 	)
 }
+
+func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
+	panic(
+		wire.Build(
+			providerSet,
+			cli.QueueProviderSet,
+		),
+	)
+}
+
+func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
+	panic(
+		wire.Build(
+			providerSet,
+			cli.MigrateProviderSet,
+		),
+	)
+}

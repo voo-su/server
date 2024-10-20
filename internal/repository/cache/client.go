@@ -9,25 +9,25 @@ import (
 )
 
 type ClientStorage struct {
+	Conf    *config.Config
 	Redis   *redis.Client
-	Config  *config.Config
 	Storage *ServerStorage
 }
 
 func NewClientStorage(
+	conf *config.Config,
 	redis *redis.Client,
-	config *config.Config,
 	storage *ServerStorage,
 ) *ClientStorage {
 	return &ClientStorage{
+		Conf:    conf,
 		Redis:   redis,
-		Config:  config,
 		Storage: storage,
 	}
 }
 
 func (c *ClientStorage) Set(ctx context.Context, channel string, fd string, uid int) error {
-	sid := c.Config.ServerId()
+	sid := c.Conf.ServerId()
 	_, err := c.Redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.HSet(ctx, c.clientKey(sid, channel), fd, uid)
 		pipe.SAdd(ctx, c.userKey(sid, channel, strconv.Itoa(uid)), fd)
@@ -38,7 +38,7 @@ func (c *ClientStorage) Set(ctx context.Context, channel string, fd string, uid 
 }
 
 func (c *ClientStorage) Del(ctx context.Context, channel, fd string) error {
-	sid := c.Config.ServerId()
+	sid := c.Conf.ServerId()
 	key := c.clientKey(sid, channel)
 	uid, _ := c.Redis.HGet(ctx, key, fd).Result()
 	_, err := c.Redis.Pipelined(ctx, func(pipe redis.Pipeliner) error {

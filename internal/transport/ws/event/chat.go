@@ -18,7 +18,7 @@ import (
 
 type ChatEvent struct {
 	Redis               *redis.Client
-	Config              *config.Config
+	Conf                *config.Config
 	RoomStorage         *cache.RoomStorage
 	GroupChatMemberRepo *group_chat2.GroupChatMember
 
@@ -35,7 +35,7 @@ func (c *ChatEvent) OnOpen(client socket.IClient) {
 			Channel:  socket.Session.Chat.Name(),
 			RoomType: entity.RoomImGroup,
 			Number:   strconv.Itoa(id),
-			Sid:      c.Config.ServerId(),
+			Sid:      c.Conf.ServerId(),
 			Cid:      client.Cid(),
 		})
 	}
@@ -73,7 +73,7 @@ func (c *ChatEvent) OnClose(client socket.IClient, code int, text string) {
 			Channel:  socket.Session.Chat.Name(),
 			RoomType: entity.RoomImGroup,
 			Number:   strconv.Itoa(id),
-			Sid:      c.Config.ServerId(),
+			Sid:      c.Conf.ServerId(),
 			Cid:      client.Cid(),
 		})
 	}

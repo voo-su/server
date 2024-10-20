@@ -18,7 +18,7 @@ import (
 )
 
 type Message struct {
-	DialogService          *service.DialogService
+	ChatService            *service.ChatService
 	AuthService            *service.AuthService
 	MessageSendService     service.MessageSendService
 	Filesystem             *filesystem.Filesystem
@@ -62,39 +62,6 @@ func (c *Message) Text(ctx *core.Context) error {
 
 	return ctx.Success(nil)
 }
-
-//type CodeMessageRequest struct {
-//	DialogType   int    `form:"dialog_type" json:"dialog_type" binding:"required,oneof=1 2" label:"dialog_type"`
-//	ReceiverId int    `form:"receiver_id" json:"receiver_id" binding:"required,numeric,gt=0" label:"receiver_id"`
-//	Lang       string `form:"lang" json:"lang" binding:"required"`
-//	Code       string `form:"code" json:"code" binding:"required,max=65535"`
-//}
-//
-//func (c *Message) Code(ctx *core.Context) error {
-//	params := &CodeMessageRequest{}
-//	if err := ctx.Context.ShouldBind(params); err != nil {
-//		return ctx.InvalidParams(err)
-//	}
-//	uid := ctx.UserId()
-//	if err := c.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
-//		DialogType:   params.DialogType,
-//		UserId:     uid,
-//		ReceiverId: params.ReceiverId,
-//	}); err != nil {
-//		return ctx.ErrorBusiness(err.Error())
-//	}
-//	if err := c.MessageSendService.SendCode(ctx.Ctx(), uid, &api_v1.CodeMessageRequest{
-//		Lang: params.Lang,
-//		Code: params.Code,
-//		Receiver: &api_v1.MessageReceiver{
-//			DialogType:   int32(params.DialogType),
-//			ReceiverId: int32(params.ReceiverId),
-//		},
-//	}); err != nil {
-//		return ctx.ErrorBusiness(err.Error())
-//	}
-//	return ctx.Success(nil)
-//}
 
 type ImageMessageRequest struct {
 	DialogType int `form:"dialog_type" json:"dialog_type" binding:"required,oneof=1 2" label:"dialog_type"`
@@ -269,7 +236,7 @@ func (c *Message) Delete(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.DialogService.DeleteRecordList(ctx.Ctx(), &service.RemoveRecordListOpt{
+	if err := c.ChatService.DeleteRecordList(ctx.Ctx(), &service.RemoveRecordListOpt{
 		UserId:     ctx.UserId(),
 		DialogType: params.DialogType,
 		ReceiverId: params.ReceiverId,
@@ -438,6 +405,23 @@ func (c *Message) Sticker(ctx *core.Context) error {
 			ReceiverId: int32(params.ReceiverId),
 		},
 	}); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+type CollectMessageRequest struct {
+	RecordId int `form:"record_id" json:"record_id" binding:"required,numeric,gt=0" label:"record_id"`
+}
+
+func (c *Message) Collect(ctx *core.Context) error {
+	params := &CollectMessageRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := c.ChatService.Collect(ctx.Ctx(), ctx.UserId(), params.RecordId); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

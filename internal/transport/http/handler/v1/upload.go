@@ -18,7 +18,7 @@ import (
 )
 
 type Upload struct {
-	Config       *config.Config
+	Conf         *config.Config
 	Filesystem   *filesystem.Filesystem
 	SplitService *service.SplitService
 }

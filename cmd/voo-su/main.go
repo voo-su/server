@@ -44,10 +44,34 @@ func NewCronCommand() core.Command {
 	}
 }
 
+func NewQueueCommand() core.Command {
+	return core.Command{
+		Name: "cli-queue",
+		Action: func(ctx *cli.Context, conf *config.Config) error {
+			logger.InitLogger(fmt.Sprintf("%s/cli_queue.log", conf.App.Log), logger.LevelInfo, "queue")
+
+			return _cli.Queue(ctx, NewQueueInjector(conf))
+		},
+	}
+}
+
+func NewMigrateCommand() core.Command {
+	return core.Command{
+		Name: "cli-migrate",
+		Action: func(ctx *cli.Context, conf *config.Config) error {
+			logger.InitLogger(fmt.Sprintf("%s/cli_migrate.log", conf.App.Log), logger.LevelInfo, "migrate")
+
+			return _cli.Migrate(ctx, NewMigrateInjector(conf))
+		},
+	}
+}
+
 func main() {
 	app := core.NewApp()
 	app.Register(NewHttpCommand())
 	app.Register(NewWsCommand())
 	app.Register(NewCronCommand())
+	app.Register(NewQueueCommand())
+	app.Register(NewMigrateCommand())
 	app.Run()
 }

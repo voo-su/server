@@ -26,7 +26,6 @@ type Config struct {
 	Cors       *Cors       `yaml:"cors"`
 	File       *File       `yaml:"file"`
 	Email      *Email      `yaml:"email"`
-	Nsq        *Nsq        `yaml:"nsq"`
 }
 
 func New(filename string) *Config {

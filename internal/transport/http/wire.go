@@ -12,7 +12,7 @@ import (
 )
 
 type AppProvider struct {
-	Config *config.Config
+	Conf   *config.Config
 	Engine *gin.Engine
 }
 
@@ -26,18 +26,18 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(handler.V1), "*"),
 	wire.Struct(new(v1.Auth), "*"),
 	wire.Struct(new(v1.Account), "*"),
-	wire.Struct(new(v1.User), "*"),
 	wire.Struct(new(v1.Upload), "*"),
 	wire.Struct(new(v1.Contact), "*"),
 	wire.Struct(new(v1.ContactRequest), "*"),
-	wire.Struct(new(v1.GroupChat), "*"),
-	wire.Struct(new(v1.GroupChatRequest), "*"),
-	wire.Struct(new(v1.Dialog), "*"),
+	wire.Struct(new(v1.Chat), "*"),
 	wire.Struct(new(v1.Message), "*"),
 	wire.Struct(new(v1.Publish), "*"),
+	wire.Struct(new(v1.GroupChat), "*"),
+	wire.Struct(new(v1.GroupChatRequest), "*"),
 	wire.Struct(new(v1.Sticker), "*"),
 	wire.Struct(new(v1.ContactFolder), "*"),
 	wire.Struct(new(v1.GroupChatAds), "*"),
+    wire.Struct(new(v1.Search), "*"),
 	wire.Struct(new(v1.Project), "*"),
 	wire.Struct(new(v1.ProjectTask), "*"),
 	wire.Struct(new(v1.ProjectTaskComment), "*"),
@@ -45,10 +45,10 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(service.MessageService), "*"),
 	wire.Bind(new(service.MessageSendService), new(*service.MessageService)),
 	service.NewAuthService,
-	service.NewDialogService,
 	service.NewContactService,
 	service.NewContactApplyService,
 	service.NewContactFolderService,
+	service.NewChatService,
 	service.NewGroupChatService,
 	service.NewGroupMemberService,
 	service.NewGroupChatAdsService,

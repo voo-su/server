@@ -15,8 +15,8 @@ import (
 )
 
 type Handler struct {
-	Chat   *ChatChannel
-	Config *config.Config
+	Chat *ChatChannel
+	Conf *config.Config
 }
 
 type AuthConn struct {
@@ -83,7 +83,7 @@ func (h *Handler) auth(connect net.Conn, data chan *AuthConn) {
 		return
 	}
 
-	claims, err := jwt.ParseToken(detail.Token, h.Config.Jwt.Secret)
+	claims, err := jwt.ParseToken(detail.Token, h.Conf.Jwt.Secret)
 	if err != nil || claims.Valid() != nil {
 		return
 	}

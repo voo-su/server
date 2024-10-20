@@ -35,137 +35,6 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on KeyboardMessage with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *KeyboardMessage) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on KeyboardMessage with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// KeyboardMessageMultiError, or nil if none found.
-func (m *KeyboardMessage) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *KeyboardMessage) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Event
-
-	if all {
-		switch v := interface{}(m.GetData()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, KeyboardMessageValidationError{
-					field:  "Data",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, KeyboardMessageValidationError{
-					field:  "Data",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetData()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return KeyboardMessageValidationError{
-				field:  "Data",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return KeyboardMessageMultiError(errors)
-	}
-
-	return nil
-}
-
-// KeyboardMessageMultiError is an error wrapping multiple validation errors
-// returned by KeyboardMessage.ValidateAll() if the designated constraints
-// aren't met.
-type KeyboardMessageMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m KeyboardMessageMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m KeyboardMessageMultiError) AllErrors() []error { return m }
-
-// KeyboardMessageValidationError is the validation error returned by
-// KeyboardMessage.Validate if the designated constraints aren't met.
-type KeyboardMessageValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e KeyboardMessageValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e KeyboardMessageValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e KeyboardMessageValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e KeyboardMessageValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e KeyboardMessageValidationError) ErrorName() string { return "KeyboardMessageValidationError" }
-
-// Error satisfies the builtin error interface
-func (e KeyboardMessageValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sKeyboardMessage.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = KeyboardMessageValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = KeyboardMessageValidationError{}
-
 // Validate checks the field values on MessageReceiver with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
@@ -292,6 +161,35 @@ func (m *TextMessageRequest) validate(all bool) error {
 
 	var errors []error
 
+	if all {
+		switch v := interface{}(m.GetReceiver()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, TextMessageRequestValidationError{
+					field:  "Receiver",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, TextMessageRequestValidationError{
+					field:  "Receiver",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetReceiver()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return TextMessageRequestValidationError{
+				field:  "Receiver",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	// no validation rules for Type
 
 	// no validation rules for Content
@@ -326,35 +224,6 @@ func (m *TextMessageRequest) validate(all bool) error {
 	}
 
 	// no validation rules for QuoteId
-
-	if all {
-		switch v := interface{}(m.GetReceiver()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, TextMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, TextMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetReceiver()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return TextMessageRequestValidationError{
-				field:  "Receiver",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
 
 	if len(errors) > 0 {
 		return TextMessageRequestMultiError(errors)
@@ -458,16 +327,6 @@ func (m *ImageMessageRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Type
-
-	// no validation rules for Url
-
-	// no validation rules for Width
-
-	// no validation rules for Height
-
-	// no validation rules for Size
-
 	if all {
 		switch v := interface{}(m.GetReceiver()).(type) {
 		case interface{ ValidateAll() error }:
@@ -496,6 +355,16 @@ func (m *ImageMessageRequest) validate(all bool) error {
 			}
 		}
 	}
+
+	// no validation rules for Type
+
+	// no validation rules for Url
+
+	// no validation rules for Width
+
+	// no validation rules for Height
+
+	// no validation rules for Size
 
 	// no validation rules for QuoteId
 
@@ -579,145 +448,6 @@ var _ interface {
 	ErrorName() string
 } = ImageMessageRequestValidationError{}
 
-// Validate checks the field values on VoiceMessageRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *VoiceMessageRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on VoiceMessageRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// VoiceMessageRequestMultiError, or nil if none found.
-func (m *VoiceMessageRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *VoiceMessageRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Type
-
-	// no validation rules for Url
-
-	// no validation rules for Duration
-
-	// no validation rules for Size
-
-	if all {
-		switch v := interface{}(m.GetReceiver()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, VoiceMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, VoiceMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetReceiver()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return VoiceMessageRequestValidationError{
-				field:  "Receiver",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return VoiceMessageRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// VoiceMessageRequestMultiError is an error wrapping multiple validation
-// errors returned by VoiceMessageRequest.ValidateAll() if the designated
-// constraints aren't met.
-type VoiceMessageRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m VoiceMessageRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m VoiceMessageRequestMultiError) AllErrors() []error { return m }
-
-// VoiceMessageRequestValidationError is the validation error returned by
-// VoiceMessageRequest.Validate if the designated constraints aren't met.
-type VoiceMessageRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e VoiceMessageRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e VoiceMessageRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e VoiceMessageRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e VoiceMessageRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e VoiceMessageRequestValidationError) ErrorName() string {
-	return "VoiceMessageRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e VoiceMessageRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sVoiceMessageRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = VoiceMessageRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = VoiceMessageRequestValidationError{}
-
 // Validate checks the field values on VideoMessageRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -739,14 +469,6 @@ func (m *VideoMessageRequest) validate(all bool) error {
 	}
 
 	var errors []error
-
-	// no validation rules for Type
-
-	// no validation rules for Url
-
-	// no validation rules for Duration
-
-	// no validation rules for Size
 
 	if all {
 		switch v := interface{}(m.GetReceiver()).(type) {
@@ -776,6 +498,14 @@ func (m *VideoMessageRequest) validate(all bool) error {
 			}
 		}
 	}
+
+	// no validation rules for Type
+
+	// no validation rules for Url
+
+	// no validation rules for Duration
+
+	// no validation rules for Size
 
 	// no validation rules for Cover
 
@@ -881,10 +611,6 @@ func (m *FileMessageRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Type
-
-	// no validation rules for UploadId
-
 	if all {
 		switch v := interface{}(m.GetReceiver()).(type) {
 		case interface{ ValidateAll() error }:
@@ -913,6 +639,10 @@ func (m *FileMessageRequest) validate(all bool) error {
 			}
 		}
 	}
+
+	// no validation rules for Type
+
+	// no validation rules for UploadId
 
 	if len(errors) > 0 {
 		return FileMessageRequestMultiError(errors)
@@ -994,417 +724,6 @@ var _ interface {
 	ErrorName() string
 } = FileMessageRequestValidationError{}
 
-// Validate checks the field values on CodeMessageRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *CodeMessageRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on CodeMessageRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// CodeMessageRequestMultiError, or nil if none found.
-func (m *CodeMessageRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *CodeMessageRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Type
-
-	// no validation rules for Lang
-
-	// no validation rules for Code
-
-	if all {
-		switch v := interface{}(m.GetReceiver()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CodeMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CodeMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetReceiver()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CodeMessageRequestValidationError{
-				field:  "Receiver",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return CodeMessageRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// CodeMessageRequestMultiError is an error wrapping multiple validation errors
-// returned by CodeMessageRequest.ValidateAll() if the designated constraints
-// aren't met.
-type CodeMessageRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m CodeMessageRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m CodeMessageRequestMultiError) AllErrors() []error { return m }
-
-// CodeMessageRequestValidationError is the validation error returned by
-// CodeMessageRequest.Validate if the designated constraints aren't met.
-type CodeMessageRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e CodeMessageRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e CodeMessageRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e CodeMessageRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e CodeMessageRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e CodeMessageRequestValidationError) ErrorName() string {
-	return "CodeMessageRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e CodeMessageRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sCodeMessageRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = CodeMessageRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = CodeMessageRequestValidationError{}
-
-// Validate checks the field values on LocationMessageRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *LocationMessageRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on LocationMessageRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// LocationMessageRequestMultiError, or nil if none found.
-func (m *LocationMessageRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *LocationMessageRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Type
-
-	// no validation rules for Longitude
-
-	// no validation rules for Latitude
-
-	// no validation rules for Description
-
-	if all {
-		switch v := interface{}(m.GetReceiver()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, LocationMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, LocationMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetReceiver()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return LocationMessageRequestValidationError{
-				field:  "Receiver",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return LocationMessageRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// LocationMessageRequestMultiError is an error wrapping multiple validation
-// errors returned by LocationMessageRequest.ValidateAll() if the designated
-// constraints aren't met.
-type LocationMessageRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m LocationMessageRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m LocationMessageRequestMultiError) AllErrors() []error { return m }
-
-// LocationMessageRequestValidationError is the validation error returned by
-// LocationMessageRequest.Validate if the designated constraints aren't met.
-type LocationMessageRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e LocationMessageRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e LocationMessageRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e LocationMessageRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e LocationMessageRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e LocationMessageRequestValidationError) ErrorName() string {
-	return "LocationMessageRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e LocationMessageRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sLocationMessageRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = LocationMessageRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = LocationMessageRequestValidationError{}
-
-// Validate checks the field values on ForwardMessageRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *ForwardMessageRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on ForwardMessageRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// ForwardMessageRequestMultiError, or nil if none found.
-func (m *ForwardMessageRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *ForwardMessageRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Type
-
-	// no validation rules for Mode
-
-	if all {
-		switch v := interface{}(m.GetReceiver()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, ForwardMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, ForwardMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetReceiver()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return ForwardMessageRequestValidationError{
-				field:  "Receiver",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return ForwardMessageRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// ForwardMessageRequestMultiError is an error wrapping multiple validation
-// errors returned by ForwardMessageRequest.ValidateAll() if the designated
-// constraints aren't met.
-type ForwardMessageRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ForwardMessageRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ForwardMessageRequestMultiError) AllErrors() []error { return m }
-
-// ForwardMessageRequestValidationError is the validation error returned by
-// ForwardMessageRequest.Validate if the designated constraints aren't met.
-type ForwardMessageRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ForwardMessageRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ForwardMessageRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ForwardMessageRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ForwardMessageRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ForwardMessageRequestValidationError) ErrorName() string {
-	return "ForwardMessageRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e ForwardMessageRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sForwardMessageRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ForwardMessageRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ForwardMessageRequestValidationError{}
-
 // Validate checks the field values on VoteMessageRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -1426,14 +745,6 @@ func (m *VoteMessageRequest) validate(all bool) error {
 	}
 
 	var errors []error
-
-	// no validation rules for Type
-
-	// no validation rules for Title
-
-	// no validation rules for Mode
-
-	// no validation rules for Anonymous
 
 	if all {
 		switch v := interface{}(m.GetReceiver()).(type) {
@@ -1463,6 +774,14 @@ func (m *VoteMessageRequest) validate(all bool) error {
 			}
 		}
 	}
+
+	// no validation rules for Type
+
+	// no validation rules for Title
+
+	// no validation rules for Mode
+
+	// no validation rules for Anonymous
 
 	if len(errors) > 0 {
 		return VoteMessageRequestMultiError(errors)
@@ -1544,48 +863,79 @@ var _ interface {
 	ErrorName() string
 } = VoteMessageRequestValidationError{}
 
-// Validate checks the field values on LoginMessageRequest with the rules
+// Validate checks the field values on VoiceMessageRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *LoginMessageRequest) Validate() error {
+func (m *VoiceMessageRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on LoginMessageRequest with the rules
+// ValidateAll checks the field values on VoiceMessageRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// LoginMessageRequestMultiError, or nil if none found.
-func (m *LoginMessageRequest) ValidateAll() error {
+// VoiceMessageRequestMultiError, or nil if none found.
+func (m *VoiceMessageRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *LoginMessageRequest) validate(all bool) error {
+func (m *VoiceMessageRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	// no validation rules for Ip
+	if all {
+		switch v := interface{}(m.GetReceiver()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, VoiceMessageRequestValidationError{
+					field:  "Receiver",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, VoiceMessageRequestValidationError{
+					field:  "Receiver",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetReceiver()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return VoiceMessageRequestValidationError{
+				field:  "Receiver",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
-	// no validation rules for Agent
+	// no validation rules for Type
 
-	// no validation rules for Address
+	// no validation rules for Url
+
+	// no validation rules for Duration
+
+	// no validation rules for Size
 
 	if len(errors) > 0 {
-		return LoginMessageRequestMultiError(errors)
+		return VoiceMessageRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// LoginMessageRequestMultiError is an error wrapping multiple validation
-// errors returned by LoginMessageRequest.ValidateAll() if the designated
+// VoiceMessageRequestMultiError is an error wrapping multiple validation
+// errors returned by VoiceMessageRequest.ValidateAll() if the designated
 // constraints aren't met.
-type LoginMessageRequestMultiError []error
+type VoiceMessageRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m LoginMessageRequestMultiError) Error() string {
+func (m VoiceMessageRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1594,11 +944,11 @@ func (m LoginMessageRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m LoginMessageRequestMultiError) AllErrors() []error { return m }
+func (m VoiceMessageRequestMultiError) AllErrors() []error { return m }
 
-// LoginMessageRequestValidationError is the validation error returned by
-// LoginMessageRequest.Validate if the designated constraints aren't met.
-type LoginMessageRequestValidationError struct {
+// VoiceMessageRequestValidationError is the validation error returned by
+// VoiceMessageRequest.Validate if the designated constraints aren't met.
+type VoiceMessageRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1606,24 +956,24 @@ type LoginMessageRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e LoginMessageRequestValidationError) Field() string { return e.field }
+func (e VoiceMessageRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e LoginMessageRequestValidationError) Reason() string { return e.reason }
+func (e VoiceMessageRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e LoginMessageRequestValidationError) Cause() error { return e.cause }
+func (e VoiceMessageRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e LoginMessageRequestValidationError) Key() bool { return e.key }
+func (e VoiceMessageRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e LoginMessageRequestValidationError) ErrorName() string {
-	return "LoginMessageRequestValidationError"
+func (e VoiceMessageRequestValidationError) ErrorName() string {
+	return "VoiceMessageRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e LoginMessageRequestValidationError) Error() string {
+func (e VoiceMessageRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1635,14 +985,14 @@ func (e LoginMessageRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sLoginMessageRequest.%s: %s%s",
+		"invalid %sVoiceMessageRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = LoginMessageRequestValidationError{}
+var _ error = VoiceMessageRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -1650,7 +1000,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = LoginMessageRequestValidationError{}
+} = VoiceMessageRequestValidationError{}
 
 // Validate checks the field values on StickerMessageRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -1787,141 +1137,6 @@ var _ interface {
 	ErrorName() string
 } = StickerMessageRequestValidationError{}
 
-// Validate checks the field values on CardMessageRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *CardMessageRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on CardMessageRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// CardMessageRequestMultiError, or nil if none found.
-func (m *CardMessageRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *CardMessageRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Type
-
-	// no validation rules for UserId
-
-	if all {
-		switch v := interface{}(m.GetReceiver()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CardMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CardMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetReceiver()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CardMessageRequestValidationError{
-				field:  "Receiver",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if len(errors) > 0 {
-		return CardMessageRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// CardMessageRequestMultiError is an error wrapping multiple validation errors
-// returned by CardMessageRequest.ValidateAll() if the designated constraints
-// aren't met.
-type CardMessageRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m CardMessageRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m CardMessageRequestMultiError) AllErrors() []error { return m }
-
-// CardMessageRequestValidationError is the validation error returned by
-// CardMessageRequest.Validate if the designated constraints aren't met.
-type CardMessageRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e CardMessageRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e CardMessageRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e CardMessageRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e CardMessageRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e CardMessageRequestValidationError) ErrorName() string {
-	return "CardMessageRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e CardMessageRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sCardMessageRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = CardMessageRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = CardMessageRequestValidationError{}
-
 // Validate checks the field values on MixedMessageRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -1943,6 +1158,35 @@ func (m *MixedMessageRequest) validate(all bool) error {
 	}
 
 	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetReceiver()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, MixedMessageRequestValidationError{
+					field:  "Receiver",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, MixedMessageRequestValidationError{
+					field:  "Receiver",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetReceiver()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return MixedMessageRequestValidationError{
+				field:  "Receiver",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	// no validation rules for Type
 
@@ -1978,35 +1222,6 @@ func (m *MixedMessageRequest) validate(all bool) error {
 			}
 		}
 
-	}
-
-	if all {
-		switch v := interface{}(m.GetReceiver()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, MixedMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, MixedMessageRequestValidationError{
-					field:  "Receiver",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetReceiver()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return MixedMessageRequestValidationError{
-				field:  "Receiver",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
 	}
 
 	// no validation rules for QuoteId
@@ -2091,46 +1306,48 @@ var _ interface {
 	ErrorName() string
 } = MixedMessageRequestValidationError{}
 
-// Validate checks the field values on KeyboardMessage_Data with the rules
+// Validate checks the field values on LoginMessageRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *KeyboardMessage_Data) Validate() error {
+func (m *LoginMessageRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on KeyboardMessage_Data with the rules
+// ValidateAll checks the field values on LoginMessageRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// KeyboardMessage_DataMultiError, or nil if none found.
-func (m *KeyboardMessage_Data) ValidateAll() error {
+// LoginMessageRequestMultiError, or nil if none found.
+func (m *LoginMessageRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *KeyboardMessage_Data) validate(all bool) error {
+func (m *LoginMessageRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	// no validation rules for SenderId
+	// no validation rules for Ip
 
-	// no validation rules for ReceiverId
+	// no validation rules for Agent
+
+	// no validation rules for Address
 
 	if len(errors) > 0 {
-		return KeyboardMessage_DataMultiError(errors)
+		return LoginMessageRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// KeyboardMessage_DataMultiError is an error wrapping multiple validation
-// errors returned by KeyboardMessage_Data.ValidateAll() if the designated
+// LoginMessageRequestMultiError is an error wrapping multiple validation
+// errors returned by LoginMessageRequest.ValidateAll() if the designated
 // constraints aren't met.
-type KeyboardMessage_DataMultiError []error
+type LoginMessageRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m KeyboardMessage_DataMultiError) Error() string {
+func (m LoginMessageRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -2139,11 +1356,11 @@ func (m KeyboardMessage_DataMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m KeyboardMessage_DataMultiError) AllErrors() []error { return m }
+func (m LoginMessageRequestMultiError) AllErrors() []error { return m }
 
-// KeyboardMessage_DataValidationError is the validation error returned by
-// KeyboardMessage_Data.Validate if the designated constraints aren't met.
-type KeyboardMessage_DataValidationError struct {
+// LoginMessageRequestValidationError is the validation error returned by
+// LoginMessageRequest.Validate if the designated constraints aren't met.
+type LoginMessageRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -2151,24 +1368,24 @@ type KeyboardMessage_DataValidationError struct {
 }
 
 // Field function returns field value.
-func (e KeyboardMessage_DataValidationError) Field() string { return e.field }
+func (e LoginMessageRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e KeyboardMessage_DataValidationError) Reason() string { return e.reason }
+func (e LoginMessageRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e KeyboardMessage_DataValidationError) Cause() error { return e.cause }
+func (e LoginMessageRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e KeyboardMessage_DataValidationError) Key() bool { return e.key }
+func (e LoginMessageRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e KeyboardMessage_DataValidationError) ErrorName() string {
-	return "KeyboardMessage_DataValidationError"
+func (e LoginMessageRequestValidationError) ErrorName() string {
+	return "LoginMessageRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e KeyboardMessage_DataValidationError) Error() string {
+func (e LoginMessageRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -2180,14 +1397,14 @@ func (e KeyboardMessage_DataValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sKeyboardMessage_Data.%s: %s%s",
+		"invalid %sLoginMessageRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = KeyboardMessage_DataValidationError{}
+var _ error = LoginMessageRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -2195,7 +1412,138 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = KeyboardMessage_DataValidationError{}
+} = LoginMessageRequestValidationError{}
+
+// Validate checks the field values on KeyboardMessage with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *KeyboardMessage) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on KeyboardMessage with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// KeyboardMessageMultiError, or nil if none found.
+func (m *KeyboardMessage) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *KeyboardMessage) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Event
+
+	if all {
+		switch v := interface{}(m.GetData()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, KeyboardMessageValidationError{
+					field:  "Data",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, KeyboardMessageValidationError{
+					field:  "Data",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetData()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return KeyboardMessageValidationError{
+				field:  "Data",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return KeyboardMessageMultiError(errors)
+	}
+
+	return nil
+}
+
+// KeyboardMessageMultiError is an error wrapping multiple validation errors
+// returned by KeyboardMessage.ValidateAll() if the designated constraints
+// aren't met.
+type KeyboardMessageMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m KeyboardMessageMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m KeyboardMessageMultiError) AllErrors() []error { return m }
+
+// KeyboardMessageValidationError is the validation error returned by
+// KeyboardMessage.Validate if the designated constraints aren't met.
+type KeyboardMessageValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e KeyboardMessageValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e KeyboardMessageValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e KeyboardMessageValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e KeyboardMessageValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e KeyboardMessageValidationError) ErrorName() string { return "KeyboardMessageValidationError" }
+
+// Error satisfies the builtin error interface
+func (e KeyboardMessageValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sKeyboardMessage.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = KeyboardMessageValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = KeyboardMessageValidationError{}
 
 // Validate checks the field values on TextMessageRequest_Mention with the
 // rules defined in the proto definition for this message. If any rules are
@@ -2406,3 +1754,109 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = MixedMessageRequest_ItemValidationError{}
+
+// Validate checks the field values on KeyboardMessage_Data with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *KeyboardMessage_Data) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on KeyboardMessage_Data with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// KeyboardMessage_DataMultiError, or nil if none found.
+func (m *KeyboardMessage_Data) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *KeyboardMessage_Data) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for SenderId
+
+	// no validation rules for ReceiverId
+
+	if len(errors) > 0 {
+		return KeyboardMessage_DataMultiError(errors)
+	}
+
+	return nil
+}
+
+// KeyboardMessage_DataMultiError is an error wrapping multiple validation
+// errors returned by KeyboardMessage_Data.ValidateAll() if the designated
+// constraints aren't met.
+type KeyboardMessage_DataMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m KeyboardMessage_DataMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m KeyboardMessage_DataMultiError) AllErrors() []error { return m }
+
+// KeyboardMessage_DataValidationError is the validation error returned by
+// KeyboardMessage_Data.Validate if the designated constraints aren't met.
+type KeyboardMessage_DataValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e KeyboardMessage_DataValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e KeyboardMessage_DataValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e KeyboardMessage_DataValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e KeyboardMessage_DataValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e KeyboardMessage_DataValidationError) ErrorName() string {
+	return "KeyboardMessage_DataValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e KeyboardMessage_DataValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sKeyboardMessage_Data.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = KeyboardMessage_DataValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = KeyboardMessage_DataValidationError{}

@@ -6,7 +6,29 @@ import "third_party/tagger/tagger.proto";
 
 option go_package = "./v1;api_v1";
 
-message DialogSessionItem{
+message ChatCreateRequest{
+    int32 dialog_type = 1 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+    int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\""];
+}
+
+message ChatCreateResponse{
+    int32 id = 1;
+    int32 dialog_type = 2;
+    int32 receiver_id = 3;
+    int32 is_top = 4;
+    int32 is_disturb = 5;
+    int32 is_online = 6;
+    int32 is_bot = 7;
+    string username = 8;
+    string name = 9;
+    string surname = 10;
+    string avatar = 11;
+    int32 unread_num = 12;
+    string msg_text = 13;
+    string updated_at = 14;
+}
+
+message ChatItem{
     int32 id = 1;
     int32 dialog_type = 2;
     int32 receiver_id = 3;
@@ -21,62 +43,36 @@ message DialogSessionItem{
     int32 is_disturb = 12;
     int32 is_online = 13;
     int32 is_bot = 14;
-    // string remark = 15;
 }
 
-message DialogSessionCreateRequest{
-    int32 dialog_type = 1 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
-    int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\""];
+message ChatListResponse{
+    repeated ChatItem items = 1;
 }
 
-message DialogSessionCreateResponse{
-    int32 id = 1;
-    int32 dialog_type = 2;
-    int32 receiver_id = 3;
-    int32 is_top = 4;
-    int32 is_disturb = 5;
-    int32 is_online = 6;
-    int32 is_bot = 7;
-    string username = 8;
-    string name = 9;
-    string surname = 10;
-    string avatar = 11;
-    // string remark_name = 10;
-    int32 unread_num = 12;
-    string msg_text = 13;
-    string updated_at = 14;
-}
-
-message DialogSessionDeleteRequest{
+message ChatDeleteRequest{
     int32 list_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message DialogSessionDeleteResponse{}
+message ChatDeleteResponse{}
 
-message DialogSessionTopRequest{
+message ChatTopRequest{
     int32 list_id = 1 [(tagger.tags) = "binding:\"required\""];
     int32 type = 2 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
 }
 
-message DialogSessionTopResponse{}
+message ChatTopResponse{}
 
-message DialogSessionDisturbRequest{
+message ChatDisturbRequest{
     int32 dialog_type = 1 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
     int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\""];
     int32 is_disturb = 3 [(tagger.tags) = "binding:\"oneof=0 1\""];
 }
 
-message DialogSessionDisturbResponse{}
+message ChatDisturbResponse{}
 
-message DialogSessionListRequest{}
-
-message DialogSessionListResponse{
-    repeated DialogSessionItem items = 1;
-}
-
-message DialogSessionClearUnreadNumRequest{
+message ChatClearUnreadNumRequest{
     int32 dialog_type = 1 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
     int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
-message DialogSessionClearUnreadNumResponse{}
+message ChatClearUnreadNumResponse{}

@@ -23,19 +23,19 @@ type GroupChat struct {
 	DialogRepo             *repo.Dialog
 	GroupChatService       *service.GroupChatService
 	GroupChatMemberService *service.GroupChatMemberService
-	DialogService          *service.DialogService
+	ChatService            *service.ChatService
 	ContactService         *service.ContactService
 	MessageSendService     service.MessageSendService
 	RedisLock              *cache.RedisLock
 }
 
-func (c *GroupChat) Create(ctx *core.Context) error {
+func (g *GroupChat) Create(ctx *core.Context) error {
 	params := &api_v1.GroupChatCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	gid, err := c.GroupChatService.Create(ctx.Ctx(), &service.GroupCreateOpt{
+	gid, err := g.GroupChatService.Create(ctx.Ctx(), &service.GroupCreateOpt{
 		UserId:    ctx.UserId(),
 		Name:      params.Name,
 		Avatar:    params.Avatar,
@@ -48,19 +48,19 @@ func (c *GroupChat) Create(ctx *core.Context) error {
 	return ctx.Success(&api_v1.GroupChatCreateResponse{GroupId: int32(gid)})
 }
 
-func (c *GroupChat) Invite(ctx *core.Context) error {
+func (g *GroupChat) Invite(ctx *core.Context) error {
 	params := &api_v1.GroupChatInviteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	key := fmt.Sprintf("group-join:%d", params.GroupId)
-	if !c.RedisLock.Lock(ctx.Ctx(), key, 20) {
+	if !g.RedisLock.Lock(ctx.Ctx(), key, 20) {
 		return ctx.ErrorBusiness("Ошибка сети, повторите попытку позже")
 	}
 
-	defer c.RedisLock.UnLock(ctx.Ctx(), key)
-	group, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
+	defer g.RedisLock.UnLock(ctx.Ctx(), key)
+	group, err := g.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка сети, повторите попытку позже")
 	}
@@ -75,11 +75,11 @@ func (c *GroupChat) Invite(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Список приглашенных друзей не может быть пустым")
 	}
 
-	if !c.GroupChatMemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), uid, true) {
+	if !g.GroupChatMemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), uid, true) {
 		return ctx.ErrorBusiness("Вы не являетесь участником группы и не имеете права приглашать друзей")
 	}
 
-	if err := c.GroupChatService.Invite(ctx.Ctx(), &service.GroupInviteOpt{
+	if err := g.GroupChatService.Invite(ctx.Ctx(), &service.GroupInviteOpt{
 		UserId:    uid,
 		GroupId:   int(params.GroupId),
 		MemberIds: uids,
@@ -90,30 +90,30 @@ func (c *GroupChat) Invite(ctx *core.Context) error {
 	return ctx.Success(&api_v1.GroupChatInviteResponse{})
 }
 
-func (c *GroupChat) SignOut(ctx *core.Context) error {
+func (g *GroupChat) SignOut(ctx *core.Context) error {
 	params := &api_v1.GroupChatSecedeRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	uid := ctx.UserId()
-	if err := c.GroupChatService.Secede(ctx.Ctx(), int(params.GroupId), uid); err != nil {
+	if err := g.GroupChatService.Secede(ctx.Ctx(), int(params.GroupId), uid); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	sid := c.DialogRepo.FindBySessionId(uid, int(params.GroupId), entity.ChatGroupMode)
-	_ = c.DialogService.Delete(ctx.Ctx(), ctx.UserId(), sid)
+	sid := g.DialogRepo.FindBySessionId(uid, int(params.GroupId), entity.ChatGroupMode)
+	_ = g.ChatService.Delete(ctx.Ctx(), ctx.UserId(), sid)
 
 	return ctx.Success(nil)
 }
 
-func (c *GroupChat) Setting(ctx *core.Context) error {
+func (g *GroupChat) Setting(ctx *core.Context) error {
 	params := &api_v1.GroupSettingRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	group, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
+	group, err := g.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка сети, повторите попытку позже")
 	}
@@ -123,11 +123,11 @@ func (c *GroupChat) Setting(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if !c.GroupChatMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
+	if !g.GroupChatMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
 		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
 	}
 
-	if err := c.GroupChatService.Update(ctx.Ctx(), &service.GroupUpdateOpt{
+	if err := g.GroupChatService.Update(ctx.Ctx(), &service.GroupUpdateOpt{
 		GroupId:     int(params.GroupId),
 		Name:        params.GroupName,
 		Avatar:      params.Avatar,
@@ -147,38 +147,14 @@ func (c *GroupChat) Setting(ctx *core.Context) error {
 	return ctx.Success(&api_v1.GroupChatSettingResponse{})
 }
 
-func (c *GroupChat) RemoveMembers(ctx *core.Context) error {
-	params := &api_v1.GroupChatRemoveMemberRequest{}
-	if err := ctx.Context.ShouldBind(params); err != nil {
-		return ctx.InvalidParams(err)
-	}
-
-	uid := ctx.UserId()
-	if !c.GroupChatMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
-	}
-
-	err := c.GroupChatService.RemoveMember(ctx.Ctx(), &service.GroupRemoveMembersOpt{
-		UserId:    uid,
-		GroupId:   int(params.GroupId),
-		MemberIds: sliceutil.ParseIds(params.MembersIds),
-	})
-
-	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
-	}
-
-	return ctx.Success(&api_v1.GroupChatRemoveMemberResponse{})
-}
-
-func (c *GroupChat) Get(ctx *core.Context) error {
+func (g *GroupChat) Get(ctx *core.Context) error {
 	params := &api_v1.GroupChatDetailRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	uid := ctx.UserId()
-	groupInfo, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
+	groupInfo, err := g.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -200,36 +176,20 @@ func (c *GroupChat) Get(ctx *core.Context) error {
 		//VisitCard: c.GroupMemberRepo.GetMemberRemark(ctx.Ctx(), int(params.GroupId), uid),
 	}
 
-	if c.DialogRepo.IsDisturb(uid, groupInfo.Id, 2) {
+	if g.DialogRepo.IsDisturb(uid, groupInfo.Id, 2) {
 		resp.IsDisturb = 1
 	}
 
 	return ctx.Success(resp)
 }
 
-//func (c *GroupChat) UpdateMemberRemark(ctx *core.Context) error {
-//	params := &api_v1.GroupChatRemarkUpdateRequest{}
-//	if err := ctx.Context.ShouldBind(params); err != nil {
-//		return ctx.InvalidParams(err)
-//	}
-//
-//	_, err := c.GroupChatMemberRepo.UpdateWhere(ctx.Ctx(), map[string]any{
-//		"user_card": params.VisitCard,
-//	}, "group_id = ? and user_id = ?", params.GroupId, ctx.UserId())
-//	if err != nil {
-//		return ctx.ErrorBusiness("Не удалось изменить заметку в группе")
-//	}
-//
-//	return ctx.Success(nil)
-//}
-
-func (c *GroupChat) GetInviteFriends(ctx *core.Context) error {
+func (g *GroupChat) GetInviteFriends(ctx *core.Context) error {
 	params := &api_v1.GroupChatGetInviteFriendsRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	items, err := c.ContactService.List(ctx.Ctx(), ctx.UserId())
+	items, err := g.ContactService.List(ctx.Ctx(), ctx.UserId())
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -238,7 +198,7 @@ func (c *GroupChat) GetInviteFriends(ctx *core.Context) error {
 		return ctx.Success(items)
 	}
 
-	mids := c.GroupChatMemberRepo.GetMemberIds(ctx.Ctx(), int(params.GroupId))
+	mids := g.GroupChatMemberRepo.GetMemberIds(ctx.Ctx(), int(params.GroupId))
 	if len(mids) == 0 {
 		return ctx.Success(items)
 	}
@@ -253,8 +213,8 @@ func (c *GroupChat) GetInviteFriends(ctx *core.Context) error {
 	return ctx.Success(data)
 }
 
-func (c *GroupChat) GroupList(ctx *core.Context) error {
-	items, err := c.GroupChatService.List(ctx.UserId())
+func (g *GroupChat) GroupList(ctx *core.Context) error {
+	items, err := g.GroupChatService.List(ctx.UserId())
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -277,13 +237,13 @@ func (c *GroupChat) GroupList(ctx *core.Context) error {
 	return ctx.Success(resp)
 }
 
-func (c *GroupChat) Members(ctx *core.Context) error {
+func (g *GroupChat) Members(ctx *core.Context) error {
 	params := &api_v1.GroupChatMemberListRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	group, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
+	group, err := g.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка сети, попробуйте позже")
 	}
@@ -292,11 +252,11 @@ func (c *GroupChat) Members(ctx *core.Context) error {
 		return ctx.Success([]any{})
 	}
 
-	if !c.GroupChatMemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), ctx.UserId(), false) {
+	if !g.GroupChatMemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), ctx.UserId(), false) {
 		return ctx.ErrorBusiness("Не являетесь членом группы и не имеете права просматривать список участников")
 	}
 
-	list := c.GroupChatMemberRepo.GetMembers(ctx.Ctx(), int(params.GroupId))
+	list := g.GroupChatMemberRepo.GetMembers(ctx.Ctx(), int(params.GroupId))
 
 	items := make([]*api_v1.GroupChatMemberListResponse_Item, 0)
 	for _, item := range list {
@@ -314,14 +274,38 @@ func (c *GroupChat) Members(ctx *core.Context) error {
 	return ctx.Success(&api_v1.GroupChatMemberListResponse{Items: items})
 }
 
-func (c *GroupChat) AssignAdmin(ctx *core.Context) error {
+func (g *GroupChat) RemoveMembers(ctx *core.Context) error {
+	params := &api_v1.GroupChatRemoveMemberRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	uid := ctx.UserId()
+	if !g.GroupChatMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
+		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
+	}
+
+	err := g.GroupChatService.RemoveMember(ctx.Ctx(), &service.GroupRemoveMembersOpt{
+		UserId:    uid,
+		GroupId:   int(params.GroupId),
+		MemberIds: sliceutil.ParseIds(params.MembersIds),
+	})
+
+	if err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(&api_v1.GroupChatRemoveMemberResponse{})
+}
+
+func (g *GroupChat) AssignAdmin(ctx *core.Context) error {
 	params := &api_v1.GroupChatAssignAdminRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	uid := ctx.UserId()
-	if !c.GroupChatMemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
+	if !g.GroupChatMemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
 		return ctx.ErrorBusiness("Отсутствуют права доступа")
 	}
 
@@ -330,7 +314,7 @@ func (c *GroupChat) AssignAdmin(ctx *core.Context) error {
 		leader = 1
 	}
 
-	err := c.GroupChatMemberService.SetLeaderStatus(ctx.Ctx(), int(params.GroupId), int(params.UserId), leader)
+	err := g.GroupChatMemberService.SetLeaderStatus(ctx.Ctx(), int(params.GroupId), int(params.UserId), leader)
 	if err != nil {
 		logger.Errorf("Не удалось установить информацию администратора:%s", err.Error())
 		return ctx.ErrorBusiness("Не удалось установить информацию администратора!")
@@ -339,21 +323,21 @@ func (c *GroupChat) AssignAdmin(ctx *core.Context) error {
 	return ctx.Success(nil)
 }
 
-func (c *GroupChat) Dismiss(ctx *core.Context) error {
+func (g *GroupChat) Dismiss(ctx *core.Context) error {
 	params := &api_v1.GroupChatDismissRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	uid := ctx.UserId()
-	if !c.GroupChatMemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
+	if !g.GroupChatMemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
 		return ctx.ErrorBusiness("У вас нет прав на расформирование группы")
 	}
-	if err := c.GroupChatService.Dismiss(ctx.Ctx(), int(params.GroupId), ctx.UserId()); err != nil {
+	if err := g.GroupChatService.Dismiss(ctx.Ctx(), int(params.GroupId), ctx.UserId()); err != nil {
 		return ctx.ErrorBusiness("Не удалось расформировать группу")
 	}
 
-	_ = c.MessageSendService.SendSystemText(ctx.Ctx(), uid, &api_v1.TextMessageRequest{
+	_ = g.MessageSendService.SendSystemText(ctx.Ctx(), uid, &api_v1.TextMessageRequest{
 		Content: "Группа была расформирована владельцем группы",
 		Receiver: &api_v1.MessageReceiver{
 			DialogType: entity.ChatGroupMode,
@@ -364,14 +348,14 @@ func (c *GroupChat) Dismiss(ctx *core.Context) error {
 	return ctx.Success(nil)
 }
 
-func (c *GroupChat) Mute(ctx *core.Context) error {
+func (g *GroupChat) Mute(ctx *core.Context) error {
 	params := &api_v1.GroupChatMuteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	uid := ctx.UserId()
-	group, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
+	group, err := g.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка сети. Пожалуйста, попробуйте еще раз")
 	}
@@ -379,7 +363,7 @@ func (c *GroupChat) Mute(ctx *core.Context) error {
 	if group.IsDismiss == 1 {
 		return ctx.ErrorBusiness("Эта группа была расформирована")
 	}
-	if !c.GroupChatMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
+	if !g.GroupChatMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
 		return ctx.ErrorBusiness("У вас нет прав доступа")
 	}
 
@@ -390,7 +374,7 @@ func (c *GroupChat) Mute(ctx *core.Context) error {
 		data["is_mute"] = 0
 	}
 
-	affected, err := c.GroupChatRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.GroupId)
+	affected, err := g.GroupChatRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.GroupId)
 	if err != nil {
 		return ctx.Error("Серверная ошибка. Пожалуйста, попробуйте еще раз")
 	}
@@ -398,7 +382,7 @@ func (c *GroupChat) Mute(ctx *core.Context) error {
 		return ctx.Success(api_v1.GroupChatMuteResponse{})
 	}
 
-	user, err := c.UserRepo.FindById(ctx.Ctx(), uid)
+	user, err := g.UserRepo.FindById(ctx.Ctx(), uid)
 	if err != nil {
 		return err
 	}
@@ -419,7 +403,7 @@ func (c *GroupChat) Mute(ctx *core.Context) error {
 		}
 	}
 
-	_ = c.MessageSendService.SendSysOther(ctx.Ctx(), &model.Message{
+	_ = g.MessageSendService.SendSysOther(ctx.Ctx(), &model.Message{
 		MsgType:    msgType,
 		DialogType: model.DialogRecordDialogTypeGroup,
 		UserId:     uid,
@@ -430,14 +414,14 @@ func (c *GroupChat) Mute(ctx *core.Context) error {
 	return ctx.Success(api_v1.GroupChatMuteResponse{})
 }
 
-func (c *GroupChat) Overt(ctx *core.Context) error {
+func (g *GroupChat) Overt(ctx *core.Context) error {
 	params := &api_v1.GroupChatOvertRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	uid := ctx.UserId()
-	group, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
+	group, err := g.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка сети. Пожалуйста, попробуйте еще раз")
 	}
@@ -446,7 +430,7 @@ func (c *GroupChat) Overt(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Эта группа была расформирована")
 	}
 
-	if !c.GroupChatMemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
+	if !g.GroupChatMemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
 		return ctx.ErrorBusiness("У вас нет прав доступа")
 	}
 
@@ -457,7 +441,7 @@ func (c *GroupChat) Overt(ctx *core.Context) error {
 		data["is_overt"] = 0
 	}
 
-	_, err = c.GroupChatRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.GroupId)
+	_, err = g.GroupChatRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.GroupId)
 	if err != nil {
 		return ctx.Error("Серверная ошибка. Пожалуйста, попробуйте еще раз")
 	}

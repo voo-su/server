@@ -17,9 +17,9 @@ message ContactListResponse{
         string surname = 5;
         int32 gender = 6;
         string about = 7;
-        //        string remark = 8;
-        int32 is_online = 9;
-        int32 group_id = 10;
+        int32 is_online = 8;
+        int32 group_id = 9;
+        // string remark = 10;
     }
 
     repeated Item items = 1;
@@ -30,13 +30,6 @@ message ContactDeleteRequest{
 }
 
 message ContactDeleteResponse{}
-
-//message ContactEditRemarkRequest{
-//    int32 friend_id = 1 [(tagger.tags) = "binding:\"required\""];
-//    string remark = 2;
-//}
-
-//message ContactEditRemarkResponse{}
 
 message ContactDetailRequest{
     int32 user_id = 1 [(tagger.tags) = "form:\"user_id\" binding:\"required\""];
@@ -50,11 +43,9 @@ message ContactDetailResponse{
     string surname = 5;
     int32 gender = 6;
     string about = 7;
-    //    string remark = 8;
-//    int32 friend_request = 9;
-    int32 friend_status = 10;
-    int32 group_id = 11;
-    int32 is_bot = 12;
+    int32 friend_status = 8;
+    int32 group_id = 9;
+    int32 is_bot = 10;
 }
 
 message ContactChangeGroupRequest{
@@ -66,21 +57,18 @@ message ContactChangeGroupResponse{}
 
 message ContactRequestCreateRequest{
     int32 friend_id = 1 [(tagger.tags) = "binding:\"required\""];
-    //  string remark = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
 message ContactRequestCreateResponse{}
 
 message ContactRequestAcceptRequest{
     int32 apply_id = 1 [(tagger.tags) = "binding:\"required\""];
-    // string remark = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
 message ContactRequestAcceptResponse{}
 
 message ContactRequestDeclineRequest{
     int32 apply_id = 1 [(tagger.tags) = "binding:\"required\""];
-    // string remark = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
 message ContactRequestDeclineResponse{}
@@ -90,12 +78,10 @@ message ContactRequestListResponse{
         int32 id = 1;
         int32 user_id = 2;
         int32 friend_id = 3;
-        // string remark = 4;
-        string username = 5;
-        string avatar = 6;
-        string name = 7;
-        string surname = 8;
-        // string created_at = 7;
+        string username = 4;
+        string avatar = 5;
+        string name = 6;
+        string surname = 7;
     }
 
     repeated Item items = 1;
@@ -133,6 +119,7 @@ message ContactFolderSortRequest{
         int32 id = 1 [(tagger.tags) = "binding:\"required\""];
         int32 sort = 2 [(tagger.tags) = "binding:\"required\""];
     }
+
     repeated Item items = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
@@ -147,6 +134,7 @@ message ContactFolderListResponse{
         int32 count = 3;
         int32 sort = 4;
     }
+
     repeated Item items = 1;
 }
 
@@ -156,6 +144,7 @@ message ContactFolderSaveRequest{
         int32 sort = 2 [(tagger.tags) = "binding:\"required\""];
         string name = 3 [(tagger.tags) = "binding:\"required\""];
     }
+
     repeated Item items = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
