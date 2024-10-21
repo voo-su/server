@@ -1,38 +1,36 @@
-FROM alpine:3.19
+FROM alpine:3.20 AS builder
 
-ARG GOLANG_VERSION=1.22.2
-ARG SSH_PASSWORD=root
+ARG GOLANG_VERSION=1.23.2
 
-# Установка зависимостей и очистка временных файлов
 RUN apk update && \
     apk add --no-cache make gcc openssh bash musl-dev openssl-dev ca-certificates && \
     update-ca-certificates && \
     rm -rf /var/cache/apk/*
 
-# Установка Go
 RUN wget https://go.dev/dl/go$GOLANG_VERSION.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go$GOLANG_VERSION.linux-amd64.tar.gz && \
     rm go$GOLANG_VERSION.linux-amd64.tar.gz
 
-# Настройка SSH
-RUN sed -i -e 's/#PermitRootLogin.*/PermitRootLogin\ yes/' \
-    -e 's/#Port 22/Port 22/' /etc/ssh/sshd_config && \
-    echo "root:${SSH_PASSWORD}" | chpasswd && \
-    /usr/bin/ssh-keygen -A && \
-    ssh-keygen -t rsa -b 4096 -f  /etc/ssh/ssh_host_key && \
-    echo "export VISIBLE=now" >> /etc/profile
-
-# Добавление Go в PATH
 ENV PATH=$PATH:/usr/local/go/bin
 
-RUN mkdir /opt/voo-su
+RUN mkdir /usr/src
 
-WORKDIR /opt/voo-su
+RUN mkdir /usr/src/voo-su
 
-#RUN ln -sf /opt/voo-su/configs/voo-su.yaml /etc/voo-su/voo-su.yaml
+WORKDIR /usr/src/voo-su
 
-EXPOSE 22
-EXPOSE 8000
-EXPOSE 8001
+COPY . ./
 
-CMD ["/usr/sbin/sshd", "-D"]
+RUN make install
+
+RUN make build
+
+FROM alpine:3.20
+
+COPY --from=builder /usr/src/voo-su/build /usr/bin
+
+RUN mkdir /etc/voo-su
+
+EXPOSE 8000 8001
+
+CMD ["sh"]
