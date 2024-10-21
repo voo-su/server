@@ -111,8 +111,7 @@ create table message_votes
     is_anonymous  smallint     default 0                     not null,
     status        smallint     default 0                     not null,
     created_at    timestamp                                  not null,
-    updated_at    timestamp                                  not null,
-    new_column    integer
+    updated_at    timestamp                                  not null
 );
 
 create table message_vote_answers
@@ -121,8 +120,7 @@ create table message_vote_answers
     vote_id    integer default 0          not null,
     user_id    integer default 0          not null,
     option     char    default ''::bpchar not null,
-    created_at timestamp                  not null,
-    new_column integer
+    created_at timestamp                  not null
 );
 
 create table message_delete
@@ -188,8 +186,7 @@ create table group_chat_ads
     is_confirm    smallint    default 0                     not null,
     created_at    timestamp                                 not null,
     updated_at    timestamp                                 not null,
-    deleted_at    timestamp,
-    new_column    integer
+    deleted_at    timestamp
 );
 
 create table dialogs

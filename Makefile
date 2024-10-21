@@ -15,23 +15,22 @@ proto:
 	protoc --proto_path=./api/proto \
 		--gotag_out=outdir="./api/pb/":./ ./api/proto/v1/*.proto
 
-.PHONY: http
-http:
-	go run ./cmd/voo-su http --c ./configs/voo-su.yaml
-
-.PHONY: ws
-ws:
-	go run ./cmd/voo-su ws --c ./configs/voo-su.yaml
-
-.PHONY: cli-cron
-cli-cron:
-	go run ./cmd/voo-su cli-cron --c ./configs/voo-su.yaml
-
-.PHONY: cli-queue
-cli-queue:
-	go run ./cmd/voo-su cli-queue --c ./configs/voo-su.yaml
-
 .PHONY: build
 build:
 	go build -o ./build/voo-su ./cmd/voo-su
 
+.PHONY: http
+http:
+	go run ./cmd/voo-su http
+
+.PHONY: ws
+ws:
+	go run ./cmd/voo-su ws
+
+.PHONY: cli-cron
+cli-cron:
+	go run ./cmd/voo-su cli-cron
+
+.PHONY: cli-queue
+cli-queue:
+	go run ./cmd/voo-su cli-queue

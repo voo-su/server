@@ -61,9 +61,10 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 		{
 			contact.GET("", core.HandlerFunc(handler.V1.Contact.List))
 			contact.GET("/get", core.HandlerFunc(handler.V1.Contact.Get))
+			contact.PUT("/remark", core.HandlerFunc(handler.V1.Contact.EditRemark))
 			contact.POST("/delete", core.HandlerFunc(handler.V1.Contact.Delete))
+			contact.POST("/requests", core.HandlerFunc(handler.V1.ContactRequest.Create))
 			contact.GET("/requests", core.HandlerFunc(handler.V1.ContactRequest.List))
-			contact.POST("/requests/create", core.HandlerFunc(handler.V1.ContactRequest.Create))
 			contact.POST("/requests/accept", core.HandlerFunc(handler.V1.ContactRequest.Accept))
 			contact.POST("/requests/decline", core.HandlerFunc(handler.V1.ContactRequest.Decline))
 			contact.GET("/requests/unread-num", core.HandlerFunc(handler.V1.ContactRequest.ApplyUnreadNum))

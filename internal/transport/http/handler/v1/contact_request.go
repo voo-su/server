@@ -32,8 +32,7 @@ func (ca *ContactRequest) Create(ctx *core.Context) error {
 	}
 
 	if err := ca.ContactRequestService.Create(ctx.Ctx(), &service.ContactApplyCreateOpt{
-		UserId: ctx.UserId(),
-		//Remarks:  params.Remark,
+		UserId:   ctx.UserId(),
 		FriendId: int(params.FriendId),
 	}); err != nil {
 		return ctx.ErrorBusiness(err)
@@ -50,8 +49,6 @@ func (ca *ContactRequest) Accept(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	_, err := ca.ContactRequestService.Accept(ctx.Ctx(), &service.ContactApplyAcceptOpt{
-		//Remarks: params.Remark,
-		Remarks: "",
 		ApplyId: int(params.ApplyId),
 		UserId:  uid,
 	})
@@ -78,9 +75,7 @@ func (ca *ContactRequest) Decline(ctx *core.Context) error {
 	}
 
 	if err := ca.ContactRequestService.Decline(ctx.Ctx(), &service.ContactApplyDeclineOpt{
-		UserId: ctx.UserId(),
-		//Remarks: params.Remark,
-		Remarks: "",
+		UserId:  ctx.UserId(),
 		ApplyId: int(params.ApplyId),
 	}); err != nil {
 		return ctx.ErrorBusiness(err)
@@ -101,7 +96,6 @@ func (ca *ContactRequest) List(ctx *core.Context) error {
 			Id:       int32(item.Id),
 			UserId:   int32(item.UserId),
 			FriendId: int32(item.FriendId),
-			//Remark:   item.Remark,
 			Username: item.Username,
 			Avatar:   item.Avatar,
 			Name:     item.Name,

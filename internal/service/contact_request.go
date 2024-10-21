@@ -21,8 +21,7 @@ func NewContactApplyService(source *repo.Source) *ContactRequestService {
 }
 
 type ContactApplyCreateOpt struct {
-	UserId int
-	//Remarks  string
+	UserId   int
 	FriendId int
 }
 
@@ -30,7 +29,6 @@ func (s *ContactRequestService) Create(ctx context.Context, opt *ContactApplyCre
 	apply := &model.ContactRequest{
 		UserId:   opt.UserId,
 		FriendId: opt.FriendId,
-		//Remark:   opt.Remarks,
 	}
 	if err := s.Source.Db().WithContext(ctx).Create(apply).Error; err != nil {
 		return err
@@ -53,7 +51,6 @@ func (s *ContactRequestService) Create(ctx context.Context, opt *ContactApplyCre
 
 type ContactApplyAcceptOpt struct {
 	UserId  int
-	Remarks string
 	ApplyId int
 }
 
@@ -65,7 +62,7 @@ func (s *ContactRequestService) Accept(ctx context.Context, opt *ContactApplyAcc
 	}
 
 	err := db.Transaction(func(tx *gorm.DB) error {
-		addFriendFunc := func(uid, fid int, remark string) error {
+		addFriendFunc := func(uid, fid int) error {
 			var contact model.Contact
 			err := tx.Where("user_id = ? and friend_id = ?", uid, fid).First(&contact).Error
 			if err == nil {
@@ -73,7 +70,6 @@ func (s *ContactRequestService) Accept(ctx context.Context, opt *ContactApplyAcc
 					Model(&model.Contact{}).
 					Where("id = ?", contact.Id).
 					Updates(&model.Contact{
-						//Remark: remark,
 						Remark: "",
 						Status: 1,
 					}).Error
@@ -85,9 +81,8 @@ func (s *ContactRequestService) Accept(ctx context.Context, opt *ContactApplyAcc
 			return tx.Create(&model.Contact{
 				UserId:   uid,
 				FriendId: fid,
-				//Remark:   remark,
-				Remark: "",
-				Status: 1,
+				Remark:   "",
+				Status:   1,
 			}).Error
 		}
 		var user model.User
@@ -95,11 +90,11 @@ func (s *ContactRequestService) Accept(ctx context.Context, opt *ContactApplyAcc
 			return err
 		}
 
-		if err := addFriendFunc(applyInfo.UserId, applyInfo.FriendId, user.Username); err != nil {
+		if err := addFriendFunc(applyInfo.UserId, applyInfo.FriendId); err != nil {
 			return err
 		}
 
-		if err := addFriendFunc(applyInfo.FriendId, applyInfo.UserId, opt.Remarks); err != nil {
+		if err := addFriendFunc(applyInfo.FriendId, applyInfo.UserId); err != nil {
 			return err
 		}
 		return tx.Delete(&model.ContactRequest{}, "user_id = ? and friend_id = ?", applyInfo.UserId, applyInfo.FriendId).Error
@@ -109,7 +104,6 @@ func (s *ContactRequestService) Accept(ctx context.Context, opt *ContactApplyAcc
 
 type ContactApplyDeclineOpt struct {
 	UserId  int
-	Remarks string
 	ApplyId int
 }
 
@@ -134,7 +128,6 @@ func (s *ContactRequestService) Decline(ctx context.Context, opt *ContactApplyDe
 func (s *ContactRequestService) List(ctx context.Context, uid int) ([]*model.ApplyItem, error) {
 	fields := []string{
 		"contact_requests.id",
-		"contact_requests.remark",
 		"u.username",
 		"u.avatar",
 		"u.name",
