@@ -94,6 +94,13 @@ message MixedMessageRequest{
     string quote_id = 4;
 }
 
+message CodeMessageRequest{
+    MessageReceiver receiver = 1;
+    string type = 2;
+    string lang = 3 [(tagger.tags) = "binding:\"required\""];
+    string code = 4 [(tagger.tags) = "binding:\"required\""];
+}
+
 message LoginMessageRequest{
     string ip = 1;
     string agent = 2;

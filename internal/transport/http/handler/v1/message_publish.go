@@ -26,6 +26,7 @@ func (c *Publish) transfer(ctx *core.Context, typeValue string) error {
 		mapping["forward"] = c.onSendForward
 		mapping["mixed"] = c.onMixedMessage
 		mapping["sticker"] = c.onSendSticker
+		mapping["code"] = c.onSendCode
 	}
 	if call, ok := mapping[typeValue]; ok {
 		return call(ctx)
@@ -66,8 +67,7 @@ func (c *Publish) onSendText(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.MessageSendService.SendText(ctx.Ctx(), ctx.UserId(), params)
-	if err != nil {
+	if err := c.MessageSendService.SendText(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -80,8 +80,7 @@ func (c *Publish) onSendImage(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.MessageSendService.SendImage(ctx.Ctx(), ctx.UserId(), params)
-	if err != nil {
+	if err := c.MessageSendService.SendImage(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -95,8 +94,7 @@ func (c *Publish) onSendVoice(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.MessageSendService.SendVoice(ctx.Ctx(), ctx.UserId(), params)
-	if err != nil {
+	if err := c.MessageSendService.SendVoice(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -110,8 +108,7 @@ func (c *Publish) onSendVideo(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.MessageSendService.SendVideo(ctx.Ctx(), ctx.UserId(), params)
-	if err != nil {
+	if err := c.MessageSendService.SendVideo(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -124,8 +121,7 @@ func (c *Publish) onSendFile(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.MessageSendService.SendFile(ctx.Ctx(), ctx.UserId(), params)
-	if err != nil {
+	if err := c.MessageSendService.SendFile(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -138,8 +134,7 @@ func (c *Publish) onSendForward(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.MessageSendService.SendForward(ctx.Ctx(), ctx.UserId(), params)
-	if err != nil {
+	if err := c.MessageSendService.SendForward(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -160,8 +155,7 @@ func (c *Publish) onSendVote(ctx *core.Context) error {
 		return ctx.InvalidParams("количество вариантов (options) не может превышать 6!")
 	}
 
-	err := c.MessageSendService.SendVote(ctx.Ctx(), ctx.UserId(), params)
-	if err != nil {
+	if err := c.MessageSendService.SendVote(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -174,8 +168,7 @@ func (c *Publish) onMixedMessage(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.MessageSendService.SendMixedMessage(ctx.Ctx(), ctx.UserId(), params)
-	if err != nil {
+	if err := c.MessageSendService.SendMixedMessage(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -188,8 +181,20 @@ func (c *Publish) onSendSticker(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.MessageSendService.SendSticker(ctx.Ctx(), ctx.UserId(), params)
-	if err != nil {
+	if err := c.MessageSendService.SendSticker(ctx.Ctx(), ctx.UserId(), params); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (c *Publish) onSendCode(ctx *core.Context) error {
+	params := &api_v1.CodeMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := c.MessageSendService.SendCode(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

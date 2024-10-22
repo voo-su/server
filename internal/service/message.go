@@ -42,6 +42,7 @@ type MessageSendService interface {
 	Vote(ctx context.Context, uid int, msgId int, optionsValue string) (*repo.VoteStatistics, error)
 	SendLogin(ctx context.Context, uid int, req *api_v1.LoginMessageRequest) error
 	SendSticker(ctx context.Context, uid int, req *api_v1.StickerMessageRequest) error
+	SendCode(ctx context.Context, uid int, req *api_v1.CodeMessageRequest) error
 }
 
 type MessageService struct {
@@ -884,5 +885,19 @@ func (m *MessageService) SendSticker(ctx context.Context, uid int, req *api_v1.S
 		}),
 	}
 
+	return m.save(ctx, data)
+}
+
+func (m *MessageService) SendCode(ctx context.Context, uid int, req *api_v1.CodeMessageRequest) error {
+	data := &model.Message{
+		DialogType: int(req.Receiver.DialogType),
+		MsgType:    entity.ChatMsgTypeCode,
+		UserId:     uid,
+		ReceiverId: int(req.Receiver.ReceiverId),
+		Extra: jsonutil.Encode(&model.DialogRecordExtraCode{
+			Lang: req.Lang,
+			Code: req.Code,
+		}),
+	}
 	return m.save(ctx, data)
 }

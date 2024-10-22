@@ -787,6 +787,77 @@ func (x *MixedMessageRequest) GetQuoteId() string {
 	return ""
 }
 
+type CodeMessageRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Receiver *MessageReceiver `protobuf:"bytes,1,opt,name=receiver,proto3" json:"receiver,omitempty"`
+	Type     string           `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Lang     string           `protobuf:"bytes,3,opt,name=lang,proto3" json:"lang,omitempty" binding:"required"`
+	Code     string           `protobuf:"bytes,4,opt,name=code,proto3" json:"code,omitempty" binding:"required"`
+}
+
+func (x *CodeMessageRequest) Reset() {
+	*x = CodeMessageRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_v1_message_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CodeMessageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CodeMessageRequest) ProtoMessage() {}
+
+func (x *CodeMessageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_message_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CodeMessageRequest.ProtoReflect.Descriptor instead.
+func (*CodeMessageRequest) Descriptor() ([]byte, []int) {
+	return file_v1_message_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *CodeMessageRequest) GetReceiver() *MessageReceiver {
+	if x != nil {
+		return x.Receiver
+	}
+	return nil
+}
+
+func (x *CodeMessageRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *CodeMessageRequest) GetLang() string {
+	if x != nil {
+		return x.Lang
+	}
+	return ""
+}
+
+func (x *CodeMessageRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
 type LoginMessageRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -800,7 +871,7 @@ type LoginMessageRequest struct {
 func (x *LoginMessageRequest) Reset() {
 	*x = LoginMessageRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_message_proto_msgTypes[10]
+		mi := &file_v1_message_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -813,7 +884,7 @@ func (x *LoginMessageRequest) String() string {
 func (*LoginMessageRequest) ProtoMessage() {}
 
 func (x *LoginMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_message_proto_msgTypes[10]
+	mi := &file_v1_message_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -826,7 +897,7 @@ func (x *LoginMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoginMessageRequest.ProtoReflect.Descriptor instead.
 func (*LoginMessageRequest) Descriptor() ([]byte, []int) {
-	return file_v1_message_proto_rawDescGZIP(), []int{10}
+	return file_v1_message_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *LoginMessageRequest) GetIp() string {
@@ -862,7 +933,7 @@ type KeyboardMessage struct {
 func (x *KeyboardMessage) Reset() {
 	*x = KeyboardMessage{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_message_proto_msgTypes[11]
+		mi := &file_v1_message_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -875,7 +946,7 @@ func (x *KeyboardMessage) String() string {
 func (*KeyboardMessage) ProtoMessage() {}
 
 func (x *KeyboardMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_message_proto_msgTypes[11]
+	mi := &file_v1_message_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -888,7 +959,7 @@ func (x *KeyboardMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KeyboardMessage.ProtoReflect.Descriptor instead.
 func (*KeyboardMessage) Descriptor() ([]byte, []int) {
-	return file_v1_message_proto_rawDescGZIP(), []int{11}
+	return file_v1_message_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *KeyboardMessage) GetEvent() string {
@@ -917,7 +988,7 @@ type TextMessageRequest_Mention struct {
 func (x *TextMessageRequest_Mention) Reset() {
 	*x = TextMessageRequest_Mention{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_message_proto_msgTypes[12]
+		mi := &file_v1_message_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -930,7 +1001,7 @@ func (x *TextMessageRequest_Mention) String() string {
 func (*TextMessageRequest_Mention) ProtoMessage() {}
 
 func (x *TextMessageRequest_Mention) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_message_proto_msgTypes[12]
+	mi := &file_v1_message_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -972,7 +1043,7 @@ type MixedMessageRequest_Item struct {
 func (x *MixedMessageRequest_Item) Reset() {
 	*x = MixedMessageRequest_Item{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_message_proto_msgTypes[13]
+		mi := &file_v1_message_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -985,7 +1056,7 @@ func (x *MixedMessageRequest_Item) String() string {
 func (*MixedMessageRequest_Item) ProtoMessage() {}
 
 func (x *MixedMessageRequest_Item) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_message_proto_msgTypes[13]
+	mi := &file_v1_message_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1027,7 +1098,7 @@ type KeyboardMessage_Data struct {
 func (x *KeyboardMessage_Data) Reset() {
 	*x = KeyboardMessage_Data{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_v1_message_proto_msgTypes[14]
+		mi := &file_v1_message_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1040,7 +1111,7 @@ func (x *KeyboardMessage_Data) String() string {
 func (*KeyboardMessage_Data) ProtoMessage() {}
 
 func (x *KeyboardMessage_Data) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_message_proto_msgTypes[14]
+	mi := &file_v1_message_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1053,7 +1124,7 @@ func (x *KeyboardMessage_Data) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KeyboardMessage_Data.ProtoReflect.Descriptor instead.
 func (*KeyboardMessage_Data) Descriptor() ([]byte, []int) {
-	return file_v1_message_proto_rawDescGZIP(), []int{11, 0}
+	return file_v1_message_proto_rawDescGZIP(), []int{12, 0}
 }
 
 func (x *KeyboardMessage_Data) GetSenderId() int32 {
@@ -1215,23 +1286,35 @@ var file_v1_message_proto_rawDesc = []byte{
 	0x65, 0x6d, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
 	0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e,
 	0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74,
-	0x22, 0x55, 0x0a, 0x13, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x70, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x70, 0x12, 0x14, 0x0a, 0x05, 0x61, 0x67, 0x65, 0x6e, 0x74,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x12, 0x18, 0x0a,
-	0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
-	0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x22, 0x9b, 0x01, 0x0a, 0x0f, 0x4b, 0x65, 0x79, 0x62,
-	0x6f, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65,
-	0x76, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x76, 0x65, 0x6e,
-	0x74, 0x12, 0x2c, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x18, 0x2e, 0x76, 0x31, 0x2e, 0x4b, 0x65, 0x79, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x73,
-	0x73, 0x61, 0x67, 0x65, 0x2e, 0x44, 0x61, 0x74, 0x61, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x1a,
-	0x44, 0x0a, 0x04, 0x44, 0x61, 0x74, 0x61, 0x12, 0x1b, 0x0a, 0x09, 0x73, 0x65, 0x6e, 0x64, 0x65,
-	0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x73, 0x65, 0x6e, 0x64,
-	0x65, 0x72, 0x49, 0x64, 0x12, 0x1f, 0x0a, 0x0b, 0x72, 0x65, 0x63, 0x65, 0x69, 0x76, 0x65, 0x72,
-	0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x72, 0x65, 0x63, 0x65, 0x69,
-	0x76, 0x65, 0x72, 0x49, 0x64, 0x42, 0x0d, 0x5a, 0x0b, 0x2e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70,
-	0x69, 0x5f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x22, 0xb3, 0x01, 0x0a, 0x12, 0x43, 0x6f, 0x64, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2f, 0x0a, 0x08, 0x72, 0x65, 0x63, 0x65, 0x69,
+	0x76, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x76, 0x31, 0x2e, 0x4d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x63, 0x65, 0x69, 0x76, 0x65, 0x72, 0x52, 0x08,
+	0x72, 0x65, 0x63, 0x65, 0x69, 0x76, 0x65, 0x72, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x2b, 0x0a, 0x04,
+	0x6c, 0x61, 0x6e, 0x67, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42, 0x17, 0x9a, 0x84, 0x9e, 0x03,
+	0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72,
+	0x65, 0x64, 0x22, 0x52, 0x04, 0x6c, 0x61, 0x6e, 0x67, 0x12, 0x2b, 0x0a, 0x04, 0x63, 0x6f, 0x64,
+	0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x42, 0x17, 0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69,
+	0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22,
+	0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x22, 0x55, 0x0a, 0x13, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x4d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a,
+	0x02, 0x69, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x70, 0x12, 0x14, 0x0a,
+	0x05, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x61, 0x67,
+	0x65, 0x6e, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x22, 0x9b, 0x01,
+	0x0a, 0x0f, 0x4b, 0x65, 0x79, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67,
+	0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x05, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x12, 0x2c, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x18, 0x2e, 0x76, 0x31, 0x2e, 0x4b, 0x65, 0x79, 0x62, 0x6f,
+	0x61, 0x72, 0x64, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x2e, 0x44, 0x61, 0x74, 0x61, 0x52,
+	0x04, 0x64, 0x61, 0x74, 0x61, 0x1a, 0x44, 0x0a, 0x04, 0x44, 0x61, 0x74, 0x61, 0x12, 0x1b, 0x0a,
+	0x09, 0x73, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x08, 0x73, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x49, 0x64, 0x12, 0x1f, 0x0a, 0x0b, 0x72, 0x65,
+	0x63, 0x65, 0x69, 0x76, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x0a, 0x72, 0x65, 0x63, 0x65, 0x69, 0x76, 0x65, 0x72, 0x49, 0x64, 0x42, 0x0d, 0x5a, 0x0b, 0x2e,
+	0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70, 0x69, 0x5f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -1246,7 +1329,7 @@ func file_v1_message_proto_rawDescGZIP() []byte {
 	return file_v1_message_proto_rawDescData
 }
 
-var file_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_v1_message_proto_goTypes = []interface{}{
 	(*MessageReceiver)(nil),            // 0: v1.MessageReceiver
 	(*TextMessageRequest)(nil),         // 1: v1.TextMessageRequest
@@ -1258,15 +1341,16 @@ var file_v1_message_proto_goTypes = []interface{}{
 	(*StickerMessageRequest)(nil),      // 7: v1.StickerMessageRequest
 	(*ForwardMessageRequest)(nil),      // 8: v1.ForwardMessageRequest
 	(*MixedMessageRequest)(nil),        // 9: v1.MixedMessageRequest
-	(*LoginMessageRequest)(nil),        // 10: v1.LoginMessageRequest
-	(*KeyboardMessage)(nil),            // 11: v1.KeyboardMessage
-	(*TextMessageRequest_Mention)(nil), // 12: v1.TextMessageRequest.Mention
-	(*MixedMessageRequest_Item)(nil),   // 13: v1.MixedMessageRequest.Item
-	(*KeyboardMessage_Data)(nil),       // 14: v1.KeyboardMessage.Data
+	(*CodeMessageRequest)(nil),         // 10: v1.CodeMessageRequest
+	(*LoginMessageRequest)(nil),        // 11: v1.LoginMessageRequest
+	(*KeyboardMessage)(nil),            // 12: v1.KeyboardMessage
+	(*TextMessageRequest_Mention)(nil), // 13: v1.TextMessageRequest.Mention
+	(*MixedMessageRequest_Item)(nil),   // 14: v1.MixedMessageRequest.Item
+	(*KeyboardMessage_Data)(nil),       // 15: v1.KeyboardMessage.Data
 }
 var file_v1_message_proto_depIdxs = []int32{
 	0,  // 0: v1.TextMessageRequest.receiver:type_name -> v1.MessageReceiver
-	12, // 1: v1.TextMessageRequest.mention:type_name -> v1.TextMessageRequest.Mention
+	13, // 1: v1.TextMessageRequest.mention:type_name -> v1.TextMessageRequest.Mention
 	0,  // 2: v1.ImageMessageRequest.receiver:type_name -> v1.MessageReceiver
 	0,  // 3: v1.VideoMessageRequest.receiver:type_name -> v1.MessageReceiver
 	0,  // 4: v1.FileMessageRequest.receiver:type_name -> v1.MessageReceiver
@@ -1275,13 +1359,14 @@ var file_v1_message_proto_depIdxs = []int32{
 	0,  // 7: v1.StickerMessageRequest.receiver:type_name -> v1.MessageReceiver
 	0,  // 8: v1.ForwardMessageRequest.receiver:type_name -> v1.MessageReceiver
 	0,  // 9: v1.MixedMessageRequest.receiver:type_name -> v1.MessageReceiver
-	13, // 10: v1.MixedMessageRequest.items:type_name -> v1.MixedMessageRequest.Item
-	14, // 11: v1.KeyboardMessage.data:type_name -> v1.KeyboardMessage.Data
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	14, // 10: v1.MixedMessageRequest.items:type_name -> v1.MixedMessageRequest.Item
+	0,  // 11: v1.CodeMessageRequest.receiver:type_name -> v1.MessageReceiver
+	15, // 12: v1.KeyboardMessage.data:type_name -> v1.KeyboardMessage.Data
+	13, // [13:13] is the sub-list for method output_type
+	13, // [13:13] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_v1_message_proto_init() }
@@ -1411,7 +1496,7 @@ func file_v1_message_proto_init() {
 			}
 		}
 		file_v1_message_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LoginMessageRequest); i {
+			switch v := v.(*CodeMessageRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1423,7 +1508,7 @@ func file_v1_message_proto_init() {
 			}
 		}
 		file_v1_message_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*KeyboardMessage); i {
+			switch v := v.(*LoginMessageRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1435,7 +1520,7 @@ func file_v1_message_proto_init() {
 			}
 		}
 		file_v1_message_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TextMessageRequest_Mention); i {
+			switch v := v.(*KeyboardMessage); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1447,7 +1532,7 @@ func file_v1_message_proto_init() {
 			}
 		}
 		file_v1_message_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MixedMessageRequest_Item); i {
+			switch v := v.(*TextMessageRequest_Mention); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1459,6 +1544,18 @@ func file_v1_message_proto_init() {
 			}
 		}
 		file_v1_message_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MixedMessageRequest_Item); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_v1_message_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*KeyboardMessage_Data); i {
 			case 0:
 				return &v.state
@@ -1477,7 +1574,7 @@ func file_v1_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_v1_message_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

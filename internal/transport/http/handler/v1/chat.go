@@ -79,7 +79,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 	}
 	if item.DialogType == entity.ChatPrivateMode {
 		item.UnreadNum = int32(c.UnreadStorage.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
-		//item.Remark = c.contactService.Dao().GetFriendRemark(ctx.Ctx(), uid, int(params.ReceiverId))
+		item.Remark = c.ContactService.Contact.GetFriendRemark(ctx.Ctx(), uid, int(params.ReceiverId))
 		if user, err := c.UserRepo.FindById(ctx.Ctx(), result.ReceiverId); err == nil {
 			item.Username = user.Username
 			item.Name = user.Name
@@ -109,10 +109,10 @@ func (c *Chat) Create(ctx *core.Context) error {
 		Name:       item.Name,
 		Surname:    item.Surname,
 		Avatar:     item.Avatar,
-		//RemarkName: item.Remark,
-		UnreadNum: item.UnreadNum,
-		MsgText:   item.MsgText,
-		UpdatedAt: item.UpdatedAt,
+		RemarkName: item.Remark,
+		UnreadNum:  item.UnreadNum,
+		MsgText:    item.MsgText,
+		UpdatedAt:  item.UpdatedAt,
 	})
 }
 
@@ -134,7 +134,7 @@ func (c *Chat) List(ctx *core.Context) error {
 		}
 	}
 
-	//remarks, _ := c.contactService.Dao().Remarks(ctx.Ctx(), uid, friends)
+	remarks, _ := c.ContactService.Contact.Remarks(ctx.Ctx(), uid, friends)
 	items := make([]*api_v1.ChatItem, 0)
 	for _, item := range data {
 		value := &api_v1.ChatItem{
@@ -166,7 +166,7 @@ func (c *Chat) List(ctx *core.Context) error {
 			value.Name = item.Name
 			//}
 			value.Surname = item.Surname
-			//value.Remark = remarks[item.ReceiverId]
+			value.Remark = remarks[item.ReceiverId]
 			value.IsOnline = int32(strutil.BoolToInt(c.ClientStorage.IsOnline(ctx.Ctx(), entity.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))))
 		} else {
 			value.Name = item.GroupName

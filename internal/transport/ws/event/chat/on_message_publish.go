@@ -20,6 +20,7 @@ func (h *Handler) onPublish(ctx context.Context, client socket.IClient, data []b
 		publishMapping["vote"] = h.onVoteMessage
 		publishMapping["file"] = h.onFileMessage
 		publishMapping["sticker"] = h.onStickerMessage
+		publishMapping["code"] = h.onCodeMessage
 	}
 	val, err := sonic.Get(data, "content.type")
 	if err == nil {
@@ -125,4 +126,41 @@ func (h *Handler) onVoteMessage(_ context.Context, _ socket.IClient, data []byte
 		return
 	}
 	fmt.Println("[onVoteMessage] Новое сообщение ", string(data))
+}
+
+type CodeMessage struct {
+	AckId   string                    `json:"ack_id"`
+	Event   string                    `json:"event"`
+	Content api_v1.CodeMessageRequest `json:"content"`
+}
+
+func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data []byte) {
+	var m CodeMessage
+	if err := json.Unmarshal(data, &m); err != nil {
+		log.Println("Ошибка в чате при получении текстового сообщения: ", err)
+		return
+	}
+	if m.Content.GetReceiver() == nil {
+		return
+	}
+
+	err := h.Message.SendCode(ctx, client.Uid(), &api_v1.CodeMessageRequest{
+		Lang: m.Content.Lang,
+		Code: m.Content.Code,
+		Receiver: &api_v1.MessageReceiver{
+			DialogType: m.Content.Receiver.DialogType,
+			ReceiverId: m.Content.Receiver.ReceiverId,
+		},
+	})
+	if err != nil {
+		log.Printf("Ошибка в чате при получении текстового сообщения: %s", err.Error())
+		return
+	}
+
+	if len(m.AckId) == 0 {
+		return
+	}
+	if err = client.Write(&socket.ClientResponse{Sid: m.AckId, Event: "ack"}); err != nil {
+		log.Printf("Ошибка подтверждения в чате при получении текстового сообщения: %s", err.Error())
+	}
 }
