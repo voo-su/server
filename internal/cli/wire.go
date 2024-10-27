@@ -2,8 +2,8 @@ package cli
 
 import (
 	"github.com/google/wire"
-	"voo.su/internal/transport/cli/handle/cron"
-	"voo.su/internal/transport/cli/handle/queue"
+	"voo.su/internal/cli/handler/cron"
+	"voo.su/internal/cli/handler/queue"
 )
 
 var CronProviderSet = wire.NewSet(

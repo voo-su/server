@@ -32,5 +32,5 @@ type ContactListItem struct {
 	About    string `gorm:"column:about" json:"about"`
 	Remark   string `gorm:"column:remark" json:"friend_remark"`
 	IsOnline int    `json:"isOnline"`
-	GroupId  int    `gorm:"column:group_id" json:"group_id"`
+	FolderId int    `gorm:"column:folder_id" json:"folder_id"`
 }

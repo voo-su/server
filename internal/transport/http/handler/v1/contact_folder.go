@@ -123,7 +123,7 @@ func (c *ContactFolder) Move(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.ContactFolderService.MoveGroup(ctx.Ctx(), ctx.UserId(), int(params.UserId), int(params.GroupId))
+	err := c.ContactFolderService.MoveGroup(ctx.Ctx(), ctx.UserId(), int(params.UserId), int(params.FolderId))
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}

@@ -415,7 +415,7 @@ func (m *ContactDetailResponse) validate(all bool) error {
 
 	// no validation rules for FriendStatus
 
-	// no validation rules for GroupId
+	// no validation rules for FolderId
 
 	// no validation rules for IsBot
 
@@ -731,7 +731,7 @@ func (m *ContactChangeGroupRequest) validate(all bool) error {
 
 	// no validation rules for UserId
 
-	// no validation rules for GroupId
+	// no validation rules for FolderId
 
 	if len(errors) > 0 {
 		return ContactChangeGroupRequestMultiError(errors)
@@ -3268,7 +3268,7 @@ func (m *ContactListResponse_Item) validate(all bool) error {
 
 	// no validation rules for IsOnline
 
-	// no validation rules for GroupId
+	// no validation rules for FolderId
 
 	// no validation rules for Remark
 

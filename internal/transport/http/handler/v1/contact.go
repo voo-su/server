@@ -37,7 +37,7 @@ func (c *Contact) List(ctx *core.Context) error {
 			Surname:  item.Surname,
 			Gender:   int32(item.Gender),
 			About:    item.About,
-			GroupId:  int32(item.GroupId),
+			FolderId: int32(item.FolderId),
 			Remark:   item.Remark,
 		})
 	}
@@ -82,7 +82,7 @@ func (c *Contact) Get(ctx *core.Context) error {
 		if err == nil && contact.Status == 1 {
 			if c.ContactRepo.IsFriend(ctx.Ctx(), uid, user.Id, false) {
 				data.FriendStatus = 2
-				data.GroupId = int32(contact.FolderId)
+				data.FolderId = int32(contact.FolderId)
 				data.Remark = contact.Remark
 			}
 		}

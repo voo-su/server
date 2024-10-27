@@ -18,7 +18,7 @@ message ContactListResponse{
         int32 gender = 6;
         string about = 7;
         int32 is_online = 8;
-        int32 group_id = 9;
+        int32 folder_id = 9;
         string remark = 10;
     }
 
@@ -38,7 +38,7 @@ message ContactDetailResponse{
     int32 gender = 6;
     string about = 7;
     int32 friend_status = 8;
-    int32 group_id = 9;
+    int32 folder_id = 9;
     int32 is_bot = 10;
     string remark = 11;
 }
@@ -51,7 +51,7 @@ message ContactDeleteResponse{}
 
 message ContactChangeGroupRequest{
     int32 user_id = 1 [(tagger.tags) = "form:\"user_id\" binding:\"required\""];
-    int32 group_id = 2 [(tagger.tags) = "form:\"group_id\""];
+    int32 folder_id = 2 [(tagger.tags) = "form:\"folder_id\""];
 }
 
 message ContactChangeGroupResponse{}

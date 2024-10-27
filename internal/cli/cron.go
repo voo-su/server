@@ -10,8 +10,8 @@ import (
 	"os/signal"
 	"reflect"
 	"syscall"
+	"voo.su/internal/cli/handler/cron"
 	"voo.su/internal/config"
-	"voo.su/internal/transport/cli/handle/cron"
 )
 
 type ICrontab interface {
