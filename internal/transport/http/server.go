@@ -17,7 +17,7 @@ import (
 )
 
 func Run(ctx *cli.Context, app *AppProvider) error {
-	if app.Config.App.Env == "prod" {
+	if app.Conf.App.Env == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -27,7 +27,7 @@ func Run(ctx *cli.Context, app *AppProvider) error {
 
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
 
-	log.Printf("HTTP Порт прослушивания: %d", app.Config.App.Http)
+	log.Printf("HTTP Порт прослушивания: %d", app.Conf.App.Http)
 	log.Printf("HTTP PID сервера: %d", os.Getpid())
 
 	return run(c, eg, groupCtx, app)
@@ -35,7 +35,7 @@ func Run(ctx *cli.Context, app *AppProvider) error {
 
 func run(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppProvider) error {
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", app.Config.App.Http),
+		Addr:    fmt.Sprintf(":%d", app.Conf.App.Http),
 		Handler: app.Engine,
 	}
 

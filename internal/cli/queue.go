@@ -7,8 +7,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"voo.su/internal/cli/handler/queue"
 	"voo.su/internal/config"
-	"voo.su/internal/transport/cli/handle/queue"
 )
 
 type QueueJobs struct {

@@ -6,11 +6,9 @@ import (
 	"voo.su/pkg/client"
 )
 
-const timeout = 5 * time.Second
-
 func NewHttpClient() *http.Client {
 	return &http.Client{
-		Timeout: timeout,
+		Timeout: 15 * time.Second,
 	}
 }
 

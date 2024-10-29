@@ -37,8 +37,8 @@ func (c *Contact) List(ctx *core.Context) error {
 			Surname:  item.Surname,
 			Gender:   int32(item.Gender),
 			About:    item.About,
-			//Remark:   item.Remark,
-			GroupId: int32(item.GroupId),
+			FolderId: int32(item.FolderId),
+			Remark:   item.Remark,
 		})
 	}
 
@@ -62,14 +62,13 @@ func (c *Contact) Get(ctx *core.Context) error {
 	}
 
 	data := api_v1.ContactDetailResponse{
-		Id:       int32(user.Id),
-		Username: user.Username,
-		Avatar:   user.Avatar,
-		Name:     user.Name,
-		Surname:  user.Surname,
-		Gender:   int32(user.Gender),
-		About:    user.About,
-		//FriendApply:  0,
+		Id:           int32(user.Id),
+		Username:     user.Username,
+		Avatar:       user.Avatar,
+		Name:         user.Name,
+		Surname:      user.Surname,
+		Gender:       int32(user.Gender),
+		About:        user.About,
 		FriendStatus: 0,
 		IsBot:        int32(user.IsBot),
 	}
@@ -79,11 +78,12 @@ func (c *Contact) Get(ctx *core.Context) error {
 		if err != nil && err != gorm.ErrRecordNotFound {
 			return err
 		}
+
 		if err == nil && contact.Status == 1 {
 			if c.ContactRepo.IsFriend(ctx.Ctx(), uid, user.Id, false) {
 				data.FriendStatus = 2
-				data.GroupId = int32(contact.FolderId)
-				//data.Remark = contact.Remark
+				data.FolderId = int32(contact.FolderId)
+				data.Remark = contact.Remark
 			}
 		}
 	}
@@ -116,4 +116,17 @@ func (c *Contact) Delete(ctx *core.Context) error {
 	}
 
 	return ctx.Success(&api_v1.ContactDeleteResponse{})
+}
+
+func (c *Contact) EditRemark(ctx *core.Context) error {
+	params := &api_v1.ContactRemarkEditRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := c.ContactService.UpdateRemark(ctx.Ctx(), ctx.UserId(), int(params.FriendId), params.Remark); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(&api_v1.ContactRemarkEditResponse{})
 }

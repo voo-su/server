@@ -6,7 +6,7 @@ import (
 )
 
 type EmailHandle struct {
-	rds *redis.Client
+	Redis *redis.Client
 }
 
 func (e *EmailHandle) Handle(ctx context.Context) error {

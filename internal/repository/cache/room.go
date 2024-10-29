@@ -13,16 +13,16 @@ type RoomStorage struct {
 	Redis *redis.Client
 }
 
-func NewRoomStorage(redis *redis.Client) *RoomStorage {
-	return &RoomStorage{Redis: redis}
-}
-
 type RoomOption struct {
 	Channel  string
 	RoomType entity.RoomType
 	Number   string
 	Sid      string
 	Cid      int64
+}
+
+func NewRoomStorage(redis *redis.Client) *RoomStorage {
+	return &RoomStorage{Redis: redis}
 }
 
 func (r *RoomStorage) Add(ctx context.Context, opt *RoomOption) error {

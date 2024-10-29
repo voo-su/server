@@ -6,7 +6,7 @@ import (
 )
 
 type LoginHandle struct {
-	rds *redis.Client
+	Redis *redis.Client
 }
 
 func (e *LoginHandle) Handle(ctx context.Context) error {

@@ -13,13 +13,13 @@ type MessageStorage struct {
 	Redis *redis.Client
 }
 
-func NewMessageStorage(rds *redis.Client) *MessageStorage {
-	return &MessageStorage{rds}
-}
-
 type LastCacheMessage struct {
 	Content  string `json:"content"`
 	Datetime string `json:"datetime"`
+}
+
+func NewMessageStorage(rds *redis.Client) *MessageStorage {
+	return &MessageStorage{rds}
 }
 
 func (m *MessageStorage) Set(ctx context.Context, dialogType int, sender int, receive int, message *LastCacheMessage) error {

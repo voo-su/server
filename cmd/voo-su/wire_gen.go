@@ -8,15 +8,15 @@ package main
 
 import (
 	"github.com/google/wire"
+	"voo.su/internal/cli"
+	"voo.su/internal/cli/handler/cron"
+	"voo.su/internal/cli/handler/queue"
 	"voo.su/internal/config"
 	"voo.su/internal/logic"
 	"voo.su/internal/provider"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
 	"voo.su/internal/service"
-	"voo.su/internal/transport/cli"
-	"voo.su/internal/transport/cli/handle/cron"
-	"voo.su/internal/transport/cli/handle/queue"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/http/handler"
 	"voo.su/internal/transport/http/handler/v1"
@@ -338,10 +338,10 @@ func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
 	db := provider.NewPostgresqlClient(conf)
 	client := provider.NewRedisClient(conf)
 	emailHandle := queue.EmailHandle{
-		rds: client,
+		Redis: client,
 	}
 	loginHandle := queue.LoginHandle{
-		rds: client,
+		Redis: client,
 	}
 	queueJobs := &cli.QueueJobs{
 		EmailHandle: emailHandle,

@@ -54,7 +54,7 @@ func (c *ChatEvent) OnOpen(client socket.IClient) {
 
 func (c *ChatEvent) OnMessage(client socket.IClient, message []byte) {
 	val, err := sonic.Get(message, "event")
-	if err == nil {
+	if err != nil {
 		return
 	}
 	event, _ := val.String()

@@ -26,6 +26,7 @@ message ChatCreateResponse{
     int32 unread_num = 12;
     string msg_text = 13;
     string updated_at = 14;
+    string remark_name = 15;
 }
 
 message ChatItem{
@@ -43,6 +44,7 @@ message ChatItem{
     int32 is_disturb = 12;
     int32 is_online = 13;
     int32 is_bot = 14;
+    string remark = 15;
 }
 
 message ChatListResponse{

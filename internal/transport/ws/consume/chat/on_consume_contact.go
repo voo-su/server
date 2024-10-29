@@ -27,7 +27,7 @@ func (h *Handler) onConsumeContactStatus(ctx context.Context, body []byte) {
 
 	clientIds := make([]int64, 0)
 	for _, uid := range sliceutil.Unique(contactIds) {
-		ids := h.ClientStorage.GetUidFromClientIds(ctx, h.Config.ServerId(), socket.Session.Chat.Name(), strconv.FormatInt(uid, 10))
+		ids := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.FormatInt(uid, 10))
 		if len(ids) > 0 {
 			clientIds = append(clientIds, ids...)
 		}
@@ -59,7 +59,7 @@ func (h *Handler) onConsumeContactApply(ctx context.Context, body []byte) {
 		return
 	}
 
-	clientIds := h.ClientStorage.GetUidFromClientIds(ctx, h.Config.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(apply.FriendId))
+	clientIds := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(apply.FriendId))
 	if len(clientIds) == 0 {
 		return
 	}

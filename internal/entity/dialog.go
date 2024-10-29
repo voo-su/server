@@ -19,9 +19,11 @@ const (
 	PushEventImMessageKeyboard = "voo.message.keyboard"
 	PushEventImMessageRead     = "voo.message.read"
 	PushEventImMessageRevoke   = "voo.message.revoke"
-	PushEventContactRequest    = "voo.contact.request"
-	PushEventContactStatus     = "voo.contact.status"
-	PushEventGroupChatRequest  = "voo.group_chat.request"
+
+	PushEventContactRequest = "voo.contact.request"
+	PushEventContactStatus  = "voo.contact.status"
+
+	PushEventGroupChatRequest = "voo.group_chat.request"
 )
 
 const (

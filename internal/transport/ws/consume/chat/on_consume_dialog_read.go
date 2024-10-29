@@ -10,9 +10,9 @@ import (
 )
 
 type ConsumeDialogRead struct {
-	SenderId   int   `json:"sender_id"`
-	ReceiverId int   `json:"receiver_id"`
-	Ids        []int `json:"ids"`
+	SenderId   int      `json:"sender_id"`
+	ReceiverId int      `json:"receiver_id"`
+	MsgIds     []string `json:"msg_ids"`
 }
 
 func (h *Handler) onConsumeDialogRead(ctx context.Context, body []byte) {
@@ -22,7 +22,7 @@ func (h *Handler) onConsumeDialogRead(ctx context.Context, body []byte) {
 		return
 	}
 
-	clientIds := h.ClientStorage.GetUidFromClientIds(ctx, h.Config.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(in.ReceiverId))
+	clientIds := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(in.ReceiverId))
 	if len(clientIds) == 0 {
 		return
 	}
@@ -33,7 +33,7 @@ func (h *Handler) onConsumeDialogRead(ctx context.Context, body []byte) {
 	c.SetMessage(entity.PushEventImMessageRead, map[string]any{
 		"sender_id":   in.SenderId,
 		"receiver_id": in.ReceiverId,
-		"ids":         in.Ids,
+		"msg_ids":     in.MsgIds,
 	})
 	socket.Session.Chat.Write(c)
 }

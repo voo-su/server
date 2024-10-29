@@ -18,18 +18,12 @@ message ContactListResponse{
         int32 gender = 6;
         string about = 7;
         int32 is_online = 8;
-        int32 group_id = 9;
-        // string remark = 10;
+        int32 folder_id = 9;
+        string remark = 10;
     }
 
     repeated Item items = 1;
 }
-
-message ContactDeleteRequest{
-    int32 friend_id = 1 [(tagger.tags) = "binding:\"required\""];
-}
-
-message ContactDeleteResponse{}
 
 message ContactDetailRequest{
     int32 user_id = 1 [(tagger.tags) = "form:\"user_id\" binding:\"required\""];
@@ -44,13 +38,20 @@ message ContactDetailResponse{
     int32 gender = 6;
     string about = 7;
     int32 friend_status = 8;
-    int32 group_id = 9;
+    int32 folder_id = 9;
     int32 is_bot = 10;
+    string remark = 11;
 }
+
+message ContactDeleteRequest{
+    int32 friend_id = 1 [(tagger.tags) = "binding:\"required\""];
+}
+
+message ContactDeleteResponse{}
 
 message ContactChangeGroupRequest{
     int32 user_id = 1 [(tagger.tags) = "form:\"user_id\" binding:\"required\""];
-    int32 group_id = 2 [(tagger.tags) = "form:\"group_id\""];
+    int32 folder_id = 2 [(tagger.tags) = "form:\"folder_id\""];
 }
 
 message ContactChangeGroupResponse{}
@@ -149,3 +150,10 @@ message ContactFolderSaveRequest{
 }
 
 message ContactFolderSaveResponse{}
+
+message ContactRemarkEditRequest{
+    int32 friend_id = 1 [(tagger.tags) = "binding:\"required\""];
+    string remark = 2;
+}
+
+message ContactRemarkEditResponse{}

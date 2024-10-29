@@ -273,6 +273,234 @@ var _ interface {
 	ErrorName() string
 } = ContactListResponseValidationError{}
 
+// Validate checks the field values on ContactDetailRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactDetailRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactDetailRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactDetailRequestMultiError, or nil if none found.
+func (m *ContactDetailRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactDetailRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	if len(errors) > 0 {
+		return ContactDetailRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactDetailRequestMultiError is an error wrapping multiple validation
+// errors returned by ContactDetailRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ContactDetailRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactDetailRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactDetailRequestMultiError) AllErrors() []error { return m }
+
+// ContactDetailRequestValidationError is the validation error returned by
+// ContactDetailRequest.Validate if the designated constraints aren't met.
+type ContactDetailRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactDetailRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactDetailRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactDetailRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactDetailRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactDetailRequestValidationError) ErrorName() string {
+	return "ContactDetailRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactDetailRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactDetailRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactDetailRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactDetailRequestValidationError{}
+
+// Validate checks the field values on ContactDetailResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactDetailResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactDetailResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactDetailResponseMultiError, or nil if none found.
+func (m *ContactDetailResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactDetailResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Username
+
+	// no validation rules for Avatar
+
+	// no validation rules for Name
+
+	// no validation rules for Surname
+
+	// no validation rules for Gender
+
+	// no validation rules for About
+
+	// no validation rules for FriendStatus
+
+	// no validation rules for FolderId
+
+	// no validation rules for IsBot
+
+	// no validation rules for Remark
+
+	if len(errors) > 0 {
+		return ContactDetailResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactDetailResponseMultiError is an error wrapping multiple validation
+// errors returned by ContactDetailResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ContactDetailResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactDetailResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactDetailResponseMultiError) AllErrors() []error { return m }
+
+// ContactDetailResponseValidationError is the validation error returned by
+// ContactDetailResponse.Validate if the designated constraints aren't met.
+type ContactDetailResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactDetailResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactDetailResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactDetailResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactDetailResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactDetailResponseValidationError) ErrorName() string {
+	return "ContactDetailResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactDetailResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactDetailResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactDetailResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactDetailResponseValidationError{}
+
 // Validate checks the field values on ContactDeleteRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -479,232 +707,6 @@ var _ interface {
 	ErrorName() string
 } = ContactDeleteResponseValidationError{}
 
-// Validate checks the field values on ContactDetailRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *ContactDetailRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on ContactDetailRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// ContactDetailRequestMultiError, or nil if none found.
-func (m *ContactDetailRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *ContactDetailRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for UserId
-
-	if len(errors) > 0 {
-		return ContactDetailRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// ContactDetailRequestMultiError is an error wrapping multiple validation
-// errors returned by ContactDetailRequest.ValidateAll() if the designated
-// constraints aren't met.
-type ContactDetailRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ContactDetailRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ContactDetailRequestMultiError) AllErrors() []error { return m }
-
-// ContactDetailRequestValidationError is the validation error returned by
-// ContactDetailRequest.Validate if the designated constraints aren't met.
-type ContactDetailRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ContactDetailRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ContactDetailRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ContactDetailRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ContactDetailRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ContactDetailRequestValidationError) ErrorName() string {
-	return "ContactDetailRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e ContactDetailRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sContactDetailRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ContactDetailRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ContactDetailRequestValidationError{}
-
-// Validate checks the field values on ContactDetailResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *ContactDetailResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on ContactDetailResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// ContactDetailResponseMultiError, or nil if none found.
-func (m *ContactDetailResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *ContactDetailResponse) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Id
-
-	// no validation rules for Username
-
-	// no validation rules for Avatar
-
-	// no validation rules for Name
-
-	// no validation rules for Surname
-
-	// no validation rules for Gender
-
-	// no validation rules for About
-
-	// no validation rules for FriendStatus
-
-	// no validation rules for GroupId
-
-	// no validation rules for IsBot
-
-	if len(errors) > 0 {
-		return ContactDetailResponseMultiError(errors)
-	}
-
-	return nil
-}
-
-// ContactDetailResponseMultiError is an error wrapping multiple validation
-// errors returned by ContactDetailResponse.ValidateAll() if the designated
-// constraints aren't met.
-type ContactDetailResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ContactDetailResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ContactDetailResponseMultiError) AllErrors() []error { return m }
-
-// ContactDetailResponseValidationError is the validation error returned by
-// ContactDetailResponse.Validate if the designated constraints aren't met.
-type ContactDetailResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ContactDetailResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ContactDetailResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ContactDetailResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ContactDetailResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ContactDetailResponseValidationError) ErrorName() string {
-	return "ContactDetailResponseValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e ContactDetailResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sContactDetailResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ContactDetailResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ContactDetailResponseValidationError{}
-
 // Validate checks the field values on ContactChangeGroupRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -729,7 +731,7 @@ func (m *ContactChangeGroupRequest) validate(all bool) error {
 
 	// no validation rules for UserId
 
-	// no validation rules for GroupId
+	// no validation rules for FolderId
 
 	if len(errors) > 0 {
 		return ContactChangeGroupRequestMultiError(errors)
@@ -3020,6 +3022,214 @@ var _ interface {
 	ErrorName() string
 } = ContactFolderSaveResponseValidationError{}
 
+// Validate checks the field values on ContactRemarkEditRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactRemarkEditRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactRemarkEditRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactRemarkEditRequestMultiError, or nil if none found.
+func (m *ContactRemarkEditRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactRemarkEditRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for FriendId
+
+	// no validation rules for Remark
+
+	if len(errors) > 0 {
+		return ContactRemarkEditRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactRemarkEditRequestMultiError is an error wrapping multiple validation
+// errors returned by ContactRemarkEditRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ContactRemarkEditRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactRemarkEditRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactRemarkEditRequestMultiError) AllErrors() []error { return m }
+
+// ContactRemarkEditRequestValidationError is the validation error returned by
+// ContactRemarkEditRequest.Validate if the designated constraints aren't met.
+type ContactRemarkEditRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactRemarkEditRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactRemarkEditRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactRemarkEditRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactRemarkEditRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactRemarkEditRequestValidationError) ErrorName() string {
+	return "ContactRemarkEditRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactRemarkEditRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactRemarkEditRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactRemarkEditRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactRemarkEditRequestValidationError{}
+
+// Validate checks the field values on ContactRemarkEditResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ContactRemarkEditResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ContactRemarkEditResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ContactRemarkEditResponseMultiError, or nil if none found.
+func (m *ContactRemarkEditResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ContactRemarkEditResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return ContactRemarkEditResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ContactRemarkEditResponseMultiError is an error wrapping multiple validation
+// errors returned by ContactRemarkEditResponse.ValidateAll() if the
+// designated constraints aren't met.
+type ContactRemarkEditResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ContactRemarkEditResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ContactRemarkEditResponseMultiError) AllErrors() []error { return m }
+
+// ContactRemarkEditResponseValidationError is the validation error returned by
+// ContactRemarkEditResponse.Validate if the designated constraints aren't met.
+type ContactRemarkEditResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ContactRemarkEditResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ContactRemarkEditResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ContactRemarkEditResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ContactRemarkEditResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ContactRemarkEditResponseValidationError) ErrorName() string {
+	return "ContactRemarkEditResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ContactRemarkEditResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sContactRemarkEditResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ContactRemarkEditResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ContactRemarkEditResponseValidationError{}
+
 // Validate checks the field values on ContactListResponse_Item with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -3058,7 +3268,9 @@ func (m *ContactListResponse_Item) validate(all bool) error {
 
 	// no validation rules for IsOnline
 
-	// no validation rules for GroupId
+	// no validation rules for FolderId
+
+	// no validation rules for Remark
 
 	if len(errors) > 0 {
 		return ContactListResponse_ItemMultiError(errors)
