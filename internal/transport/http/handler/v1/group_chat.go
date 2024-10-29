@@ -2,7 +2,7 @@ package v1
 
 import (
 	"fmt"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/entity"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
@@ -30,7 +30,7 @@ type GroupChat struct {
 }
 
 func (g *GroupChat) Create(ctx *core.Context) error {
-	params := &api_v1.GroupChatCreateRequest{}
+	params := &v1Pb.GroupChatCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -45,11 +45,11 @@ func (g *GroupChat) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось создать групповой чат, попробуйте позже" + err.Error())
 	}
 
-	return ctx.Success(&api_v1.GroupChatCreateResponse{GroupId: int32(gid)})
+	return ctx.Success(&v1Pb.GroupChatCreateResponse{GroupId: int32(gid)})
 }
 
 func (g *GroupChat) Invite(ctx *core.Context) error {
-	params := &api_v1.GroupChatInviteRequest{}
+	params := &v1Pb.GroupChatInviteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -87,11 +87,11 @@ func (g *GroupChat) Invite(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось пригласить друзей в групповой чат" + err.Error())
 	}
 
-	return ctx.Success(&api_v1.GroupChatInviteResponse{})
+	return ctx.Success(&v1Pb.GroupChatInviteResponse{})
 }
 
 func (g *GroupChat) SignOut(ctx *core.Context) error {
-	params := &api_v1.GroupChatSecedeRequest{}
+	params := &v1Pb.GroupChatSecedeRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -108,7 +108,7 @@ func (g *GroupChat) SignOut(ctx *core.Context) error {
 }
 
 func (g *GroupChat) Setting(ctx *core.Context) error {
-	params := &api_v1.GroupSettingRequest{}
+	params := &v1Pb.GroupSettingRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -136,19 +136,19 @@ func (g *GroupChat) Setting(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	//_ = c.messageService.SendSystemText(ctx.Ctx(), uid, &api_v1.TextMessageRequest{
+	//_ = c.messageService.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 	//	Content: "Владелец группы или администратор изменили информацию о группе",
-	//	Receiver: &api_v1.MessageReceiver{
+	//	Receiver: &v1Pb.MessageReceiver{
 	//		DialogType: entity.ChatPrivateMode,
 	//		ReceiverId: params.GroupId,
 	//	},
 	//})
 
-	return ctx.Success(&api_v1.GroupChatSettingResponse{})
+	return ctx.Success(&v1Pb.GroupChatSettingResponse{})
 }
 
 func (g *GroupChat) Get(ctx *core.Context) error {
-	params := &api_v1.GroupChatDetailRequest{}
+	params := &v1Pb.GroupChatDetailRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -163,7 +163,7 @@ func (g *GroupChat) Get(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Данные не существуют")
 	}
 
-	resp := &api_v1.GroupChatDetailResponse{
+	resp := &v1Pb.GroupChatDetailResponse{
 		GroupId:     int32(groupInfo.Id),
 		GroupName:   groupInfo.Name,
 		Description: groupInfo.Description,
@@ -184,7 +184,7 @@ func (g *GroupChat) Get(ctx *core.Context) error {
 }
 
 func (g *GroupChat) GetInviteFriends(ctx *core.Context) error {
-	params := &api_v1.GroupChatGetInviteFriendsRequest{}
+	params := &v1Pb.GroupChatGetInviteFriendsRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -219,11 +219,11 @@ func (g *GroupChat) GroupList(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	resp := &api_v1.GroupChatListResponse{
-		Items: make([]*api_v1.GroupChatListResponse_Item, 0, len(items)),
+	resp := &v1Pb.GroupChatListResponse{
+		Items: make([]*v1Pb.GroupChatListResponse_Item, 0, len(items)),
 	}
 	for _, item := range items {
-		resp.Items = append(resp.Items, &api_v1.GroupChatListResponse_Item{
+		resp.Items = append(resp.Items, &v1Pb.GroupChatListResponse_Item{
 			Id:          int32(item.Id),
 			GroupName:   item.GroupName,
 			Avatar:      item.Avatar,
@@ -238,7 +238,7 @@ func (g *GroupChat) GroupList(ctx *core.Context) error {
 }
 
 func (g *GroupChat) Members(ctx *core.Context) error {
-	params := &api_v1.GroupChatMemberListRequest{}
+	params := &v1Pb.GroupChatMemberListRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -258,9 +258,9 @@ func (g *GroupChat) Members(ctx *core.Context) error {
 
 	list := g.GroupChatMemberRepo.GetMembers(ctx.Ctx(), int(params.GroupId))
 
-	items := make([]*api_v1.GroupChatMemberListResponse_Item, 0)
+	items := make([]*v1Pb.GroupChatMemberListResponse_Item, 0)
 	for _, item := range list {
-		items = append(items, &api_v1.GroupChatMemberListResponse_Item{
+		items = append(items, &v1Pb.GroupChatMemberListResponse_Item{
 			UserId:   int32(item.UserId),
 			Username: item.Username,
 			Avatar:   item.Avatar,
@@ -271,11 +271,11 @@ func (g *GroupChat) Members(ctx *core.Context) error {
 		})
 	}
 
-	return ctx.Success(&api_v1.GroupChatMemberListResponse{Items: items})
+	return ctx.Success(&v1Pb.GroupChatMemberListResponse{Items: items})
 }
 
 func (g *GroupChat) RemoveMembers(ctx *core.Context) error {
-	params := &api_v1.GroupChatRemoveMemberRequest{}
+	params := &v1Pb.GroupChatRemoveMemberRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -295,11 +295,11 @@ func (g *GroupChat) RemoveMembers(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.GroupChatRemoveMemberResponse{})
+	return ctx.Success(&v1Pb.GroupChatRemoveMemberResponse{})
 }
 
 func (g *GroupChat) AssignAdmin(ctx *core.Context) error {
-	params := &api_v1.GroupChatAssignAdminRequest{}
+	params := &v1Pb.GroupChatAssignAdminRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -324,7 +324,7 @@ func (g *GroupChat) AssignAdmin(ctx *core.Context) error {
 }
 
 func (g *GroupChat) Dismiss(ctx *core.Context) error {
-	params := &api_v1.GroupChatDismissRequest{}
+	params := &v1Pb.GroupChatDismissRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -337,9 +337,9 @@ func (g *GroupChat) Dismiss(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось расформировать группу")
 	}
 
-	_ = g.MessageSendService.SendSystemText(ctx.Ctx(), uid, &api_v1.TextMessageRequest{
+	_ = g.MessageSendService.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 		Content: "Группа была расформирована владельцем группы",
-		Receiver: &api_v1.MessageReceiver{
+		Receiver: &v1Pb.MessageReceiver{
 			DialogType: entity.ChatGroupMode,
 			ReceiverId: params.GroupId,
 		},
@@ -349,7 +349,7 @@ func (g *GroupChat) Dismiss(ctx *core.Context) error {
 }
 
 func (g *GroupChat) Mute(ctx *core.Context) error {
-	params := &api_v1.GroupChatMuteRequest{}
+	params := &v1Pb.GroupChatMuteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -379,7 +379,7 @@ func (g *GroupChat) Mute(ctx *core.Context) error {
 		return ctx.Error("Серверная ошибка. Пожалуйста, попробуйте еще раз")
 	}
 	if affected == 0 {
-		return ctx.Success(api_v1.GroupChatMuteResponse{})
+		return ctx.Success(v1Pb.GroupChatMuteResponse{})
 	}
 
 	user, err := g.UserRepo.FindById(ctx.Ctx(), uid)
@@ -411,11 +411,11 @@ func (g *GroupChat) Mute(ctx *core.Context) error {
 		Extra:      jsonutil.Encode(extra),
 	})
 
-	return ctx.Success(api_v1.GroupChatMuteResponse{})
+	return ctx.Success(v1Pb.GroupChatMuteResponse{})
 }
 
 func (g *GroupChat) Overt(ctx *core.Context) error {
-	params := &api_v1.GroupChatOvertRequest{}
+	params := &v1Pb.GroupChatOvertRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -446,5 +446,5 @@ func (g *GroupChat) Overt(ctx *core.Context) error {
 		return ctx.Error("Серверная ошибка. Пожалуйста, попробуйте еще раз")
 	}
 
-	return ctx.Success(api_v1.GroupChatOvertResponse{})
+	return ctx.Success(v1Pb.GroupChatOvertResponse{})
 }

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/entity"
 	"voo.su/internal/logic"
 	"voo.su/internal/repository/cache"
@@ -28,21 +28,21 @@ import (
 var _ MessageSendService = (*MessageService)(nil)
 
 type MessageSendService interface {
-	SendSystemText(ctx context.Context, uid int, req *api_v1.TextMessageRequest) error
-	SendText(ctx context.Context, uid int, req *api_v1.TextMessageRequest) error
-	SendImage(ctx context.Context, uid int, req *api_v1.ImageMessageRequest) error
-	SendVoice(ctx context.Context, uid int, req *api_v1.VoiceMessageRequest) error
-	SendVideo(ctx context.Context, uid int, req *api_v1.VideoMessageRequest) error
-	SendFile(ctx context.Context, uid int, req *api_v1.FileMessageRequest) error
-	SendVote(ctx context.Context, uid int, req *api_v1.VoteMessageRequest) error
-	SendForward(ctx context.Context, uid int, req *api_v1.ForwardMessageRequest) error
+	SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error
+	SendText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error
+	SendImage(ctx context.Context, uid int, req *v1Pb.ImageMessageRequest) error
+	SendVoice(ctx context.Context, uid int, req *v1Pb.VoiceMessageRequest) error
+	SendVideo(ctx context.Context, uid int, req *v1Pb.VideoMessageRequest) error
+	SendFile(ctx context.Context, uid int, req *v1Pb.FileMessageRequest) error
+	SendVote(ctx context.Context, uid int, req *v1Pb.VoteMessageRequest) error
+	SendForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error
 	SendSysOther(ctx context.Context, data *model.Message) error
-	SendMixedMessage(ctx context.Context, uid int, req *api_v1.MixedMessageRequest) error
+	SendMixedMessage(ctx context.Context, uid int, req *v1Pb.MixedMessageRequest) error
 	Revoke(ctx context.Context, uid int, msgId string) error
 	Vote(ctx context.Context, uid int, msgId int, optionsValue string) (*repo.VoteStatistics, error)
-	SendLogin(ctx context.Context, uid int, req *api_v1.LoginMessageRequest) error
-	SendSticker(ctx context.Context, uid int, req *api_v1.StickerMessageRequest) error
-	SendCode(ctx context.Context, uid int, req *api_v1.CodeMessageRequest) error
+	SendLogin(ctx context.Context, uid int, req *v1Pb.LoginMessageRequest) error
+	SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error
+	SendCode(ctx context.Context, uid int, req *v1Pb.CodeMessageRequest) error
 }
 
 type MessageService struct {
@@ -353,7 +353,7 @@ func (m *MessageService) HandleDialogRecords(ctx context.Context, items []*Query
 	return newItems, nil
 }
 
-func (m *MessageService) SendSystemText(ctx context.Context, uid int, req *api_v1.TextMessageRequest) error {
+func (m *MessageService) SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    entity.ChatMsgSysText,
@@ -364,7 +364,7 @@ func (m *MessageService) SendSystemText(ctx context.Context, uid int, req *api_v
 	return m.save(ctx, data)
 }
 
-func (m *MessageService) SendText(ctx context.Context, uid int, req *api_v1.TextMessageRequest) error {
+func (m *MessageService) SendText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    entity.ChatMsgTypeText,
@@ -377,7 +377,7 @@ func (m *MessageService) SendText(ctx context.Context, uid int, req *api_v1.Text
 	return m.save(ctx, data)
 }
 
-func (m *MessageService) SendImage(ctx context.Context, uid int, req *api_v1.ImageMessageRequest) error {
+func (m *MessageService) SendImage(ctx context.Context, uid int, req *v1Pb.ImageMessageRequest) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    entity.ChatMsgTypeImage,
@@ -394,7 +394,7 @@ func (m *MessageService) SendImage(ctx context.Context, uid int, req *api_v1.Ima
 	return m.save(ctx, data)
 }
 
-func (m *MessageService) SendVoice(ctx context.Context, uid int, req *api_v1.VoiceMessageRequest) error {
+func (m *MessageService) SendVoice(ctx context.Context, uid int, req *v1Pb.VoiceMessageRequest) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    entity.ChatMsgTypeAudio,
@@ -411,7 +411,7 @@ func (m *MessageService) SendVoice(ctx context.Context, uid int, req *api_v1.Voi
 	return m.save(ctx, data)
 }
 
-func (m *MessageService) SendVideo(ctx context.Context, uid int, req *api_v1.VideoMessageRequest) error {
+func (m *MessageService) SendVideo(ctx context.Context, uid int, req *v1Pb.VideoMessageRequest) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    entity.ChatMsgTypeVideo,
@@ -428,7 +428,7 @@ func (m *MessageService) SendVideo(ctx context.Context, uid int, req *api_v1.Vid
 	return m.save(ctx, data)
 }
 
-func (m *MessageService) SendFile(ctx context.Context, uid int, req *api_v1.FileMessageRequest) error {
+func (m *MessageService) SendFile(ctx context.Context, uid int, req *v1Pb.FileMessageRequest) error {
 	file, err := m.SplitRepo.GetFile(ctx, uid, req.UploadId)
 	if err != nil {
 		return err
@@ -482,7 +482,7 @@ func (m *MessageService) SendFile(ctx context.Context, uid int, req *api_v1.File
 	return m.save(ctx, data)
 }
 
-func (m *MessageService) SendVote(ctx context.Context, uid int, req *api_v1.VoteMessageRequest) error {
+func (m *MessageService) SendVote(ctx context.Context, uid int, req *v1Pb.VoteMessageRequest) error {
 	data := &model.Message{
 		MsgId:      strutil.NewMsgId(),
 		DialogType: entity.ChatGroupMode,
@@ -517,7 +517,7 @@ func (m *MessageService) SendVote(ctx context.Context, uid int, req *api_v1.Vote
 	return err
 }
 
-func (m *MessageService) SendForward(ctx context.Context, uid int, req *api_v1.ForwardMessageRequest) error {
+func (m *MessageService) SendForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error {
 	if err := m.MessageForwardLogic.Verify(ctx, uid, req); err != nil {
 		return err
 	}
@@ -571,7 +571,7 @@ func (m *MessageService) SendForward(ctx context.Context, uid int, req *api_v1.F
 	return nil
 }
 
-func (m *MessageService) SendMixedMessage(ctx context.Context, uid int, req *api_v1.MixedMessageRequest) error {
+func (m *MessageService) SendMixedMessage(ctx context.Context, uid int, req *v1Pb.MixedMessageRequest) error {
 
 	items := make([]*model.DialogRecordExtraMixedItem, 0)
 
@@ -842,7 +842,7 @@ func (m *MessageService) afterHandle(ctx context.Context, record *model.Message,
 	}
 }
 
-func (m *MessageService) SendLogin(ctx context.Context, uid int, req *api_v1.LoginMessageRequest) error {
+func (m *MessageService) SendLogin(ctx context.Context, uid int, req *v1Pb.LoginMessageRequest) error {
 	bot, err := m.BotRepo.GetLoginBot(ctx)
 	if err != nil {
 		return err
@@ -864,7 +864,7 @@ func (m *MessageService) SendLogin(ctx context.Context, uid int, req *api_v1.Log
 	return m.save(ctx, data)
 }
 
-func (m *MessageService) SendSticker(ctx context.Context, uid int, req *api_v1.StickerMessageRequest) error {
+func (m *MessageService) SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error {
 	var sticker model.StickerItem
 	if err := m.Source.Db().First(&sticker, "id = ? and user_id = ?", req.StickerId, uid).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -888,7 +888,7 @@ func (m *MessageService) SendSticker(ctx context.Context, uid int, req *api_v1.S
 	return m.save(ctx, data)
 }
 
-func (m *MessageService) SendCode(ctx context.Context, uid int, req *api_v1.CodeMessageRequest) error {
+func (m *MessageService) SendCode(ctx context.Context, uid int, req *v1Pb.CodeMessageRequest) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    entity.ChatMsgTypeCode,

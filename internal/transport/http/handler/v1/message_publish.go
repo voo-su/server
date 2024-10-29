@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin/binding"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/service"
 	"voo.su/pkg/core"
 )
@@ -62,7 +62,7 @@ func (c *Publish) Publish(ctx *core.Context) error {
 }
 
 func (c *Publish) onSendText(ctx *core.Context) error {
-	params := &api_v1.TextMessageRequest{}
+	params := &v1Pb.TextMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -75,7 +75,7 @@ func (c *Publish) onSendText(ctx *core.Context) error {
 }
 
 func (c *Publish) onSendImage(ctx *core.Context) error {
-	params := &api_v1.ImageMessageRequest{}
+	params := &v1Pb.ImageMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -89,7 +89,7 @@ func (c *Publish) onSendImage(ctx *core.Context) error {
 
 func (c *Publish) onSendVoice(ctx *core.Context) error {
 
-	params := &api_v1.VoiceMessageRequest{}
+	params := &v1Pb.VoiceMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -103,7 +103,7 @@ func (c *Publish) onSendVoice(ctx *core.Context) error {
 
 func (c *Publish) onSendVideo(ctx *core.Context) error {
 
-	params := &api_v1.VideoMessageRequest{}
+	params := &v1Pb.VideoMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -116,7 +116,7 @@ func (c *Publish) onSendVideo(ctx *core.Context) error {
 }
 
 func (c *Publish) onSendFile(ctx *core.Context) error {
-	params := &api_v1.FileMessageRequest{}
+	params := &v1Pb.FileMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -129,7 +129,7 @@ func (c *Publish) onSendFile(ctx *core.Context) error {
 }
 
 func (c *Publish) onSendForward(ctx *core.Context) error {
-	params := &api_v1.ForwardMessageRequest{}
+	params := &v1Pb.ForwardMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -142,7 +142,7 @@ func (c *Publish) onSendForward(ctx *core.Context) error {
 }
 
 func (c *Publish) onSendVote(ctx *core.Context) error {
-	params := &api_v1.VoteMessageRequest{}
+	params := &v1Pb.VoteMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -163,7 +163,7 @@ func (c *Publish) onSendVote(ctx *core.Context) error {
 }
 
 func (c *Publish) onMixedMessage(ctx *core.Context) error {
-	params := &api_v1.MixedMessageRequest{}
+	params := &v1Pb.MixedMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -176,7 +176,7 @@ func (c *Publish) onMixedMessage(ctx *core.Context) error {
 }
 
 func (c *Publish) onSendSticker(ctx *core.Context) error {
-	params := &api_v1.StickerMessageRequest{}
+	params := &v1Pb.StickerMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -189,7 +189,7 @@ func (c *Publish) onSendSticker(ctx *core.Context) error {
 }
 
 func (c *Publish) onSendCode(ctx *core.Context) error {
-	params := &api_v1.CodeMessageRequest{}
+	params := &v1Pb.CodeMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}

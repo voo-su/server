@@ -2,7 +2,7 @@ package v1
 
 import (
 	"gorm.io/gorm"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/service"
 	"voo.su/pkg/core"
@@ -14,12 +14,12 @@ type ContactFolder struct {
 
 func (c *ContactFolder) List(ctx *core.Context) error {
 	uid := ctx.UserId()
-	items := make([]*api_v1.ContactFolderListResponse_Item, 0)
+	items := make([]*v1Pb.ContactFolderListResponse_Item, 0)
 	count, err := c.ContactFolderService.ContactRepo.QueryCount(ctx.Ctx(), "user_id = ? and status = 1", uid)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
-	items = append(items, &api_v1.ContactFolderListResponse_Item{
+	items = append(items, &v1Pb.ContactFolderListResponse_Item{
 		Name:  "Все",
 		Count: int32(count),
 	})
@@ -28,7 +28,7 @@ func (c *ContactFolder) List(ctx *core.Context) error {
 		return ctx.Error(err.Error())
 	}
 	for _, v := range group {
-		items = append(items, &api_v1.ContactFolderListResponse_Item{
+		items = append(items, &v1Pb.ContactFolderListResponse_Item{
 			Id:    int32(v.Id),
 			Name:  v.Name,
 			Count: int32(v.Num),
@@ -36,11 +36,11 @@ func (c *ContactFolder) List(ctx *core.Context) error {
 		})
 	}
 
-	return ctx.Success(&api_v1.ContactFolderListResponse{Items: items})
+	return ctx.Success(&v1Pb.ContactFolderListResponse{Items: items})
 }
 
 func (c *ContactFolder) Save(ctx *core.Context) error {
-	params := &api_v1.ContactFolderSaveRequest{}
+	params := &v1Pb.ContactFolderSaveRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -114,11 +114,11 @@ func (c *ContactFolder) Save(ctx *core.Context) error {
 		return ctx.Error(err.Error())
 	}
 
-	return ctx.Success(&api_v1.ContactFolderSaveResponse{})
+	return ctx.Success(&v1Pb.ContactFolderSaveResponse{})
 }
 
 func (c *ContactFolder) Move(ctx *core.Context) error {
-	params := &api_v1.ContactChangeGroupRequest{}
+	params := &v1Pb.ContactChangeGroupRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -128,5 +128,5 @@ func (c *ContactFolder) Move(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.ContactChangeGroupResponse{})
+	return ctx.Success(&v1Pb.ContactChangeGroupResponse{})
 }

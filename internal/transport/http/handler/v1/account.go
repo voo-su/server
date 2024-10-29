@@ -3,7 +3,7 @@ package v1
 import (
 	"gorm.io/gorm"
 	"regexp"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 	"voo.su/pkg/core"
@@ -20,7 +20,7 @@ func (a *Account) Get(ctx *core.Context) error {
 		return ctx.Error(err.Error())
 	}
 
-	return ctx.Success(&api_v1.AccountResponse{
+	return ctx.Success(&v1Pb.AccountResponse{
 		Id:       int32(user.Id),
 		Username: user.Username,
 		Email:    user.Email,
@@ -34,7 +34,7 @@ func (a *Account) Get(ctx *core.Context) error {
 }
 
 func (a *Account) ChangeDetail(ctx *core.Context) error {
-	params := &api_v1.AccountDetailUpdateRequest{}
+	params := &v1Pb.AccountDetailUpdateRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -62,7 +62,7 @@ func (a *Account) ChangeDetail(ctx *core.Context) error {
 }
 
 func (a *Account) ChangeUsername(ctx *core.Context) error {
-	params := &api_v1.AccountUsernameUpdateRequest{}
+	params := &v1Pb.AccountUsernameUpdateRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
 	}

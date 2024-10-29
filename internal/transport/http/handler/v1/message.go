@@ -3,7 +3,7 @@ package v1
 import (
 	"bytes"
 	"fmt"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/entity"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
@@ -73,12 +73,12 @@ func (c *Message) Image(ctx *core.Context) error {
 		return err
 	}
 
-	if err := c.MessageSendService.SendImage(ctx.Ctx(), ctx.UserId(), &api_v1.ImageMessageRequest{
+	if err := c.MessageSendService.SendImage(ctx.Ctx(), ctx.UserId(), &v1Pb.ImageMessageRequest{
 		Url:    c.Filesystem.Default.PublicUrl(filePath),
 		Width:  int32(meta.Width),
 		Height: int32(meta.Height),
 		Size:   int32(file.Size),
-		Receiver: &api_v1.MessageReceiver{
+		Receiver: &v1Pb.MessageReceiver{
 			DialogType: int32(params.DialogType),
 			ReceiverId: int32(params.ReceiverId),
 		},
@@ -111,9 +111,9 @@ func (c *Message) File(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	if err := c.MessageSendService.SendFile(ctx.Ctx(), uid, &api_v1.FileMessageRequest{
+	if err := c.MessageSendService.SendFile(ctx.Ctx(), uid, &v1Pb.FileMessageRequest{
 		UploadId: params.UploadId,
-		Receiver: &api_v1.MessageReceiver{
+		Receiver: &v1Pb.MessageReceiver{
 			DialogType: int32(params.DialogType),
 			ReceiverId: int32(params.ReceiverId),
 		},
@@ -156,12 +156,12 @@ func (c *Message) Vote(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	if err := c.MessageSendService.SendVote(ctx.Ctx(), uid, &api_v1.VoteMessageRequest{
+	if err := c.MessageSendService.SendVote(ctx.Ctx(), uid, &v1Pb.VoteMessageRequest{
 		Mode:      int32(params.Mode),
 		Title:     params.Title,
 		Options:   params.Options,
 		Anonymous: int32(params.Anonymous),
-		Receiver: &api_v1.MessageReceiver{
+		Receiver: &v1Pb.MessageReceiver{
 			DialogType: entity.ChatGroupMode,
 			ReceiverId: int32(params.ReceiverId),
 		},
@@ -363,9 +363,9 @@ func (c *Message) Sticker(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	if err := c.MessageSendService.SendSticker(ctx.Ctx(), uid, &api_v1.StickerMessageRequest{
+	if err := c.MessageSendService.SendSticker(ctx.Ctx(), uid, &v1Pb.StickerMessageRequest{
 		StickerId: int32(params.StickerId),
-		Receiver: &api_v1.MessageReceiver{
+		Receiver: &v1Pb.MessageReceiver{
 			DialogType: int32(params.DialogType),
 			ReceiverId: int32(params.ReceiverId),
 		},

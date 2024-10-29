@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"time"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
@@ -26,23 +26,23 @@ type Sticker struct {
 func (c *Sticker) CollectList(ctx *core.Context) error {
 	var (
 		uid  = ctx.UserId()
-		resp = &api_v1.StickerListResponse{
-			SysSticker:     make([]*api_v1.StickerListResponse_SysSticker, 0),
-			CollectSticker: make([]*api_v1.StickerListItem, 0),
+		resp = &v1Pb.StickerListResponse{
+			SysSticker:     make([]*v1Pb.StickerListResponse_SysSticker, 0),
+			CollectSticker: make([]*v1Pb.StickerListItem, 0),
 		}
 	)
 	if ids := c.StickerRepo.GetUserInstallIds(uid); len(ids) > 0 {
 		if items, err := c.StickerRepo.FindByIds(ctx.Ctx(), ids); err == nil {
 			for _, item := range items {
-				data := &api_v1.StickerListResponse_SysSticker{
+				data := &v1Pb.StickerListResponse_SysSticker{
 					StickerId: int32(item.Id),
 					Url:       item.Icon,
 					Name:      item.Name,
-					List:      make([]*api_v1.StickerListItem, 0),
+					List:      make([]*v1Pb.StickerListItem, 0),
 				}
 				if list, err := c.StickerRepo.GetDetailsAll(item.Id, 0); err == nil {
 					for _, v := range list {
-						data.List = append(data.List, &api_v1.StickerListItem{
+						data.List = append(data.List, &v1Pb.StickerListItem{
 							MediaId: int32(v.Id),
 							Src:     v.Url,
 						})
@@ -55,7 +55,7 @@ func (c *Sticker) CollectList(ctx *core.Context) error {
 
 	if items, err := c.StickerRepo.GetDetailsAll(0, uid); err == nil {
 		for _, item := range items {
-			resp.CollectSticker = append(resp.CollectSticker, &api_v1.StickerListItem{
+			resp.CollectSticker = append(resp.CollectSticker, &v1Pb.StickerListItem{
 				MediaId: int32(item.Id),
 				Src:     item.Url,
 			})
@@ -66,7 +66,7 @@ func (c *Sticker) CollectList(ctx *core.Context) error {
 }
 
 func (c *Sticker) DeleteCollect(ctx *core.Context) error {
-	params := &api_v1.StickerDeleteRequest{}
+	params := &v1Pb.StickerDeleteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -115,7 +115,7 @@ func (c *Sticker) Upload(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Ошибка загрузки")
 	}
 
-	return ctx.Success(&api_v1.StickerUploadResponse{
+	return ctx.Success(&v1Pb.StickerUploadResponse{
 		MediaId: int32(m.Id),
 		Src:     m.Url,
 	})
@@ -128,9 +128,9 @@ func (c *Sticker) SystemList(ctx *core.Context) error {
 	}
 
 	ids := c.StickerRepo.GetUserInstallIds(ctx.UserId())
-	data := make([]*api_v1.StickerSysListResponse_Item, 0)
+	data := make([]*v1Pb.StickerSysListResponse_Item, 0)
 	for _, item := range items {
-		data = append(data, &api_v1.StickerSysListResponse_Item{
+		data = append(data, &v1Pb.StickerSysListResponse_Item{
 			Id:     int32(item.Id),
 			Name:   item.Name,
 			Icon:   item.Icon,
@@ -144,7 +144,7 @@ func (c *Sticker) SystemList(ctx *core.Context) error {
 func (c *Sticker) SetSystemSticker(ctx *core.Context) error {
 	var (
 		err    error
-		params = &api_v1.StickerSetSystemRequest{}
+		params = &v1Pb.StickerSetSystemRequest{}
 		uid    = ctx.UserId()
 		key    = fmt.Sprintf("sys-sticker:%d", uid)
 	)
@@ -173,17 +173,17 @@ func (c *Sticker) SetSystemSticker(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	items := make([]*api_v1.StickerListItem, 0)
+	items := make([]*v1Pb.StickerListItem, 0)
 	if list, err := c.StickerRepo.GetDetailsAll(int(params.StickerId), 0); err == nil {
 		for _, item := range list {
-			items = append(items, &api_v1.StickerListItem{
+			items = append(items, &v1Pb.StickerListItem{
 				MediaId: int32(item.Id),
 				Src:     item.Url,
 			})
 		}
 	}
 
-	return ctx.Success(&api_v1.StickerSetSystemResponse{
+	return ctx.Success(&v1Pb.StickerSetSystemResponse{
 		StickerId: int32(info.Id),
 		Url:       info.Icon,
 		Name:      info.Name,

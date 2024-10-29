@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/entity"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
@@ -20,7 +20,7 @@ type GroupChatAds struct {
 }
 
 func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
-	params := &api_v1.GroupChatAdsEditRequest{}
+	params := &v1Pb.GroupChatAdsEditRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -77,7 +77,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 }
 
 func (g *GroupChatAds) Delete(ctx *core.Context) error {
-	params := &api_v1.GroupChatAdsDeleteRequest{}
+	params := &v1Pb.GroupChatAdsDeleteRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -89,7 +89,7 @@ func (g *GroupChatAds) Delete(ctx *core.Context) error {
 }
 
 func (g *GroupChatAds) List(ctx *core.Context) error {
-	params := &api_v1.GroupChatAdsListRequest{}
+	params := &v1Pb.GroupChatAdsListRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -103,9 +103,9 @@ func (g *GroupChatAds) List(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	items := make([]*api_v1.GroupChatAdsListResponse_Item, 0)
+	items := make([]*v1Pb.GroupChatAdsListResponse_Item, 0)
 	for i := 0; i < len(all); i++ {
-		items = append(items, &api_v1.GroupChatAdsListResponse_Item{
+		items = append(items, &v1Pb.GroupChatAdsListResponse_Item{
 			Id:           int32(all[i].Id),
 			Title:        all[i].Title,
 			Content:      all[i].Content,
@@ -119,7 +119,7 @@ func (g *GroupChatAds) List(ctx *core.Context) error {
 		})
 	}
 
-	return ctx.Success(&api_v1.GroupChatAdsListResponse{
+	return ctx.Success(&v1Pb.GroupChatAdsListResponse{
 		Items: items,
 	})
 }

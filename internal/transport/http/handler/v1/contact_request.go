@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/repo"
 	"voo.su/internal/service"
 	"voo.su/pkg/core"
@@ -21,7 +21,7 @@ func (ca *ContactRequest) ApplyUnreadNum(ctx *core.Context) error {
 }
 
 func (ca *ContactRequest) Create(ctx *core.Context) error {
-	params := &api_v1.ContactRequestCreateRequest{}
+	params := &v1Pb.ContactRequestCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -38,11 +38,11 @@ func (ca *ContactRequest) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err)
 	}
 
-	return ctx.Success(&api_v1.ContactRequestCreateResponse{})
+	return ctx.Success(&v1Pb.ContactRequestCreateResponse{})
 }
 
 func (ca *ContactRequest) Accept(ctx *core.Context) error {
-	params := &api_v1.ContactRequestAcceptRequest{}
+	params := &v1Pb.ContactRequestAcceptRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -55,9 +55,9 @@ func (ca *ContactRequest) Accept(ctx *core.Context) error {
 	if err != nil {
 		return ctx.ErrorBusiness(err)
 	}
-	//err = ca.MessageService.SendSystemText(ctx.Ctx(), applyInfo.UserId, &api_v1.TextMessageRequest{
+	//err = ca.MessageService.SendSystemText(ctx.Ctx(), applyInfo.UserId, &v1Pb.TextMessageRequest{
 	//	Content: "Теперь можете начать общаться",
-	//	Receiver: &api_v1.MessageReceiver{
+	//	Receiver: &v1Pb.MessageReceiver{
 	//		DialogType: entity.ChatPrivateMode,
 	//		ReceiverId: int32(applyInfo.FriendId),
 	//	},
@@ -65,11 +65,11 @@ func (ca *ContactRequest) Accept(ctx *core.Context) error {
 	//if err != nil {
 	//	fmt.Println("ошибка", err.Error())
 	//}
-	return ctx.Success(&api_v1.ContactRequestAcceptResponse{})
+	return ctx.Success(&v1Pb.ContactRequestAcceptResponse{})
 }
 
 func (ca *ContactRequest) Decline(ctx *core.Context) error {
-	params := &api_v1.ContactRequestDeclineRequest{}
+	params := &v1Pb.ContactRequestDeclineRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -81,7 +81,7 @@ func (ca *ContactRequest) Decline(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err)
 	}
 
-	return ctx.Success(&api_v1.ContactRequestDeclineResponse{})
+	return ctx.Success(&v1Pb.ContactRequestDeclineResponse{})
 }
 
 func (ca *ContactRequest) List(ctx *core.Context) error {
@@ -90,9 +90,9 @@ func (ca *ContactRequest) List(ctx *core.Context) error {
 		return ctx.Error(err.Error())
 	}
 
-	items := make([]*api_v1.ContactRequestListResponse_Item, 0, len(list))
+	items := make([]*v1Pb.ContactRequestListResponse_Item, 0, len(list))
 	for _, item := range list {
-		items = append(items, &api_v1.ContactRequestListResponse_Item{
+		items = append(items, &v1Pb.ContactRequestListResponse_Item{
 			Id:       int32(item.Id),
 			UserId:   int32(item.UserId),
 			FriendId: int32(item.FriendId),
@@ -106,5 +106,5 @@ func (ca *ContactRequest) List(ctx *core.Context) error {
 
 	ca.ContactRequestService.ClearApplyUnreadNum(ctx.Ctx(), ctx.UserId())
 
-	return ctx.Success(&api_v1.ContactRequestListResponse{Items: items})
+	return ctx.Success(&v1Pb.ContactRequestListResponse{Items: items})
 }

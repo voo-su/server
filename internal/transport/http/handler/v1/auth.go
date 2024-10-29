@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
 	"voo.su/internal/entity"
 	"voo.su/internal/repository/cache"
@@ -28,7 +28,7 @@ type Auth struct {
 }
 
 func (a *Auth) Login(ctx *core.Context) error {
-	params := &api_v1.AuthLoginRequest{}
+	params := &v1Pb.AuthLoginRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -45,14 +45,14 @@ func (a *Auth) Login(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.AuthLoginResponse{
+	return ctx.Success(&v1Pb.AuthLoginResponse{
 		Token:     token,
 		ExpiresIn: entity.ExpiresTime,
 	})
 }
 
 func (a *Auth) Verify(ctx *core.Context) error {
-	params := &api_v1.AuthVerifyRequest{}
+	params := &v1Pb.AuthVerifyRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -91,7 +91,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 			ReceiverId: root.UserId,
 			IsBoot:     true,
 		})
-		_ = a.MessageSendService.SendLogin(ctx.Ctx(), user.Id, &api_v1.LoginMessageRequest{
+		_ = a.MessageSendService.SendLogin(ctx.Ctx(), user.Id, &v1Pb.LoginMessageRequest{
 			Ip:      ip,
 			Agent:   ctx.Context.GetHeader("user-agent"),
 			Address: address,
@@ -116,7 +116,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		fmt.Println(_err)
 	}
 
-	return ctx.Success(&api_v1.AuthVerifyResponse{
+	return ctx.Success(&v1Pb.AuthVerifyResponse{
 		Type:        "Bearer",
 		AccessToken: token,
 		ExpiresIn:   int32(a.Conf.Jwt.ExpiresTime),
@@ -136,7 +136,7 @@ func (a *Auth) Logout(ctx *core.Context) error {
 
 //func (c *Auth) Refresh(ctx *core.Context) error {
 //	c.toBlackList(ctx)
-//	return ctx.Success(&api_v1.AuthRefreshResponse{
+//	return ctx.Success(&v1Pb.AuthRefreshResponse{
 //		Type:        "Bearer",
 //		AccessToken: c.token(ctx.UserId()),
 //		ExpiresIn:   int32(c.config.Jwt.ExpiresTime),

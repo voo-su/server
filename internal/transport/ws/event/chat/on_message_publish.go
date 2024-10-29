@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/bytedance/sonic"
 	"log"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/pkg/core/socket"
 )
 
@@ -35,9 +35,9 @@ func (h *Handler) onPublish(ctx context.Context, client socket.IClient, data []b
 }
 
 type TextMessage struct {
-	AckId   string                    `json:"ack_id"`
-	Event   string                    `json:"event"`
-	Content api_v1.TextMessageRequest `json:"content"`
+	AckId   string                  `json:"ack_id"`
+	Event   string                  `json:"event"`
+	Content v1Pb.TextMessageRequest `json:"content"`
 }
 
 func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data []byte) {
@@ -49,9 +49,9 @@ func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data
 	if in.Content.GetContent() == "" || in.Content.GetReceiver() == nil {
 		return
 	}
-	err := h.Message.SendText(ctx, client.Uid(), &api_v1.TextMessageRequest{
+	err := h.Message.SendText(ctx, client.Uid(), &v1Pb.TextMessageRequest{
 		Content: in.Content.Content,
-		Receiver: &api_v1.MessageReceiver{
+		Receiver: &v1Pb.MessageReceiver{
 			DialogType: in.Content.Receiver.DialogType,
 			ReceiverId: in.Content.Receiver.ReceiverId,
 		},
@@ -69,9 +69,9 @@ func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data
 }
 
 type StickerMessage struct {
-	MsgId   string                       `json:"msg_id"`
-	Event   string                       `json:"event"`
-	Content api_v1.StickerMessageRequest `json:"content"`
+	MsgId   string                     `json:"msg_id"`
+	Event   string                     `json:"event"`
+	Content v1Pb.StickerMessageRequest `json:"content"`
 }
 
 func (h *Handler) onStickerMessage(_ context.Context, _ socket.IClient, data []byte) {
@@ -84,9 +84,9 @@ func (h *Handler) onStickerMessage(_ context.Context, _ socket.IClient, data []b
 }
 
 type ImageMessage struct {
-	MsgId   string                     `json:"msg_id"`
-	Event   string                     `json:"event"`
-	Content api_v1.ImageMessageRequest `json:"content"`
+	MsgId   string                   `json:"msg_id"`
+	Event   string                   `json:"event"`
+	Content v1Pb.ImageMessageRequest `json:"content"`
 }
 
 func (h *Handler) onImageMessage(_ context.Context, _ socket.IClient, data []byte) {
@@ -99,9 +99,9 @@ func (h *Handler) onImageMessage(_ context.Context, _ socket.IClient, data []byt
 }
 
 type FileMessage struct {
-	MsgId   string                     `json:"msg_id"`
-	Event   string                     `json:"event"`
-	Content api_v1.ImageMessageRequest `json:"content"`
+	MsgId   string                   `json:"msg_id"`
+	Event   string                   `json:"event"`
+	Content v1Pb.ImageMessageRequest `json:"content"`
 }
 
 func (h *Handler) onFileMessage(_ context.Context, _ socket.IClient, data []byte) {
@@ -114,9 +114,9 @@ func (h *Handler) onFileMessage(_ context.Context, _ socket.IClient, data []byte
 }
 
 type VoteMessage struct {
-	MsgId   string                    `json:"msg_id"`
-	Event   string                    `json:"event"`
-	Content api_v1.VoteMessageRequest `json:"content"`
+	MsgId   string                  `json:"msg_id"`
+	Event   string                  `json:"event"`
+	Content v1Pb.VoteMessageRequest `json:"content"`
 }
 
 func (h *Handler) onVoteMessage(_ context.Context, _ socket.IClient, data []byte) {
@@ -129,9 +129,9 @@ func (h *Handler) onVoteMessage(_ context.Context, _ socket.IClient, data []byte
 }
 
 type CodeMessage struct {
-	AckId   string                    `json:"ack_id"`
-	Event   string                    `json:"event"`
-	Content api_v1.CodeMessageRequest `json:"content"`
+	AckId   string                  `json:"ack_id"`
+	Event   string                  `json:"event"`
+	Content v1Pb.CodeMessageRequest `json:"content"`
 }
 
 func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data []byte) {
@@ -144,10 +144,10 @@ func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data
 		return
 	}
 
-	err := h.Message.SendCode(ctx, client.Uid(), &api_v1.CodeMessageRequest{
+	err := h.Message.SendCode(ctx, client.Uid(), &v1Pb.CodeMessageRequest{
 		Lang: m.Content.Lang,
 		Code: m.Content.Code,
-		Receiver: &api_v1.MessageReceiver{
+		Receiver: &v1Pb.MessageReceiver{
 			DialogType: m.Content.Receiver.DialogType,
 			ReceiverId: m.Content.Receiver.ReceiverId,
 		},

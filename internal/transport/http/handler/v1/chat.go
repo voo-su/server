@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	api_v1 "voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/entity"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
@@ -32,7 +32,7 @@ type Chat struct {
 
 func (c *Chat) Create(ctx *core.Context) error {
 	var (
-		params = &api_v1.ChatCreateRequest{}
+		params = &v1Pb.ChatCreateRequest{}
 		uid    = ctx.UserId()
 		agent  = strings.TrimSpace(ctx.Context.GetHeader("user-agent"))
 	)
@@ -70,7 +70,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	item := &api_v1.ChatItem{
+	item := &v1Pb.ChatItem{
 		Id:         int32(result.Id),
 		DialogType: int32(result.DialogType),
 		ReceiverId: int32(result.ReceiverId),
@@ -97,7 +97,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 		item.UpdatedAt = msg.Datetime
 	}
 
-	return ctx.Success(&api_v1.ChatCreateResponse{
+	return ctx.Success(&v1Pb.ChatCreateResponse{
 		Id:         item.Id,
 		DialogType: item.DialogType,
 		ReceiverId: item.ReceiverId,
@@ -135,9 +135,9 @@ func (c *Chat) List(ctx *core.Context) error {
 	}
 
 	remarks, _ := c.ContactService.Contact.Remarks(ctx.Ctx(), uid, friends)
-	items := make([]*api_v1.ChatItem, 0)
+	items := make([]*v1Pb.ChatItem, 0)
 	for _, item := range data {
-		value := &api_v1.ChatItem{
+		value := &v1Pb.ChatItem{
 			Id:         int32(item.Id),
 			DialogType: int32(item.DialogType),
 			ReceiverId: int32(item.ReceiverId),
@@ -180,11 +180,11 @@ func (c *Chat) List(ctx *core.Context) error {
 		items = append(items, value)
 	}
 
-	return ctx.Success(&api_v1.ChatListResponse{Items: items})
+	return ctx.Success(&v1Pb.ChatListResponse{Items: items})
 }
 
 func (c *Chat) Delete(ctx *core.Context) error {
-	params := &api_v1.ChatDeleteRequest{}
+	params := &v1Pb.ChatDeleteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -193,22 +193,22 @@ func (c *Chat) Delete(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.ChatDeleteResponse{})
+	return ctx.Success(&v1Pb.ChatDeleteResponse{})
 }
 
 func (c *Chat) ClearUnreadMessage(ctx *core.Context) error {
-	params := &api_v1.ChatClearUnreadNumRequest{}
+	params := &v1Pb.ChatClearUnreadNumRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	c.UnreadStorage.Reset(ctx.Ctx(), int(params.DialogType), int(params.ReceiverId), ctx.UserId())
 
-	return ctx.Success(&api_v1.ChatClearUnreadNumResponse{})
+	return ctx.Success(&v1Pb.ChatClearUnreadNumResponse{})
 }
 
 func (c *Chat) Top(ctx *core.Context) error {
-	params := &api_v1.ChatTopRequest{}
+	params := &v1Pb.ChatTopRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -221,11 +221,11 @@ func (c *Chat) Top(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.ChatTopResponse{})
+	return ctx.Success(&v1Pb.ChatTopResponse{})
 }
 
 func (c *Chat) Disturb(ctx *core.Context) error {
-	params := &api_v1.ChatDisturbRequest{}
+	params := &v1Pb.ChatDisturbRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -239,5 +239,5 @@ func (c *Chat) Disturb(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.ChatDisturbResponse{})
+	return ctx.Success(&v1Pb.ChatDisturbResponse{})
 }

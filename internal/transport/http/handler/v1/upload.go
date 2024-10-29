@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
 	"voo.su/internal/service"
 	"voo.su/pkg/core"
@@ -35,7 +35,7 @@ func (u *Upload) Avatar(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Ошибка загрузки файла")
 	}
 
-	return ctx.Success(api_v1.UploadAvatarResponse{
+	return ctx.Success(v1Pb.UploadAvatarResponse{
 		Avatar: u.Filesystem.Default.PublicUrl(object),
 	})
 }
@@ -64,13 +64,13 @@ func (u *Upload) Image(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось загрузить файл")
 	}
 
-	return ctx.Success(api_v1.UploadImageResponse{
+	return ctx.Success(v1Pb.UploadImageResponse{
 		Src: u.Filesystem.Default.PublicUrl(object),
 	})
 }
 
 func (u *Upload) InitiateMultipart(ctx *core.Context) error {
-	params := &api_v1.UploadInitiateMultipartRequest{}
+	params := &v1Pb.UploadInitiateMultipartRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -84,7 +84,7 @@ func (u *Upload) InitiateMultipart(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.UploadInitiateMultipartResponse{
+	return ctx.Success(&v1Pb.UploadInitiateMultipartResponse{
 		UploadId:    info.UploadId,
 		UploadIdMd5: encrypt.Md5(info.UploadId),
 		SplitSize:   2 << 20,
@@ -92,7 +92,7 @@ func (u *Upload) InitiateMultipart(ctx *core.Context) error {
 }
 
 func (u *Upload) MultipartUpload(ctx *core.Context) error {
-	params := &api_v1.UploadMultipartRequest{}
+	params := &v1Pb.UploadMultipartRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -114,12 +114,12 @@ func (u *Upload) MultipartUpload(ctx *core.Context) error {
 	}
 
 	if params.SplitIndex != params.SplitNum-1 {
-		return ctx.Success(&api_v1.UploadMultipartResponse{
+		return ctx.Success(&v1Pb.UploadMultipartResponse{
 			IsMerge: false,
 		})
 	}
 
-	return ctx.Success(&api_v1.UploadMultipartResponse{
+	return ctx.Success(&v1Pb.UploadMultipartResponse{
 		UploadId: params.UploadId,
 		IsMerge:  true,
 	})

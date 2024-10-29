@@ -5,7 +5,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"strings"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/entity"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
@@ -28,7 +28,7 @@ type ForwardRecord struct {
 	DialogType int
 }
 
-func (m *MessageForwardLogic) Verify(ctx context.Context, uid int, req *api_v1.ForwardMessageRequest) error {
+func (m *MessageForwardLogic) Verify(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error {
 	query := m.db.WithContext(ctx).Model(&model.Message{})
 	query.Where("id in ?", req.MessageIds)
 	if req.Receiver.DialogType == entity.ChatPrivateMode {
@@ -52,7 +52,7 @@ func (m *MessageForwardLogic) Verify(ctx context.Context, uid int, req *api_v1.F
 	return nil
 }
 
-func (m *MessageForwardLogic) MultiMergeForward(ctx context.Context, uid int, req *api_v1.ForwardMessageRequest) ([]*ForwardRecord, error) {
+func (m *MessageForwardLogic) MultiMergeForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) ([]*ForwardRecord, error) {
 	receives := make([]map[string]int, 0)
 	for _, userId := range req.Uids {
 		receives = append(receives, map[string]int{"receiver_id": int(userId), "dialog_type": 1})
@@ -109,7 +109,7 @@ func (m *MessageForwardLogic) MultiMergeForward(ctx context.Context, uid int, re
 	return list, nil
 }
 
-func (m *MessageForwardLogic) MultiSplitForward(ctx context.Context, uid int, req *api_v1.ForwardMessageRequest) ([]*ForwardRecord, error) {
+func (m *MessageForwardLogic) MultiSplitForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) ([]*ForwardRecord, error) {
 	var (
 		receives = make([]map[string]int, 0)
 		records  = make([]*model.Message, 0)
@@ -172,7 +172,7 @@ type forwardItem struct {
 	Username string `json:"username"`
 }
 
-func (m *MessageForwardLogic) aggregation(ctx context.Context, req *api_v1.ForwardMessageRequest) ([]map[string]any, error) {
+func (m *MessageForwardLogic) aggregation(ctx context.Context, req *v1Pb.ForwardMessageRequest) ([]map[string]any, error) {
 	rows := make([]*forwardItem, 0, 3)
 	query := m.db.WithContext(ctx).Table("messages")
 	query.Joins("LEFT JOIN users on users.id = messages.user_id")

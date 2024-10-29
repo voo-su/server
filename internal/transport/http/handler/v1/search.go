@@ -3,7 +3,7 @@ package v1
 import (
 	"errors"
 	"gorm.io/gorm"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/repo"
 	"voo.su/pkg/core"
 	"voo.su/pkg/timeutil"
@@ -16,7 +16,7 @@ type Search struct {
 }
 
 func (s *Search) Users(ctx *core.Context) error {
-	params := &api_v1.SearchUsersRequest{}
+	params := &v1Pb.SearchUsersRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -30,9 +30,9 @@ func (s *Search) Users(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	items := make([]*api_v1.SearchUserResponse_Item, 0)
+	items := make([]*v1Pb.SearchUserResponse_Item, 0)
 	for _, item := range list {
-		items = append(items, &api_v1.SearchUserResponse_Item{
+		items = append(items, &v1Pb.SearchUserResponse_Item{
 			Id:       int32(item.Id),
 			Username: item.Username,
 			Avatar:   item.Avatar,
@@ -41,11 +41,11 @@ func (s *Search) Users(ctx *core.Context) error {
 		})
 	}
 
-	return ctx.Success(&api_v1.SearchUserResponse{Items: items})
+	return ctx.Success(&v1Pb.SearchUserResponse{Items: items})
 }
 
 func (s *Search) GroupChats(ctx *core.Context) error {
-	params := &api_v1.SearchGroupChatsRequest{}
+	params := &v1Pb.SearchGroupChatsRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -61,8 +61,8 @@ func (s *Search) GroupChats(ctx *core.Context) error {
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка запроса")
 	}
-	resp := &api_v1.SearchGroupChatsResponse{}
-	resp.Items = make([]*api_v1.SearchGroupChatsResponse_Item, 0)
+	resp := &v1Pb.SearchGroupChatsResponse{}
+	resp.Items = make([]*v1Pb.SearchGroupChatsResponse_Item, 0)
 	if len(list) == 0 {
 		return ctx.Success(resp)
 	}
@@ -91,7 +91,7 @@ func (s *Search) GroupChats(ctx *core.Context) error {
 		if i >= 40 {
 			break
 		}
-		resp.Items = append(resp.Items, &api_v1.SearchGroupChatsResponse_Item{
+		resp.Items = append(resp.Items, &v1Pb.SearchGroupChatsResponse_Item{
 			Id:          int32(value.Id),
 			Type:        int32(value.Type),
 			Name:        value.Name,

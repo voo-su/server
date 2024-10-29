@@ -3,7 +3,7 @@ package v1
 import (
 	"errors"
 	"gorm.io/gorm"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/entity"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
@@ -27,9 +27,9 @@ func (c *Contact) List(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	items := make([]*api_v1.ContactListResponse_Item, 0, len(list))
+	items := make([]*v1Pb.ContactListResponse_Item, 0, len(list))
 	for _, item := range list {
-		items = append(items, &api_v1.ContactListResponse_Item{
+		items = append(items, &v1Pb.ContactListResponse_Item{
 			Id:       int32(item.Id),
 			Username: item.Username,
 			Avatar:   item.Avatar,
@@ -42,11 +42,11 @@ func (c *Contact) List(ctx *core.Context) error {
 		})
 	}
 
-	return ctx.Success(&api_v1.ContactListResponse{Items: items})
+	return ctx.Success(&v1Pb.ContactListResponse{Items: items})
 }
 
 func (c *Contact) Get(ctx *core.Context) error {
-	params := &api_v1.ContactDetailRequest{}
+	params := &v1Pb.ContactDetailRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -61,7 +61,7 @@ func (c *Contact) Get(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	data := api_v1.ContactDetailResponse{
+	data := v1Pb.ContactDetailResponse{
 		Id:           int32(user.Id),
 		Username:     user.Username,
 		Avatar:       user.Avatar,
@@ -92,7 +92,7 @@ func (c *Contact) Get(ctx *core.Context) error {
 }
 
 func (c *Contact) Delete(ctx *core.Context) error {
-	params := &api_v1.ContactDeleteRequest{}
+	params := &v1Pb.ContactDeleteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -102,9 +102,9 @@ func (c *Contact) Delete(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	_ = c.MessageSendService.SendSystemText(ctx.Ctx(), uid, &api_v1.TextMessageRequest{
+	_ = c.MessageSendService.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 		Content: "Контакт удален",
-		Receiver: &api_v1.MessageReceiver{
+		Receiver: &v1Pb.MessageReceiver{
 			DialogType: entity.ChatPrivateMode,
 			ReceiverId: params.FriendId,
 		},
@@ -115,11 +115,11 @@ func (c *Contact) Delete(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.ContactDeleteResponse{})
+	return ctx.Success(&v1Pb.ContactDeleteResponse{})
 }
 
 func (c *Contact) EditRemark(ctx *core.Context) error {
-	params := &api_v1.ContactRemarkEditRequest{}
+	params := &v1Pb.ContactRemarkEditRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -128,5 +128,5 @@ func (c *Contact) EditRemark(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(&api_v1.ContactRemarkEditResponse{})
+	return ctx.Success(&v1Pb.ContactRemarkEditResponse{})
 }

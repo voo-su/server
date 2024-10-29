@@ -3,7 +3,7 @@ package v1
 import (
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/entity"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
@@ -27,7 +27,7 @@ type GroupChatRequest struct {
 }
 
 func (g *GroupChatRequest) Create(ctx *core.Context) error {
-	params := &api_v1.GroupChatRequestCreateRequest{}
+	params := &v1Pb.GroupChatRequestCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -76,7 +76,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 	uid := ctx.UserId()
 
-	params := &api_v1.GroupChatRequestAgreeRequest{}
+	params := &v1Pb.GroupChatRequestAgreeRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -124,7 +124,7 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 }
 
 func (g *GroupChatRequest) Decline(ctx *core.Context) error {
-	params := &api_v1.GroupChatRequestDeclineRequest{}
+	params := &v1Pb.GroupChatRequestDeclineRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -158,11 +158,11 @@ func (g *GroupChatRequest) Decline(ctx *core.Context) error {
 		return ctx.Error(err.Error())
 	}
 
-	return ctx.Success(&api_v1.GroupChatRequestDeclineResponse{})
+	return ctx.Success(&v1Pb.GroupChatRequestDeclineResponse{})
 }
 
 func (g *GroupChatRequest) List(ctx *core.Context) error {
-	params := &api_v1.GroupRequestListRequest{}
+	params := &v1Pb.GroupRequestListRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -176,9 +176,9 @@ func (g *GroupChatRequest) List(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Ошибка создания группового чата. Пожалуйста, попробуйте еще раз")
 	}
 
-	items := make([]*api_v1.GroupChatRequestListResponse_Item, 0)
+	items := make([]*v1Pb.GroupChatRequestListResponse_Item, 0)
 	for _, item := range list {
-		items = append(items, &api_v1.GroupChatRequestListResponse_Item{
+		items = append(items, &v1Pb.GroupChatRequestListResponse_Item{
 			Id:        int32(item.Id),
 			UserId:    int32(item.UserId),
 			GroupId:   int32(item.GroupId),
@@ -188,7 +188,7 @@ func (g *GroupChatRequest) List(ctx *core.Context) error {
 		})
 	}
 
-	return ctx.Success(&api_v1.GroupChatRequestListResponse{Items: items})
+	return ctx.Success(&v1Pb.GroupChatRequestListResponse{Items: items})
 }
 
 func (g *GroupChatRequest) All(ctx *core.Context) error {
@@ -209,7 +209,7 @@ func (g *GroupChatRequest) All(ctx *core.Context) error {
 		groupIds = append(groupIds, m.GroupId)
 	}
 
-	resp := &api_v1.GroupChatRequestAllResponse{Items: make([]*api_v1.GroupChatRequestAllResponse_Item, 0)}
+	resp := &v1Pb.GroupChatRequestAllResponse{Items: make([]*v1Pb.GroupChatRequestAllResponse_Item, 0)}
 	if len(groupIds) == 0 {
 		return ctx.Success(resp)
 	}
@@ -232,7 +232,7 @@ func (g *GroupChatRequest) All(ctx *core.Context) error {
 	})
 
 	for _, item := range list {
-		resp.Items = append(resp.Items, &api_v1.GroupChatRequestAllResponse_Item{
+		resp.Items = append(resp.Items, &v1Pb.GroupChatRequestAllResponse_Item{
 			Id:        int32(item.Id),
 			UserId:    int32(item.UserId),
 			GroupName: groupMap[item.GroupId].Name,

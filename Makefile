@@ -9,11 +9,13 @@ install:
 
 .PHONY: proto
 proto:
-	protoc --proto_path=./api/proto \
-		--go_out=paths=source_relative:./api/pb/ \
-		--validate_out=paths=source_relative,lang=go:./api/pb/ ./api/proto/v1/*.proto
-	protoc --proto_path=./api/proto \
-		--gotag_out=outdir="./api/pb/":./ ./api/proto/v1/*.proto
+	protoc --proto_path=./api/http/proto --proto_path=./third_party/proto/ \
+		--go_out=paths=source_relative:./api/http/pb/ \
+		--validate_out=paths=source_relative,lang=go:./api/http/pb/ \
+		./api/http/proto/v1/*.proto
+	protoc --proto_path=./api/http/proto --proto_path=./third_party/proto/ \
+		--gotag_out=outdir="./api/http/pb/":./ \
+		./api/http/proto/v1/*.proto
 
 .PHONY: build
 build:
