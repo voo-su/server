@@ -13,3 +13,5 @@ create table message_read
 create index idx_msg_id on message_read (msg_id);
 create index idx_created_at on message_read (created_at);
 create index idx_updated_at on message_read (updated_at);
+
+ALTER TABLE bots ADD COLUMN token VARCHAR(255) UNIQUE NOT NULL;

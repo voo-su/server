@@ -40,8 +40,7 @@ func (a *Auth) Login(ctx *core.Context) error {
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	})
 
-	err := a.AuthService.Send(ctx.Ctx(), entity.LoginChannel, params.Email, token)
-	if err != nil {
+	if err := a.AuthService.Send(ctx.Ctx(), entity.LoginChannel, params.Email, token); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

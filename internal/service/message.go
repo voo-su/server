@@ -29,7 +29,7 @@ var _ MessageSendService = (*MessageService)(nil)
 
 type MessageSendService interface {
 	SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error
-	SendText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error
+	SendText(ctx context.Context, uid int, req *SendText) error
 	SendImage(ctx context.Context, uid int, req *v1Pb.ImageMessageRequest) error
 	SendVoice(ctx context.Context, uid int, req *v1Pb.VoiceMessageRequest) error
 	SendVideo(ctx context.Context, uid int, req *v1Pb.VideoMessageRequest) error
@@ -364,7 +364,18 @@ func (m *MessageService) SendSystemText(ctx context.Context, uid int, req *v1Pb.
 	return m.save(ctx, data)
 }
 
-func (m *MessageService) SendText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error {
+type Receiver struct {
+	DialogType int32
+	ReceiverId int32
+}
+
+type SendText struct {
+	Receiver Receiver
+	Content  string
+	QuoteId  string
+}
+
+func (m *MessageService) SendText(ctx context.Context, uid int, req *SendText /*req1 *v1Pb.TextMessageRequest*/) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    entity.ChatMsgTypeText,

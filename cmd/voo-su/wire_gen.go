@@ -19,6 +19,7 @@ import (
 	"voo.su/internal/service"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/http/handler"
+	"voo.su/internal/transport/http/handler/bot"
 	"voo.su/internal/transport/http/handler/v1"
 	"voo.su/internal/transport/http/router"
 	"voo.su/internal/transport/ws"
@@ -53,7 +54,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	ipAddressService := service.NewIpAddressService(source, conf, requestClient)
 	dialog := repo.NewDialog(db)
 	chatService := service.NewChatService(source, dialog, groupChatMember)
-	bot := repo.NewBot(db)
+	repoBot := repo.NewBot(db)
 	sequence := cache.NewSequence(client)
 	repoSequence := repo.NewSequence(db, sequence)
 	messageForwardLogic := logic.NewMessageForwardLogic(db, repoSequence)
@@ -80,7 +81,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Sequence:            repoSequence,
 		DialogVoteCache:     vote,
 		MessageRepo:         message,
-		BotRepo:             bot,
+		BotRepo:             repoBot,
 	}
 	userSession := repo.NewUserSession(db)
 	auth := &v1.Auth{
@@ -90,7 +91,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		RedisLock:          redisLock,
 		IpAddressService:   ipAddressService,
 		ChatService:        chatService,
-		BotRepo:            bot,
+		BotRepo:            repoBot,
 		MessageSendService: messageService,
 		UserSession:        userSession,
 	}
@@ -203,7 +204,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatRepo:       groupChat,
 		GroupChatMemberRepo: groupChatMember,
 	}
-	handlerV1 := &handler.V1{
+	v1Handler := &v1.Handler{
 		Auth:             auth,
 		Account:          account,
 		Contact:          v1Contact,
@@ -219,8 +220,15 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatAds:     v1GroupChatAds,
 		Search:           search,
 	}
+	botMessage := &bot.Message{
+		MessageSendService: messageService,
+	}
+	botHandler := &bot.Handler{
+		Message: botMessage,
+	}
 	handlerHandler := &handler.Handler{
-		V1: handlerV1,
+		V1:  v1Handler,
+		Bot: botHandler,
 	}
 	engine := router.NewRouter(conf, handlerHandler, jwtTokenStorage)
 	appProvider := &http.AppProvider{
@@ -250,7 +258,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	unreadStorage := cache.NewUnreadStorage(client)
 	messageStorage := cache.NewMessageStorage(client)
 	message := repo.NewMessage(db)
-	bot := repo.NewBot(db)
+	repoBot := repo.NewBot(db)
 	messageService := &service.MessageService{
 		Source:              source,
 		MessageForwardLogic: messageForwardLogic,
@@ -265,7 +273,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 		Sequence:            repoSequence,
 		DialogVoteCache:     vote,
 		MessageRepo:         message,
-		BotRepo:             bot,
+		BotRepo:             repoBot,
 	}
 	chatHandler := chat.NewHandler(client, groupChatMemberService, messageService)
 	chatEvent := &event.ChatEvent{

@@ -7,6 +7,7 @@ import (
 	"voo.su/internal/repository/repo"
 	"voo.su/internal/service"
 	"voo.su/internal/transport/http/handler"
+	"voo.su/internal/transport/http/handler/bot"
 	v1 "voo.su/internal/transport/http/handler/v1"
 	"voo.su/internal/transport/http/router"
 )
@@ -23,7 +24,7 @@ var ProviderSet = wire.NewSet(
 	router.NewRouter,
 
 	// v1
-	wire.Struct(new(handler.V1), "*"),
+	wire.Struct(new(v1.Handler), "*"),
 	wire.Struct(new(v1.Auth), "*"),
 	wire.Struct(new(v1.Account), "*"),
 	wire.Struct(new(v1.Upload), "*"),
@@ -38,6 +39,10 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(v1.ContactFolder), "*"),
 	wire.Struct(new(v1.GroupChatAds), "*"),
 	wire.Struct(new(v1.Search), "*"),
+
+	// Bot
+	wire.Struct(new(bot.Handler), "*"),
+	wire.Struct(new(bot.Message), "*"),
 
 	wire.Struct(new(service.MessageService), "*"),
 	wire.Bind(new(service.MessageSendService), new(*service.MessageService)),

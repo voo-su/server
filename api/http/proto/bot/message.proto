@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package bot;
+
+import "tagger/tagger.proto";
+
+option go_package = "./bot;bot_pb";
+
+message MessageSendRequest{
+    int32 chatId = 1 [(tagger.tags) = "form:\"chatId\" binding:\"required\""];
+    string content = 2 [(tagger.tags) = "form:\"content\" binding:\"required\""];
+}
+
+message MessageSendResponse{}

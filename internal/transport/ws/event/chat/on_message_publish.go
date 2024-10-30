@@ -7,6 +7,7 @@ import (
 	"github.com/bytedance/sonic"
 	"log"
 	v1Pb "voo.su/api/http/pb/v1"
+	"voo.su/internal/service"
 	"voo.su/pkg/core/socket"
 )
 
@@ -49,9 +50,9 @@ func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data
 	if in.Content.GetContent() == "" || in.Content.GetReceiver() == nil {
 		return
 	}
-	err := h.Message.SendText(ctx, client.Uid(), &v1Pb.TextMessageRequest{
+	err := h.Message.SendText(ctx, client.Uid(), &service.SendText{
 		Content: in.Content.Content,
-		Receiver: &v1Pb.MessageReceiver{
+		Receiver: service.Receiver{
 			DialogType: in.Content.Receiver.DialogType,
 			ReceiverId: in.Content.Receiver.ReceiverId,
 		},

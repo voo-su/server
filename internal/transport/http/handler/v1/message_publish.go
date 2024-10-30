@@ -67,7 +67,14 @@ func (c *Publish) onSendText(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.SendText(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := c.MessageSendService.SendText(ctx.Ctx(), ctx.UserId(), &service.SendText{
+		Receiver: service.Receiver{
+			DialogType: params.Receiver.DialogType,
+			ReceiverId: params.Receiver.ReceiverId,
+		},
+		Content: params.Content,
+		QuoteId: params.QuoteId,
+	}); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
