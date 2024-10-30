@@ -106,5 +106,10 @@ func NewV1(router *gin.Engine, conf *config.Config, handler *handler.Handler, se
 			upload.POST("/multipart/initiate", core.HandlerFunc(handler.V1.Upload.InitiateMultipart))
 			upload.POST("/multipart", core.HandlerFunc(handler.V1.Upload.MultipartUpload))
 		}
+		bot := v1.Group("/bots").Use(authorize)
+		{
+			bot.POST("", core.HandlerFunc(handler.V1.Bot.Create))
+			bot.GET("", core.HandlerFunc(handler.V1.Bot.List))
+		}
 	}
 }

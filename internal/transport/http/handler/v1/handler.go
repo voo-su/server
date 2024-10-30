@@ -15,4 +15,5 @@ type Handler struct {
 	ContactFolder    *ContactFolder
 	GroupChatAds     *GroupChatAds
 	Search           *Search
+	Bot              *Bot
 }

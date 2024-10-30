@@ -57,7 +57,7 @@ func (m *SearchUsersRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Username
+	// no validation rules for Q
 
 	if len(errors) > 0 {
 		return SearchUsersRequestMultiError(errors)

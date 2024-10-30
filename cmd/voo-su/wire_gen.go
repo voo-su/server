@@ -204,6 +204,11 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatRepo:       groupChat,
 		GroupChatMemberRepo: groupChatMember,
 	}
+	botService := service.NewBotService(repoBot, user)
+	v1Bot := &v1.Bot{
+		BotService:         botService,
+		MessageSendService: messageService,
+	}
 	v1Handler := &v1.Handler{
 		Auth:             auth,
 		Account:          account,
@@ -219,9 +224,11 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		ContactFolder:    v1ContactFolder,
 		GroupChatAds:     v1GroupChatAds,
 		Search:           search,
+		Bot:              v1Bot,
 	}
 	botMessage := &bot.Message{
 		MessageSendService: messageService,
+		BotServiceService:  botService,
 	}
 	botHandler := &bot.Handler{
 		Message: botMessage,

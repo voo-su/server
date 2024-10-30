@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"fmt"
 	botPb "voo.su/api/http/pb/bot"
 	"voo.su/internal/service"
 	"voo.su/pkg/core"
@@ -9,6 +8,7 @@ import (
 
 type Message struct {
 	MessageSendService service.MessageSendService
+	BotServiceService  *service.BotService
 }
 
 func (m *Message) Send(ctx *core.Context) error {
@@ -19,10 +19,12 @@ func (m *Message) Send(ctx *core.Context) error {
 
 	token := ctx.Context.Param("token")
 
-	fmt.Println(token)
-	fmt.Println(params)
+	var bot, err = m.BotServiceService.GetBotByToken(ctx.Ctx(), token)
+	if err != nil {
+		return ctx.ErrorBusiness("")
+	}
 
-	if err := m.MessageSendService.SendText(ctx.Ctx(), 2, &service.SendText{
+	if err := m.MessageSendService.SendText(ctx.Ctx(), bot.UserId, &service.SendText{
 		Receiver: service.Receiver{
 			DialogType: 2,
 			ReceiverId: params.ChatId,

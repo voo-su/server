@@ -39,6 +39,7 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(v1.ContactFolder), "*"),
 	wire.Struct(new(v1.GroupChatAds), "*"),
 	wire.Struct(new(v1.Search), "*"),
+	wire.Struct(new(v1.Bot), "*"),
 
 	// Bot
 	wire.Struct(new(bot.Handler), "*"),
@@ -58,6 +59,7 @@ var ProviderSet = wire.NewSet(
 	service.NewSplitService,
 	service.NewIpAddressService,
 	service.NewStickerService,
+	service.NewBotService,
 
 	repo.NewUserSession,
 	repo.NewSource,

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package v1;
+
+import "tagger/tagger.proto";
+
+option go_package = "./v1;v1_pb";
+
+message BotCreateRequest{
+    string name = 1;
+}
+
+message BotCreateResponse{
+    string token = 1;
+}
+
+message BotListRequest{}
+
+message BotListResponse{
+    message Item{
+        int32 id = 1;
+        string username = 2;
+    }
+
+    repeated Item items = 1;
+}

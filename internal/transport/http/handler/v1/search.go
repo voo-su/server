@@ -22,7 +22,7 @@ func (s *Search) Users(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	list, err := s.UserRepo.SearchByUsername(params.Username, uid)
+	list, err := s.UserRepo.Search(params.Q, uid)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.ErrorBusiness("Ничего не найдено.")
