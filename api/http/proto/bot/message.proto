@@ -12,3 +12,14 @@ message MessageSendRequest{
 }
 
 message MessageSendResponse{}
+
+message MessageChatsRequest{}
+
+message MessageChatsResponse{
+    message Item{
+        int32 id = 1;
+        string name = 2;
+    }
+
+    repeated Item items = 1;
+}

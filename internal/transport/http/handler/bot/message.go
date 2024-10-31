@@ -8,7 +8,7 @@ import (
 
 type Message struct {
 	MessageSendService service.MessageSendService
-	BotServiceService  *service.BotService
+	BotService         *service.BotService
 }
 
 func (m *Message) Send(ctx *core.Context) error {
@@ -19,7 +19,7 @@ func (m *Message) Send(ctx *core.Context) error {
 
 	token := ctx.Context.Param("token")
 
-	var bot, err = m.BotServiceService.GetBotByToken(ctx.Ctx(), token)
+	var bot, err = m.BotService.GetBotByToken(ctx.Ctx(), token)
 	if err != nil {
 		return ctx.ErrorBusiness("")
 	}
@@ -35,4 +35,30 @@ func (m *Message) Send(ctx *core.Context) error {
 	}
 
 	return ctx.Success(&botPb.MessageSendResponse{})
+}
+
+func (m *Message) GroupChats(ctx *core.Context) error {
+	token := ctx.Context.Param("token")
+
+	var bot, err = m.BotService.GetBotByToken(ctx.Ctx(), token)
+	if err != nil {
+		return ctx.ErrorBusiness("")
+	}
+
+	list, err := m.BotService.Chats(ctx.Ctx(), bot.Id)
+	if err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	items := make([]*botPb.MessageChatsResponse_Item, 0, len(list))
+	for _, item := range list {
+		items = append(items, &botPb.MessageChatsResponse_Item{
+			Id:   int32(item.Id),
+			Name: item.GroupName,
+		})
+	}
+
+	return ctx.Success(&botPb.MessageChatsResponse{
+		Items: items,
+	})
 }

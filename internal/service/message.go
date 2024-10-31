@@ -732,11 +732,14 @@ func (m *MessageService) save(ctx context.Context, data *model.Message) error {
 	if data.MsgId == "" {
 		data.MsgId = strutil.NewMsgId()
 	}
+
 	m.loadReply(ctx, data)
 	m.loadSequence(ctx, data)
+
 	if err := m.Source.Db().WithContext(ctx).Create(data).Error; err != nil {
 		return err
 	}
+
 	option := make(map[string]string)
 	switch data.MsgType {
 	case entity.ChatMsgTypeText:
@@ -748,7 +751,9 @@ func (m *MessageService) save(ctx context.Context, data *model.Message) error {
 			option["text"] = "Неизвестно"
 		}
 	}
+
 	m.afterHandle(ctx, data, option)
+
 	return nil
 }
 

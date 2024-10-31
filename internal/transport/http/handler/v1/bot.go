@@ -2,6 +2,7 @@ package v1
 
 import (
 	"fmt"
+	"regexp"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/service"
 	"voo.su/pkg/core"
@@ -18,15 +19,20 @@ func (b *Bot) Create(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
+	re := regexp.MustCompile(`(_bot|bot)$`)
+	if !re.MatchString(params.Username) {
+		return ctx.ErrorBusiness(fmt.Sprintf("Имя пользователя '%s' не заканчивается на '_bot' или 'bot'", params.Username))
+	}
+
 	token, err := b.BotService.Create(ctx.Ctx(), &service.BotCreateOpt{
-		Name: params.Name,
+		Username: params.Username,
 	})
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
 
-	//    _ = b.MessageSendService.SendLogin(ctx.Ctx(), ctx.UserId(), &v1Pb.LoginMessageRequest{})
+	//_ = b.MessageSendService.SendLogin(ctx.Ctx(), ctx.UserId(), &v1Pb.LoginMessageRequest{})
 
 	return ctx.Success(&v1Pb.BotCreateResponse{
 		Token: *token,
@@ -43,7 +49,8 @@ func (b *Bot) List(ctx *core.Context) error {
 	for _, item := range list {
 		items = append(items, &v1Pb.BotListResponse_Item{
 			Id:       int32(item.Id),
-			Username: item.Username,
+			Username: item.Name,
+			Token:    item.Token,
 		})
 	}
 

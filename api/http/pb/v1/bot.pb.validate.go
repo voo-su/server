@@ -57,7 +57,7 @@ func (m *BotCreateRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Name
+	// no validation rules for Username
 
 	if len(errors) > 0 {
 		return BotCreateRequestMultiError(errors)
@@ -500,6 +500,8 @@ func (m *BotListResponse_Item) validate(all bool) error {
 	// no validation rules for Id
 
 	// no validation rules for Username
+
+	// no validation rules for Token
 
 	if len(errors) > 0 {
 		return BotListResponse_ItemMultiError(errors)

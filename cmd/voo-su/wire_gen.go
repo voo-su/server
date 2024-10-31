@@ -204,7 +204,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatRepo:       groupChat,
 		GroupChatMemberRepo: groupChatMember,
 	}
-	botService := service.NewBotService(repoBot, user)
+	botService := service.NewBotService(source, repoBot, user)
 	v1Bot := &v1.Bot{
 		BotService:         botService,
 		MessageSendService: messageService,
@@ -228,7 +228,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	}
 	botMessage := &bot.Message{
 		MessageSendService: messageService,
-		BotServiceService:  botService,
+		BotService:         botService,
 	}
 	botHandler := &bot.Handler{
 		Message: botMessage,
