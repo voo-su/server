@@ -25,10 +25,10 @@ func (b *Bot) Create(ctx *core.Context) error {
 	}
 
 	token, err := b.BotService.Create(ctx.Ctx(), &service.BotCreateOpt{
-		Username: params.Username,
+		Username:  params.Username,
+		CreatorId: ctx.UserId(),
 	})
 	if err != nil {
-		fmt.Println(err)
 		return nil
 	}
 

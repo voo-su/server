@@ -26,13 +26,15 @@ func NewBotService(
 }
 
 type BotCreateOpt struct {
-	Username string
+	Username  string
+	CreatorId int
 }
 
 func (b *BotService) Create(ctx context.Context, opt *BotCreateOpt) (*string, error) {
 	user, err := b.UserRepo.Create(&model.User{
-		Name:  opt.Username,
-		IsBot: 1,
+		Username: opt.Username,
+		Name:     opt.Username,
+		IsBot:    1,
 	})
 	if err != nil {
 		return nil, err
@@ -41,9 +43,10 @@ func (b *BotService) Create(ctx context.Context, opt *BotCreateOpt) (*string, er
 	token := encrypt.GenerateToken()
 
 	return &token, b.BotRepo.Create(ctx, &model.Bot{
-		UserId: user.Id,
-		Token:  token,
-		Name:   opt.Username,
+		UserId:    user.Id,
+		Token:     token,
+		Name:      opt.Username,
+		CreatorId: opt.CreatorId,
 	})
 }
 
@@ -63,6 +66,7 @@ func (b *BotService) List(ctx context.Context, uid int) ([]*model.Bot, error) {
 		"bots.name",
 		"bots.token",
 	})
+	tx.Where("bots.creator_id = ?", uid)
 
 	var items []*model.Bot
 	if err := tx.Scan(&items).Error; err != nil {

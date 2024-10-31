@@ -10,6 +10,7 @@ type Bot struct {
 	Description string    `gorm:"column:description;NOT NULL" json:"description"`
 	Avatar      string    `gorm:"column:avatar;NOT NULL" json:"avatar"`
 	CreatedAt   time.Time `gorm:"column:created_at;NOT NULL" json:"created_at"`
+	CreatorId   int       `gorm:"column:creator_id;default:NULL" json:"creator_id"`
 }
 
 func (Bot) TableName() string {
