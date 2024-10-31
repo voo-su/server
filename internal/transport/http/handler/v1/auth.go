@@ -19,7 +19,6 @@ type Auth struct {
 	Conf               *config.Config
 	AuthService        *service.AuthService
 	JwtTokenStorage    *cache.JwtTokenStorage
-	RedisLock          *cache.RedisLock
 	IpAddressService   *service.IpAddressService
 	ChatService        *service.ChatService
 	BotRepo            *repo.Bot
@@ -69,6 +68,8 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		return ctx.InvalidParams("Неверный токен")
 	}
 
+	ip := ctx.Context.ClientIP()
+
 	user, err := a.AuthService.Register(ctx.Ctx(), claims.ID)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
@@ -76,7 +77,6 @@ func (a *Auth) Verify(ctx *core.Context) error {
 
 	a.AuthService.Delete(ctx.Ctx(), entity.LoginChannel, params.Token)
 
-	ip := ctx.Context.ClientIP()
 	root, _ := a.BotRepo.GetLoginBot(ctx.Ctx())
 	if root != nil {
 		address, err := a.IpAddressService.FindAddress(ip)
@@ -90,7 +90,8 @@ func (a *Auth) Verify(ctx *core.Context) error {
 			ReceiverId: root.UserId,
 			IsBoot:     true,
 		})
-		_ = a.MessageSendService.SendLogin(ctx.Ctx(), user.Id, &v1Pb.LoginMessageRequest{
+
+		_ = a.MessageSendService.SendLogin(ctx.Ctx(), user.Id, &service.SendLogin{
 			Ip:      ip,
 			Agent:   ctx.Context.GetHeader("user-agent"),
 			Address: address,

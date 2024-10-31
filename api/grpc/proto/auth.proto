@@ -5,13 +5,27 @@ package auth;
 option go_package = "./auth;auth_pb";
 
 message AuthLoginRequest {
-
+    string email = 1;
+    string platform = 2;
 }
 
 message AuthLoginResponse {
+    string token = 1;
+    int32 expiresIn = 2;
+}
 
+message AuthVerifyRequest{
+    string token = 1;
+    string code = 2;
+}
+
+message AuthVerifyResponse{
+    string type = 1;
+    string accessToken = 2;
+    int32 expiresIn = 3;
 }
 
 service AuthService {
     rpc Login(AuthLoginRequest) returns (AuthLoginResponse) {}
+    rpc Verify(AuthVerifyRequest) returns (AuthVerifyResponse) {}
 }

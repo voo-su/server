@@ -50,7 +50,6 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	user := repo.NewUser(db)
 	authService := service.NewAuthService(smsStorage, contact, groupChatMember, groupChat, conf, emailClient, user)
 	jwtTokenStorage := cache.NewTokenSessionStorage(client)
-	redisLock := cache.NewRedisLock(client)
 	source := repo.NewSource(db, client)
 	httpClient := provider.NewHttpClient()
 	requestClient := provider.NewRequestClient(httpClient)
@@ -91,7 +90,6 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Conf:               conf,
 		AuthService:        authService,
 		JwtTokenStorage:    jwtTokenStorage,
-		RedisLock:          redisLock,
 		IpAddressService:   ipAddressService,
 		ChatService:        chatService,
 		BotRepo:            repoBot,
@@ -118,6 +116,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		MessageSendService:    messageService,
 		ContactRepo:           contact,
 	}
+	redisLock := cache.NewRedisLock(client)
 	groupChatService := service.NewGroupChatService(source, groupChat, groupChatMember, relation, repoSequence)
 	chat := &v1.Chat{
 		ChatService:      chatService,
@@ -396,7 +395,44 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	emailClient := provider.NewEmailClient(conf)
 	user := repo.NewUser(db)
 	authService := service.NewAuthService(smsStorage, contact, groupChatMember, groupChat, conf, emailClient, user)
-	authHandler := handler3.NewAuthHandler(conf, tokenMiddleware, authService)
+	jwtTokenStorage := cache.NewTokenSessionStorage(client)
+	source := repo.NewSource(db, client)
+	httpClient := provider.NewHttpClient()
+	requestClient := provider.NewRequestClient(httpClient)
+	ipAddressService := service.NewIpAddressService(source, conf, requestClient)
+	dialog := repo.NewDialog(db)
+	chatService := service.NewChatService(source, dialog, groupChatMember)
+	repoBot := repo.NewBot(db)
+	sequence := cache.NewSequence(client)
+	repoSequence := repo.NewSequence(db, sequence)
+	messageForwardLogic := logic.NewMessageForwardLogic(db, repoSequence)
+	split := repo.NewFileSplit(db)
+	vote := cache.NewVote(client)
+	messageVote := repo.NewMessageVote(db, vote)
+	filesystem := provider.NewFilesystem(conf)
+	unreadStorage := cache.NewUnreadStorage(client)
+	messageStorage := cache.NewMessageStorage(client)
+	serverStorage := cache.NewSidStorage(client)
+	clientStorage := cache.NewClientStorage(conf, client, serverStorage)
+	message := repo.NewMessage(db)
+	messageService := &service.MessageService{
+		Source:              source,
+		MessageForwardLogic: messageForwardLogic,
+		GroupChatMemberRepo: groupChatMember,
+		SplitRepo:           split,
+		MessageVoteRepo:     messageVote,
+		Filesystem:          filesystem,
+		UnreadStorage:       unreadStorage,
+		MessageStorage:      messageStorage,
+		ServerStorage:       serverStorage,
+		ClientStorage:       clientStorage,
+		Sequence:            repoSequence,
+		DialogVoteCache:     vote,
+		MessageRepo:         message,
+		BotRepo:             repoBot,
+	}
+	userSession := repo.NewUserSession(db)
+	authHandler := handler3.NewAuthHandler(conf, tokenMiddleware, authService, jwtTokenStorage, ipAddressService, chatService, repoBot, messageService, userSession)
 	appProvider := &grpc.AppProvider{
 		Conf:            conf,
 		TokenMiddleware: tokenMiddleware,

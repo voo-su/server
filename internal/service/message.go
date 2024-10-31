@@ -40,7 +40,7 @@ type MessageSendService interface {
 	SendMixedMessage(ctx context.Context, uid int, req *v1Pb.MixedMessageRequest) error
 	Revoke(ctx context.Context, uid int, msgId string) error
 	Vote(ctx context.Context, uid int, msgId int, optionsValue string) (*repo.VoteStatistics, error)
-	SendLogin(ctx context.Context, uid int, req *v1Pb.LoginMessageRequest) error
+	SendLogin(ctx context.Context, uid int, req *SendLogin) error
 	SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error
 	SendCode(ctx context.Context, uid int, req *v1Pb.CodeMessageRequest) error
 }
@@ -858,7 +858,13 @@ func (m *MessageService) afterHandle(ctx context.Context, record *model.Message,
 	}
 }
 
-func (m *MessageService) SendLogin(ctx context.Context, uid int, req *v1Pb.LoginMessageRequest) error {
+type SendLogin struct {
+	Ip      string
+	Agent   string
+	Address string
+}
+
+func (m *MessageService) SendLogin(ctx context.Context, uid int, req *SendLogin) error {
 	bot, err := m.BotRepo.GetLoginBot(ctx)
 	if err != nil {
 		return err

@@ -19,6 +19,9 @@ func NewGrpMethodsService() *GrpcMethodService {
 			{
 				Name: "/auth.AuthService/Login",
 			},
+			{
+				Name: "/auth.AuthService/Verify",
+			},
 		},
 	}
 }
