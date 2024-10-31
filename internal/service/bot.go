@@ -76,7 +76,7 @@ func (b *BotService) List(ctx context.Context, uid int) ([]*model.Bot, error) {
 	return items, nil
 }
 
-func (b *BotService) Chats(ctx context.Context, botId int) ([]*model.SearchChat, error) {
+func (b *BotService) Chats(ctx context.Context, creatorId int) ([]*model.SearchChat, error) {
 	fields := []string{
 		"g.id",
 		"d.dialog_type",
@@ -92,7 +92,7 @@ func (b *BotService) Chats(ctx context.Context, botId int) ([]*model.SearchChat,
 	query := b.Source.Db().WithContext(ctx).Table("dialogs d")
 	//query.Joins("LEFT JOIN users AS u ON d.receiver_id = u.id AND d.dialog_type = 1")
 	query.Joins("LEFT JOIN group_chats AS g ON d.receiver_id = g.id")
-	query.Where("d.user_id = ? AND d.dialog_type = 2 AND d.is_delete = 0", 2)
+	query.Where("d.user_id = ? AND d.dialog_type = 2 AND d.is_delete = 0", creatorId)
 	query.Order("d.updated_at DESC")
 
 	var items []*model.SearchChat

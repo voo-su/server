@@ -5,6 +5,7 @@ import (
 	cliV2 "github.com/urfave/cli/v2"
 	"voo.su/internal/cli"
 	"voo.su/internal/config"
+	"voo.su/internal/transport/grpc"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/ws"
 	"voo.su/pkg/core"
@@ -29,6 +30,15 @@ func NewWsCommand() core.Command {
 			logger.InitLogger(fmt.Sprintf("%s/ws.log", conf.App.Log), logger.LevelInfo, "ws")
 
 			return ws.Run(ctx, NewWsInjector(conf))
+		},
+	}
+}
+
+func NewGrpcCommand() core.Command {
+	return core.Command{
+		Name: "grpc",
+		Action: func(ctx *cliV2.Context, conf *config.Config) error {
+			return grpc.Run(ctx, NewGrpcInjector(conf))
 		},
 	}
 }
@@ -73,5 +83,6 @@ func main() {
 	app.Register(NewCronCommand())
 	app.Register(NewQueueCommand())
 	app.Register(NewMigrateCommand())
+	app.Register(NewGrpcCommand())
 	app.Run()
 }

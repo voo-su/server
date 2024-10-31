@@ -21,3 +21,11 @@ alter table bots alter column created_at set default now();
 alter table bots add creator_id int default null;
 
 ALTER TABLE bots ADD COLUMN token VARCHAR(255) UNIQUE NOT NULL;
+
+alter table users alter column created_at set default now();
+alter table users alter column updated_at set default now();
+
+alter table bots alter column created_at set default now();
+alter table bots add creator_id int default null;
+
+ALTER TABLE bots ADD COLUMN token VARCHAR(255) UNIQUE NOT NULL;

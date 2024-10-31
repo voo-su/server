@@ -1,9 +1,14 @@
 app:
   env: dev
+  log: ./runtime/log
+
+server:
   http: xxxx
   ws: xxxx
   tcp: xxxx
-  log: ./runtime/log
+  grpc_host: "127.0.0.1"
+  grpc_port: 50051
+  grpc_protocol: "tcp"
 
 postgresql:
   host: xxx.xxx.xxx.xxx

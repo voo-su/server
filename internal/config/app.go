@@ -10,16 +10,23 @@ import (
 )
 
 type App struct {
-	Http      int    `yaml:"http"`
-	Websocket int    `yaml:"ws"`
-	Tcp       int    `yaml:"tcp"`
-	Env       string `yaml:"env"`
-	Log       string `yaml:"log"`
+	Env string `yaml:"env"`
+	Log string `yaml:"log"`
+}
+
+type Server struct {
+	Http         int    `yaml:"http"`
+	Websocket    int    `yaml:"ws"`
+	Tcp          int    `yaml:"tcp"`
+	GrpcHost     string `yaml:"grpc_host"`
+	GrpcProtocol string `yaml:"grpc_protocol"`
+	GrpcPort     int    `yaml:"grpc_port"`
 }
 
 type Config struct {
 	sid        string
 	App        *App        `yaml:"app"`
+	Server     *Server     `yaml:"server"`
 	Redis      *Redis      `yaml:"redis"`
 	Postgresql *Postgresql `yaml:"postgresql"`
 	Jwt        *Jwt        `yaml:"jwt"`

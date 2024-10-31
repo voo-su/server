@@ -2,7 +2,7 @@ package ws
 
 import (
 	"github.com/google/wire"
-	"voo.su/internal/repository/repo"
+	"voo.su/internal/repository"
 	"voo.su/internal/service"
 	"voo.su/internal/transport/ws/consume"
 	"voo.su/internal/transport/ws/event"
@@ -12,19 +12,15 @@ import (
 )
 
 var ProviderSet = wire.NewSet(
-	wire.Struct(new(service.MessageService), "*"),
-	wire.Bind(new(service.MessageSendService), new(*service.MessageService)),
-	wire.Struct(new(handler.Handler), "*"),
 	wire.Struct(new(AppProvider), "*"),
+	wire.Struct(new(handler.Handler), "*"),
+
 	wire.Struct(new(process.SubServers), "*"),
 
 	router.NewRouter,
 
-	service.NewContactService,
-	service.NewChatService,
-	service.NewGroupMemberService,
-
 	handler.ProviderSet,
+
 	event.ProviderSet,
 	consume.ProviderSet,
 
@@ -32,13 +28,7 @@ var ProviderSet = wire.NewSet(
 	process.NewHealthSubscribe,
 	process.NewMessageSubscribe,
 
-	repo.NewSource,
-	repo.NewDialog,
-	repo.NewMessage,
-	repo.NewMessageVote,
-	repo.NewGroupMember,
-	repo.NewContact,
-	repo.NewFileSplit,
-	repo.NewSequence,
-	repo.NewBot,
+	service.ProviderSet,
+
+	repository.ProviderSet,
 )

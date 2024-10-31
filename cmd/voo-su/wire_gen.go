@@ -17,6 +17,9 @@ import (
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
 	"voo.su/internal/service"
+	"voo.su/internal/transport/grpc"
+	handler3 "voo.su/internal/transport/grpc/handler"
+	"voo.su/internal/transport/grpc/middleware"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/http/handler"
 	"voo.su/internal/transport/http/handler/bot"
@@ -377,6 +380,30 @@ func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
 		DB:   db,
 	}
 	return migrateProvider
+}
+
+func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
+	tokenMiddleware := middleware.NewTokenMiddleware(conf)
+	grpcMethodService := middleware.NewGrpMethodsService()
+	client := provider.NewRedisClient(conf)
+	smsStorage := cache.NewSmsStorage(client)
+	db := provider.NewPostgresqlClient(conf)
+	contactRemark := cache.NewContactRemark(client)
+	relation := cache.NewRelation(client)
+	contact := repo.NewContact(db, contactRemark, relation)
+	groupChatMember := repo.NewGroupMember(db, relation)
+	groupChat := repo.NewGroupChat(db)
+	emailClient := provider.NewEmailClient(conf)
+	user := repo.NewUser(db)
+	authService := service.NewAuthService(smsStorage, contact, groupChatMember, groupChat, conf, emailClient, user)
+	authHandler := handler3.NewAuthHandler(conf, tokenMiddleware, authService)
+	appProvider := &grpc.AppProvider{
+		Conf:            conf,
+		TokenMiddleware: tokenMiddleware,
+		RoutesServices:  grpcMethodService,
+		AuthHandler:     authHandler,
+	}
+	return appProvider
 }
 
 // wire.go:
