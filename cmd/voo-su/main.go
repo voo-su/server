@@ -5,14 +5,14 @@ import (
 	cliV2 "github.com/urfave/cli/v2"
 	"voo.su/internal/cli"
 	"voo.su/internal/config"
+	"voo.su/internal/provider"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/ws"
-	"voo.su/pkg/core"
 	"voo.su/pkg/logger"
 )
 
-func NewHttpCommand() core.Command {
-	return core.Command{
+func NewHttpCommand() provider.Command {
+	return provider.Command{
 		Name: "http",
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
 			logger.InitLogger(fmt.Sprintf("%s/http.log", conf.App.Log), logger.LevelInfo, "http")
@@ -22,8 +22,8 @@ func NewHttpCommand() core.Command {
 	}
 }
 
-func NewWsCommand() core.Command {
-	return core.Command{
+func NewWsCommand() provider.Command {
+	return provider.Command{
 		Name: "ws",
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
 			logger.InitLogger(fmt.Sprintf("%s/ws.log", conf.App.Log), logger.LevelInfo, "ws")
@@ -33,8 +33,8 @@ func NewWsCommand() core.Command {
 	}
 }
 
-func NewCronCommand() core.Command {
-	return core.Command{
+func NewCronCommand() provider.Command {
+	return provider.Command{
 		Name: "cli-cron",
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
 			logger.InitLogger(fmt.Sprintf("%s/cli_cron.log", conf.App.Log), logger.LevelInfo, "cron")
@@ -44,8 +44,8 @@ func NewCronCommand() core.Command {
 	}
 }
 
-func NewQueueCommand() core.Command {
-	return core.Command{
+func NewQueueCommand() provider.Command {
+	return provider.Command{
 		Name: "cli-queue",
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
 			logger.InitLogger(fmt.Sprintf("%s/cli_queue.log", conf.App.Log), logger.LevelInfo, "queue")
@@ -55,8 +55,8 @@ func NewQueueCommand() core.Command {
 	}
 }
 
-func NewMigrateCommand() core.Command {
-	return core.Command{
+func NewMigrateCommand() provider.Command {
+	return provider.Command{
 		Name: "cli-migrate",
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
 			logger.InitLogger(fmt.Sprintf("%s/cli_migrate.log", conf.App.Log), logger.LevelInfo, "migrate")
@@ -67,7 +67,7 @@ func NewMigrateCommand() core.Command {
 }
 
 func main() {
-	app := core.NewApp()
+	app := provider.NewApp()
 	app.Register(NewHttpCommand())
 	app.Register(NewWsCommand())
 	app.Register(NewCronCommand())

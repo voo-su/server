@@ -1,0 +1,11 @@
+cors:
+  origin: "*"
+  headers: "Content-Type,Cache-Control,User-Agent,Keep-Alive,DNT,AccessToken,Authorization"
+  methods: "OPTIONS,GET,POST,PUT,DELETE"
+  credentials: false
+  max_age: 600
+
+jwt:
+  secret: xxxxxxxxxxxxxxxxxx
+  expires_time: xxxxxxx
+  buffer_time: xxxxxxx

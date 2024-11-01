@@ -10,16 +10,14 @@ import (
 )
 
 type App struct {
-	Http      int    `yaml:"http"`
-	Websocket int    `yaml:"ws"`
-	Tcp       int    `yaml:"tcp"`
-	Env       string `yaml:"env"`
-	Log       string `yaml:"log"`
+	Env string `yaml:"env"`
+	Log string `yaml:"log"`
 }
 
 type Config struct {
 	sid        string
 	App        *App        `yaml:"app"`
+	Server     *Server     `yaml:"server"`
 	Redis      *Redis      `yaml:"redis"`
 	Postgresql *Postgresql `yaml:"postgresql"`
 	Jwt        *Jwt        `yaml:"jwt"`
@@ -28,23 +26,39 @@ type Config struct {
 	Email      *Email      `yaml:"email"`
 }
 
-func New(filename string) *Config {
-	//loc, _ := time.LoadLocation("Europe/Moscow")
-	//time.Local = loc
-
+func loadFile(filename string, target interface{}) error {
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("ошибка чтения файла: %v", err)
 	}
 
-	var conf Config
-	if yaml.Unmarshal(content, &conf) != nil {
-		panic(fmt.Sprintf("Ошибка при разборе: %v", err))
+	if err := yaml.Unmarshal(content, target); err != nil {
+		return fmt.Errorf("ошибка разбора YAML: %v", err)
+	}
+
+	return nil
+}
+
+// LoadConfig загружает конфигурацию из всех YAML файлов
+func LoadConfig(configPath string) *Config {
+	conf := &Config{}
+	filenames := []string{
+		configPath + "app.yaml",
+		configPath + "server.yaml",
+		configPath + "database.yaml",
+		configPath + "auth.yaml",
+		configPath + "file.yaml",
+		configPath + "email.yaml",
+	}
+
+	for _, filename := range filenames {
+		if err := loadFile(filename, conf); err != nil {
+			fmt.Printf("Предупреждение: Не удалось загрузить конфигурацию из %s: %v\n", filename, err)
+		}
 	}
 
 	conf.sid = encrypt.Md5(fmt.Sprintf("%d%s", time.Now().UnixNano(), strutil.Random(6)))
-
-	return &conf
+	return conf
 }
 
 func (c *Config) ServerId() string {

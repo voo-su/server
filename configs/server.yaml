@@ -1,0 +1,4 @@
+server:
+  http: xxxx
+  ws: xxxx
+  tcp: xxxx

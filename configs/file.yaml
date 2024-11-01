@@ -1,0 +1,5 @@
+file:
+  default: local
+  local:
+    root: ./runtime/media
+    domain:
