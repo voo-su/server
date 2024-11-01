@@ -12,7 +12,7 @@ import (
 	"log"
 	"net"
 	"os"
-	authPb "voo.su/api/grpc/pb"
+	"voo.su/api/grpc/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/transport/grpc/middleware"
 )
@@ -21,7 +21,8 @@ type AppProvider struct {
 	Conf            *config.Config
 	TokenMiddleware *middleware.TokenMiddleware
 	RoutesServices  *middleware.GrpcMethodService
-	AuthHandler     authPb.AuthServiceServer
+	AuthHandler     pb.AuthServiceServer
+	ChatHandler     pb.ChatServiceServer
 }
 
 func serve(app *AppProvider) error {
@@ -40,7 +41,8 @@ func serve(app *AppProvider) error {
 		middleware.AuthorizationServerInterceptor,
 	)))
 
-	authPb.RegisterAuthServiceServer(srv, app.AuthHandler)
+	pb.RegisterAuthServiceServer(srv, app.AuthHandler)
+	pb.RegisterChatServiceServer(srv, app.ChatHandler)
 
 	reflection.Register(srv)
 
