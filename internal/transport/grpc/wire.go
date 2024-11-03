@@ -18,8 +18,12 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(pb.UnimplementedChatServiceServer), "*"),
 	wire.Bind(new(pb.ChatServiceServer), new(*handler.ChatHandler)),
 
+	wire.Struct(new(pb.UnimplementedContactServiceServer), "*"),
+	wire.Bind(new(pb.ContactServiceServer), new(*handler.ContactHandler)),
+
 	handler.NewAuthHandler,
 	handler.NewChatHandler,
+	handler.NewContactHandler,
 
 	middleware.NewTokenMiddleware,
 	middleware.NewGrpMethodsService,

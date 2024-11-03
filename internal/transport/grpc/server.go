@@ -23,6 +23,7 @@ type AppProvider struct {
 	RoutesServices  *middleware.GrpcMethodService
 	AuthHandler     pb.AuthServiceServer
 	ChatHandler     pb.ChatServiceServer
+	ContactHandler  pb.ContactServiceServer
 }
 
 func serve(app *AppProvider) error {
@@ -43,6 +44,7 @@ func serve(app *AppProvider) error {
 
 	pb.RegisterAuthServiceServer(srv, app.AuthHandler)
 	pb.RegisterChatServiceServer(srv, app.ChatHandler)
+	pb.RegisterContactServiceServer(srv, app.ContactHandler)
 
 	reflection.Register(srv)
 

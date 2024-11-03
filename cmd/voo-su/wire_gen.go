@@ -434,13 +434,15 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	userSession := repo.NewUserSession(db)
 	authHandler := handler3.NewAuthHandler(conf, tokenMiddleware, authService, jwtTokenStorage, ipAddressService, chatService, repoBot, messageService, userSession)
 	contactService := service.NewContactService(source, contact)
-	chatHandler := handler3.NewChatHandler(conf, contactService, chatService, messageService)
+	chatHandler := handler3.NewChatHandler(conf, contactService, chatService, messageService, messageStorage, unreadStorage)
+	contactHandler := handler3.NewContactHandler(conf, tokenMiddleware, contactService)
 	appProvider := &grpc.AppProvider{
 		Conf:            conf,
 		TokenMiddleware: tokenMiddleware,
 		RoutesServices:  grpcMethodService,
 		AuthHandler:     authHandler,
 		ChatHandler:     chatHandler,
+		ContactHandler:  contactHandler,
 	}
 	return appProvider
 }
