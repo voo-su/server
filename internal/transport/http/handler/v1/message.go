@@ -2,14 +2,15 @@ package v1
 
 import (
 	"bytes"
-	"fmt"
+	"net/http"
+	"time"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
-	"voo.su/pkg/filesystem"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/minio"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
@@ -20,8 +21,9 @@ type Message struct {
 	ChatUseCase            *usecase.ChatUseCase
 	AuthUseCase            *usecase.AuthUseCase
 	MessageSendUseCase     usecase.MessageSendUseCase
-	Filesystem             *filesystem.Filesystem
+	Minio                  minio.IMinio
 	MessageUseCase         *usecase.MessageUseCase
+	GroupChatUseCase       *usecase.GroupChatUseCase
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
 }
 
@@ -58,20 +60,21 @@ func (c *Message) Image(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	stream, err := filesystem.ReadMultipartStream(file)
+	stream, err := minio.ReadMultipartStream(file)
 	if err != nil {
 		return err
 	}
 
-	ext := strutil.FileSuffix(file.Filename)
 	meta := utils.ReadImageMeta(bytes.NewReader(stream))
-	filePath := fmt.Sprintf("dialog/%s/%s", timeutil.DateNumber(), strutil.GenImageName(ext, meta.Width, meta.Height))
-	if err := c.Filesystem.Default.Write(stream, filePath); err != nil {
-		return err
+	ext := strutil.FileSuffix(file.Filename)
+
+	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
+	if err = c.Minio.Write(c.Minio.BucketPublicName(), src, stream); err != nil {
+		return ctx.ErrorBusiness("Ошибка загрузки")
 	}
 
 	if err := c.MessageSendUseCase.SendImage(ctx.Ctx(), ctx.UserId(), &v1Pb.ImageMessageRequest{
-		Url:    c.Filesystem.Default.PublicUrl(filePath),
+		Url:    c.Minio.PublicUrl(c.Minio.BucketPublicName(), src),
 		Width:  int32(meta.Width),
 		Height: int32(meta.Height),
 		Size:   int32(file.Size),
@@ -328,12 +331,10 @@ func (c *Message) Download(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	switch fileInfo.Drive {
-	case constant.FileDriveLocal:
-		ctx.Context.FileAttachment(c.Filesystem.Local.Path(fileInfo.Path), fileInfo.Name)
-	default:
-		return ctx.ErrorBusiness("Неизвестный тип драйвера файла")
-	}
+	ctx.Context.Redirect(
+		http.StatusFound,
+		c.Minio.PrivateUrl(c.Minio.BucketPrivateName(), fileInfo.Path, fileInfo.Name, 60*time.Second),
+	)
 
 	return nil
 }

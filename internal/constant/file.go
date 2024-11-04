@@ -7,10 +7,6 @@ const (
 	MediaFileOther = 4
 )
 
-const (
-	FileDriveLocal = 1
-)
-
 var FileMediaMap = map[string]int{
 	"gif":  MediaFileImage,
 	"jpg":  MediaFileImage,

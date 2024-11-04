@@ -6,16 +6,19 @@ import (
 	"path"
 	"time"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/filesystem"
+	"voo.su/pkg/minio"
 )
 
 type ClearTmpFile struct {
-	DB         *gorm.DB
-	Filesystem *filesystem.Filesystem
+	DB    *gorm.DB
+	Minio minio.IMinio
 }
 
-func NewClearTmpFile(db *gorm.DB, fileSystem *filesystem.Filesystem) *ClearTmpFile {
-	return &ClearTmpFile{DB: db, Filesystem: fileSystem}
+func NewClearTmpFile(db *gorm.DB, minio minio.IMinio) *ClearTmpFile {
+	return &ClearTmpFile{
+		DB:    db,
+		Minio: minio,
+	}
 }
 
 func (c *ClearTmpFile) Name() string {
@@ -35,7 +38,7 @@ func (c *ClearTmpFile) Handle(ctx context.Context) error {
 	for {
 		items := make([]*model.Split, 0)
 		err := c.DB.Model(&model.Split{}).
-			Where("id > ? and type = 1 and drive = 1 and created_at <= ?", lastId, time.Now().Add(-24*time.Hour)).
+			Where("id > ? AND type = 1 AND drive = 1 AND created_at <= ?", lastId, time.Now().Add(-24*time.Hour)).
 			Order("id asc").
 			Limit(size).
 			Scan(&items).Error
@@ -46,19 +49,19 @@ func (c *ClearTmpFile) Handle(ctx context.Context) error {
 		for _, item := range items {
 			list := make([]*model.Split, 0)
 			c.DB.Table("splits").
-				Where("user_id = ? and upload_id = ? and type = 2", item.UserId, item.UploadId).
+				Where("user_id = ? AND upload_id = ? AND type = 2", item.UserId, item.UploadId).
 				Scan(&list)
+
 			for _, value := range list {
-				if err := c.Filesystem.Local.Delete(value.Path); err == nil {
-					c.DB.Delete(model.Split{}, value.Id)
-				}
+				_ = c.Minio.Delete(c.Minio.BucketPublicName(), value.Path)
+				c.DB.Delete(model.Split{}, value.Id)
 			}
 
 			if len(list) > 0 {
-				_ = c.Filesystem.Local.DeleteDir(path.Dir(list[0].Path))
+				_ = c.Minio.Delete(c.Minio.BucketPrivateName(), path.Dir(item.Path))
 			}
 
-			if err := c.Filesystem.Local.Delete(item.Path); err == nil {
+			if err := c.Minio.Delete(c.Minio.BucketPrivateName(), item.Path); err == nil {
 				c.DB.Delete(model.Split{}, item.Id)
 			}
 		}

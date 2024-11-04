@@ -9,15 +9,3 @@ func GetMediaType(ext string) int {
 
 	return constant.MediaFileOther
 }
-
-var fileSystemDriveMap = map[string]int{
-	"local": constant.FileDriveLocal,
-}
-
-func FileDriveMode(drive string) int {
-	if val, ok := fileSystemDriveMap[drive]; ok {
-		return val
-	}
-
-	return 0
-}

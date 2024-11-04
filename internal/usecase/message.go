@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"html"
@@ -19,9 +20,9 @@ import (
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 	"voo.su/pkg/encrypt"
-	"voo.su/pkg/filesystem"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/logger"
+	"voo.su/pkg/minio"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
@@ -49,7 +50,7 @@ type MessageSendUseCase interface {
 type MessageUseCase struct {
 	*repo.Source
 	MessageForwardLogic *logic.MessageForwardLogic
-	Filesystem          *filesystem.Filesystem
+	Minio               minio.IMinio
 	GroupChatMemberRepo *repo.GroupChatMember
 	SplitRepo           *repo.Split
 	MessageVoteRepo     *repo.MessageVote
@@ -441,20 +442,32 @@ func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *v1Pb.Video
 }
 
 func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *v1Pb.FileMessageRequest) error {
+	now := time.Now()
+
 	file, err := m.SplitRepo.GetFile(ctx, uid, req.UploadId)
 	if err != nil {
 		return err
 	}
+
 	publicUrl := ""
-	filePath := fmt.Sprintf("private-dialog/%s/%s.%s", timeutil.DateNumber(), encrypt.Md5(strutil.Random(16)), file.FileExt)
+	filePath := fmt.Sprintf("private-dialog/%s/%s.%s", now.Format("200601"), uuid.New().String(), file.FileExt)
+
 	if entity.GetMediaType(file.FileExt) <= 3 {
-		filePath = fmt.Sprintf("file/%s/%s.%s", timeutil.DateNumber(), encrypt.Md5(strutil.Random(16)), file.FileExt)
-		publicUrl = m.Filesystem.Default.PublicUrl(filePath)
+		filePath = strutil.GenMediaObjectName(file.FileExt, 0, 0)
+		if err := m.Minio.CopyObject(
+			m.Minio.BucketPrivateName(), file.Path,
+			m.Minio.BucketPublicName(), filePath,
+		); err != nil {
+			return err
+		}
+
+		publicUrl = m.Minio.PublicUrl(m.Minio.BucketPublicName(), filePath)
+	} else {
+		if err := m.Minio.Copy(m.Minio.BucketPrivateName(), file.Path, filePath); err != nil {
+			return err
+		}
 	}
 
-	if err := m.Filesystem.Default.Copy(file.Path, filePath); err != nil {
-		return err
-	}
 	data := &model.Message{
 		MsgId:      encrypt.Md5(req.UploadId),
 		DialogType: int(req.Receiver.DialogType),

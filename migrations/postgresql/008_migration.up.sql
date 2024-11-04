@@ -9,4 +9,7 @@ ALTER TABLE bots alter COLUMN created_at SET DEFAULT now();
 ALTER TABLE bots ADD creator_id INT DEFAULT NULL;
 ALTER TABLE bots ADD COLUMN token VARCHAR(255) UNIQUE NOT NULL;
 
+alter table splits alter column upload_id type varchar using upload_id::varchar;
+alter table splits alter column original_name type varchar using original_name::varchar;
+
 INSERT INTO schema_migrations (version, dirty) VALUES (8, false);

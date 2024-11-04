@@ -56,7 +56,7 @@ func (c *Context) InvalidParams(message any) error {
 		resp.Message = fmt.Sprintf("%v", msg)
 	}
 
-	c.Context.AbortWithStatusJSON(http.StatusOK, resp)
+	c.Context.AbortWithStatusJSON(http.StatusBadRequest, resp)
 
 	return nil
 }
@@ -73,7 +73,7 @@ func (c *Context) ErrorBusiness(message any) error {
 	}
 
 	//resp.Meta = initMeta()
-	c.Context.AbortWithStatusJSON(http.StatusOK, resp)
+	c.Context.AbortWithStatusJSON(http.StatusBadRequest, resp)
 
 	return nil
 }

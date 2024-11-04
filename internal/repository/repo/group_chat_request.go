@@ -22,7 +22,6 @@ func (g *GroupChatRequest) List(ctx context.Context, groupIds []int) ([]*entity.
 		"group_chat_requests.id",
 		"group_chat_requests.group_id",
 		"group_chat_requests.user_id",
-		"group_chat_requests.remark",
 		"group_chat_requests.created_at",
 		"users.avatar",
 		"users.username",

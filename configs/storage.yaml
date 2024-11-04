@@ -1,0 +1,7 @@
+minio:
+  endpoint: "xxx.xxx.xxx.xxx"
+  ssl: false
+  secret_id: ""
+  secret_key: ""
+  bucket_public: ""
+  bucket_private: ""

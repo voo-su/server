@@ -2,24 +2,22 @@ package v1
 
 import (
 	"bytes"
-	"fmt"
+	"math"
 	"path"
 	"strconv"
 	"strings"
-	"time"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
-	"voo.su/pkg/encrypt"
-	"voo.su/pkg/filesystem"
+	"voo.su/pkg/minio"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/utils"
 )
 
 type Upload struct {
 	Conf         *config.Config
-	Filesystem   *filesystem.Filesystem
+	Minio        minio.IMinio
 	SplitUseCase *usecase.SplitUseCase
 }
 
@@ -29,14 +27,14 @@ func (u *Upload) Avatar(ctx *core.Context) error {
 		return ctx.InvalidParams("Ошибка загрузки файла")
 	}
 
-	stream, _ := filesystem.ReadMultipartStream(file)
-	object := fmt.Sprintf("avatar/%s/%s", time.Now().Format("20060102"), strutil.GenImageName("png", 200, 200))
-	if err := u.Filesystem.Default.Write(stream, object); err != nil {
+	stream, _ := minio.ReadMultipartStream(file)
+	object := strutil.GenMediaObjectName("png", 200, 200)
+	if err := u.Minio.Write(u.Minio.BucketPublicName(), object, stream); err != nil {
 		return ctx.ErrorBusiness("Ошибка загрузки файла")
 	}
 
 	return ctx.Success(v1Pb.UploadAvatarResponse{
-		Avatar: u.Filesystem.Default.PublicUrl(object),
+		Avatar: u.Minio.PublicUrl(u.Minio.BucketPublicName(), object),
 	})
 }
 
@@ -52,20 +50,20 @@ func (u *Upload) Image(ctx *core.Context) error {
 		height, _ = strconv.Atoi(ctx.Context.DefaultPostForm("height", "0"))
 	)
 
-	stream, _ := filesystem.ReadMultipartStream(file)
+	stream, _ := minio.ReadMultipartStream(file)
 	if width == 0 || height == 0 {
 		meta := utils.ReadImageMeta(bytes.NewReader(stream))
 		width = meta.Width
 		height = meta.Height
 	}
 
-	object := fmt.Sprintf("image/common/%s/%s", time.Now().Format("20060102"), strutil.GenImageName(ext, width, height))
-	if err := u.Filesystem.Default.Write(stream, object); err != nil {
+	object := strutil.GenMediaObjectName(ext, width, height)
+	if err := u.Minio.Write(u.Minio.BucketPublicName(), object, stream); err != nil {
 		return ctx.ErrorBusiness("Не удалось загрузить файл")
 	}
 
 	return ctx.Success(v1Pb.UploadImageResponse{
-		Src: u.Filesystem.Default.PublicUrl(object),
+		Src: u.Minio.PublicUrl(u.Minio.BucketPublicName(), object),
 	})
 }
 
@@ -85,9 +83,9 @@ func (u *Upload) InitiateMultipart(ctx *core.Context) error {
 	}
 
 	return ctx.Success(&v1Pb.UploadInitiateMultipartResponse{
-		UploadId:    info.UploadId,
-		UploadIdMd5: encrypt.Md5(info.UploadId),
-		SplitSize:   2 << 20,
+		UploadId:  info.UploadId,
+		ShardSize: 5 << 20,
+		ShardNum:  int32(math.Ceil(float64(params.FileSize) / float64(5<<20))),
 	})
 }
 

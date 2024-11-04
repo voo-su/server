@@ -1,7 +1,6 @@
 package strutil
 
 import (
-	"crypto/md5"
 	"fmt"
 	"github.com/google/uuid"
 	"math/rand"
@@ -33,15 +32,11 @@ func Random(length int) string {
 }
 
 func GenImageName(ext string, width, height int) string {
-	str := fmt.Sprintf("%d%s", time.Now().Unix(), Random(10))
-
-	return fmt.Sprintf("%x_%dx%d.%s", md5.Sum([]byte(str)), width, height, ext)
+	return fmt.Sprintf("%s_%dx%d.%s", uuid.New().String(), width, height, ext)
 }
 
 func GenFileName(ext string) string {
-	str := fmt.Sprintf("%d%s", time.Now().Unix(), Random(10))
-
-	return fmt.Sprintf("%x.%s", md5.Sum([]byte(str)), ext)
+	return fmt.Sprintf("%s.%s", uuid.New().String(), ext)
 }
 
 func MtSubstr(value string, start, end int) string {
@@ -74,4 +69,23 @@ func NewMsgId() string {
 
 func NewUuid() string {
 	return uuid.New().String()
+}
+
+func GenMediaObjectName(ext string, width, height int) string {
+	var (
+		mediaType = "common"
+		fileName  = GenFileName(ext)
+	)
+
+	switch ext {
+	case "png", "jpeg", "jpg", "gif", "webp", "svg", "ico":
+		mediaType = "image"
+		fileName = GenImageName(ext, width, height)
+	case "mp3", "wav", "aac", "ogg", "flac":
+		mediaType = "audio"
+	case "mp4", "avi", "mov", "wmv", "mkv":
+		mediaType = "video"
+	}
+
+	return fmt.Sprintf("media/%s/%s/%s", mediaType, time.Now().Format("200601"), fileName)
 }

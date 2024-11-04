@@ -3,13 +3,12 @@ package v1
 import (
 	"bytes"
 	"fmt"
-	"time"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
-	"voo.su/pkg/filesystem"
+	"voo.su/pkg/minio"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/utils"
@@ -17,7 +16,7 @@ import (
 
 type Sticker struct {
 	StickerUseCase *usecase.StickerUseCase
-	Filesystem     *filesystem.Filesystem
+	Minio          minio.IMinio
 	RedisLock      *cache.RedisLock
 }
 
@@ -90,22 +89,23 @@ func (c *Sticker) Upload(ctx *core.Context) error {
 		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5 МБ")
 	}
 
-	stream, err := filesystem.ReadMultipartStream(file)
+	stream, err := minio.ReadMultipartStream(file)
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка загрузки")
 	}
 
 	meta := utils.ReadImageMeta(bytes.NewReader(stream))
 	ext := strutil.FileSuffix(file.Filename)
-	src := fmt.Sprintf("sticker/%s/%s", time.Now().Format("20060102"), strutil.GenImageName(ext, meta.Width, meta.Height))
-	if err = c.Filesystem.Default.Write(stream, src); err != nil {
+
+	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
+	if err = c.Minio.Write(c.Minio.BucketPublicName(), src, stream); err != nil {
 		return ctx.ErrorBusiness("Ошибка загрузки")
 	}
 
 	m := &model.StickerItem{
 		UserId:      ctx.UserId(),
 		Description: "Пользовательский набор",
-		Url:         c.Filesystem.Default.PublicUrl(src),
+		Url:         c.Minio.PublicUrl(c.Minio.BucketPublicName(), src),
 		FileSuffix:  ext,
 		FileSize:    int(file.Size),
 	}

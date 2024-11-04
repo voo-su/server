@@ -23,7 +23,7 @@ var providerSet = wire.NewSet(
 	provider.NewRedisClient,
 	provider.NewHttpClient,
 	provider.NewEmailClient,
-	provider.NewFilesystem,
+	provider.NewMinioClient,
 	provider.NewRequestClient,
 
 	wire.Struct(new(provider.Providers), "*"),

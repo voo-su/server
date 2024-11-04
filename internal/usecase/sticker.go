@@ -6,25 +6,25 @@ import (
 	"strings"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
-	"voo.su/pkg/filesystem"
+	"voo.su/pkg/minio"
 	"voo.su/pkg/sliceutil"
 )
 
 type StickerUseCase struct {
 	*repo.Source
 	StickerRepo *repo.Sticker
-	Filesystem  *filesystem.Filesystem
+	IMinio      minio.IMinio
 }
 
 func NewStickerUseCase(
 	source *repo.Source,
 	stickerRepo *repo.Sticker,
-	fileSystem *filesystem.Filesystem,
+	minio minio.IMinio,
 ) *StickerUseCase {
 	return &StickerUseCase{
 		Source:      source,
 		StickerRepo: stickerRepo,
-		Filesystem:  fileSystem,
+		IMinio:      minio,
 	}
 }
 

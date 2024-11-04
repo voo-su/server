@@ -23,7 +23,7 @@ type Config struct {
 	ClickHouse ClickHouse  `yaml:"clickhouse"`
 	Jwt        *Jwt        `yaml:"jwt"`
 	Cors       *Cors       `yaml:"cors"`
-	File       *File       `yaml:"file"`
+	Minio      *Minio      `yaml:"minio"`
 	Email      *Email      `yaml:"email"`
 }
 
@@ -48,7 +48,7 @@ func LoadConfig(configPath string) *Config {
 		configPath + "server.yaml",
 		configPath + "database.yaml",
 		configPath + "auth.yaml",
-		configPath + "file.yaml",
+		configPath + "storage.yaml",
 		configPath + "email.yaml",
 	}
 

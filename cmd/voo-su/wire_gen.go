@@ -65,7 +65,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	sequence := cache.NewSequence(client)
 	repoSequence := repo.NewSequence(db, sequence)
 	messageForwardLogic := logic.NewMessageForwardLogic(db, repoSequence)
-	filesystem := provider.NewFilesystem(conf)
+	iMinio := provider.NewMinioClient(conf)
 	split := repo.NewFileSplit(db)
 	vote := cache.NewVote(client)
 	messageVote := repo.NewMessageVote(db, vote)
@@ -77,7 +77,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	messageUseCase := &usecase.MessageUseCase{
 		Source:              source,
 		MessageForwardLogic: messageForwardLogic,
-		Filesystem:          filesystem,
+		Minio:               iMinio,
 		GroupChatMemberRepo: groupChatMember,
 		SplitRepo:           split,
 		MessageVoteRepo:     messageVote,
@@ -136,18 +136,19 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		ChatUseCase:            chatUseCase,
 		AuthUseCase:            authUseCase,
 		MessageSendUseCase:     messageUseCase,
-		Filesystem:             filesystem,
+		Minio:                  iMinio,
 		MessageUseCase:         messageUseCase,
+		GroupChatUseCase:       groupChatUseCase,
 		GroupChatMemberUseCase: groupChatMemberUseCase,
 	}
 	publish := &v1.Publish{
 		AuthUseCase:        authUseCase,
 		MessageSendUseCase: messageUseCase,
 	}
-	splitUseCase := usecase.NewSplitUseCase(source, split, conf, filesystem)
+	splitUseCase := usecase.NewSplitUseCase(source, split, conf, iMinio)
 	upload := &v1.Upload{
 		Conf:         conf,
-		Filesystem:   filesystem,
+		Minio:        iMinio,
 		SplitUseCase: splitUseCase,
 	}
 	v1GroupChat := &v1.GroupChat{
@@ -170,10 +171,10 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Redis:                   client,
 	}
 	sticker := repo.NewSticker(db)
-	stickerUseCase := usecase.NewStickerUseCase(source, sticker, filesystem)
+	stickerUseCase := usecase.NewStickerUseCase(source, sticker, iMinio)
 	v1Sticker := &v1.Sticker{
 		StickerUseCase: stickerUseCase,
-		Filesystem:     filesystem,
+		Minio:          iMinio,
 		RedisLock:      redisLock,
 	}
 	contactFolder := repo.NewContactFolder(db)
@@ -245,7 +246,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	sequence := cache.NewSequence(client)
 	repoSequence := repo.NewSequence(db, sequence)
 	messageForwardLogic := logic.NewMessageForwardLogic(db, repoSequence)
-	filesystem := provider.NewFilesystem(conf)
+	iMinio := provider.NewMinioClient(conf)
 	split := repo.NewFileSplit(db)
 	vote := cache.NewVote(client)
 	messageVote := repo.NewMessageVote(db, vote)
@@ -256,7 +257,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	messageUseCase := &usecase.MessageUseCase{
 		Source:              source,
 		MessageForwardLogic: messageForwardLogic,
-		Filesystem:          filesystem,
+		Minio:               iMinio,
 		GroupChatMemberRepo: groupChatMember,
 		SplitRepo:           split,
 		MessageVoteRepo:     messageVote,
@@ -321,8 +322,8 @@ func NewCronInjector(conf *config.Config) *cli.CronProvider {
 	serverStorage := cache.NewSidStorage(client)
 	clearWsCache := cron.NewClearWsCache(serverStorage)
 	db := provider.NewPostgresqlClient(conf)
-	filesystem := provider.NewFilesystem(conf)
-	clearTmpFile := cron.NewClearTmpFile(db, filesystem)
+	iMinio := provider.NewMinioClient(conf)
+	clearTmpFile := cron.NewClearTmpFile(db, iMinio)
 	clearExpireServer := cron.NewClearExpireServer(serverStorage)
 	crontab := &cli.Crontab{
 		ClearWsCache:      clearWsCache,
@@ -391,7 +392,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	sequence := cache.NewSequence(client)
 	repoSequence := repo.NewSequence(db, sequence)
 	messageForwardLogic := logic.NewMessageForwardLogic(db, repoSequence)
-	filesystem := provider.NewFilesystem(conf)
+	iMinio := provider.NewMinioClient(conf)
 	split := repo.NewFileSplit(db)
 	vote := cache.NewVote(client)
 	messageVote := repo.NewMessageVote(db, vote)
@@ -403,7 +404,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	messageUseCase := &usecase.MessageUseCase{
 		Source:              source,
 		MessageForwardLogic: messageForwardLogic,
-		Filesystem:          filesystem,
+		Minio:               iMinio,
 		GroupChatMemberRepo: groupChatMember,
 		SplitRepo:           split,
 		MessageVoteRepo:     messageVote,
@@ -434,4 +435,4 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 
 // wire.go:
 
-var providerSet = wire.NewSet(provider.NewPostgresqlClient, provider.NewClickHouseClient, provider.NewRedisClient, provider.NewHttpClient, provider.NewEmailClient, provider.NewFilesystem, provider.NewRequestClient, wire.Struct(new(provider.Providers), "*"), cache.ProviderSet, logic.ProviderSet, usecase.ProviderSet, repository.ProviderSet)
+var providerSet = wire.NewSet(provider.NewPostgresqlClient, provider.NewClickHouseClient, provider.NewRedisClient, provider.NewHttpClient, provider.NewEmailClient, provider.NewMinioClient, provider.NewRequestClient, wire.Struct(new(provider.Providers), "*"), cache.ProviderSet, logic.ProviderSet, usecase.ProviderSet, repository.ProviderSet)

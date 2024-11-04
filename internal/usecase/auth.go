@@ -70,7 +70,7 @@ func (a *AuthUseCase) IsAuth(ctx context.Context, opt *AuthOption) error {
 	}
 
 	if groupInfo.IsDismiss == 1 {
-		return errors.New("Группа удалена")
+		return errors.New("группа удалена")
 	}
 
 	memberInfo, err := a.GroupChatMember.FindByUserId(ctx, opt.ReceiverId, opt.UserId)
@@ -82,15 +82,15 @@ func (a *AuthUseCase) IsAuth(ctx context.Context, opt *AuthOption) error {
 	}
 
 	if memberInfo.IsQuit == constant.GroupMemberQuitStatusYes {
-		return errors.New("отсутствуют права на отправку сообщений")
+		return errors.New("у вас нет прав на отправку сообщений")
 	}
 
 	if memberInfo.IsMute == constant.GroupMemberMuteStatusYes {
-		return errors.New("запрещено главой группы или администратором")
+		return errors.New("отправка сообщений запрещена администратором или владельцем группы")
 	}
 
 	if opt.IsVerifyGroupMute && groupInfo.IsMute == 1 && memberInfo.Leader == 0 {
-		return errors.New("в этой групповой беседе включено полное отключение голоса для всех участников")
+		return errors.New("в данной группе включено полное отключение возможности отправки сообщений для всех участников")
 	}
 
 	return nil

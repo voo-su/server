@@ -23,8 +23,8 @@ message UploadInitiateMultipartRequest{
 
 message UploadInitiateMultipartResponse{
     string upload_id = 1;
-    int32 split_size = 2;
-    string upload_id_md5 = 3;
+    int32 shard_size = 2;
+    int32 shard_num = 3;
 }
 
 message UploadMultipartRequest{
