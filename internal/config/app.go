@@ -18,8 +18,9 @@ type Config struct {
 	sid        string
 	App        *App        `yaml:"app"`
 	Server     *Server     `yaml:"server"`
-	Redis      *Redis      `yaml:"redis"`
 	Postgresql *Postgresql `yaml:"postgresql"`
+	Redis      *Redis      `yaml:"redis"`
+	ClickHouse ClickHouse  `yaml:"clickhouse"`
 	Jwt        *Jwt        `yaml:"jwt"`
 	Cors       *Cors       `yaml:"cors"`
 	File       *File       `yaml:"file"`

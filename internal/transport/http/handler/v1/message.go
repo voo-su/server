@@ -6,7 +6,6 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
-	"voo.su/internal/repository/repo"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/filesystem"
@@ -24,8 +23,6 @@ type Message struct {
 	Filesystem             *filesystem.Filesystem
 	MessageUseCase         *usecase.MessageUseCase
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
-	GroupMemberRepo        *repo.GroupChatMember
-	MessageRepo            *repo.Message
 }
 
 type ImageMessageRequest struct {
@@ -308,7 +305,7 @@ func (c *Message) Download(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	record, err := c.MessageRepo.FindById(ctx.Ctx(), params.RecordId)
+	record, err := c.MessageUseCase.MessageRepo.FindById(ctx.Ctx(), params.RecordId)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -320,7 +317,7 @@ func (c *Message) Download(ctx *core.Context) error {
 				return ctx.Forbidden("Отсутствует доступ")
 			}
 		} else {
-			if !c.GroupMemberRepo.IsMember(ctx.Ctx(), record.ReceiverId, uid, false) {
+			if !c.GroupChatMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), record.ReceiverId, uid, false) {
 				return ctx.Forbidden("Отсутствует доступ")
 			}
 		}

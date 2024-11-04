@@ -8,33 +8,33 @@ import (
 	chatPb "voo.su/api/grpc/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/repository/cache"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/timeutil"
 )
 
 type ChatHandler struct {
 	chatPb.UnimplementedChatServiceServer
 	Conf               *config.Config
-	ContactService     *service.ContactService
-	ChatService        *service.ChatService
-	MessageSendService service.MessageSendService
+	ContactUseCase     *usecase.ContactUseCase
+	ChatUseCase        *usecase.ChatUseCase
+	MessageSendUseCase usecase.MessageSendUseCase
 	MessageStorage     *cache.MessageStorage
 	UnreadStorage      *cache.UnreadStorage
 }
 
 func NewChatHandler(
 	conf *config.Config,
-	contactService *service.ContactService,
-	chatService *service.ChatService,
-	messageSendService service.MessageSendService,
+	contactUseCase *usecase.ContactUseCase,
+	chatUseCase *usecase.ChatUseCase,
+	messageSendUseCase usecase.MessageSendUseCase,
 	messageStorage *cache.MessageStorage,
 	unreadStorage *cache.UnreadStorage,
 ) *ChatHandler {
 	return &ChatHandler{
 		Conf:               conf,
-		ContactService:     contactService,
-		ChatService:        chatService,
-		MessageSendService: messageSendService,
+		ContactUseCase:     contactUseCase,
+		ChatUseCase:        chatUseCase,
+		MessageSendUseCase: messageSendUseCase,
 		MessageStorage:     messageStorage,
 		UnreadStorage:      unreadStorage,
 	}
@@ -47,10 +47,10 @@ func (c *ChatHandler) List(ctx context.Context, in *chatPb.GetChatListRequest) (
 
 	unReads := c.UnreadStorage.All(ctx, uid)
 	if len(unReads) > 0 {
-		c.ChatService.BatchAddList(ctx, uid, unReads)
+		c.ChatUseCase.BatchAddList(ctx, uid, unReads)
 	}
 
-	data, err := c.ChatService.List(ctx, 1)
+	data, err := c.ChatUseCase.List(ctx, 1)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}

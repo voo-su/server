@@ -5,7 +5,6 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/repository/model"
-	"voo.su/internal/repository/repo"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jsonutil"
@@ -13,11 +12,9 @@ import (
 )
 
 type GroupChatAds struct {
-	GroupAdsUseCase     *usecase.GroupChatAdsUseCase
 	GroupMemberUseCase  *usecase.GroupChatMemberUseCase
+	GroupChatAdsUseCase *usecase.GroupChatAdsUseCase
 	MessageSendUseCase  usecase.MessageSendUseCase
-	GroupChatMemberRepo *repo.GroupChatMember
-	GroupChatAdsRepo    *repo.GroupChatAds
 }
 
 func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
@@ -27,7 +24,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if !g.GroupChatMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
+	if !g.GroupMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
 		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
 	}
 
@@ -36,7 +33,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 		err error
 	)
 	if params.AdsId == 0 {
-		err = g.GroupAdsUseCase.Create(ctx.Ctx(), &usecase.GroupChatAdsEditOpt{
+		err = g.GroupChatAdsUseCase.Create(ctx.Ctx(), &usecase.GroupChatAdsEditOpt{
 			UserId:    uid,
 			GroupId:   int(params.GroupId),
 			AdsId:     int(params.AdsId),
@@ -47,7 +44,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 		})
 		msg = "Успешно добавлено объявление в группу"
 	} else {
-		err = g.GroupAdsUseCase.Update(ctx.Ctx(), &usecase.GroupChatAdsEditOpt{
+		err = g.GroupChatAdsUseCase.Update(ctx.Ctx(), &usecase.GroupChatAdsEditOpt{
 			GroupId:   int(params.GroupId),
 			AdsId:     int(params.AdsId),
 			Title:     params.Title,
@@ -83,7 +80,7 @@ func (g *GroupChatAds) Delete(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := g.GroupAdsUseCase.Delete(ctx.Ctx(), int(params.GroupId), int(params.AdsId)); err != nil {
+	if err := g.GroupChatAdsUseCase.Delete(ctx.Ctx(), int(params.GroupId), int(params.AdsId)); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 	return ctx.Success(nil, "Успешно удалено объявление группы")
@@ -95,11 +92,11 @@ func (g *GroupChatAds) List(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if !g.GroupChatMemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), ctx.UserId(), true) {
+	if !g.GroupMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), ctx.UserId(), true) {
 		return ctx.ErrorBusiness("У вас нет прав на получение данных")
 	}
 
-	all, err := g.GroupChatAdsRepo.GetListAll(ctx.Ctx(), int(params.GroupId))
+	all, err := g.GroupChatAdsUseCase.GroupChatAdsRepo.GetListAll(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}

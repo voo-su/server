@@ -1,8 +1,19 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/ClickHouse/clickhouse-go/v2"
+)
 
 type Postgresql struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Database string `yaml:"database"`
+}
+
+type ClickHouse struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
 	Username string `yaml:"username"`
@@ -19,4 +30,29 @@ func (d *Postgresql) GetDsn() string {
 		d.Password,
 		d.Database,
 	)
+}
+
+func (d *ClickHouse) Options() *clickhouse.Options {
+	return &clickhouse.Options{
+		Addr: []string{fmt.Sprintf("%s:%d", d.Host, d.Port)},
+		Auth: clickhouse.Auth{
+			Database: d.Database,
+			Username: d.Username,
+			Password: d.Password,
+		},
+		ClientInfo: clickhouse.ClientInfo{
+			Products: []struct {
+				Name    string
+				Version string
+			}{
+				{Name: "Voo.su", Version: ""},
+			},
+		},
+		Debugf: func(format string, v ...interface{}) {
+			fmt.Printf(format, v)
+		},
+		//TLS: &tls.Config{
+		//	InsecureSkipVerify: true,
+		//},
+	}
 }

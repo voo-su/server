@@ -7,7 +7,6 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
-	"voo.su/internal/repository/repo"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jsonutil"
@@ -17,9 +16,6 @@ import (
 
 type GroupChatRequest struct {
 	GroupRequestStorage     *cache.GroupChatRequestStorage
-	GroupChatRepo           *repo.GroupChat
-	GroupChatRequestRepo    *repo.GroupChatRequest
-	GroupMemberRepo         *repo.GroupChatMember
 	GroupChatRequestUseCase *usecase.GroupChatRequestUseCase
 	GroupChatMemberUseCase  *usecase.GroupChatMemberUseCase
 	GroupChatUseCase        *usecase.GroupChatUseCase
@@ -32,7 +28,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	apply, err := g.GroupChatRequestRepo.FindByWhere(ctx.Ctx(), "group_id = ? and status = ?", params.GroupId, constant.GroupChatRequestStatusWait)
+	apply, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.FindByWhere(ctx.Ctx(), "group_id = ? and status = ?", params.GroupId, constant.GroupChatRequestStatusWait)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return ctx.Error(err.Error())
 	}
@@ -40,7 +36,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 	uid := ctx.UserId()
 
 	if apply == nil {
-		err = g.GroupChatRequestRepo.Create(ctx.Ctx(), &model.GroupChatRequest{
+		err = g.GroupChatRequestUseCase.GroupChatRequestRepo.Create(ctx.Ctx(), &model.GroupChatRequest{
 			GroupId: int(params.GroupId),
 			UserId:  uid,
 			Status:  constant.GroupChatRequestStatusWait,
@@ -50,14 +46,14 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 			"updated_at": timeutil.DateTime(),
 		}
 
-		_, err = g.GroupChatRequestRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", apply.Id)
+		_, err = g.GroupChatRequestUseCase.GroupChatRequestRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", apply.Id)
 	}
 
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
 
-	find, err := g.GroupMemberRepo.FindByWhere(ctx.Ctx(), "group_id = ? and leader = ?", params.GroupId, 2)
+	find, err := g.GroupChatMemberUseCase.MemberRepo.FindByWhere(ctx.Ctx(), "group_id = ? and leader = ?", params.GroupId, 2)
 	if err == nil && find != nil {
 		g.GroupRequestStorage.Incr(ctx.Ctx(), find.UserId)
 	}
@@ -81,7 +77,7 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	apply, err := g.GroupChatRequestRepo.FindById(ctx.Ctx(), int(params.ApplyId))
+	apply, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.FindById(ctx.Ctx(), int(params.ApplyId))
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return ctx.Error(err.Error())
 	}
@@ -90,7 +86,7 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Информация о заявке не найдена")
 	}
 
-	if !g.GroupMemberRepo.IsLeader(ctx.Ctx(), apply.GroupId, uid) {
+	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), apply.GroupId, uid) {
 		return ctx.Forbidden("Нет доступа")
 	}
 
@@ -98,7 +94,7 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Информация о заявке уже обработана другим пользователем")
 	}
 
-	if !g.GroupMemberRepo.IsMember(ctx.Ctx(), apply.GroupId, apply.UserId, false) {
+	if !g.GroupChatMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), apply.GroupId, apply.UserId, false) {
 		err = g.GroupChatUseCase.Invite(ctx.Ctx(), &usecase.GroupInviteOpt{
 			UserId:    uid,
 			GroupId:   apply.GroupId,
@@ -115,7 +111,7 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 		"updated_at": timeutil.DateTime(),
 	}
 
-	_, err = g.GroupChatRequestRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.ApplyId)
+	_, err = g.GroupChatRequestUseCase.GroupChatRequestRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.ApplyId)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -131,7 +127,7 @@ func (g *GroupChatRequest) Decline(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 
-	apply, err := g.GroupChatRequestRepo.FindById(ctx.Ctx(), int(params.ApplyId))
+	apply, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.FindById(ctx.Ctx(), int(params.ApplyId))
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return ctx.Error(err.Error())
 	}
@@ -140,7 +136,7 @@ func (g *GroupChatRequest) Decline(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Запись заявки не найдена")
 	}
 
-	if !g.GroupMemberRepo.IsLeader(ctx.Ctx(), apply.GroupId, uid) {
+	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), apply.GroupId, uid) {
 		return ctx.Forbidden("Нет доступа")
 	}
 
@@ -153,7 +149,7 @@ func (g *GroupChatRequest) Decline(ctx *core.Context) error {
 		"updated_at": timeutil.DateTime(),
 	}
 
-	_, err = g.GroupChatRequestRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.ApplyId)
+	_, err = g.GroupChatRequestUseCase.GroupChatRequestRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.ApplyId)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -167,11 +163,11 @@ func (g *GroupChatRequest) List(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if !g.GroupMemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), ctx.UserId()) {
+	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), ctx.UserId()) {
 		return ctx.Forbidden("Недостаточно прав доступа")
 	}
 
-	list, err := g.GroupChatRequestRepo.List(ctx.Ctx(), []int{int(params.GroupId)})
+	list, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.List(ctx.Ctx(), []int{int(params.GroupId)})
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка создания группового чата. Пожалуйста, попробуйте еще раз")
 	}
@@ -193,7 +189,7 @@ func (g *GroupChatRequest) List(ctx *core.Context) error {
 
 func (g *GroupChatRequest) All(ctx *core.Context) error {
 	uid := ctx.UserId()
-	all, err := g.GroupMemberRepo.FindAll(ctx.Ctx(), func(db *gorm.DB) {
+	all, err := g.GroupChatMemberUseCase.MemberRepo.FindAll(ctx.Ctx(), func(db *gorm.DB) {
 		db.Select("group_id")
 		db.Where("user_id = ?", uid)
 		db.Where("leader = ?", 2)
@@ -214,12 +210,12 @@ func (g *GroupChatRequest) All(ctx *core.Context) error {
 		return ctx.Success(resp)
 	}
 
-	list, err := g.GroupChatRequestRepo.List(ctx.Ctx(), groupIds)
+	list, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.List(ctx.Ctx(), groupIds)
 	if err != nil {
 		return ctx.ErrorBusiness("Не удалось создать групповой чат. Пожалуйста, попробуйте позже!")
 	}
 
-	groups, err := g.GroupChatRepo.FindAll(ctx.Ctx(), func(db *gorm.DB) {
+	groups, err := g.GroupChatUseCase.GroupChatRepo.FindAll(ctx.Ctx(), func(db *gorm.DB) {
 		db.Select("id,group_name")
 		db.Where("id in ?", groupIds)
 	})

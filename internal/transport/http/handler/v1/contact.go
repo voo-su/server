@@ -6,7 +6,6 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
-	"voo.su/internal/repository/repo"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 )
@@ -15,10 +14,8 @@ type Contact struct {
 	ContactUseCase     *usecase.ContactUseCase
 	ClientStorage      *cache.ClientStorage
 	ChatUseCase        *usecase.ChatUseCase
+	UserUseCase        *usecase.UserUseCase
 	MessageSendUseCase usecase.MessageSendUseCase
-	ContactRepo        *repo.Contact
-	UserRepo           *repo.User
-	ChatRepo           *repo.Chat
 }
 
 func (c *Contact) List(ctx *core.Context) error {
@@ -52,7 +49,7 @@ func (c *Contact) Get(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	user, err := c.UserRepo.FindById(ctx.Ctx(), int(params.UserId))
+	user, err := c.UserUseCase.UserRepo.FindById(ctx.Ctx(), int(params.UserId))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.ErrorBusiness("Пользователь не существует")
@@ -74,13 +71,13 @@ func (c *Contact) Get(ctx *core.Context) error {
 	}
 	if uid != user.Id {
 		data.FriendStatus = 1
-		contact, err := c.ContactRepo.FindByWhere(ctx.Ctx(), "user_id = ? and friend_id = ?", uid, user.Id)
+		contact, err := c.ContactUseCase.ContactRepo.FindByWhere(ctx.Ctx(), "user_id = ? and friend_id = ?", uid, user.Id)
 		if err != nil && err != gorm.ErrRecordNotFound {
 			return err
 		}
 
 		if err == nil && contact.Status == 1 {
-			if c.ContactRepo.IsFriend(ctx.Ctx(), uid, user.Id, false) {
+			if c.ContactUseCase.ContactRepo.IsFriend(ctx.Ctx(), uid, user.Id, false) {
 				data.FriendStatus = 2
 				data.FolderId = int32(contact.FolderId)
 				data.Remark = contact.Remark
@@ -110,7 +107,7 @@ func (c *Contact) Delete(ctx *core.Context) error {
 		},
 	})
 
-	sid := c.ChatRepo.FindBySessionId(uid, int(params.FriendId), constant.ChatPrivateMode)
+	sid := c.ChatUseCase.ChatRepo.FindBySessionId(uid, int(params.FriendId), constant.ChatPrivateMode)
 	if err := c.ChatUseCase.Delete(ctx.Ctx(), ctx.UserId(), sid); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}

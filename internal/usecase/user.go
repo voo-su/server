@@ -6,15 +6,18 @@ import (
 
 type UserUseCase struct {
 	*repo.Source
-	UserRepo *repo.User
+	UserRepo        *repo.User
+	UserSessionRepo *repo.UserSession
 }
 
 func NewUserUseCase(
 	source *repo.Source,
 	userRepo *repo.User,
+	userSessionRepo *repo.UserSession,
 ) *UserUseCase {
 	return &UserUseCase{
-		Source:   source,
-		UserRepo: userRepo,
+		Source:          source,
+		UserRepo:        userRepo,
+		UserSessionRepo: userSessionRepo,
 	}
 }

@@ -4,12 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"voo.su/internal/config"
-	"voo.su/internal/repository"
 	"voo.su/internal/transport/http/handler"
 	"voo.su/internal/transport/http/handler/bot"
 	v1 "voo.su/internal/transport/http/handler/v1"
 	"voo.su/internal/transport/http/router"
-	"voo.su/internal/usecase"
 )
 
 type AppProvider struct {
@@ -44,7 +42,4 @@ var ProviderSet = wire.NewSet(
 	// Bot
 	wire.Struct(new(bot.Handler), "*"),
 	wire.Struct(new(bot.Message), "*"),
-
-	usecase.ProviderSet,
-	repository.ProviderSet,
 )

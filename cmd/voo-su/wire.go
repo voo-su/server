@@ -9,14 +9,17 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/domain/logic"
 	"voo.su/internal/provider"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/transport/grpc"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/ws"
+	"voo.su/internal/usecase"
 )
 
 var providerSet = wire.NewSet(
 	provider.NewPostgresqlClient,
+	provider.NewClickHouseClient,
 	provider.NewRedisClient,
 	provider.NewHttpClient,
 	provider.NewEmailClient,
@@ -27,6 +30,8 @@ var providerSet = wire.NewSet(
 
 	cache.ProviderSet,
 	logic.ProviderSet,
+	usecase.ProviderSet,
+	repository.ProviderSet,
 )
 
 func NewHttpInjector(conf *config.Config) *http.AppProvider {

@@ -5,14 +5,14 @@ import (
 	"gorm.io/gorm"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/repo"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/timeutil"
 )
 
 type Search struct {
-	UserRepo            *repo.User
-	GroupChatRepo       *repo.GroupChat
-	GroupChatMemberRepo *repo.GroupChatMember
+	UserUseCase      *usecase.UserUseCase
+	GroupChatUseCase *usecase.GroupChatUseCase
 }
 
 func (s *Search) Users(ctx *core.Context) error {
@@ -22,7 +22,7 @@ func (s *Search) Users(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	list, err := s.UserRepo.Search(params.Q, uid)
+	list, err := s.UserUseCase.UserRepo.Search(params.Q, uid)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.ErrorBusiness("Ничего не найдено.")
@@ -51,7 +51,7 @@ func (s *Search) GroupChats(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	list, err := s.GroupChatRepo.SearchOvertList(ctx.Ctx(), &repo.SearchOvertListOpt{
+	list, err := s.GroupChatUseCase.GroupChatRepo.SearchOvertList(ctx.Ctx(), &repo.SearchOvertListOpt{
 		Name:   params.Name,
 		UserId: uid,
 		Page:   int(params.Page),
@@ -72,7 +72,7 @@ func (s *Search) GroupChats(ctx *core.Context) error {
 		ids = append(ids, val.Id)
 	}
 
-	count, err := s.GroupChatMemberRepo.CountGroupMemberNum(ids)
+	count, err := s.GroupChatUseCase.MemberRepo.CountGroupMemberNum(ids)
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка запроса")
 	}

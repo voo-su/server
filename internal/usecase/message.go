@@ -49,18 +49,18 @@ type MessageSendUseCase interface {
 type MessageUseCase struct {
 	*repo.Source
 	MessageForwardLogic *logic.MessageForwardLogic
+	Filesystem          *filesystem.Filesystem
 	GroupChatMemberRepo *repo.GroupChatMember
 	SplitRepo           *repo.Split
 	MessageVoteRepo     *repo.MessageVote
-	Filesystem          *filesystem.Filesystem
+	Sequence            *repo.Sequence
+	MessageRepo         *repo.Message
+	BotRepo             *repo.Bot
 	UnreadStorage       *cache.UnreadStorage
 	MessageStorage      *cache.MessageStorage
 	ServerStorage       *cache.ServerStorage
 	ClientStorage       *cache.ClientStorage
-	Sequence            *repo.Sequence
 	DialogVoteCache     *cache.Vote
-	MessageRepo         *repo.Message
-	BotRepo             *repo.Bot
 }
 
 type DialogRecordsItem struct {
@@ -746,7 +746,7 @@ func (m *MessageUseCase) save(ctx context.Context, data *model.Message) error {
 	case constant.ChatMsgTypeText:
 		option["text"] = strutil.MtSubstr(strutil.ReplaceImgAll(data.Content), 0, 300)
 	default:
-		if value, ok := entity.ChatMsgTypeMapping[data.MsgType]; ok {
+		if value, ok := constant.ChatMsgTypeMapping[data.MsgType]; ok {
 			option["text"] = value
 		} else {
 			option["text"] = "Неизвестно"
@@ -860,9 +860,9 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message,
 }
 
 type SendLogin struct {
-    Ip      string
-    Agent   string
-    Address string
+	Ip      string
+	Agent   string
+	Address string
 }
 
 func (m *MessageUseCase) SendLogin(ctx context.Context, uid int, req *SendLogin) error {

@@ -6,6 +6,7 @@ import (
 	"voo.su/internal/cli"
 	"voo.su/internal/config"
 	"voo.su/internal/provider"
+	"voo.su/internal/transport/grpc"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/ws"
 	"voo.su/pkg/logger"
@@ -34,12 +35,12 @@ func NewWsCommand() provider.Command {
 }
 
 func NewGrpcCommand() provider.Command {
-    return provider.Command{
-        Name: "grpc",
-        Action: func(ctx *cliV2.Context, conf *config.Config) error {
-            return grpc.Run(ctx, NewGrpcInjector(conf))
-        },
-    }
+	return provider.Command{
+		Name: "grpc",
+		Action: func(ctx *cliV2.Context, conf *config.Config) error {
+			return grpc.Run(ctx, NewGrpcInjector(conf))
+		},
+	}
 }
 
 func NewCronCommand() provider.Command {

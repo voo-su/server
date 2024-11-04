@@ -19,25 +19,25 @@ import (
 
 type GroupChatUseCase struct {
 	*repo.Source
-	Repo     *repo.GroupChat
-	Member   *repo.GroupChatMember
-	Relation *cache.Relation
-	Sequence *repo.Sequence
+	GroupChatRepo *repo.GroupChat
+	MemberRepo    *repo.GroupChatMember
+	SequenceRepo  *repo.Sequence
+	Relation      *cache.Relation
 }
 
 func NewGroupChatUseCase(
 	source *repo.Source,
-	repo *repo.GroupChat,
-	member *repo.GroupChatMember,
+	groupChatRepo *repo.GroupChat,
+	memberRepo *repo.GroupChatMember,
+	sequenceRepo *repo.Sequence,
 	relation *cache.Relation,
-	sequence *repo.Sequence,
 ) *GroupChatUseCase {
 	return &GroupChatUseCase{
-		Source:   source,
-		Repo:     repo,
-		Member:   member,
-		Relation: relation,
-		Sequence: sequence,
+		Source:        source,
+		GroupChatRepo: groupChatRepo,
+		MemberRepo:    memberRepo,
+		SequenceRepo:  sequenceRepo,
+		Relation:      relation,
 	}
 }
 
@@ -109,7 +109,7 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 			DialogType: constant.ChatGroupMode,
 			ReceiverId: group.Id,
 			MsgType:    constant.ChatMsgSysGroupCreate,
-			Sequence:   g.Sequence.Get(ctx, 0, group.Id),
+			Sequence:   g.SequenceRepo.Get(ctx, 0, group.Id),
 			Extra: jsonutil.Encode(entity.DialogRecordExtraGroupCreate{
 				OwnerId:   user.Id,
 				OwnerName: user.Username,
@@ -144,7 +144,7 @@ type GroupUpdateOpt struct {
 }
 
 func (g *GroupChatUseCase) Update(ctx context.Context, opt *GroupUpdateOpt) error {
-	_, err := g.Repo.UpdateById(ctx, opt.GroupId, map[string]any{
+	_, err := g.GroupChatRepo.UpdateById(ctx, opt.GroupId, map[string]any{
 		"group_name":  opt.Name,
 		"avatar":      opt.Avatar,
 		"description": opt.Description,
@@ -199,7 +199,7 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 		DialogType: constant.ChatGroupMode,
 		ReceiverId: groupId,
 		MsgType:    constant.ChatMsgSysGroupMemberQuit,
-		Sequence:   g.Sequence.Get(ctx, 0, groupId),
+		Sequence:   g.SequenceRepo.Get(ctx, 0, groupId),
 		Extra: jsonutil.Encode(&entity.DialogRecordExtraGroupMemberQuit{
 			OwnerId:   user.Id,
 			OwnerName: user.Username,
@@ -264,7 +264,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		db               = g.Source.Db().WithContext(ctx)
 	)
 	m := make(map[int]struct{})
-	for _, value := range g.Member.GetMemberIds(ctx, opt.GroupId) {
+	for _, value := range g.MemberRepo.GetMemberIds(ctx, opt.GroupId) {
 		m[value] = struct{}{}
 	}
 
@@ -322,7 +322,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		DialogType: constant.ChatGroupMode,
 		ReceiverId: opt.GroupId,
 		MsgType:    constant.ChatMsgSysGroupMemberJoin,
-		Sequence:   g.Sequence.Get(ctx, 0, opt.GroupId),
+		Sequence:   g.SequenceRepo.Get(ctx, 0, opt.GroupId),
 	}
 	record.Extra = jsonutil.Encode(&entity.DialogRecordExtraGroupJoin{
 		OwnerId:   memberMaps[opt.UserId].Id,
@@ -421,7 +421,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 
 	record := &model.Message{
 		MsgId:      strutil.NewMsgId(),
-		Sequence:   g.Sequence.Get(ctx, 0, opt.GroupId),
+		Sequence:   g.SequenceRepo.Get(ctx, 0, opt.GroupId),
 		DialogType: constant.ChatGroupMode,
 		ReceiverId: opt.GroupId,
 		MsgType:    constant.ChatMsgSysGroupMemberKicked,

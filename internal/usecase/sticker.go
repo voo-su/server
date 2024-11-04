@@ -12,24 +12,24 @@ import (
 
 type StickerUseCase struct {
 	*repo.Source
-	Sticker    *repo.Sticker
-	Filesystem *filesystem.Filesystem
+	StickerRepo *repo.Sticker
+	Filesystem  *filesystem.Filesystem
 }
 
 func NewStickerUseCase(
 	source *repo.Source,
-	repo *repo.Sticker,
+	stickerRepo *repo.Sticker,
 	fileSystem *filesystem.Filesystem,
 ) *StickerUseCase {
 	return &StickerUseCase{
-		Source:     source,
-		Sticker:    repo,
-		Filesystem: fileSystem,
+		Source:      source,
+		StickerRepo: stickerRepo,
+		Filesystem:  fileSystem,
 	}
 }
 
 func (s *StickerUseCase) RemoveUserSysSticker(uid int, stickerId int) error {
-	ids := s.Sticker.GetUserInstallIds(uid)
+	ids := s.StickerRepo.GetUserInstallIds(uid)
 	if !sliceutil.Include(stickerId, ids) {
 		return fmt.Errorf("данных не существует")
 	}
@@ -47,7 +47,7 @@ func (s *StickerUseCase) RemoveUserSysSticker(uid int, stickerId int) error {
 }
 
 func (s *StickerUseCase) AddUserSysSticker(uid int, stickerId int) error {
-	ids := s.Sticker.GetUserInstallIds(uid)
+	ids := s.StickerRepo.GetUserInstallIds(uid)
 	if sliceutil.Include(stickerId, ids) {
 		return nil
 	}

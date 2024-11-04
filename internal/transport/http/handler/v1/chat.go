@@ -7,7 +7,6 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
-	"voo.su/internal/repository/repo"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/encrypt"
@@ -23,11 +22,9 @@ type Chat struct {
 	ContactUseCase   *usecase.ContactUseCase
 	UnreadStorage    *cache.UnreadStorage
 	ContactRemark    *cache.ContactRemark
-	GroupChatService *usecase.GroupChatUseCase
+	GroupChatUseCase *usecase.GroupChatUseCase
 	AuthUseCase      *usecase.AuthUseCase
-	ContactRepo      *repo.Contact
-	UserRepo         *repo.User
-	GroupChatRepo    *repo.GroupChat
+	UserUseCase      *usecase.UserUseCase
 }
 
 func (c *Chat) Create(ctx *core.Context) error {
@@ -79,15 +76,15 @@ func (c *Chat) Create(ctx *core.Context) error {
 	}
 	if item.DialogType == constant.ChatPrivateMode {
 		item.UnreadNum = int32(c.UnreadStorage.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
-		item.Remark = c.ContactUseCase.Contact.GetFriendRemark(ctx.Ctx(), uid, int(params.ReceiverId))
-		if user, err := c.UserRepo.FindById(ctx.Ctx(), result.ReceiverId); err == nil {
+		item.Remark = c.ContactUseCase.ContactRepo.GetFriendRemark(ctx.Ctx(), uid, int(params.ReceiverId))
+		if user, err := c.UserUseCase.UserRepo.FindById(ctx.Ctx(), result.ReceiverId); err == nil {
 			item.Username = user.Username
 			item.Name = user.Name
 			item.Surname = user.Surname
 			item.Avatar = user.Avatar
 		}
 	} else if result.DialogType == constant.ChatGroupMode {
-		if group, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.ReceiverId)); err == nil {
+		if group, err := c.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.ReceiverId)); err == nil {
 			item.Name = group.Name
 		}
 	}
@@ -134,7 +131,7 @@ func (c *Chat) List(ctx *core.Context) error {
 		}
 	}
 
-	remarks, _ := c.ContactUseCase.Contact.Remarks(ctx.Ctx(), uid, friends)
+	remarks, _ := c.ContactUseCase.ContactRepo.Remarks(ctx.Ctx(), uid, friends)
 	items := make([]*v1Pb.ChatItem, 0)
 	for _, item := range data {
 		value := &v1Pb.ChatItem{

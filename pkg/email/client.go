@@ -55,9 +55,6 @@ func (c *Client) SendMail(email *Option, opt ...OptionFunc) error {
 		m.SetBody("text/html", email.Body)
 	}
 
-	// m.SetHeader("Cc", m.FormatAddress("xxxx@foxmail.com", "00"))
-	// m.SetHeader("Bcc", m.FormatAddress("xxxx@gmail.com", "111"))
-
 	for _, o := range opt {
 		o(m)
 	}

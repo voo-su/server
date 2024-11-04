@@ -9,7 +9,6 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
-	"voo.su/internal/repository/repo"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jwt"
@@ -19,11 +18,12 @@ type Auth struct {
 	Conf               *config.Config
 	AuthUseCase        *usecase.AuthUseCase
 	JwtTokenStorage    *cache.JwtTokenStorage
+	RedisLock          *cache.RedisLock
 	IpAddressUseCase   *usecase.IpAddressUseCase
 	ChatUseCase        *usecase.ChatUseCase
-	BotRepo            *repo.Bot
+	BotUseCase         *usecase.BotUseCase
+	UserUseCase        *usecase.UserUseCase
 	MessageSendUseCase usecase.MessageSendUseCase
-	UserSession        *repo.UserSession
 }
 
 func (a *Auth) Login(ctx *core.Context) error {
@@ -69,16 +69,14 @@ func (a *Auth) Verify(ctx *core.Context) error {
 	}
 
 	user, err := a.AuthUseCase.Register(ctx.Ctx(), claims.ID)
-	ip := ctx.Context.ClientIP()
-
-	user, err := a.AuthService.Register(ctx.Ctx(), claims.ID)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	a.AuthUseCase.Delete(ctx.Ctx(), constant.LoginChannel, params.Token)
 
-	root, _ := a.BotRepo.GetLoginBot(ctx.Ctx())
+	ip := ctx.Context.ClientIP()
+	root, _ := a.BotUseCase.BotRepo.GetLoginBot(ctx.Ctx())
 	if root != nil {
 		address, err := a.IpAddressUseCase.FindAddress(ip)
 		if err != nil {
@@ -91,9 +89,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 			ReceiverId: root.UserId,
 			IsBoot:     true,
 		})
-		_ = a.MessageSendUseCase.SendLogin(ctx.Ctx(), user.Id, &v1Pb.LoginMessageRequest{
-
-		_ = a.MessageSendService.SendLogin(ctx.Ctx(), user.Id, &service.SendLogin{
+		_ = a.MessageSendUseCase.SendLogin(ctx.Ctx(), user.Id, &usecase.SendLogin{
 			Ip:      ip,
 			Agent:   ctx.Context.GetHeader("user-agent"),
 			Address: address,
@@ -108,7 +104,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	})
 
-	_err := a.UserSession.Create(ctx.Ctx(), &model.UserSession{
+	_err := a.UserUseCase.UserSessionRepo.Create(ctx.Ctx(), &model.UserSession{
 		UserId:      user.Id,
 		AccessToken: token,
 		UserIp:      ip,

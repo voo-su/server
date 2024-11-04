@@ -10,21 +10,21 @@ import (
 
 type ContactUseCase struct {
 	*repo.Source
-	Contact *repo.Contact
+	ContactRepo *repo.Contact
 }
 
 func NewContactUseCase(
 	source *repo.Source,
-	contact *repo.Contact,
+	contactRepo *repo.Contact,
 ) *ContactUseCase {
 	return &ContactUseCase{
-		Source:  source,
-		Contact: contact,
+		Source:      source,
+		ContactRepo: contactRepo,
 	}
 }
 
 func (c *ContactUseCase) List(ctx context.Context, uid int) ([]*entity.ContactListItem, error) {
-	tx := c.Contact.Model(ctx)
+	tx := c.ContactRepo.Model(ctx)
 	tx.Select([]string{
 		"u.id",
 		"u.username",
@@ -48,14 +48,14 @@ func (c *ContactUseCase) List(ctx context.Context, uid int) ([]*entity.ContactLi
 
 func (c *ContactUseCase) GetContactIds(ctx context.Context, uid int) []int64 {
 	var ids []int64
-	c.Contact.Model(ctx).
+	c.ContactRepo.Model(ctx).
 		Where("user_id = ? and status = ?", uid, constant.ContactStatusNormal).
 		Pluck("friend_id", &ids)
 	return ids
 }
 
 func (c *ContactUseCase) Delete(ctx context.Context, uid, friendId int) error {
-	find, err := c.Contact.FindByWhere(ctx, "user_id = ? and friend_id = ?", uid, friendId)
+	find, err := c.ContactRepo.FindByWhere(ctx, "user_id = ? and friend_id = ?", uid, friendId)
 	if err != nil {
 		return err
 	}
@@ -77,11 +77,11 @@ func (c *ContactUseCase) Delete(ctx context.Context, uid, friendId int) error {
 }
 
 func (c *ContactUseCase) UpdateRemark(ctx context.Context, uid int, friendId int, remark string) error {
-	_, err := c.Contact.UpdateWhere(ctx, map[string]any{
+	_, err := c.ContactRepo.UpdateWhere(ctx, map[string]any{
 		"remark": remark,
 	}, "user_id = ? and friend_id = ?", uid, friendId)
 	if err == nil {
-		_ = c.Contact.SetFriendRemark(ctx, uid, friendId, remark)
+		_ = c.ContactRepo.SetFriendRemark(ctx, uid, friendId, remark)
 	}
 
 	return err

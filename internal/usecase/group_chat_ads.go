@@ -10,16 +10,16 @@ import (
 
 type GroupChatAdsUseCase struct {
 	*repo.Source
-	Ads *repo.GroupChatAds
+	GroupChatAdsRepo *repo.GroupChatAds
 }
 
 func NewGroupChatAdsUseCase(
 	source *repo.Source,
-	ads *repo.GroupChatAds,
+	groupChatAdsRepo *repo.GroupChatAds,
 ) *GroupChatAdsUseCase {
 	return &GroupChatAdsUseCase{
-		Source: source,
-		Ads:    ads,
+		Source:           source,
+		GroupChatAdsRepo: groupChatAdsRepo,
 	}
 }
 
@@ -34,7 +34,7 @@ type GroupChatAdsEditOpt struct {
 }
 
 func (g *GroupChatAdsUseCase) Create(ctx context.Context, opt *GroupChatAdsEditOpt) error {
-	return g.Ads.Create(ctx, &model.GroupChatAds{
+	return g.GroupChatAdsRepo.Create(ctx, &model.GroupChatAds{
 		GroupId:      opt.GroupId,
 		CreatorId:    opt.UserId,
 		Title:        opt.Title,
@@ -46,7 +46,7 @@ func (g *GroupChatAdsUseCase) Create(ctx context.Context, opt *GroupChatAdsEditO
 }
 
 func (g *GroupChatAdsUseCase) Update(ctx context.Context, opt *GroupChatAdsEditOpt) error {
-	_, err := g.Ads.UpdateWhere(ctx, map[string]any{
+	_, err := g.GroupChatAdsRepo.UpdateWhere(ctx, map[string]any{
 		"title":      opt.Title,
 		"content":    opt.Content,
 		"is_top":     opt.IsTop,
@@ -58,7 +58,7 @@ func (g *GroupChatAdsUseCase) Update(ctx context.Context, opt *GroupChatAdsEditO
 }
 
 func (g *GroupChatAdsUseCase) Delete(ctx context.Context, groupId, id int) error {
-	_, err := g.Ads.UpdateWhere(ctx, map[string]any{
+	_, err := g.GroupChatAdsRepo.UpdateWhere(ctx, map[string]any{
 		"is_delete":  1,
 		"deleted_at": timeutil.DateTime(),
 		"updated_at": time.Now(),

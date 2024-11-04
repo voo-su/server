@@ -21,7 +21,7 @@ import (
 
 type AuthUseCase struct {
 	SmsStorage      *cache.SmsStorage
-	Contact         *repo.Contact
+	ContactRepo     *repo.Contact
 	GroupChatMember *repo.GroupChatMember
 	GroupChat       *repo.GroupChat
 	Conf            *config.Config
@@ -31,7 +31,7 @@ type AuthUseCase struct {
 
 func NewAuthUseCase(
 	smsStorage *cache.SmsStorage,
-	contact *repo.Contact,
+	contactRepo *repo.Contact,
 	groupChatMember *repo.GroupChatMember,
 	groupChat *repo.GroupChat,
 	conf *config.Config,
@@ -40,7 +40,7 @@ func NewAuthUseCase(
 ) *AuthUseCase {
 	return &AuthUseCase{
 		SmsStorage:      smsStorage,
-		Contact:         contact,
+		ContactRepo:     contactRepo,
 		GroupChatMember: groupChatMember,
 		GroupChat:       groupChat,
 		Conf:            conf,
@@ -58,7 +58,7 @@ type AuthOption struct {
 
 func (a *AuthUseCase) IsAuth(ctx context.Context, opt *AuthOption) error {
 	if opt.DialogType == constant.ChatPrivateMode {
-		if a.Contact.IsFriend(ctx, opt.UserId, opt.ReceiverId, false) {
+		if a.ContactRepo.IsFriend(ctx, opt.UserId, opt.ReceiverId, false) {
 			return nil
 		}
 		return errors.New("нет прав на отправку сообщений")
@@ -124,6 +124,7 @@ func (a *AuthUseCase) Send(ctx context.Context, channel string, _email string, t
 		fmt.Println("Код: ", code)
 		return nil
 	}
+
 	body, err := a.CodeTemplate(map[string]string{"code": code})
 	if err != nil {
 		return err

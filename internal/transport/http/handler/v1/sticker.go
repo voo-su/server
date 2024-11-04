@@ -7,7 +7,6 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
-	"voo.su/internal/repository/repo"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/filesystem"
@@ -17,9 +16,8 @@ import (
 )
 
 type Sticker struct {
-	StickerRepo    *repo.Sticker
-	Filesystem     *filesystem.Filesystem
 	StickerUseCase *usecase.StickerUseCase
+	Filesystem     *filesystem.Filesystem
 	RedisLock      *cache.RedisLock
 }
 
@@ -31,8 +29,8 @@ func (c *Sticker) CollectList(ctx *core.Context) error {
 			CollectSticker: make([]*v1Pb.StickerListItem, 0),
 		}
 	)
-	if ids := c.StickerRepo.GetUserInstallIds(uid); len(ids) > 0 {
-		if items, err := c.StickerRepo.FindByIds(ctx.Ctx(), ids); err == nil {
+	if ids := c.StickerUseCase.StickerRepo.GetUserInstallIds(uid); len(ids) > 0 {
+		if items, err := c.StickerUseCase.StickerRepo.FindByIds(ctx.Ctx(), ids); err == nil {
 			for _, item := range items {
 				data := &v1Pb.StickerListResponse_SysSticker{
 					StickerId: int32(item.Id),
@@ -40,7 +38,7 @@ func (c *Sticker) CollectList(ctx *core.Context) error {
 					Name:      item.Name,
 					List:      make([]*v1Pb.StickerListItem, 0),
 				}
-				if list, err := c.StickerRepo.GetDetailsAll(item.Id, 0); err == nil {
+				if list, err := c.StickerUseCase.StickerRepo.GetDetailsAll(item.Id, 0); err == nil {
 					for _, v := range list {
 						data.List = append(data.List, &v1Pb.StickerListItem{
 							MediaId: int32(v.Id),
@@ -53,7 +51,7 @@ func (c *Sticker) CollectList(ctx *core.Context) error {
 		}
 	}
 
-	if items, err := c.StickerRepo.GetDetailsAll(0, uid); err == nil {
+	if items, err := c.StickerUseCase.StickerRepo.GetDetailsAll(0, uid); err == nil {
 		for _, item := range items {
 			resp.CollectSticker = append(resp.CollectSticker, &v1Pb.StickerListItem{
 				MediaId: int32(item.Id),
@@ -122,12 +120,12 @@ func (c *Sticker) Upload(ctx *core.Context) error {
 }
 
 func (c *Sticker) SystemList(ctx *core.Context) error {
-	items, err := c.StickerRepo.GetSystemStickerList(ctx.Ctx())
+	items, err := c.StickerUseCase.StickerRepo.GetSystemStickerList(ctx.Ctx())
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	ids := c.StickerRepo.GetUserInstallIds(ctx.UserId())
+	ids := c.StickerUseCase.StickerRepo.GetUserInstallIds(ctx.UserId())
 	data := make([]*v1Pb.StickerSysListResponse_Item, 0)
 	for _, item := range items {
 		data = append(data, &v1Pb.StickerSysListResponse_Item{
@@ -165,7 +163,7 @@ func (c *Sticker) SetSystemSticker(ctx *core.Context) error {
 		return ctx.Success(nil)
 	}
 
-	info, err := c.StickerRepo.FindById(ctx.Ctx(), int(params.StickerId))
+	info, err := c.StickerUseCase.StickerRepo.FindById(ctx.Ctx(), int(params.StickerId))
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -174,7 +172,7 @@ func (c *Sticker) SetSystemSticker(ctx *core.Context) error {
 	}
 
 	items := make([]*v1Pb.StickerListItem, 0)
-	if list, err := c.StickerRepo.GetDetailsAll(int(params.StickerId), 0); err == nil {
+	if list, err := c.StickerUseCase.StickerRepo.GetDetailsAll(int(params.StickerId), 0); err == nil {
 		for _, item := range list {
 			items = append(items, &v1Pb.StickerListItem{
 				MediaId: int32(item.Id),

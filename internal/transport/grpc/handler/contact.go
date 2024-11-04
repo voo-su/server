@@ -6,26 +6,26 @@ import (
 	"google.golang.org/grpc/status"
 	contactPb "voo.su/api/grpc/pb"
 	"voo.su/internal/config"
-	"voo.su/internal/service"
 	"voo.su/internal/transport/grpc/middleware"
+	"voo.su/internal/usecase"
 )
 
 type ContactHandler struct {
 	contactPb.UnimplementedContactServiceServer
 	Conf            *config.Config
 	TokenMiddleware *middleware.TokenMiddleware
-	ContactService  *service.ContactService
+	ContactUseCase  *usecase.ContactUseCase
 }
 
 func NewContactHandler(
 	conf *config.Config,
 	tokenMiddleware *middleware.TokenMiddleware,
-	contactService *service.ContactService,
+	contactUseCase *usecase.ContactUseCase,
 ) *ContactHandler {
 	return &ContactHandler{
 		Conf:            conf,
 		TokenMiddleware: tokenMiddleware,
-		ContactService:  contactService,
+		ContactUseCase:  contactUseCase,
 	}
 }
 
@@ -34,7 +34,7 @@ func (c *ContactHandler) List(ctx context.Context, in *contactPb.GetContactListR
 	// TODO
 	uid := 1
 
-	list, err := c.ContactService.List(ctx, uid)
+	list, err := c.ContactUseCase.List(ctx, uid)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}

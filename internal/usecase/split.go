@@ -21,20 +21,20 @@ import (
 
 type SplitUseCase struct {
 	*repo.Source
-	Split      *repo.Split
+	SplitRepo  *repo.Split
 	Config     *config.Config
 	FileSystem *filesystem.Filesystem
 }
 
 func NewSplitUseCase(
 	source *repo.Source,
-	repo *repo.Split,
+	splitRepo *repo.Split,
 	conf *config.Config,
 	fileSystem *filesystem.Filesystem,
 ) *SplitUseCase {
 	return &SplitUseCase{
 		Source:     source,
-		Split:      repo,
+		SplitRepo:  splitRepo,
 		Config:     conf,
 		FileSystem: fileSystem,
 	}
@@ -81,7 +81,7 @@ type MultipartUploadOpt struct {
 }
 
 func (s *SplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUploadOpt) error {
-	info, err := s.Split.FindByWhere(ctx, "upload_id = ? and type = 1", opt.UploadId)
+	info, err := s.SplitRepo.FindByWhere(ctx, "upload_id = ? and type = 1", opt.UploadId)
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func (s *SplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUpload
 }
 
 func (s *SplitUseCase) merge(info *model.Split) error {
-	items, err := s.Split.GetSplitList(context.TODO(), info.UploadId)
+	items, err := s.SplitRepo.GetSplitList(context.TODO(), info.UploadId)
 	if err != nil {
 		return err
 	}

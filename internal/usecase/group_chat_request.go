@@ -9,21 +9,21 @@ import (
 
 type GroupChatRequestUseCase struct {
 	*repo.Source
-	Repo *repo.GroupChatRequest
+	GroupChatRequestRepo *repo.GroupChatRequest
 }
 
 func NewGroupRequestUseCase(
 	source *repo.Source,
-	repo *repo.GroupChatRequest,
+	groupChatRequestRepo *repo.GroupChatRequest,
 ) *GroupChatRequestUseCase {
 	return &GroupChatRequestUseCase{
-		Source: source,
-		Repo:   repo,
+		Source:               source,
+		GroupChatRequestRepo: groupChatRequestRepo,
 	}
 }
 
 func (s *GroupChatRequestUseCase) Auth(ctx context.Context, id, userId int) bool {
-	info, err := s.Repo.FindById(ctx, id)
+	info, err := s.GroupChatRequestRepo.FindById(ctx, id)
 	if err != nil {
 		return false
 	}
@@ -37,7 +37,7 @@ func (s *GroupChatRequestUseCase) Auth(ctx context.Context, id, userId int) bool
 }
 
 func (s *GroupChatRequestUseCase) Insert(ctx context.Context, groupId, userId int /*, remark string*/) error {
-	return s.Repo.Create(ctx, &model.GroupChatRequest{
+	return s.GroupChatRequestRepo.Create(ctx, &model.GroupChatRequest{
 		GroupId: groupId,
 		UserId:  userId,
 		//Remark:  remark,
