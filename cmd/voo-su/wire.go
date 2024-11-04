@@ -10,6 +10,7 @@ import (
 	"voo.su/internal/domain/logic"
 	"voo.su/internal/provider"
 	"voo.su/internal/repository/cache"
+	"voo.su/internal/transport/grpc"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/ws"
 )
@@ -71,4 +72,11 @@ func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
 			cli.MigrateProviderSet,
 		),
 	)
+}
+
+func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
+	panic(wire.Build(
+		providerSet,
+		grpc.ProviderSet,
+	))
 }

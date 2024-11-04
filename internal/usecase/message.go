@@ -41,7 +41,7 @@ type MessageSendUseCase interface {
 	SendMixedMessage(ctx context.Context, uid int, req *v1Pb.MixedMessageRequest) error
 	Revoke(ctx context.Context, uid int, msgId string) error
 	Vote(ctx context.Context, uid int, msgId int, optionsValue string) (*repo.VoteStatistics, error)
-	SendLogin(ctx context.Context, uid int, req *v1Pb.LoginMessageRequest) error
+	SendLogin(ctx context.Context, uid int, req *SendLogin) error
 	SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error
 	SendCode(ctx context.Context, uid int, req *v1Pb.CodeMessageRequest) error
 }
@@ -746,7 +746,7 @@ func (m *MessageUseCase) save(ctx context.Context, data *model.Message) error {
 	case constant.ChatMsgTypeText:
 		option["text"] = strutil.MtSubstr(strutil.ReplaceImgAll(data.Content), 0, 300)
 	default:
-		if value, ok := constant.ChatMsgTypeMapping[data.MsgType]; ok {
+		if value, ok := entity.ChatMsgTypeMapping[data.MsgType]; ok {
 			option["text"] = value
 		} else {
 			option["text"] = "Неизвестно"
@@ -859,7 +859,13 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message,
 	}
 }
 
-func (m *MessageUseCase) SendLogin(ctx context.Context, uid int, req *v1Pb.LoginMessageRequest) error {
+type SendLogin struct {
+    Ip      string
+    Agent   string
+    Address string
+}
+
+func (m *MessageUseCase) SendLogin(ctx context.Context, uid int, req *SendLogin) error {
 	bot, err := m.BotRepo.GetLoginBot(ctx)
 	if err != nil {
 		return err

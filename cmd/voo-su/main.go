@@ -33,6 +33,15 @@ func NewWsCommand() provider.Command {
 	}
 }
 
+func NewGrpcCommand() provider.Command {
+    return provider.Command{
+        Name: "grpc",
+        Action: func(ctx *cliV2.Context, conf *config.Config) error {
+            return grpc.Run(ctx, NewGrpcInjector(conf))
+        },
+    }
+}
+
 func NewCronCommand() provider.Command {
 	return provider.Command{
 		Name: "cli-cron",
@@ -73,5 +82,6 @@ func main() {
 	app.Register(NewCronCommand())
 	app.Register(NewQueueCommand())
 	app.Register(NewMigrateCommand())
+	app.Register(NewGrpcCommand())
 	app.Run()
 }

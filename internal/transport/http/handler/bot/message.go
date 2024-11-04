@@ -45,7 +45,7 @@ func (m *Message) GroupChats(ctx *core.Context) error {
 		return ctx.ErrorBusiness("")
 	}
 
-	list, err := m.BotUseCase.Chats(ctx.Ctx(), bot.Id)
+	list, err := m.BotUseCase.Chats(ctx.Ctx(), bot.CreatorId)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}

@@ -19,7 +19,6 @@ type Auth struct {
 	Conf               *config.Config
 	AuthUseCase        *usecase.AuthUseCase
 	JwtTokenStorage    *cache.JwtTokenStorage
-	RedisLock          *cache.RedisLock
 	IpAddressUseCase   *usecase.IpAddressUseCase
 	ChatUseCase        *usecase.ChatUseCase
 	BotRepo            *repo.Bot
@@ -70,13 +69,15 @@ func (a *Auth) Verify(ctx *core.Context) error {
 	}
 
 	user, err := a.AuthUseCase.Register(ctx.Ctx(), claims.ID)
+	ip := ctx.Context.ClientIP()
+
+	user, err := a.AuthService.Register(ctx.Ctx(), claims.ID)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	a.AuthUseCase.Delete(ctx.Ctx(), constant.LoginChannel, params.Token)
 
-	ip := ctx.Context.ClientIP()
 	root, _ := a.BotRepo.GetLoginBot(ctx.Ctx())
 	if root != nil {
 		address, err := a.IpAddressUseCase.FindAddress(ip)
@@ -91,6 +92,8 @@ func (a *Auth) Verify(ctx *core.Context) error {
 			IsBoot:     true,
 		})
 		_ = a.MessageSendUseCase.SendLogin(ctx.Ctx(), user.Id, &v1Pb.LoginMessageRequest{
+
+		_ = a.MessageSendService.SendLogin(ctx.Ctx(), user.Id, &service.SendLogin{
 			Ip:      ip,
 			Agent:   ctx.Context.GetHeader("user-agent"),
 			Address: address,
