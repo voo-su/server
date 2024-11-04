@@ -6,7 +6,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"strconv"
 	"time"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 )
 
 type RoomStorage struct {
@@ -15,7 +15,7 @@ type RoomStorage struct {
 
 type RoomOption struct {
 	Channel  string
-	RoomType entity.RoomType
+	RoomType constant.RoomType
 	Number   string
 	Sid      string
 	Cid      int64

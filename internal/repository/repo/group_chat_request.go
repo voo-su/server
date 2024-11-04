@@ -3,19 +3,21 @@ package repo
 import (
 	"context"
 	"gorm.io/gorm"
+	"voo.su/internal/constant"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type GroupChatRequest struct {
-	core.Repo[model.GroupChatRequest]
+	repo.Repo[model.GroupChatRequest]
 }
 
 func NewGroupChatApply(db *gorm.DB) *GroupChatRequest {
-	return &GroupChatRequest{Repo: core.NewRepo[model.GroupChatRequest](db)}
+	return &GroupChatRequest{Repo: repo.NewRepo[model.GroupChatRequest](db)}
 }
 
-func (g *GroupChatRequest) List(ctx context.Context, groupIds []int) ([]*model.GroupApplyList, error) {
+func (g *GroupChatRequest) List(ctx context.Context, groupIds []int) ([]*entity.GroupApplyList, error) {
 	fields := []string{
 		"group_chat_requests.id",
 		"group_chat_requests.group_id",
@@ -27,10 +29,10 @@ func (g *GroupChatRequest) List(ctx context.Context, groupIds []int) ([]*model.G
 	}
 	query := g.Repo.Db.WithContext(ctx).Table("group_chat_requests")
 	query.Joins("LEFT JOIN users on users.id = group_chat_requests.user_id")
-	query.Where("group_chat_requests.status = ?", model.GroupChatRequestStatusWait)
+	query.Where("group_chat_requests.status = ?", constant.GroupChatRequestStatusWait)
 	query.Order("group_chat_requests.updated_at desc,group_chat_requests.id desc")
 
-	var items []*model.GroupApplyList
+	var items []*entity.GroupApplyList
 	if err := query.Select(fields).Scan(&items).Error; err != nil {
 		return nil, err
 	}

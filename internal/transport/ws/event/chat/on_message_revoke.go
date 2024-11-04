@@ -2,7 +2,7 @@ package chat
 
 import (
 	"context"
-	"voo.su/pkg/core/socket"
+	"voo.su/pkg/socket"
 )
 
 func (h *Handler) onRevokeMessage(ctx context.Context, client socket.IClient, data []byte) {

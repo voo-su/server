@@ -5,12 +5,12 @@ import (
 	"gorm.io/gorm"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/repo"
 )
 
 type MessageVote struct {
-	core.Repo[model.MessageVote]
+	repo.Repo[model.MessageVote]
 	cache *cache.Vote
 }
 
@@ -20,7 +20,7 @@ type VoteStatistics struct {
 }
 
 func NewMessageVote(db *gorm.DB, cache *cache.Vote) *MessageVote {
-	return &MessageVote{Repo: core.NewRepo[model.MessageVote](db), cache: cache}
+	return &MessageVote{Repo: repo.NewRepo[model.MessageVote](db), cache: cache}
 }
 
 func (t *MessageVote) GetVoteAnswerUser(ctx context.Context, vid int) ([]int, error) {

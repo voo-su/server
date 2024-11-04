@@ -8,3 +8,7 @@ type StickerUser struct {
 	StickerIds string    `gorm:"column:sticker_ids;NOT NULL" json:"sticker_ids"`
 	CreatedAt  time.Time `gorm:"column:created_at;NOT NULL" json:"created_at"`
 }
+
+func (StickerUser) TableName() string {
+	return "sticker_users"
+}

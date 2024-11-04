@@ -9,7 +9,7 @@ import (
 	"time"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/encrypt"
 	"voo.su/pkg/filesystem"
@@ -20,7 +20,7 @@ import (
 type Upload struct {
 	Conf         *config.Config
 	Filesystem   *filesystem.Filesystem
-	SplitService *service.SplitService
+	SplitUseCase *usecase.SplitUseCase
 }
 
 func (u *Upload) Avatar(ctx *core.Context) error {
@@ -75,7 +75,7 @@ func (u *Upload) InitiateMultipart(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	info, err := u.SplitService.InitiateMultipartUpload(ctx.Ctx(), &service.MultipartInitiateOpt{
+	info, err := u.SplitUseCase.InitiateMultipartUpload(ctx.Ctx(), &usecase.MultipartInitiateOpt{
 		Name:   params.FileName,
 		Size:   params.FileSize,
 		UserId: ctx.UserId(),
@@ -102,7 +102,7 @@ func (u *Upload) MultipartUpload(ctx *core.Context) error {
 		return ctx.InvalidParams("Ошибка загрузки файла")
 	}
 
-	err = u.SplitService.MultipartUpload(ctx.Ctx(), &service.MultipartUploadOpt{
+	err = u.SplitUseCase.MultipartUpload(ctx.Ctx(), &usecase.MultipartUploadOpt{
 		UserId:     ctx.UserId(),
 		UploadId:   params.UploadId,
 		SplitIndex: int(params.SplitIndex),

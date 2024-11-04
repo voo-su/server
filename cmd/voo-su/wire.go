@@ -7,7 +7,7 @@ import (
 	"github.com/google/wire"
 	"voo.su/internal/cli"
 	"voo.su/internal/config"
-	"voo.su/internal/logic"
+	"voo.su/internal/domain/logic"
 	"voo.su/internal/provider"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/transport/http"

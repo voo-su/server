@@ -4,18 +4,18 @@ import (
 	"gorm.io/gorm"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/model"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 )
 
 type ContactFolder struct {
-	ContactFolderService *service.ContactFolderService
+	ContactFolderUseCase *usecase.ContactFolderUseCase
 }
 
 func (c *ContactFolder) List(ctx *core.Context) error {
 	uid := ctx.UserId()
 	items := make([]*v1Pb.ContactFolderListResponse_Item, 0)
-	count, err := c.ContactFolderService.ContactRepo.QueryCount(ctx.Ctx(), "user_id = ? and status = 1", uid)
+	count, err := c.ContactFolderUseCase.ContactRepo.QueryCount(ctx.Ctx(), "user_id = ? and status = 1", uid)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -23,7 +23,7 @@ func (c *ContactFolder) List(ctx *core.Context) error {
 		Name:  "Все",
 		Count: int32(count),
 	})
-	group, err := c.ContactFolderService.GetUserGroup(ctx.Ctx(), uid)
+	group, err := c.ContactFolderUseCase.GetUserGroup(ctx.Ctx(), uid)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -68,7 +68,7 @@ func (c *ContactFolder) Save(ctx *core.Context) error {
 		}
 	}
 
-	all, err := c.ContactFolderService.ContactFolderRepo.FindAll(ctx.Ctx())
+	all, err := c.ContactFolderUseCase.ContactFolderRepo.FindAll(ctx.Ctx())
 	if err != nil {
 		return ctx.ErrorBusiness(err)
 	}
@@ -79,7 +79,7 @@ func (c *ContactFolder) Save(ctx *core.Context) error {
 		}
 	}
 
-	err = c.ContactFolderService.Db().Transaction(func(tx *gorm.DB) error {
+	err = c.ContactFolderUseCase.Db().Transaction(func(tx *gorm.DB) error {
 		if len(insertItems) > 0 {
 			if err := tx.Create(insertItems).Error; err != nil {
 				return err
@@ -123,7 +123,7 @@ func (c *ContactFolder) Move(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.ContactFolderService.MoveGroup(ctx.Ctx(), ctx.UserId(), int(params.UserId), int(params.FolderId))
+	err := c.ContactFolderUseCase.MoveGroup(ctx.Ctx(), ctx.UserId(), int(params.UserId), int(params.FolderId))
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}

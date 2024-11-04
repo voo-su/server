@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/entity"
-	"voo.su/internal/repository/model"
+	"voo.su/internal/constant"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/filesystem"
 	"voo.su/pkg/jsonutil"
@@ -18,12 +18,12 @@ import (
 )
 
 type Message struct {
-	ChatService            *service.ChatService
-	AuthService            *service.AuthService
-	MessageSendService     service.MessageSendService
+	ChatUseCase            *usecase.ChatUseCase
+	AuthUseCase            *usecase.AuthUseCase
+	MessageSendUseCase     usecase.MessageSendUseCase
 	Filesystem             *filesystem.Filesystem
-	MessageService         *service.MessageService
-	GroupChatMemberService *service.GroupChatMemberService
+	MessageUseCase         *usecase.MessageUseCase
+	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
 	GroupMemberRepo        *repo.GroupChatMember
 	MessageRepo            *repo.Message
 }
@@ -52,7 +52,7 @@ func (c *Message) Image(ctx *core.Context) error {
 		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5МБ")
 	}
 
-	if err := c.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
+	if err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
 		DialogType:        params.DialogType,
 		UserId:            ctx.UserId(),
 		ReceiverId:        params.ReceiverId,
@@ -73,7 +73,7 @@ func (c *Message) Image(ctx *core.Context) error {
 		return err
 	}
 
-	if err := c.MessageSendService.SendImage(ctx.Ctx(), ctx.UserId(), &v1Pb.ImageMessageRequest{
+	if err := c.MessageSendUseCase.SendImage(ctx.Ctx(), ctx.UserId(), &v1Pb.ImageMessageRequest{
 		Url:    c.Filesystem.Default.PublicUrl(filePath),
 		Width:  int32(meta.Width),
 		Height: int32(meta.Height),
@@ -102,7 +102,7 @@ func (c *Message) File(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if err := c.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
+	if err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
 		DialogType:        params.DialogType,
 		UserId:            uid,
 		ReceiverId:        params.ReceiverId,
@@ -111,7 +111,7 @@ func (c *Message) File(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	if err := c.MessageSendService.SendFile(ctx.Ctx(), uid, &v1Pb.FileMessageRequest{
+	if err := c.MessageSendUseCase.SendFile(ctx.Ctx(), uid, &v1Pb.FileMessageRequest{
 		UploadId: params.UploadId,
 		Receiver: &v1Pb.MessageReceiver{
 			DialogType: int32(params.DialogType),
@@ -147,8 +147,8 @@ func (c *Message) Vote(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if err := c.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
-		DialogType:        entity.ChatGroupMode,
+	if err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
+		DialogType:        constant.ChatGroupMode,
 		UserId:            uid,
 		ReceiverId:        params.ReceiverId,
 		IsVerifyGroupMute: true,
@@ -156,13 +156,13 @@ func (c *Message) Vote(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	if err := c.MessageSendService.SendVote(ctx.Ctx(), uid, &v1Pb.VoteMessageRequest{
+	if err := c.MessageSendUseCase.SendVote(ctx.Ctx(), uid, &v1Pb.VoteMessageRequest{
 		Mode:      int32(params.Mode),
 		Title:     params.Title,
 		Options:   params.Options,
 		Anonymous: int32(params.Anonymous),
 		Receiver: &v1Pb.MessageReceiver{
-			DialogType: entity.ChatGroupMode,
+			DialogType: constant.ChatGroupMode,
 			ReceiverId: int32(params.ReceiverId),
 		},
 	}); err != nil {
@@ -182,7 +182,7 @@ func (c *Message) Revoke(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.Revoke(ctx.Ctx(), ctx.UserId(), params.MsgId); err != nil {
+	if err := c.MessageSendUseCase.Revoke(ctx.Ctx(), ctx.UserId(), params.MsgId); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -201,7 +201,7 @@ func (c *Message) Delete(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.ChatService.DeleteRecordList(ctx.Ctx(), &service.RemoveRecordListOpt{
+	if err := c.ChatUseCase.DeleteRecordList(ctx.Ctx(), &usecase.RemoveRecordListOpt{
 		UserId:     ctx.UserId(),
 		DialogType: params.DialogType,
 		ReceiverId: params.ReceiverId,
@@ -224,7 +224,7 @@ func (c *Message) HandleVote(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	data, err := c.MessageSendService.Vote(ctx.Ctx(), ctx.UserId(), params.RecordId, params.Options)
+	data, err := c.MessageSendUseCase.Vote(ctx.Ctx(), ctx.UserId(), params.RecordId, params.Options)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -247,8 +247,8 @@ func (c *Message) GetRecords(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if params.DialogType == entity.ChatGroupMode {
-		err := c.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
+	if params.DialogType == constant.ChatGroupMode {
+		err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
 			DialogType: params.DialogType,
 			UserId:     uid,
 			ReceiverId: params.ReceiverId,
@@ -261,7 +261,7 @@ func (c *Message) GetRecords(ctx *core.Context) error {
 				"created_at":  timeutil.DateTime(),
 				"id":          1,
 				"msg_id":      strutil.NewMsgId(),
-				"msg_type":    entity.ChatMsgSysText,
+				"msg_type":    constant.ChatMsgSysText,
 				"receiver_id": params.ReceiverId,
 				"dialog_type": params.DialogType,
 				"user_id":     0,
@@ -275,7 +275,7 @@ func (c *Message) GetRecords(ctx *core.Context) error {
 		}
 	}
 
-	records, err := c.MessageService.GetDialogRecords(ctx.Ctx(), &service.QueryDialogRecordsOpt{
+	records, err := c.MessageUseCase.GetDialogRecords(ctx.Ctx(), &usecase.QueryDialogRecordsOpt{
 		DialogType: params.DialogType,
 		UserId:     ctx.UserId(),
 		ReceiverId: params.ReceiverId,
@@ -315,7 +315,7 @@ func (c *Message) Download(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if uid != record.UserId {
-		if record.DialogType == entity.ChatPrivateMode {
+		if record.DialogType == constant.ChatPrivateMode {
 			if record.ReceiverId != uid {
 				return ctx.Forbidden("Отсутствует доступ")
 			}
@@ -326,13 +326,13 @@ func (c *Message) Download(ctx *core.Context) error {
 		}
 	}
 
-	var fileInfo model.DialogRecordExtraFile
+	var fileInfo entity.DialogRecordExtraFile
 	if err := jsonutil.Decode(record.Extra, &fileInfo); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	switch fileInfo.Drive {
-	case entity.FileDriveLocal:
+	case constant.FileDriveLocal:
 		ctx.Context.FileAttachment(c.Filesystem.Local.Path(fileInfo.Path), fileInfo.Name)
 	default:
 		return ctx.ErrorBusiness("Неизвестный тип драйвера файла")
@@ -354,7 +354,7 @@ func (c *Message) Sticker(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if err := c.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
+	if err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
 		DialogType:        params.DialogType,
 		UserId:            uid,
 		ReceiverId:        params.ReceiverId,
@@ -363,7 +363,7 @@ func (c *Message) Sticker(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	if err := c.MessageSendService.SendSticker(ctx.Ctx(), uid, &v1Pb.StickerMessageRequest{
+	if err := c.MessageSendUseCase.SendSticker(ctx.Ctx(), uid, &v1Pb.StickerMessageRequest{
 		StickerId: int32(params.StickerId),
 		Receiver: &v1Pb.MessageReceiver{
 			DialogType: int32(params.DialogType),
@@ -386,7 +386,7 @@ func (c *Message) Collect(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.ChatService.Collect(ctx.Ctx(), ctx.UserId(), params.RecordId); err != nil {
+	if err := c.ChatUseCase.Collect(ctx.Ctx(), ctx.UserId(), params.RecordId); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

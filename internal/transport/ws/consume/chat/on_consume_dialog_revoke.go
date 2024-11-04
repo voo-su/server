@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core/socket"
 	"voo.su/pkg/logger"
+	"voo.su/pkg/socket"
 )
 
 type ConsumeDialogRevoke struct {
@@ -28,15 +28,15 @@ func (h *Handler) onConsumeDialogRevoke(ctx context.Context, body []byte) {
 	}
 
 	var clientIds []int64
-	if record.DialogType == entity.ChatPrivateMode {
+	if record.DialogType == constant.ChatPrivateMode {
 		for _, uid := range [2]int{record.UserId, record.ReceiverId} {
 			ids := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(uid))
 			clientIds = append(clientIds, ids...)
 		}
-	} else if record.DialogType == entity.ChatGroupMode {
+	} else if record.DialogType == constant.ChatGroupMode {
 		clientIds = h.RoomStorage.All(ctx, &cache.RoomOption{
 			Channel:  socket.Session.Chat.Name(),
-			RoomType: entity.RoomImGroup,
+			RoomType: constant.RoomImGroup,
 			Number:   strconv.Itoa(record.ReceiverId),
 			Sid:      h.Conf.ServerId(),
 		})
@@ -48,7 +48,7 @@ func (h *Handler) onConsumeDialogRevoke(ctx context.Context, body []byte) {
 	c := socket.NewSenderContent()
 	c.SetAck(true)
 	c.SetReceive(clientIds...)
-	c.SetMessage(entity.PushEventImMessageRevoke, map[string]any{
+	c.SetMessage(constant.PushEventImMessageRevoke, map[string]any{
 		"dialog_type": record.DialogType,
 		"sender_id":   record.UserId,
 		"receiver_id": record.ReceiverId,

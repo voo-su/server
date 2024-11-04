@@ -4,25 +4,25 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 )
 
 type Contact struct {
-	ContactService     *service.ContactService
+	ContactUseCase     *usecase.ContactUseCase
 	ClientStorage      *cache.ClientStorage
-	ChatService        *service.ChatService
-	MessageSendService service.MessageSendService
+	ChatUseCase        *usecase.ChatUseCase
+	MessageSendUseCase usecase.MessageSendUseCase
 	ContactRepo        *repo.Contact
 	UserRepo           *repo.User
-	DialogRepo         *repo.Dialog
+	ChatRepo           *repo.Chat
 }
 
 func (c *Contact) List(ctx *core.Context) error {
-	list, err := c.ContactService.List(ctx.Ctx(), ctx.UserId())
+	list, err := c.ContactUseCase.List(ctx.Ctx(), ctx.UserId())
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -98,20 +98,20 @@ func (c *Contact) Delete(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if err := c.ContactService.Delete(ctx.Ctx(), uid, int(params.FriendId)); err != nil {
+	if err := c.ContactUseCase.Delete(ctx.Ctx(), uid, int(params.FriendId)); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	_ = c.MessageSendService.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
+	_ = c.MessageSendUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 		Content: "Контакт удален",
 		Receiver: &v1Pb.MessageReceiver{
-			DialogType: entity.ChatPrivateMode,
+			DialogType: constant.ChatPrivateMode,
 			ReceiverId: params.FriendId,
 		},
 	})
 
-	sid := c.DialogRepo.FindBySessionId(uid, int(params.FriendId), entity.ChatPrivateMode)
-	if err := c.ChatService.Delete(ctx.Ctx(), ctx.UserId(), sid); err != nil {
+	sid := c.ChatRepo.FindBySessionId(uid, int(params.FriendId), constant.ChatPrivateMode)
+	if err := c.ChatUseCase.Delete(ctx.Ctx(), ctx.UserId(), sid); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -124,7 +124,7 @@ func (c *Contact) EditRemark(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.ContactService.UpdateRemark(ctx.Ctx(), ctx.UserId(), int(params.FriendId), params.Remark); err != nil {
+	if err := c.ContactUseCase.UpdateRemark(ctx.Ctx(), ctx.UserId(), int(params.FriendId), params.Remark); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

@@ -7,22 +7,22 @@ import (
 	"log"
 	"strconv"
 	"voo.su/internal/config"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
-	group_chat2 "voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/repository/repo"
 	"voo.su/internal/transport/ws/event/chat"
-	"voo.su/pkg/core/socket"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/socket"
 )
 
 type ChatEvent struct {
 	Redis               *redis.Client
 	Conf                *config.Config
 	RoomStorage         *cache.RoomStorage
-	GroupChatMemberRepo *group_chat2.GroupChatMember
+	GroupChatMemberRepo *repo.GroupChatMember
 
-	GroupChatMemberService *service.GroupChatMemberService
+	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
 	Handler                *chat.Handler
 }
 
@@ -33,7 +33,7 @@ func (c *ChatEvent) OnOpen(client socket.IClient) {
 	for _, id := range ids {
 		rooms = append(rooms, &cache.RoomOption{
 			Channel:  socket.Session.Chat.Name(),
-			RoomType: entity.RoomImGroup,
+			RoomType: constant.RoomImGroup,
 			Number:   strconv.Itoa(id),
 			Sid:      c.Conf.ServerId(),
 			Cid:      client.Cid(),
@@ -43,8 +43,8 @@ func (c *ChatEvent) OnOpen(client socket.IClient) {
 		log.Println("Ошибка при вступлении в групповой чат", err.Error())
 	}
 
-	c.Redis.Publish(ctx, entity.ImTopicChat, jsonutil.Encode(map[string]any{
-		"event": entity.SubEventContactStatus,
+	c.Redis.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
+		"event": constant.SubEventContactStatus,
 		"data": jsonutil.Encode(map[string]any{
 			"user_id": client.Uid(),
 			"status":  1,
@@ -71,7 +71,7 @@ func (c *ChatEvent) OnClose(client socket.IClient, code int, text string) {
 	for _, id := range ids {
 		rooms = append(rooms, &cache.RoomOption{
 			Channel:  socket.Session.Chat.Name(),
-			RoomType: entity.RoomImGroup,
+			RoomType: constant.RoomImGroup,
 			Number:   strconv.Itoa(id),
 			Sid:      c.Conf.ServerId(),
 			Cid:      client.Cid(),
@@ -81,8 +81,8 @@ func (c *ChatEvent) OnClose(client socket.IClient, code int, text string) {
 		log.Println("Ошибка при выходе из группового чата", err.Error())
 	}
 
-	c.Redis.Publish(ctx, entity.ImTopicChat, jsonutil.Encode(map[string]any{
-		"event": entity.SubEventContactStatus,
+	c.Redis.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
+		"event": constant.SubEventContactStatus,
 		"data": jsonutil.Encode(map[string]any{
 			"user_id": client.Uid(),
 			"status":  0,

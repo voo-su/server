@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
-	"voo.su/internal/entity"
-	"voo.su/pkg/core/socket"
+	"voo.su/internal/constant"
 	"voo.su/pkg/logger"
+	"voo.su/pkg/socket"
 )
 
 type ConsumeDialogRead struct {
@@ -30,7 +30,7 @@ func (h *Handler) onConsumeDialogRead(ctx context.Context, body []byte) {
 	c := socket.NewSenderContent()
 	c.SetAck(true)
 	c.SetReceive(clientIds...)
-	c.SetMessage(entity.PushEventImMessageRead, map[string]any{
+	c.SetMessage(constant.PushEventImMessageRead, map[string]any{
 		"sender_id":   in.SenderId,
 		"receiver_id": in.ReceiverId,
 		"msg_ids":     in.MsgIds,

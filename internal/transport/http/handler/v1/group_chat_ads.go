@@ -2,19 +2,20 @@ package v1
 
 import (
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/timeutil"
 )
 
 type GroupChatAds struct {
-	GroupAdsService     *service.GroupChatAdsService
-	GroupMemberService  *service.GroupChatMemberService
-	MessageSendService  service.MessageSendService
+	GroupAdsUseCase     *usecase.GroupChatAdsUseCase
+	GroupMemberUseCase  *usecase.GroupChatMemberUseCase
+	MessageSendUseCase  usecase.MessageSendUseCase
 	GroupChatMemberRepo *repo.GroupChatMember
 	GroupChatAdsRepo    *repo.GroupChatAds
 }
@@ -35,7 +36,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 		err error
 	)
 	if params.AdsId == 0 {
-		err = g.GroupAdsService.Create(ctx.Ctx(), &service.GroupChatAdsEditOpt{
+		err = g.GroupAdsUseCase.Create(ctx.Ctx(), &usecase.GroupChatAdsEditOpt{
 			UserId:    uid,
 			GroupId:   int(params.GroupId),
 			AdsId:     int(params.AdsId),
@@ -46,7 +47,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 		})
 		msg = "Успешно добавлено объявление в группу"
 	} else {
-		err = g.GroupAdsService.Update(ctx.Ctx(), &service.GroupChatAdsEditOpt{
+		err = g.GroupAdsUseCase.Update(ctx.Ctx(), &usecase.GroupChatAdsEditOpt{
 			GroupId:   int(params.GroupId),
 			AdsId:     int(params.AdsId),
 			Title:     params.Title,
@@ -60,12 +61,12 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	_ = g.MessageSendService.SendSysOther(ctx.Ctx(), &model.Message{
-		DialogType: model.DialogRecordDialogTypeGroup,
-		MsgType:    entity.ChatMsgSysGroupAds,
+	_ = g.MessageSendUseCase.SendSysOther(ctx.Ctx(), &model.Message{
+		DialogType: constant.DialogRecordDialogTypeGroup,
+		MsgType:    constant.ChatMsgSysGroupAds,
 		UserId:     uid,
 		ReceiverId: int(params.GroupId),
-		Extra: jsonutil.Encode(model.DialogRecordExtraGroupAds{
+		Extra: jsonutil.Encode(entity.DialogRecordExtraGroupAds{
 			OwnerId:   uid,
 			OwnerName: "magomedcoder",
 			Title:     params.Title,
@@ -82,7 +83,7 @@ func (g *GroupChatAds) Delete(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := g.GroupAdsService.Delete(ctx.Ctx(), int(params.GroupId), int(params.AdsId)); err != nil {
+	if err := g.GroupAdsUseCase.Delete(ctx.Ctx(), int(params.GroupId), int(params.AdsId)); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 	return ctx.Success(nil, "Успешно удалено объявление группы")

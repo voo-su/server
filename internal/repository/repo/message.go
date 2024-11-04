@@ -3,13 +3,13 @@ package repo
 import (
 	"gorm.io/gorm"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type Message struct {
-	core.Repo[model.Message]
+	repo.Repo[model.Message]
 }
 
 func NewMessage(db *gorm.DB) *Message {
-	return &Message{Repo: core.NewRepo[model.Message](db)}
+	return &Message{Repo: repo.NewRepo[model.Message](db)}
 }

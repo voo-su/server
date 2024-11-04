@@ -5,17 +5,17 @@ import (
 	"regexp"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/model"
-	"voo.su/internal/repository/repo"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/timeutil"
 )
 
 type Account struct {
-	UserRepo *repo.User
+	UserUseCase *usecase.UserUseCase
 }
 
 func (a *Account) Get(ctx *core.Context) error {
-	user, err := a.UserRepo.FindById(ctx.Ctx(), ctx.UserId())
+	user, err := a.UserUseCase.UserRepo.FindById(ctx.Ctx(), ctx.UserId())
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -45,7 +45,7 @@ func (a *Account) ChangeDetail(ctx *core.Context) error {
 		}
 	}
 
-	_, err := a.UserRepo.UpdateById(ctx.Ctx(), ctx.UserId(), map[string]any{
+	_, err := a.UserUseCase.UserRepo.UpdateById(ctx.Ctx(), ctx.UserId(), map[string]any{
 		//"username": strings.TrimSpace(strings.Replace(params.Username, " ", "", -1)),
 		"avatar":   params.Avatar,
 		"name":     params.Name,
@@ -73,12 +73,12 @@ func (a *Account) ChangeUsername(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	var user model.User
-	result := a.UserRepo.Db.Where("username = ?", params.Username).First(&user)
+	result := a.UserUseCase.UserRepo.Db.Where("username = ?", params.Username).First(&user)
 	if result.Error != gorm.ErrRecordNotFound && user.Id != uid {
 		return ctx.ErrorBusiness("Имя пользователя уже существует")
 	}
 
-	_, err := a.UserRepo.UpdateById(ctx.Ctx(), ctx.UserId(), map[string]interface{}{
+	_, err := a.UserUseCase.UserRepo.UpdateById(ctx.Ctx(), ctx.UserId(), map[string]interface{}{
 		"username": params.Username,
 	})
 	if err != nil {

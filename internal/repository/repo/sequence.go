@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"time"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/pkg/logger"
@@ -35,7 +35,7 @@ func (s *Sequence) try(ctx context.Context, userId int, receiverId int) error {
 		defer s.cache.Redis().Del(ctx, lockName)
 		tx := s.db.WithContext(ctx).Model(&model.Message{})
 		if userId == 0 {
-			tx = tx.Where("receiver_id = ? and dialog_type = ?", receiverId, entity.ChatGroupMode)
+			tx = tx.Where("receiver_id = ? and dialog_type = ?", receiverId, constant.ChatGroupMode)
 		} else {
 			tx = tx.Where("user_id = ? and receiver_id = ?", userId, receiverId).Or("user_id = ? and receiver_id = ?", receiverId, userId)
 		}

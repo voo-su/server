@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core/socket"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/sliceutil"
+	"voo.su/pkg/socket"
 	"voo.su/pkg/timeutil"
 )
 
@@ -23,7 +23,7 @@ func (h *Handler) onConsumeContactStatus(ctx context.Context, body []byte) {
 		logger.Errorf("onConsumeContactStatus Ошибка при декодировании: ", err.Error())
 		return
 	}
-	contactIds := h.ContactService.GetContactIds(ctx, in.UserId)
+	contactIds := h.ContactUseCase.GetContactIds(ctx, in.UserId)
 
 	clientIds := make([]int64, 0)
 	for _, uid := range sliceutil.Unique(contactIds) {
@@ -38,7 +38,7 @@ func (h *Handler) onConsumeContactStatus(ctx context.Context, body []byte) {
 
 	c := socket.NewSenderContent()
 	c.SetReceive(clientIds...)
-	c.SetMessage(entity.PushEventContactStatus, in)
+	c.SetMessage(constant.PushEventContactStatus, in)
 	socket.Session.Chat.Write(c)
 }
 
@@ -55,7 +55,7 @@ func (h *Handler) onConsumeContactApply(ctx context.Context, body []byte) {
 	}
 
 	var apply model.ContactRequest
-	if err := h.ContactService.Db().First(&apply, in.ApplyId).Error; err != nil {
+	if err := h.ContactUseCase.Db().First(&apply, in.ApplyId).Error; err != nil {
 		return
 	}
 
@@ -65,7 +65,7 @@ func (h *Handler) onConsumeContactApply(ctx context.Context, body []byte) {
 	}
 
 	var user model.User
-	if err := h.ContactService.Db().First(&user, apply.FriendId).Error; err != nil {
+	if err := h.ContactUseCase.Db().First(&user, apply.FriendId).Error; err != nil {
 		return
 	}
 
@@ -81,6 +81,6 @@ func (h *Handler) onConsumeContactApply(ctx context.Context, body []byte) {
 	c := socket.NewSenderContent()
 	c.SetAck(true)
 	c.SetReceive(clientIds...)
-	c.SetMessage(entity.PushEventContactRequest, data)
+	c.SetMessage(constant.PushEventContactRequest, data)
 	socket.Session.Chat.Write(c)
 }

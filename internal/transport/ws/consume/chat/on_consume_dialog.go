@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
-	"voo.su/pkg/core/socket"
 	"voo.su/pkg/logger"
+	"voo.su/pkg/socket"
 )
 
 type ConsumeDialog struct {
@@ -25,16 +25,16 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 	}
 
 	var clientIds []int64
-	if in.DialogType == entity.ChatPrivateMode {
+	if in.DialogType == constant.ChatPrivateMode {
 		for _, val := range [2]int64{in.SenderID, in.ReceiverID} {
 			ids := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.FormatInt(val, 10))
 
 			clientIds = append(clientIds, ids...)
 		}
-	} else if in.DialogType == entity.ChatGroupMode {
+	} else if in.DialogType == constant.ChatGroupMode {
 		ids := h.RoomStorage.All(ctx, &cache.RoomOption{
 			Channel:  socket.Session.Chat.Name(),
-			RoomType: entity.RoomImGroup,
+			RoomType: constant.RoomImGroup,
 			Number:   strconv.Itoa(int(in.ReceiverID)),
 			Sid:      h.Conf.ServerId(),
 		})
@@ -44,7 +44,7 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 		return
 	}
 
-	data, err := h.MessageService.GetDialogRecord(ctx, in.RecordID)
+	data, err := h.MessageUseCase.GetDialogRecord(ctx, in.RecordID)
 	if err != nil {
 		return
 	}
@@ -52,7 +52,7 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 	c := socket.NewSenderContent()
 	c.SetReceive(clientIds...)
 	c.SetAck(true)
-	c.SetMessage(entity.PushEventImMessage, map[string]any{
+	c.SetMessage(constant.PushEventImMessage, map[string]any{
 		"sender_id":   in.SenderID,
 		"receiver_id": in.ReceiverID,
 		"dialog_type": in.DialogType,

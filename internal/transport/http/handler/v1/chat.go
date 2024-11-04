@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"strings"
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/encrypt"
 	"voo.su/pkg/strutil"
@@ -16,15 +16,15 @@ import (
 )
 
 type Chat struct {
-	ChatService      *service.ChatService
+	ChatUseCase      *usecase.ChatUseCase
 	RedisLock        *cache.RedisLock
 	ClientStorage    *cache.ClientStorage
 	MessageStorage   *cache.MessageStorage
-	ContactService   *service.ContactService
+	ContactUseCase   *usecase.ContactUseCase
 	UnreadStorage    *cache.UnreadStorage
 	ContactRemark    *cache.ContactRemark
-	GroupChatService *service.GroupChatService
-	AuthService      *service.AuthService
+	GroupChatService *usecase.GroupChatUseCase
+	AuthUseCase      *usecase.AuthUseCase
 	ContactRepo      *repo.Contact
 	UserRepo         *repo.User
 	GroupChatRepo    *repo.GroupChat
@@ -44,7 +44,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 		agent = encrypt.Md5(agent)
 	}
 
-	if params.DialogType == entity.ChatPrivateMode && int(params.ReceiverId) == ctx.UserId() {
+	if params.DialogType == constant.ChatPrivateMode && int(params.ReceiverId) == ctx.UserId() {
 		return ctx.ErrorBusiness("Ошибка создания")
 	}
 
@@ -53,7 +53,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Ошибка создания")
 	}
 
-	if c.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
+	if c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
 		DialogType: int(params.DialogType),
 		UserId:     uid,
 		ReceiverId: int(params.ReceiverId),
@@ -61,7 +61,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Недостаточно прав")
 	}
 
-	result, err := c.ChatService.Create(ctx.Ctx(), &service.CreateChatOpt{
+	result, err := c.ChatUseCase.Create(ctx.Ctx(), &usecase.CreateChatOpt{
 		UserId:     uid,
 		DialogType: int(params.DialogType),
 		ReceiverId: int(params.ReceiverId),
@@ -77,16 +77,16 @@ func (c *Chat) Create(ctx *core.Context) error {
 		IsBot:      int32(result.IsBot),
 		UpdatedAt:  timeutil.DateTime(),
 	}
-	if item.DialogType == entity.ChatPrivateMode {
+	if item.DialogType == constant.ChatPrivateMode {
 		item.UnreadNum = int32(c.UnreadStorage.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
-		item.Remark = c.ContactService.Contact.GetFriendRemark(ctx.Ctx(), uid, int(params.ReceiverId))
+		item.Remark = c.ContactUseCase.Contact.GetFriendRemark(ctx.Ctx(), uid, int(params.ReceiverId))
 		if user, err := c.UserRepo.FindById(ctx.Ctx(), result.ReceiverId); err == nil {
 			item.Username = user.Username
 			item.Name = user.Name
 			item.Surname = user.Surname
 			item.Avatar = user.Avatar
 		}
-	} else if result.DialogType == entity.ChatGroupMode {
+	} else if result.DialogType == constant.ChatGroupMode {
 		if group, err := c.GroupChatRepo.FindById(ctx.Ctx(), int(params.ReceiverId)); err == nil {
 			item.Name = group.Name
 		}
@@ -120,10 +120,10 @@ func (c *Chat) List(ctx *core.Context) error {
 	uid := ctx.UserId()
 	unReads := c.UnreadStorage.All(ctx.Ctx(), uid)
 	if len(unReads) > 0 {
-		c.ChatService.BatchAddList(ctx.Ctx(), uid, unReads)
+		c.ChatUseCase.BatchAddList(ctx.Ctx(), uid, unReads)
 	}
 
-	data, err := c.ChatService.List(ctx.Ctx(), uid)
+	data, err := c.ChatUseCase.List(ctx.Ctx(), uid)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -134,7 +134,7 @@ func (c *Chat) List(ctx *core.Context) error {
 		}
 	}
 
-	remarks, _ := c.ContactService.Contact.Remarks(ctx.Ctx(), uid, friends)
+	remarks, _ := c.ContactUseCase.Contact.Remarks(ctx.Ctx(), uid, friends)
 	items := make([]*v1Pb.ChatItem, 0)
 	for _, item := range data {
 		value := &v1Pb.ChatItem{
@@ -167,7 +167,7 @@ func (c *Chat) List(ctx *core.Context) error {
 			//}
 			value.Surname = item.Surname
 			value.Remark = remarks[item.ReceiverId]
-			value.IsOnline = int32(strutil.BoolToInt(c.ClientStorage.IsOnline(ctx.Ctx(), entity.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))))
+			value.IsOnline = int32(strutil.BoolToInt(c.ClientStorage.IsOnline(ctx.Ctx(), constant.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))))
 		} else {
 			value.Name = item.GroupName
 			value.Avatar = item.GroupAvatar
@@ -189,7 +189,7 @@ func (c *Chat) Delete(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.ChatService.Delete(ctx.Ctx(), ctx.UserId(), int(params.ListId)); err != nil {
+	if err := c.ChatUseCase.Delete(ctx.Ctx(), ctx.UserId(), int(params.ListId)); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -213,7 +213,7 @@ func (c *Chat) Top(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.ChatService.Top(ctx.Ctx(), &service.ChatTopOpt{
+	if err := c.ChatUseCase.Top(ctx.Ctx(), &usecase.ChatTopOpt{
 		UserId: ctx.UserId(),
 		Id:     int(params.ListId),
 		Type:   int(params.Type),
@@ -230,7 +230,7 @@ func (c *Chat) Disturb(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.ChatService.Disturb(ctx.Ctx(), &service.ChatDisturbOpt{
+	if err := c.ChatUseCase.Disturb(ctx.Ctx(), &usecase.ChatDisturbOpt{
 		UserId:     ctx.UserId(),
 		DialogType: int(params.DialogType),
 		ReceiverId: int(params.ReceiverId),

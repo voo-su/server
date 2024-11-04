@@ -8,7 +8,7 @@ import (
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/filesystem"
 	"voo.su/pkg/sliceutil"
@@ -19,7 +19,7 @@ import (
 type Sticker struct {
 	StickerRepo    *repo.Sticker
 	Filesystem     *filesystem.Filesystem
-	StickerService *service.StickerService
+	StickerUseCase *usecase.StickerUseCase
 	RedisLock      *cache.RedisLock
 }
 
@@ -71,7 +71,7 @@ func (c *Sticker) DeleteCollect(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.StickerService.DeleteCollect(ctx.UserId(), sliceutil.ParseIds(params.Ids)); err != nil {
+	if err := c.StickerUseCase.DeleteCollect(ctx.UserId(), sliceutil.ParseIds(params.Ids)); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -111,7 +111,7 @@ func (c *Sticker) Upload(ctx *core.Context) error {
 		FileSuffix:  ext,
 		FileSize:    int(file.Size),
 	}
-	if err := c.StickerService.Db().Create(m).Error; err != nil {
+	if err := c.StickerUseCase.Db().Create(m).Error; err != nil {
 		return ctx.ErrorBusiness("Ошибка загрузки")
 	}
 
@@ -158,7 +158,7 @@ func (c *Sticker) SetSystemSticker(ctx *core.Context) error {
 
 	defer c.RedisLock.UnLock(ctx.Ctx(), key)
 	if params.Type == 2 {
-		if err = c.StickerService.RemoveUserSysSticker(uid, int(params.StickerId)); err != nil {
+		if err = c.StickerUseCase.RemoveUserSysSticker(uid, int(params.StickerId)); err != nil {
 			return ctx.ErrorBusiness(err.Error())
 		}
 
@@ -169,7 +169,7 @@ func (c *Sticker) SetSystemSticker(ctx *core.Context) error {
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
-	if err := c.StickerService.AddUserSysSticker(uid, int(params.StickerId)); err != nil {
+	if err := c.StickerUseCase.AddUserSysSticker(uid, int(params.StickerId)); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

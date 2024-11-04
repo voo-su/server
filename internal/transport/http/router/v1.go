@@ -6,7 +6,7 @@ import (
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/transport/http/handler"
 	"voo.su/pkg/core"
-	"voo.su/pkg/core/middleware"
+	"voo.su/pkg/middleware"
 )
 
 func NewV1(router *gin.Engine, conf *config.Config, handler *handler.Handler, session *cache.JwtTokenStorage) {

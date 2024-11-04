@@ -4,19 +4,20 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"strconv"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type Contact struct {
-	core.Repo[model.Contact]
+	repo.Repo[model.Contact]
 	cache    *cache.ContactRemark
 	relation *cache.Relation
 }
 
 func NewContact(db *gorm.DB, cache *cache.ContactRemark, relation *cache.Relation) *Contact {
-	return &Contact{Repo: core.NewRepo[model.Contact](db), cache: cache, relation: relation}
+	return &Contact{Repo: repo.NewRepo[model.Contact](db), cache: cache, relation: relation}
 }
 
 func (c *Contact) Remarks(ctx context.Context, uid int, fids []int) (map[int]string, error) {
@@ -30,7 +31,7 @@ func (c *Contact) IsFriend(ctx context.Context, uid int, friendId int, cache boo
 	if cache && c.relation.IsContactRelation(ctx, uid, friendId) == nil {
 		return true
 	}
-	count, err := c.Repo.QueryCount(ctx, "((user_id = ? and friend_id = ?) or (user_id = ? and friend_id = ?)) and status = ?", uid, friendId, friendId, uid, model.ContactStatusNormal)
+	count, err := c.Repo.QueryCount(ctx, "((user_id = ? and friend_id = ?) or (user_id = ? and friend_id = ?)) and status = ?", uid, friendId, friendId, uid, constant.ContactStatusNormal)
 	if err != nil {
 		return false
 	}
@@ -61,7 +62,7 @@ func (c *Contact) SetFriendRemark(ctx context.Context, uid int, friendId int, re
 
 func (c *Contact) LoadContactCache(ctx context.Context, uid int) error {
 	all, err := c.Repo.FindAll(ctx, func(db *gorm.DB) {
-		db.Select("friend_id,remark").Where("user_id = ? and status = ?", uid, model.ContactStatusNormal)
+		db.Select("friend_id,remark").Where("user_id = ? and status = ?", uid, constant.ContactStatusNormal)
 	})
 	if err != nil {
 		return err

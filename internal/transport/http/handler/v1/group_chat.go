@@ -3,11 +3,12 @@ package v1
 import (
 	"fmt"
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/logger"
@@ -20,12 +21,12 @@ type GroupChat struct {
 	UserRepo               *repo.User
 	GroupChatRepo          *repo.GroupChat
 	GroupChatMemberRepo    *repo.GroupChatMember
-	DialogRepo             *repo.Dialog
-	GroupChatService       *service.GroupChatService
-	GroupChatMemberService *service.GroupChatMemberService
-	ChatService            *service.ChatService
-	ContactService         *service.ContactService
-	MessageSendService     service.MessageSendService
+	ChatRepo               *repo.Chat
+	GroupChatUseCase       *usecase.GroupChatUseCase
+	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
+	ChatUseCase            *usecase.ChatUseCase
+	ContactUseCase         *usecase.ContactUseCase
+	MessageSendUseCase     usecase.MessageSendUseCase
 	RedisLock              *cache.RedisLock
 }
 
@@ -35,7 +36,7 @@ func (g *GroupChat) Create(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	gid, err := g.GroupChatService.Create(ctx.Ctx(), &service.GroupCreateOpt{
+	gid, err := g.GroupChatUseCase.Create(ctx.Ctx(), &usecase.GroupCreateOpt{
 		UserId:    ctx.UserId(),
 		Name:      params.Name,
 		Avatar:    params.Avatar,
@@ -79,7 +80,7 @@ func (g *GroupChat) Invite(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Вы не являетесь участником группы и не имеете права приглашать друзей")
 	}
 
-	if err := g.GroupChatService.Invite(ctx.Ctx(), &service.GroupInviteOpt{
+	if err := g.GroupChatUseCase.Invite(ctx.Ctx(), &usecase.GroupInviteOpt{
 		UserId:    uid,
 		GroupId:   int(params.GroupId),
 		MemberIds: uids,
@@ -97,12 +98,12 @@ func (g *GroupChat) SignOut(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if err := g.GroupChatService.Secede(ctx.Ctx(), int(params.GroupId), uid); err != nil {
+	if err := g.GroupChatUseCase.Secede(ctx.Ctx(), int(params.GroupId), uid); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	sid := g.DialogRepo.FindBySessionId(uid, int(params.GroupId), entity.ChatGroupMode)
-	_ = g.ChatService.Delete(ctx.Ctx(), ctx.UserId(), sid)
+	sid := g.ChatRepo.FindBySessionId(uid, int(params.GroupId), constant.ChatGroupMode)
+	_ = g.ChatUseCase.Delete(ctx.Ctx(), ctx.UserId(), sid)
 
 	return ctx.Success(nil)
 }
@@ -127,7 +128,7 @@ func (g *GroupChat) Setting(ctx *core.Context) error {
 		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
 	}
 
-	if err := g.GroupChatService.Update(ctx.Ctx(), &service.GroupUpdateOpt{
+	if err := g.GroupChatUseCase.Update(ctx.Ctx(), &usecase.GroupUpdateOpt{
 		GroupId:     int(params.GroupId),
 		Name:        params.GroupName,
 		Avatar:      params.Avatar,
@@ -139,7 +140,7 @@ func (g *GroupChat) Setting(ctx *core.Context) error {
 	//_ = c.messageService.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 	//	Content: "Владелец группы или администратор изменили информацию о группе",
 	//	Receiver: &v1Pb.MessageReceiver{
-	//		DialogType: entity.ChatPrivateMode,
+	//		DialogType: domain.ChatPrivateMode,
 	//		ReceiverId: params.GroupId,
 	//	},
 	//})
@@ -176,7 +177,7 @@ func (g *GroupChat) Get(ctx *core.Context) error {
 		//VisitCard: c.GroupMemberRepo.GetMemberRemark(ctx.Ctx(), int(params.GroupId), uid),
 	}
 
-	if g.DialogRepo.IsDisturb(uid, groupInfo.Id, 2) {
+	if g.ChatRepo.IsDisturb(uid, groupInfo.Id, 2) {
 		resp.IsDisturb = 1
 	}
 
@@ -189,7 +190,7 @@ func (g *GroupChat) GetInviteFriends(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	items, err := g.ContactService.List(ctx.Ctx(), ctx.UserId())
+	items, err := g.ContactUseCase.List(ctx.Ctx(), ctx.UserId())
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -203,7 +204,7 @@ func (g *GroupChat) GetInviteFriends(ctx *core.Context) error {
 		return ctx.Success(items)
 	}
 
-	data := make([]*model.ContactListItem, 0)
+	data := make([]*entity.ContactListItem, 0)
 	for i := 0; i < len(items); i++ {
 		if !sliceutil.Include(items[i].Id, mids) {
 			data = append(data, items[i])
@@ -214,7 +215,7 @@ func (g *GroupChat) GetInviteFriends(ctx *core.Context) error {
 }
 
 func (g *GroupChat) GroupList(ctx *core.Context) error {
-	items, err := g.GroupChatService.List(ctx.UserId())
+	items, err := g.GroupChatUseCase.List(ctx.UserId())
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -285,7 +286,7 @@ func (g *GroupChat) RemoveMembers(ctx *core.Context) error {
 		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
 	}
 
-	err := g.GroupChatService.RemoveMember(ctx.Ctx(), &service.GroupRemoveMembersOpt{
+	err := g.GroupChatUseCase.RemoveMember(ctx.Ctx(), &usecase.GroupRemoveMembersOpt{
 		UserId:    uid,
 		GroupId:   int(params.GroupId),
 		MemberIds: sliceutil.ParseIds(params.MembersIds),
@@ -314,7 +315,7 @@ func (g *GroupChat) AssignAdmin(ctx *core.Context) error {
 		leader = 1
 	}
 
-	err := g.GroupChatMemberService.SetLeaderStatus(ctx.Ctx(), int(params.GroupId), int(params.UserId), leader)
+	err := g.GroupChatMemberUseCase.SetLeaderStatus(ctx.Ctx(), int(params.GroupId), int(params.UserId), leader)
 	if err != nil {
 		logger.Errorf("Не удалось установить информацию администратора:%s", err.Error())
 		return ctx.ErrorBusiness("Не удалось установить информацию администратора!")
@@ -333,14 +334,14 @@ func (g *GroupChat) Dismiss(ctx *core.Context) error {
 	if !g.GroupChatMemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
 		return ctx.ErrorBusiness("У вас нет прав на расформирование группы")
 	}
-	if err := g.GroupChatService.Dismiss(ctx.Ctx(), int(params.GroupId), ctx.UserId()); err != nil {
+	if err := g.GroupChatUseCase.Dismiss(ctx.Ctx(), int(params.GroupId), ctx.UserId()); err != nil {
 		return ctx.ErrorBusiness("Не удалось расформировать группу")
 	}
 
-	_ = g.MessageSendService.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
+	_ = g.MessageSendUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 		Content: "Группа была расформирована владельцем группы",
 		Receiver: &v1Pb.MessageReceiver{
-			DialogType: entity.ChatGroupMode,
+			DialogType: constant.ChatGroupMode,
 			ReceiverId: params.GroupId,
 		},
 	})
@@ -390,22 +391,22 @@ func (g *GroupChat) Mute(ctx *core.Context) error {
 	var extra any
 	var msgType int
 	if params.Mode == 1 {
-		msgType = entity.ChatMsgSysGroupMuted
-		extra = model.DialogRecordExtraGroupMuted{
+		msgType = constant.ChatMsgSysGroupMuted
+		extra = entity.DialogRecordExtraGroupMuted{
 			OwnerId:   user.Id,
 			OwnerName: user.Username,
 		}
 	} else {
-		msgType = entity.ChatMsgSysGroupCancelMuted
-		extra = model.DialogRecordExtraGroupCancelMuted{
+		msgType = constant.ChatMsgSysGroupCancelMuted
+		extra = entity.DialogRecordExtraGroupCancelMuted{
 			OwnerId:   user.Id,
 			OwnerName: user.Username,
 		}
 	}
 
-	_ = g.MessageSendService.SendSysOther(ctx.Ctx(), &model.Message{
+	_ = g.MessageSendUseCase.SendSysOther(ctx.Ctx(), &model.Message{
 		MsgType:    msgType,
-		DialogType: model.DialogRecordDialogTypeGroup,
+		DialogType: constant.DialogRecordDialogTypeGroup,
 		UserId:     uid,
 		ReceiverId: int(params.GroupId),
 		Extra:      jsonutil.Encode(extra),

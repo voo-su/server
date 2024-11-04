@@ -6,24 +6,24 @@ import (
 	"time"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jwt"
 )
 
 type Auth struct {
 	Conf               *config.Config
-	AuthService        *service.AuthService
+	AuthUseCase        *usecase.AuthUseCase
 	JwtTokenStorage    *cache.JwtTokenStorage
 	RedisLock          *cache.RedisLock
-	IpAddressService   *service.IpAddressService
-	ChatService        *service.ChatService
+	IpAddressUseCase   *usecase.IpAddressUseCase
+	ChatUseCase        *usecase.ChatUseCase
 	BotRepo            *repo.Bot
-	MessageSendService service.MessageSendService
+	MessageSendUseCase usecase.MessageSendUseCase
 	UserSession        *repo.UserSession
 }
 
@@ -33,20 +33,20 @@ func (a *Auth) Login(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	expiresAt := time.Now().Add(time.Second * time.Duration(entity.ExpiresTime))
+	expiresAt := time.Now().Add(time.Second * time.Duration(constant.ExpiresTime))
 	token := jwt.GenerateToken("auth", a.Conf.Jwt.Secret, &jwt.Options{
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		ID:        params.Email,
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	})
 
-	if err := a.AuthService.Send(ctx.Ctx(), entity.LoginChannel, params.Email, token); err != nil {
+	if err := a.AuthUseCase.Send(ctx.Ctx(), constant.LoginChannel, params.Email, token); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(&v1Pb.AuthLoginResponse{
 		Token:     token,
-		ExpiresIn: entity.ExpiresTime,
+		ExpiresIn: constant.ExpiresTime,
 	})
 }
 
@@ -56,7 +56,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if !a.AuthService.Verify(ctx.Ctx(), entity.LoginChannel, params.Token, params.Code) {
+	if !a.AuthUseCase.Verify(ctx.Ctx(), constant.LoginChannel, params.Token, params.Code) {
 		return ctx.InvalidParams("Неверный код")
 	}
 
@@ -69,28 +69,28 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		return ctx.InvalidParams("Неверный токен")
 	}
 
-	user, err := a.AuthService.Register(ctx.Ctx(), claims.ID)
+	user, err := a.AuthUseCase.Register(ctx.Ctx(), claims.ID)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	a.AuthService.Delete(ctx.Ctx(), entity.LoginChannel, params.Token)
+	a.AuthUseCase.Delete(ctx.Ctx(), constant.LoginChannel, params.Token)
 
 	ip := ctx.Context.ClientIP()
 	root, _ := a.BotRepo.GetLoginBot(ctx.Ctx())
 	if root != nil {
-		address, err := a.IpAddressService.FindAddress(ip)
+		address, err := a.IpAddressUseCase.FindAddress(ip)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		_, _ = a.ChatService.Create(ctx.Ctx(), &service.CreateChatOpt{
+		_, _ = a.ChatUseCase.Create(ctx.Ctx(), &usecase.CreateChatOpt{
 			UserId:     user.Id,
-			DialogType: entity.ChatPrivateMode,
+			DialogType: constant.ChatPrivateMode,
 			ReceiverId: root.UserId,
 			IsBoot:     true,
 		})
-		_ = a.MessageSendService.SendLogin(ctx.Ctx(), user.Id, &v1Pb.LoginMessageRequest{
+		_ = a.MessageSendUseCase.SendLogin(ctx.Ctx(), user.Id, &v1Pb.LoginMessageRequest{
 			Ip:      ip,
 			Agent:   ctx.Context.GetHeader("user-agent"),
 			Address: address,

@@ -8,3 +8,7 @@ type MessageDelete struct {
 	UserId    int       `gorm:"column:user_id;default:0;NOT NULL" json:"user_id"`
 	CreatedAt time.Time `gorm:"column:created_at;NOT NULL" json:"created_at"`
 }
+
+func (m MessageDelete) TableName() string {
+	return "message_delete"
+}

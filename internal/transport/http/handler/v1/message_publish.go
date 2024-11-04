@@ -3,15 +3,15 @@ package v1
 import (
 	"github.com/gin-gonic/gin/binding"
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 )
 
 var mapping map[string]func(ctx *core.Context) error
 
 type Publish struct {
-	AuthService        *service.AuthService
-	MessageSendService service.MessageSendService
+	AuthUseCase        *usecase.AuthUseCase
+	MessageSendUseCase usecase.MessageSendUseCase
 }
 
 func (c *Publish) transfer(ctx *core.Context, typeValue string) error {
@@ -49,7 +49,7 @@ func (c *Publish) Publish(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.AuthService.IsAuth(ctx.Ctx(), &service.AuthOption{
+	if err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
 		DialogType:        params.Receiver.DialogType,
 		UserId:            ctx.UserId(),
 		ReceiverId:        params.Receiver.ReceiverId,
@@ -67,8 +67,8 @@ func (c *Publish) onSendText(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.SendText(ctx.Ctx(), ctx.UserId(), &service.SendText{
-		Receiver: service.Receiver{
+	if err := c.MessageSendUseCase.SendText(ctx.Ctx(), ctx.UserId(), &usecase.SendText{
+		Receiver: usecase.Receiver{
 			DialogType: params.Receiver.DialogType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
@@ -87,7 +87,7 @@ func (c *Publish) onSendImage(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.SendImage(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := c.MessageSendUseCase.SendImage(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -101,7 +101,7 @@ func (c *Publish) onSendVoice(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.SendVoice(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := c.MessageSendUseCase.SendVoice(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -115,7 +115,7 @@ func (c *Publish) onSendVideo(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.SendVideo(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := c.MessageSendUseCase.SendVideo(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -128,7 +128,7 @@ func (c *Publish) onSendFile(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.SendFile(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := c.MessageSendUseCase.SendFile(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -141,7 +141,7 @@ func (c *Publish) onSendForward(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.SendForward(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := c.MessageSendUseCase.SendForward(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -162,7 +162,7 @@ func (c *Publish) onSendVote(ctx *core.Context) error {
 		return ctx.InvalidParams("количество вариантов (options) не может превышать 6!")
 	}
 
-	if err := c.MessageSendService.SendVote(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := c.MessageSendUseCase.SendVote(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -175,7 +175,7 @@ func (c *Publish) onMixedMessage(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.SendMixedMessage(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := c.MessageSendUseCase.SendMixedMessage(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -188,7 +188,7 @@ func (c *Publish) onSendSticker(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.SendSticker(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := c.MessageSendUseCase.SendSticker(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -201,7 +201,7 @@ func (c *Publish) onSendCode(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendService.SendCode(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := c.MessageSendUseCase.SendCode(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

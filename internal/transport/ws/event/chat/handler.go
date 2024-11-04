@@ -4,28 +4,28 @@ import (
 	"context"
 	"github.com/redis/go-redis/v9"
 	"log"
-	"voo.su/internal/service"
-	"voo.su/pkg/core/socket"
+	"voo.su/internal/usecase"
+	"voo.su/pkg/socket"
 )
 
 type handle func(ctx context.Context, client socket.IClient, data []byte)
 
 type Handler struct {
-	Redis         *redis.Client
-	MemberService *service.GroupChatMemberService
-	Handlers      map[string]func(ctx context.Context, client socket.IClient, data []byte)
-	Message       service.MessageSendService
+	Redis          *redis.Client
+	MemberUseCase  *usecase.GroupChatMemberUseCase
+	Handlers       map[string]func(ctx context.Context, client socket.IClient, data []byte)
+	MessageUseCase usecase.MessageSendUseCase
 }
 
 func NewHandler(
 	redis *redis.Client,
-	memberService *service.GroupChatMemberService,
-	message *service.MessageService,
+	memberUseCase *usecase.GroupChatMemberUseCase,
+	messageUseCase *usecase.MessageUseCase,
 ) *Handler {
 	return &Handler{
-		Redis:         redis,
-		MemberService: memberService,
-		Message:       message,
+		Redis:          redis,
+		MemberUseCase:  memberUseCase,
+		MessageUseCase: messageUseCase,
 	}
 }
 

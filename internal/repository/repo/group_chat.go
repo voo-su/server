@@ -4,15 +4,15 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type GroupChat struct {
-	core.Repo[model.GroupChat]
+	repo.Repo[model.GroupChat]
 }
 
 func NewGroupChat(db *gorm.DB) *GroupChat {
-	return &GroupChat{Repo: core.NewRepo[model.GroupChat](db)}
+	return &GroupChat{Repo: repo.NewRepo[model.GroupChat](db)}
 }
 
 type SearchOvertListOpt struct {

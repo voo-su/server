@@ -2,10 +2,6 @@ package model
 
 import "time"
 
-const (
-	VoteAnswerModeSingleChoice = 0
-)
-
 type MessageVote struct {
 	Id           int       `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
 	RecordId     int       `gorm:"column:record_id;default:0;NOT NULL" json:"record_id"`
@@ -23,16 +19,4 @@ type MessageVote struct {
 
 func (MessageVote) TableName() string {
 	return "message_votes"
-}
-
-type QueryVoteModel struct {
-	RecordId     int    `json:"record_id"`
-	ReceiverId   int    `json:"receiver_id"`
-	DialogType   int    `json:"dialog_type"`
-	MsgType      int    `json:"msg_type"`
-	VoteId       int    `json:"vote_id"`
-	AnswerMode   int    `json:"answer_mode"`
-	AnswerOption string `json:"answer_option"`
-	AnswerNum    int    `json:"answer_num"`
-	VoteStatus   int    `json:"vote_status"`
 }

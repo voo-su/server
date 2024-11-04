@@ -37,7 +37,7 @@ create table stickers
     updated_at timestamp                                  not null
 );
 
-create table sticker_user
+create table sticker_users
 (
     id          serial primary key,
     user_id     integer                                    not null,
@@ -92,10 +92,9 @@ create table messages
     quote_id    varchar(50)                               not null,
     content     text,
     extra       jsonb                                     not null
-        constraint dialog_records_extra_check
-            check (extra IS JSON),
-    created_at timestamp not null,
-    updated_at timestamp not null
+        constraint dialog_records_extra_check check (extra IS JSON),
+    created_at  timestamp                                 not null,
+    updated_at  timestamp                                 not null
 );
 
 create table message_votes
@@ -111,7 +110,8 @@ create table message_votes
     is_anonymous  smallint     default 0                     not null,
     status        smallint     default 0                     not null,
     created_at    timestamp                                  not null,
-    updated_at    timestamp                                  not null
+    updated_at    timestamp                                  not null,
+    new_column    integer
 );
 
 create table message_vote_answers
@@ -120,8 +120,25 @@ create table message_vote_answers
     vote_id    integer default 0          not null,
     user_id    integer default 0          not null,
     option     char    default ''::bpchar not null,
-    created_at timestamp                  not null
+    created_at timestamp                  not null,
+    new_column integer
 );
+
+create table message_read
+(
+    id          serial primary key,
+    msg_id      varchar(64) default ''::character varying not null,
+    user_id     integer     default 0                     not null,
+    receiver_id integer     default 0                     not null,
+    created_at  timestamp with time zone                  not null,
+    updated_at  timestamp with time zone                  not null,
+    constraint unique_user_receiver_msg
+        unique (user_id, receiver_id, msg_id)
+);
+
+create index idx_msg_id on message_read (msg_id);
+create index idx_created_at on message_read (created_at);
+create index idx_updated_at on message_read (updated_at);
 
 create table message_delete
 (
@@ -186,24 +203,9 @@ create table group_chat_ads
     is_confirm    smallint    default 0                     not null,
     created_at    timestamp                                 not null,
     updated_at    timestamp                                 not null,
-    deleted_at    timestamp
+    deleted_at    timestamp,
+    new_column    integer
 );
-
-create table dialogs
-(
-    id          serial primary key,
-    dialog_type smallint default 1 not null,
-    user_id     integer  default 0 not null,
-    receiver_id integer  default 0 not null,
-    is_top      smallint default 0 not null,
-    is_disturb  smallint default 0 not null,
-    is_delete   smallint default 0 not null,
-    is_bot      smallint default 0 not null,
-    created_at  timestamp          not null,
-    updated_at  timestamp          not null
-);
-
-create index dialogs_dialog_type_user_id_receiver_id_idx on dialogs (dialog_type, user_id, receiver_id);
 
 create table contacts
 (
@@ -237,6 +239,22 @@ create table contact_folders
     updated_at timestamp                                 not null
 );
 
+create table chats
+(
+    id          serial primary key,
+    dialog_type smallint default 1 not null,
+    user_id     integer  default 0 not null,
+    receiver_id integer  default 0 not null,
+    is_top      smallint default 0 not null,
+    is_disturb  smallint default 0 not null,
+    is_delete   smallint default 0 not null,
+    is_bot      smallint default 0 not null,
+    created_at  timestamp          not null,
+    updated_at  timestamp          not null
+);
+
+create index chats_dialog_type_user_id_receiver_id_idx on chats (dialog_type, user_id, receiver_id);
+
 create table bots
 (
     id          serial primary key,
@@ -245,7 +263,8 @@ create table bots
     name        varchar(255) default ''::character varying not null,
     description varchar(255) default ''::character varying not null,
     avatar      varchar(255) default ''::character varying not null,
-    created_at  timestamp                                  not null
+    created_at  timestamp                                  not null,
+    token       varchar(255)                               not null unique
 );
 
 create table schema_migrations
@@ -254,4 +273,4 @@ create table schema_migrations
     dirty   boolean not null
 );
 
-INSERT INTO schema_migrations (version, dirty) VALUES (1, false);
+INSERT INTO schema_migrations (version, dirty) VALUES (8, false);

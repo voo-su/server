@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"regexp"
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 )
 
 type Bot struct {
-	BotService         *service.BotService
-	MessageSendService service.MessageSendService
+	BotUseCase         *usecase.BotUseCase
+	MessageSendUseCase usecase.MessageSendUseCase
 }
 
 func (b *Bot) Create(ctx *core.Context) error {
@@ -24,7 +24,7 @@ func (b *Bot) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness(fmt.Sprintf("Имя пользователя '%s' не заканчивается на '_bot' или 'bot'", params.Username))
 	}
 
-	token, err := b.BotService.Create(ctx.Ctx(), &service.BotCreateOpt{
+	token, err := b.BotUseCase.Create(ctx.Ctx(), &usecase.BotCreateOpt{
 		Username:  params.Username,
 		CreatorId: ctx.UserId(),
 	})
@@ -40,7 +40,7 @@ func (b *Bot) Create(ctx *core.Context) error {
 }
 
 func (b *Bot) List(ctx *core.Context) error {
-	list, err := b.BotService.List(ctx.Ctx(), ctx.UserId())
+	list, err := b.BotUseCase.List(ctx.Ctx(), ctx.UserId())
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}

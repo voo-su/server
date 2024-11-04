@@ -4,12 +4,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"voo.su/internal/config"
-	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/repository"
 	"voo.su/internal/transport/http/handler"
 	"voo.su/internal/transport/http/handler/bot"
 	v1 "voo.su/internal/transport/http/handler/v1"
 	"voo.su/internal/transport/http/router"
+	"voo.su/internal/usecase"
 )
 
 type AppProvider struct {
@@ -45,36 +45,6 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(bot.Handler), "*"),
 	wire.Struct(new(bot.Message), "*"),
 
-	wire.Struct(new(service.MessageService), "*"),
-	wire.Bind(new(service.MessageSendService), new(*service.MessageService)),
-	service.NewAuthService,
-	service.NewContactService,
-	service.NewContactApplyService,
-	service.NewContactFolderService,
-	service.NewChatService,
-	service.NewGroupChatService,
-	service.NewGroupMemberService,
-	service.NewGroupChatAdsService,
-	service.NewGroupRequestService,
-	service.NewSplitService,
-	service.NewIpAddressService,
-	service.NewStickerService,
-	service.NewBotService,
-
-	repo.NewUserSession,
-	repo.NewSource,
-	repo.NewContact,
-	repo.NewContactFolder,
-	repo.NewGroupMember,
-	repo.NewUser,
-	repo.NewGroupChat,
-	repo.NewGroupChatApply,
-	repo.NewGroupChatAds,
-	repo.NewDialog,
-	repo.NewMessage,
-	repo.NewMessageVote,
-	repo.NewFileSplit,
-	repo.NewSequence,
-	repo.NewBot,
-	repo.NewSticker,
+	usecase.ProviderSet,
+	repository.ProviderSet,
 )

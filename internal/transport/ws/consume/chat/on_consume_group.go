@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core/socket"
 	"voo.su/pkg/logger"
+	"voo.su/pkg/socket"
 )
 
 type ConsumeGroupJoin struct {
@@ -36,7 +36,7 @@ func (h *Handler) onConsumeGroupJoin(ctx context.Context, body []byte) {
 		for _, cid := range ids {
 			opt := &cache.RoomOption{
 				Channel:  socket.Session.Chat.Name(),
-				RoomType: entity.RoomImGroup,
+				RoomType: constant.RoomImGroup,
 				Number:   strconv.Itoa(in.Gid),
 				Sid:      h.Conf.ServerId(),
 				Cid:      cid,
@@ -81,7 +81,7 @@ func (h *Handler) onConsumeGroupApply(ctx context.Context, body []byte) {
 
 	c := socket.NewSenderContent()
 	c.SetReceive(clientIds...)
-	c.SetMessage(entity.PushEventGroupChatRequest, data)
+	c.SetMessage(constant.PushEventGroupChatRequest, data)
 
 	socket.Session.Chat.Write(c)
 }

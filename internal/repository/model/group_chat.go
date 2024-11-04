@@ -4,10 +4,6 @@ import (
 	"time"
 )
 
-const (
-	GroupMemberMaxNum = 200
-)
-
 type GroupChat struct {
 	Id          int       `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
 	Type        int       `gorm:"column:type;default:1;NOT NULL" json:"type"`
@@ -25,14 +21,4 @@ type GroupChat struct {
 
 func (GroupChat) TableName() string {
 	return "group_chats"
-}
-
-type GroupItem struct {
-	Id          int    `json:"id"`
-	GroupName   string `json:"group_name"`
-	Avatar      string `json:"avatar"`
-	Description string `json:"description"`
-	Leader      int    `json:"leader"`
-	IsDisturb   int    `json:"is_disturb"`
-	CreatorId   int    `json:"creator_id"`
 }

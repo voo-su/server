@@ -4,16 +4,16 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 	"voo.su/pkg/sliceutil"
 )
 
 type Sticker struct {
-	core.Repo[model.Sticker]
+	repo.Repo[model.Sticker]
 }
 
 func NewSticker(db *gorm.DB) *Sticker {
-	return &Sticker{Repo: core.NewRepo[model.Sticker](db)}
+	return &Sticker{Repo: repo.NewRepo[model.Sticker](db)}
 }
 
 func (e *Sticker) GetUserInstallIds(uid int) []int {

@@ -3,19 +3,20 @@ package repo
 import (
 	"context"
 	"gorm.io/gorm"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type GroupChatAds struct {
-	core.Repo[model.GroupChatAds]
+	repo.Repo[model.GroupChatAds]
 }
 
 func NewGroupChatAds(db *gorm.DB) *GroupChatAds {
-	return &GroupChatAds{Repo: core.NewRepo[model.GroupChatAds](db)}
+	return &GroupChatAds{Repo: repo.NewRepo[model.GroupChatAds](db)}
 }
 
-func (g *GroupChatAds) GetListAll(ctx context.Context, groupId int) ([]*model.SearchAdsItem, error) {
+func (g *GroupChatAds) GetListAll(ctx context.Context, groupId int) ([]*entity.SearchAdsItem, error) {
 	fields := []string{
 		"group_chat_ads.id",
 		"group_chat_ads.creator_id",
@@ -35,7 +36,7 @@ func (g *GroupChatAds) GetListAll(ctx context.Context, groupId int) ([]*model.Se
 	query.Order("group_chat_ads.is_top desc")
 	query.Order("group_chat_ads.created_at desc")
 
-	var items []*model.SearchAdsItem
+	var items []*entity.SearchAdsItem
 	if err := query.Select(fields).Scan(&items).Error; err != nil {
 		return nil, err
 	}

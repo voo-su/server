@@ -4,11 +4,11 @@ import (
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/sliceutil"
@@ -20,9 +20,9 @@ type GroupChatRequest struct {
 	GroupChatRepo           *repo.GroupChat
 	GroupChatRequestRepo    *repo.GroupChatRequest
 	GroupMemberRepo         *repo.GroupChatMember
-	GroupChatRequestService *service.GroupChatRequestService
-	GroupChatMemberService  *service.GroupChatMemberService
-	GroupChatService        *service.GroupChatService
+	GroupChatRequestUseCase *usecase.GroupChatRequestUseCase
+	GroupChatMemberUseCase  *usecase.GroupChatMemberUseCase
+	GroupChatUseCase        *usecase.GroupChatUseCase
 	Redis                   *redis.Client
 }
 
@@ -32,7 +32,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	apply, err := g.GroupChatRequestRepo.FindByWhere(ctx.Ctx(), "group_id = ? and status = ?", params.GroupId, model.GroupChatRequestStatusWait)
+	apply, err := g.GroupChatRequestRepo.FindByWhere(ctx.Ctx(), "group_id = ? and status = ?", params.GroupId, constant.GroupChatRequestStatusWait)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return ctx.Error(err.Error())
 	}
@@ -43,7 +43,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 		err = g.GroupChatRequestRepo.Create(ctx.Ctx(), &model.GroupChatRequest{
 			GroupId: int(params.GroupId),
 			UserId:  uid,
-			Status:  model.GroupChatRequestStatusWait,
+			Status:  constant.GroupChatRequestStatusWait,
 		})
 	} else {
 		data := map[string]interface{}{
@@ -62,8 +62,8 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 		g.GroupRequestStorage.Incr(ctx.Ctx(), find.UserId)
 	}
 
-	g.Redis.Publish(ctx.Ctx(), entity.ImTopicChat, jsonutil.Encode(map[string]interface{}{
-		"event": entity.SubEventGroupChatRequest,
+	g.Redis.Publish(ctx.Ctx(), constant.ImTopicChat, jsonutil.Encode(map[string]interface{}{
+		"event": constant.SubEventGroupChatRequest,
 		"data": jsonutil.Encode(map[string]interface{}{
 			"group_id": params.GroupId,
 			"user_id":  ctx.UserId(),
@@ -94,12 +94,12 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 		return ctx.Forbidden("Нет доступа")
 	}
 
-	if apply.Status != model.GroupChatRequestStatusWait {
+	if apply.Status != constant.GroupChatRequestStatusWait {
 		return ctx.ErrorBusiness("Информация о заявке уже обработана другим пользователем")
 	}
 
 	if !g.GroupMemberRepo.IsMember(ctx.Ctx(), apply.GroupId, apply.UserId, false) {
-		err = g.GroupChatService.Invite(ctx.Ctx(), &service.GroupInviteOpt{
+		err = g.GroupChatUseCase.Invite(ctx.Ctx(), &usecase.GroupInviteOpt{
 			UserId:    uid,
 			GroupId:   apply.GroupId,
 			MemberIds: []int{apply.UserId},
@@ -111,7 +111,7 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 	}
 
 	data := map[string]interface{}{
-		"status":     model.GroupChatRequestStatusPass,
+		"status":     constant.GroupChatRequestStatusPass,
 		"updated_at": timeutil.DateTime(),
 	}
 
@@ -144,12 +144,12 @@ func (g *GroupChatRequest) Decline(ctx *core.Context) error {
 		return ctx.Forbidden("Нет доступа")
 	}
 
-	if apply.Status != model.GroupChatRequestStatusWait {
+	if apply.Status != constant.GroupChatRequestStatusWait {
 		return ctx.ErrorBusiness("Информация о заявке уже обработана другим пользователем")
 	}
 
 	data := map[string]interface{}{
-		"status":     model.GroupChatRequestStatusRefuse,
+		"status":     constant.GroupChatRequestStatusRefuse,
 		"updated_at": timeutil.DateTime(),
 	}
 

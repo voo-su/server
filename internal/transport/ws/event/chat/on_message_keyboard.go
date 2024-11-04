@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"voo.su/internal/entity"
-	"voo.su/pkg/core/socket"
+	"voo.su/internal/constant"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/socket"
 )
 
 type KeyboardMessage struct {
@@ -23,8 +23,8 @@ func (h *Handler) onKeyboardMessage(ctx context.Context, _ socket.IClient, data 
 		log.Println("Ошибка в чате при обработке сообщения с клавиатурой: ", err)
 		return
 	}
-	h.Redis.Publish(ctx, entity.ImTopicChat, jsonutil.Encode(map[string]any{
-		"event": entity.SubEventImMessageKeyboard,
+	h.Redis.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
+		"event": constant.SubEventImMessageKeyboard,
 		"data": jsonutil.Encode(map[string]any{
 			"sender_id":   in.Content.SenderID,
 			"receiver_id": in.Content.ReceiverID,

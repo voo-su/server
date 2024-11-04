@@ -9,8 +9,9 @@ import (
 	"google.golang.org/protobuf/proto"
 	"net/http"
 	"runtime"
-	"voo.su/pkg/core/middleware"
-	"voo.su/pkg/core/validator"
+	"voo.su/pkg/middleware"
+	"voo.su/pkg/response"
+	"voo.su/pkg/validator"
 )
 
 var MarshalOptions = protojson.MarshalOptions{
@@ -27,7 +28,7 @@ func New(ctx *gin.Context) *Context {
 }
 
 func (c *Context) Unauthorized(message string) error {
-	c.Context.AbortWithStatusJSON(http.StatusUnauthorized, &Response{
+	c.Context.AbortWithStatusJSON(http.StatusUnauthorized, &response.Response{
 		Code:    http.StatusUnauthorized,
 		Message: message,
 	})
@@ -36,7 +37,7 @@ func (c *Context) Unauthorized(message string) error {
 }
 
 func (c *Context) Forbidden(message string) error {
-	c.Context.AbortWithStatusJSON(http.StatusForbidden, &Response{
+	c.Context.AbortWithStatusJSON(http.StatusForbidden, &response.Response{
 		Code:    http.StatusForbidden,
 		Message: message,
 	})
@@ -45,7 +46,7 @@ func (c *Context) Forbidden(message string) error {
 }
 
 func (c *Context) InvalidParams(message any) error {
-	resp := &Response{Code: 305, Message: "неверные параметры"}
+	resp := &response.Response{Code: 305, Message: "неверные параметры"}
 	switch msg := message.(type) {
 	case error:
 		resp.Message = validator.Translate(msg)
@@ -61,7 +62,7 @@ func (c *Context) InvalidParams(message any) error {
 }
 
 func (c *Context) ErrorBusiness(message any) error {
-	resp := &Response{Code: 400, Message: "ошибка"}
+	resp := &response.Response{Code: 400, Message: "ошибка"}
 	switch msg := message.(type) {
 	case error:
 		resp.Message = msg.Error()
@@ -78,7 +79,7 @@ func (c *Context) ErrorBusiness(message any) error {
 }
 
 func (c *Context) Error(error string) error {
-	c.Context.AbortWithStatusJSON(http.StatusInternalServerError, &Response{
+	c.Context.AbortWithStatusJSON(http.StatusInternalServerError, &response.Response{
 		Code:    500,
 		Message: error,
 		//Meta:    initMeta(),
@@ -88,7 +89,7 @@ func (c *Context) Error(error string) error {
 }
 
 func (c *Context) Success(data any, message ...string) error {
-	resp := &Response{
+	resp := &response.Response{
 		Code:    200,
 		Message: "success",
 		Data:    data,

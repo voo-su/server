@@ -2,13 +2,13 @@ package bot
 
 import (
 	botPb "voo.su/api/http/pb/bot"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 )
 
 type Message struct {
-	MessageSendService service.MessageSendService
-	BotService         *service.BotService
+	MessageSendUseCase usecase.MessageSendUseCase
+	BotUseCase         *usecase.BotUseCase
 }
 
 func (m *Message) Send(ctx *core.Context) error {
@@ -19,13 +19,13 @@ func (m *Message) Send(ctx *core.Context) error {
 
 	token := ctx.Context.Param("token")
 
-	var bot, err = m.BotService.GetBotByToken(ctx.Ctx(), token)
+	var bot, err = m.BotUseCase.GetBotByToken(ctx.Ctx(), token)
 	if err != nil {
 		return ctx.ErrorBusiness("")
 	}
 
-	if err := m.MessageSendService.SendText(ctx.Ctx(), bot.UserId, &service.SendText{
-		Receiver: service.Receiver{
+	if err := m.MessageSendUseCase.SendText(ctx.Ctx(), bot.UserId, &usecase.SendText{
+		Receiver: usecase.Receiver{
 			DialogType: 2,
 			ReceiverId: params.ChatId,
 		},
@@ -40,12 +40,12 @@ func (m *Message) Send(ctx *core.Context) error {
 func (m *Message) GroupChats(ctx *core.Context) error {
 	token := ctx.Context.Param("token")
 
-	var bot, err = m.BotService.GetBotByToken(ctx.Ctx(), token)
+	var bot, err = m.BotUseCase.GetBotByToken(ctx.Ctx(), token)
 	if err != nil {
 		return ctx.ErrorBusiness("")
 	}
 
-	list, err := m.BotService.Chats(ctx.Ctx(), bot.Id)
+	list, err := m.BotUseCase.Chats(ctx.Ctx(), bot.Id)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}

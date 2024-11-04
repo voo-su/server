@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"voo.su/pkg/socket"
 
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli/v2"
@@ -19,7 +20,6 @@ import (
 	"voo.su/internal/provider"
 	"voo.su/internal/transport/ws/handler"
 	"voo.su/internal/transport/ws/process"
-	"voo.su/pkg/core/socket"
 	"voo.su/pkg/email"
 )
 

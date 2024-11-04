@@ -8,7 +8,7 @@ import (
 	"github.com/sourcegraph/conc/pool"
 	"log"
 	"voo.su/internal/config"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/transport/ws/consume"
 	"voo.su/pkg/utils"
 )
@@ -37,7 +37,10 @@ type IConsume interface {
 
 func (m *MessageSubscribe) Setup(ctx context.Context) error {
 	log.Println("Старт подписки на сообщение")
-	go m.subscribe(ctx, []string{entity.ImTopicChat, fmt.Sprintf(entity.ImTopicChatPrivate, m.Conf.ServerId())}, m.DefaultConsume)
+	go m.subscribe(ctx, []string{
+		constant.ImTopicChat,
+		fmt.Sprintf(constant.ImTopicChatPrivate,
+			m.Conf.ServerId())}, m.DefaultConsume)
 	<-ctx.Done()
 	return nil
 }

@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"time"
 	"voo.su/internal/config"
-	"voo.su/internal/entity"
-	"voo.su/pkg/core/socket/adapter"
+	"voo.su/internal/constant"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/jwt"
 	"voo.su/pkg/logger"
+	"voo.su/pkg/socket/adapter"
 )
 
 type Handler struct {
@@ -54,7 +54,7 @@ func (h *Handler) Dispatch(conn net.Conn) {
 		return
 	case info := <-ch:
 		fmt.Println(conn.RemoteAddr(), "аутентификация успешна", time.Now().Unix())
-		if info.Channel == entity.ImChannelChat {
+		if info.Channel == constant.ImChannelChat {
 			_ = h.Chat.NewClient(info.Uid, info.conn)
 		}
 	}

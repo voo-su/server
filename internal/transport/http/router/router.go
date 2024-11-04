@@ -8,7 +8,8 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/transport/http/handler"
-	"voo.su/pkg/core/middleware"
+	"voo.su/pkg/middleware"
+	"voo.su/pkg/response"
 )
 
 func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.JwtTokenStorage) *gin.Engine {
@@ -22,16 +23,16 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 	router.Use(middleware.AccessLog(src))
 
 	router.Use(gin.RecoveryWithWriter(gin.DefaultWriter, func(c *gin.Context, err any) {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, map[string]any{
-			"code":    http.StatusInternalServerError,
-			"message": "Ошибка системы, повторите попытку",
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Response{
+			Code:    http.StatusInternalServerError,
+			Message: "Ошибка системы, повторите попытку",
 		})
 	}))
 
 	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, map[string]any{
-			"code":    http.StatusOK,
-			"message": "v1",
+		c.JSON(http.StatusOK, response.Response{
+			Code:    http.StatusOK,
+			Message: "v1",
 		})
 	})
 
@@ -40,9 +41,9 @@ func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.Jwt
 	NewBot(router, conf, handler, session)
 
 	router.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, map[string]any{
-			"code":    http.StatusNotFound,
-			"message": "Метод не найден",
+		c.JSON(http.StatusNotFound, response.Response{
+			Code:    http.StatusNotFound,
+			Message: "Метод не найден",
 		})
 	})
 

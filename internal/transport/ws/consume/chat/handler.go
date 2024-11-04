@@ -4,10 +4,10 @@ import (
 	"context"
 	"log"
 	"voo.su/internal/config"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 )
 
 var handlers map[string]func(ctx context.Context, data []byte)
@@ -16,9 +16,9 @@ type Handler struct {
 	Conf           *config.Config
 	ClientStorage  *cache.ClientStorage
 	RoomStorage    *cache.RoomStorage
-	ChatService    *service.ChatService
-	MessageService *service.MessageService
-	ContactService *service.ContactService
+	ChatUseCase    *usecase.ChatUseCase
+	MessageUseCase *usecase.MessageUseCase
+	ContactUseCase *usecase.ContactUseCase
 	Source         *repo.Source
 }
 
@@ -26,32 +26,32 @@ func NewHandler(
 	conf *config.Config,
 	clientStorage *cache.ClientStorage,
 	roomStorage *cache.RoomStorage,
-	chatService *service.ChatService,
-	messageService *service.MessageService,
-	contactService *service.ContactService,
+	chatUseCase *usecase.ChatUseCase,
+	messageUseCase *usecase.MessageUseCase,
+	contactUseCase *usecase.ContactUseCase,
 	source *repo.Source,
 ) *Handler {
 	return &Handler{
 		Conf:           conf,
 		ClientStorage:  clientStorage,
 		RoomStorage:    roomStorage,
-		ChatService:    chatService,
-		MessageService: messageService,
-		ContactService: contactService,
+		ChatUseCase:    chatUseCase,
+		MessageUseCase: messageUseCase,
+		ContactUseCase: contactUseCase,
 		Source:         source,
 	}
 }
 
 func (h *Handler) init() {
 	handlers = make(map[string]func(ctx context.Context, data []byte))
-	handlers[entity.SubEventImMessage] = h.onConsumeDialog
-	handlers[entity.SubEventImMessageKeyboard] = h.onConsumeDialogKeyboard
-	handlers[entity.SubEventImMessageRead] = h.onConsumeDialogRead
-	handlers[entity.SubEventImMessageRevoke] = h.onConsumeDialogRevoke
-	handlers[entity.SubEventContactStatus] = h.onConsumeContactStatus
-	handlers[entity.SubEventContactRequest] = h.onConsumeContactApply
-	handlers[entity.SubEventGroupChatJoin] = h.onConsumeGroupJoin
-	handlers[entity.SubEventGroupChatRequest] = h.onConsumeGroupApply
+	handlers[constant.SubEventImMessage] = h.onConsumeDialog
+	handlers[constant.SubEventImMessageKeyboard] = h.onConsumeDialogKeyboard
+	handlers[constant.SubEventImMessageRead] = h.onConsumeDialogRead
+	handlers[constant.SubEventImMessageRevoke] = h.onConsumeDialogRevoke
+	handlers[constant.SubEventContactStatus] = h.onConsumeContactStatus
+	handlers[constant.SubEventContactRequest] = h.onConsumeContactApply
+	handlers[constant.SubEventGroupChatJoin] = h.onConsumeGroupJoin
+	handlers[constant.SubEventGroupChatRequest] = h.onConsumeGroupApply
 }
 
 func (h *Handler) Call(ctx context.Context, event string, data []byte) {

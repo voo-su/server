@@ -7,8 +7,8 @@ import (
 	"github.com/bytedance/sonic"
 	"log"
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/service"
-	"voo.su/pkg/core/socket"
+	"voo.su/internal/usecase"
+	"voo.su/pkg/socket"
 )
 
 var publishMapping map[string]handle
@@ -50,9 +50,9 @@ func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data
 	if in.Content.GetContent() == "" || in.Content.GetReceiver() == nil {
 		return
 	}
-	err := h.Message.SendText(ctx, client.Uid(), &service.SendText{
+	err := h.MessageUseCase.SendText(ctx, client.Uid(), &usecase.SendText{
 		Content: in.Content.Content,
-		Receiver: service.Receiver{
+		Receiver: usecase.Receiver{
 			DialogType: in.Content.Receiver.DialogType,
 			ReceiverId: in.Content.Receiver.ReceiverId,
 		},
@@ -145,7 +145,7 @@ func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data
 		return
 	}
 
-	err := h.Message.SendCode(ctx, client.Uid(), &v1Pb.CodeMessageRequest{
+	err := h.MessageUseCase.SendCode(ctx, client.Uid(), &v1Pb.CodeMessageRequest{
 		Lang: m.Content.Lang,
 		Code: m.Content.Code,
 		Receiver: &v1Pb.MessageReceiver{

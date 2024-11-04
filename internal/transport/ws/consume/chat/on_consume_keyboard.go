@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
-	"voo.su/internal/entity"
-	"voo.su/pkg/core/socket"
+	"voo.su/internal/constant"
 	"voo.su/pkg/logger"
+	"voo.su/pkg/socket"
 )
 
 type ConsumeDialogKeyboard struct {
@@ -28,7 +28,7 @@ func (h *Handler) onConsumeDialogKeyboard(ctx context.Context, body []byte) {
 
 	c := socket.NewSenderContent()
 	c.SetReceive(ids...)
-	c.SetMessage(entity.PushEventImMessageKeyboard, map[string]any{
+	c.SetMessage(constant.PushEventImMessageKeyboard, map[string]any{
 		"sender_id":   in.SenderID,
 		"receiver_id": in.ReceiverID,
 	})

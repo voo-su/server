@@ -4,15 +4,15 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type Bot struct {
-	core.Repo[model.Bot]
+	repo.Repo[model.Bot]
 }
 
 func NewBot(db *gorm.DB) *Bot {
-	return &Bot{Repo: core.NewRepo[model.Bot](db)}
+	return &Bot{Repo: repo.NewRepo[model.Bot](db)}
 }
 
 func (r *Bot) GetLoginBot(ctx context.Context) (*model.Bot, error) {

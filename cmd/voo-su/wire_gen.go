@@ -12,11 +12,10 @@ import (
 	"voo.su/internal/cli/handler/cron"
 	"voo.su/internal/cli/handler/queue"
 	"voo.su/internal/config"
-	"voo.su/internal/logic"
+	"voo.su/internal/domain/logic"
 	"voo.su/internal/provider"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
-	"voo.su/internal/service"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/http/handler"
 	"voo.su/internal/transport/http/handler/bot"
@@ -30,6 +29,7 @@ import (
 	handler2 "voo.su/internal/transport/ws/handler"
 	"voo.su/internal/transport/ws/process"
 	router2 "voo.su/internal/transport/ws/router"
+	"voo.su/internal/usecase"
 )
 
 // Injectors from wire.go:
@@ -45,15 +45,15 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	groupChat := repo.NewGroupChat(db)
 	emailClient := provider.NewEmailClient(conf)
 	user := repo.NewUser(db)
-	authService := service.NewAuthService(smsStorage, contact, groupChatMember, groupChat, conf, emailClient, user)
+	authUseCase := usecase.NewAuthUseCase(smsStorage, contact, groupChatMember, groupChat, conf, emailClient, user)
 	jwtTokenStorage := cache.NewTokenSessionStorage(client)
 	redisLock := cache.NewRedisLock(client)
 	source := repo.NewSource(db, client)
 	httpClient := provider.NewHttpClient()
 	requestClient := provider.NewRequestClient(httpClient)
-	ipAddressService := service.NewIpAddressService(source, conf, requestClient)
-	dialog := repo.NewDialog(db)
-	chatService := service.NewChatService(source, dialog, groupChatMember)
+	ipAddressUseCase := usecase.NewIpAddressUseCase(source, conf, requestClient)
+	chat := repo.NewChat(db)
+	chatUseCase := usecase.NewChatUseCase(source, chat, groupChatMember)
 	repoBot := repo.NewBot(db)
 	sequence := cache.NewSequence(client)
 	repoSequence := repo.NewSequence(db, sequence)
@@ -67,7 +67,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	serverStorage := cache.NewSidStorage(client)
 	clientStorage := cache.NewClientStorage(conf, client, serverStorage)
 	message := repo.NewMessage(db)
-	messageService := &service.MessageService{
+	messageUseCase := &usecase.MessageUseCase{
 		Source:              source,
 		MessageForwardLogic: messageForwardLogic,
 		GroupChatMemberRepo: groupChatMember,
@@ -86,116 +86,117 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	userSession := repo.NewUserSession(db)
 	auth := &v1.Auth{
 		Conf:               conf,
-		AuthService:        authService,
+		AuthUseCase:        authUseCase,
 		JwtTokenStorage:    jwtTokenStorage,
 		RedisLock:          redisLock,
-		IpAddressService:   ipAddressService,
-		ChatService:        chatService,
+		IpAddressUseCase:   ipAddressUseCase,
+		ChatUseCase:        chatUseCase,
 		BotRepo:            repoBot,
-		MessageSendService: messageService,
+		MessageSendUseCase: messageUseCase,
 		UserSession:        userSession,
 	}
+	userUseCase := usecase.NewUserUseCase(source, user)
 	account := &v1.Account{
-		UserRepo: user,
+		UserUseCase: userUseCase,
 	}
-	contactService := service.NewContactService(source, contact)
+	contactUseCase := usecase.NewContactUseCase(source, contact)
 	v1Contact := &v1.Contact{
-		ContactService:     contactService,
+		ContactUseCase:     contactUseCase,
 		ClientStorage:      clientStorage,
-		ChatService:        chatService,
-		MessageSendService: messageService,
+		ChatUseCase:        chatUseCase,
+		MessageSendUseCase: messageUseCase,
 		ContactRepo:        contact,
 		UserRepo:           user,
-		DialogRepo:         dialog,
+		ChatRepo:           chat,
 	}
-	contactRequestService := service.NewContactApplyService(source)
+	contactRequestUseCase := usecase.NewContactRequestUseCase(source)
 	contactRequest := &v1.ContactRequest{
-		ContactRequestService: contactRequestService,
-		ContactService:        contactService,
-		MessageSendService:    messageService,
+		ContactRequestUseCase: contactRequestUseCase,
+		ContactUseCase:        contactUseCase,
+		MessageSendUseCase:    messageUseCase,
 		ContactRepo:           contact,
 	}
-	groupChatService := service.NewGroupChatService(source, groupChat, groupChatMember, relation, repoSequence)
-	chat := &v1.Chat{
-		ChatService:      chatService,
+	groupChatUseCase := usecase.NewGroupChatUseCase(source, groupChat, groupChatMember, relation, repoSequence)
+	v1Chat := &v1.Chat{
+		ChatUseCase:      chatUseCase,
 		RedisLock:        redisLock,
 		ClientStorage:    clientStorage,
 		MessageStorage:   messageStorage,
-		ContactService:   contactService,
+		ContactUseCase:   contactUseCase,
 		UnreadStorage:    unreadStorage,
 		ContactRemark:    contactRemark,
-		GroupChatService: groupChatService,
-		AuthService:      authService,
+		GroupChatService: groupChatUseCase,
+		AuthUseCase:      authUseCase,
 		ContactRepo:      contact,
 		UserRepo:         user,
 		GroupChatRepo:    groupChat,
 	}
-	groupChatMemberService := service.NewGroupMemberService(source, groupChatMember)
+	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(source, groupChatMember)
 	v1Message := &v1.Message{
-		ChatService:            chatService,
-		AuthService:            authService,
-		MessageSendService:     messageService,
+		ChatUseCase:            chatUseCase,
+		AuthUseCase:            authUseCase,
+		MessageSendUseCase:     messageUseCase,
 		Filesystem:             filesystem,
-		MessageService:         messageService,
-		GroupChatMemberService: groupChatMemberService,
+		MessageUseCase:         messageUseCase,
+		GroupChatMemberUseCase: groupChatMemberUseCase,
 		GroupMemberRepo:        groupChatMember,
 		MessageRepo:            message,
 	}
 	publish := &v1.Publish{
-		AuthService:        authService,
-		MessageSendService: messageService,
+		AuthUseCase:        authUseCase,
+		MessageSendUseCase: messageUseCase,
 	}
-	splitService := service.NewSplitService(source, split, conf, filesystem)
+	splitUseCase := usecase.NewSplitUseCase(source, split, conf, filesystem)
 	upload := &v1.Upload{
 		Conf:         conf,
 		Filesystem:   filesystem,
-		SplitService: splitService,
+		SplitUseCase: splitUseCase,
 	}
 	v1GroupChat := &v1.GroupChat{
 		Repo:                   source,
 		UserRepo:               user,
 		GroupChatRepo:          groupChat,
 		GroupChatMemberRepo:    groupChatMember,
-		DialogRepo:             dialog,
-		GroupChatService:       groupChatService,
-		GroupChatMemberService: groupChatMemberService,
-		ChatService:            chatService,
-		ContactService:         contactService,
-		MessageSendService:     messageService,
+		ChatRepo:               chat,
+		GroupChatUseCase:       groupChatUseCase,
+		GroupChatMemberUseCase: groupChatMemberUseCase,
+		ChatUseCase:            chatUseCase,
+		ContactUseCase:         contactUseCase,
+		MessageSendUseCase:     messageUseCase,
 		RedisLock:              redisLock,
 	}
 	groupChatRequestStorage := cache.NewGroupChatRequestStorage(client)
 	groupChatRequest := repo.NewGroupChatApply(db)
-	groupChatRequestService := service.NewGroupRequestService(source, groupChatRequest)
+	groupChatRequestUseCase := usecase.NewGroupRequestUseCase(source, groupChatRequest)
 	v1GroupChatRequest := &v1.GroupChatRequest{
 		GroupRequestStorage:     groupChatRequestStorage,
 		GroupChatRepo:           groupChat,
 		GroupChatRequestRepo:    groupChatRequest,
 		GroupMemberRepo:         groupChatMember,
-		GroupChatRequestService: groupChatRequestService,
-		GroupChatMemberService:  groupChatMemberService,
-		GroupChatService:        groupChatService,
+		GroupChatRequestUseCase: groupChatRequestUseCase,
+		GroupChatMemberUseCase:  groupChatMemberUseCase,
+		GroupChatUseCase:        groupChatUseCase,
 		Redis:                   client,
 	}
 	sticker := repo.NewSticker(db)
-	stickerService := service.NewStickerService(source, sticker, filesystem)
+	stickerUseCase := usecase.NewStickerUseCase(source, sticker, filesystem)
 	v1Sticker := &v1.Sticker{
 		StickerRepo:    sticker,
 		Filesystem:     filesystem,
-		StickerService: stickerService,
+		StickerUseCase: stickerUseCase,
 		RedisLock:      redisLock,
 	}
 	contactFolder := repo.NewContactFolder(db)
-	contactFolderService := service.NewContactFolderService(source, contact, contactFolder)
+	contactFolderUseCase := usecase.NewContactFolderUseCase(source, contact, contactFolder)
 	v1ContactFolder := &v1.ContactFolder{
-		ContactFolderService: contactFolderService,
+		ContactFolderUseCase: contactFolderUseCase,
 	}
 	groupChatAds := repo.NewGroupChatAds(db)
-	groupChatAdsService := service.NewGroupChatAdsService(source, groupChatAds)
+	groupChatAdsUseCase := usecase.NewGroupChatAdsUseCase(source, groupChatAds)
 	v1GroupChatAds := &v1.GroupChatAds{
-		GroupAdsService:     groupChatAdsService,
-		GroupMemberService:  groupChatMemberService,
-		MessageSendService:  messageService,
+		GroupAdsUseCase:     groupChatAdsUseCase,
+		GroupMemberUseCase:  groupChatMemberUseCase,
+		MessageSendUseCase:  messageUseCase,
 		GroupChatMemberRepo: groupChatMember,
 		GroupChatAdsRepo:    groupChatAds,
 	}
@@ -204,17 +205,17 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatRepo:       groupChat,
 		GroupChatMemberRepo: groupChatMember,
 	}
-	botService := service.NewBotService(source, repoBot, user)
+	botUseCase := usecase.NewBotUseCase(source, repoBot, user)
 	v1Bot := &v1.Bot{
-		BotService:         botService,
-		MessageSendService: messageService,
+		BotUseCase:         botUseCase,
+		MessageSendUseCase: messageUseCase,
 	}
 	v1Handler := &v1.Handler{
 		Auth:             auth,
 		Account:          account,
 		Contact:          v1Contact,
 		ContactRequest:   contactRequest,
-		Chat:             chat,
+		Chat:             v1Chat,
 		Message:          v1Message,
 		MessagePublish:   publish,
 		Upload:           upload,
@@ -227,8 +228,8 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Bot:              v1Bot,
 	}
 	botMessage := &bot.Message{
-		MessageSendService: messageService,
-		BotService:         botService,
+		MessageSendUseCase: messageUseCase,
+		BotUseCase:         botUseCase,
 	}
 	botHandler := &bot.Handler{
 		Message: botMessage,
@@ -254,7 +255,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	relation := cache.NewRelation(client)
 	groupChatMember := repo.NewGroupMember(db, relation)
 	source := repo.NewSource(db, client)
-	groupChatMemberService := service.NewGroupMemberService(source, groupChatMember)
+	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(source, groupChatMember)
 	sequence := cache.NewSequence(client)
 	repoSequence := repo.NewSequence(db, sequence)
 	messageForwardLogic := logic.NewMessageForwardLogic(db, repoSequence)
@@ -266,7 +267,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	messageStorage := cache.NewMessageStorage(client)
 	message := repo.NewMessage(db)
 	repoBot := repo.NewBot(db)
-	messageService := &service.MessageService{
+	messageUseCase := &usecase.MessageUseCase{
 		Source:              source,
 		MessageForwardLogic: messageForwardLogic,
 		GroupChatMemberRepo: groupChatMember,
@@ -282,13 +283,13 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 		MessageRepo:         message,
 		BotRepo:             repoBot,
 	}
-	chatHandler := chat.NewHandler(client, groupChatMemberService, messageService)
+	chatHandler := chat.NewHandler(client, groupChatMemberUseCase, messageUseCase)
 	chatEvent := &event.ChatEvent{
 		Redis:                  client,
 		Conf:                   conf,
 		RoomStorage:            roomStorage,
 		GroupChatMemberRepo:    groupChatMember,
-		GroupChatMemberService: groupChatMemberService,
+		GroupChatMemberUseCase: groupChatMemberUseCase,
 		Handler:                chatHandler,
 	}
 	chatChannel := &handler2.ChatChannel{
@@ -302,12 +303,12 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	jwtTokenStorage := cache.NewTokenSessionStorage(client)
 	engine := router2.NewRouter(conf, handlerHandler, jwtTokenStorage)
 	healthSubscribe := process.NewHealthSubscribe(conf, serverStorage)
-	dialog := repo.NewDialog(db)
-	chatService := service.NewChatService(source, dialog, groupChatMember)
+	repoChat := repo.NewChat(db)
+	chatUseCase := usecase.NewChatUseCase(source, repoChat, groupChatMember)
 	contactRemark := cache.NewContactRemark(client)
 	contact := repo.NewContact(db, contactRemark, relation)
-	contactService := service.NewContactService(source, contact)
-	handler3 := chat2.NewHandler(conf, clientStorage, roomStorage, chatService, messageService, contactService, source)
+	contactUseCase := usecase.NewContactUseCase(source, contact)
+	handler3 := chat2.NewHandler(conf, clientStorage, roomStorage, chatUseCase, messageUseCase, contactUseCase, source)
 	chatSubscribe := consume.NewChatSubscribe(handler3)
 	messageSubscribe := process.NewMessageSubscribe(conf, client, chatSubscribe)
 	subServers := &process.SubServers{

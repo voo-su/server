@@ -5,8 +5,8 @@ import (
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/transport/ws/event"
 	"voo.su/pkg/core"
-	"voo.su/pkg/core/socket"
-	"voo.su/pkg/core/socket/adapter"
+	"voo.su/pkg/socket"
+	"voo.su/pkg/socket/adapter"
 )
 
 type ChatChannel struct {

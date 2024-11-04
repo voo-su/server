@@ -3,11 +3,11 @@ package chat
 import (
 	"context"
 	"log"
-	"voo.su/internal/entity"
+	"voo.su/internal/constant"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core/socket"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/logger"
+	"voo.su/pkg/socket"
 )
 
 type DialogReadMessage struct {
@@ -34,20 +34,20 @@ func (h *Handler) onReadMessage(ctx context.Context, client socket.IClient, data
 		})
 	}
 
-	if err := h.MemberService.Db().Create(items).Error; err != nil {
+	if err := h.MemberUseCase.Db().Create(items).Error; err != nil {
 		logger.Error("Не удалось выполнить пакетное создание MessageRead", err.Error())
 		return
 	}
 
-	if err := h.MemberService.Db().Model(&model.Message{}).
+	if err := h.MemberUseCase.Db().Model(&model.Message{}).
 		Where("msg_id in ? and receiver_id = ? and is_read = 0", in.Content.MsgIds, client.Uid()).
 		Update("is_read", 1).Error; err != nil {
 		log.Println("Чат onReadMessage ошибка: ", err)
 		return
 	}
 
-	h.Redis.Publish(ctx, entity.ImTopicChat, jsonutil.Encode(map[string]any{
-		"event": entity.SubEventImMessageRead,
+	h.Redis.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
+		"event": constant.SubEventImMessageRead,
 		"data": jsonutil.Encode(map[string]any{
 			"sender_id":   client.Uid(),
 			"receiver_id": in.Content.ReceiverId,

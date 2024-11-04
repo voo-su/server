@@ -23,17 +23,3 @@ type GroupChatAds struct {
 func (GroupChatAds) TableName() string {
 	return "group_chat_ads"
 }
-
-type SearchAdsItem struct {
-	Id           int       `json:"id" grom:"column:id"`
-	CreatorId    int       `json:"creator_id"`
-	Title        string    `json:"title"`
-	Content      string    `json:"content"`
-	IsTop        int       `json:"is_top"`
-	IsConfirm    int       `json:"is_confirm"`
-	ConfirmUsers string    `json:"confirm_users"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	Avatar       string    `json:"avatar"`
-	Username     string    `json:"username"`
-}

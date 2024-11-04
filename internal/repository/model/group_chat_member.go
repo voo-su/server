@@ -2,13 +2,6 @@ package model
 
 import "time"
 
-const (
-	GroupMemberQuitStatusYes = 1
-	GroupMemberQuitStatusNo  = 0
-	GroupMemberMuteStatusYes = 1
-	GroupMemberMuteStatusNo  = 0
-)
-
 type GroupChatMember struct {
 	Id      int `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
 	GroupId int `gorm:"column:group_id;default:0;NOT NULL" json:"group_id"`
@@ -25,16 +18,4 @@ type GroupChatMember struct {
 
 func (GroupChatMember) TableName() string {
 	return "group_chat_members"
-}
-
-type MemberItem struct {
-	Id       string `json:"id"`
-	UserId   int    `json:"user_id"`
-	Avatar   string `json:"avatar"`
-	Username string `json:"username"`
-	Gender   int    `json:"gender"`
-	About    string `json:"about"`
-	Leader   int    `json:"leader"`
-	IsMute   int    `json:"is_mute"`
-	//UserCard string `json:"user_card"`
 }
