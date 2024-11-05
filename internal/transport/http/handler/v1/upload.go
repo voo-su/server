@@ -38,7 +38,7 @@ func (u *Upload) Avatar(ctx *core.Context) error {
 	})
 }
 
-func (u *Upload) Image(ctx *core.Context) error {
+func (u *Upload) Upload(ctx *core.Context) error {
 	file, err := ctx.Context.FormFile("file")
 	if err != nil {
 		return ctx.InvalidParams("Не удалось загрузить файл!")

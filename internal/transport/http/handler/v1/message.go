@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"bytes"
 	"net/http"
 	"time"
 	v1Pb "voo.su/api/http/pb/v1"
@@ -11,10 +10,8 @@ import (
 	"voo.su/pkg/core"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/minio"
-	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
-	"voo.su/pkg/utils"
 )
 
 type Message struct {
@@ -25,103 +22,6 @@ type Message struct {
 	MessageUseCase         *usecase.MessageUseCase
 	GroupChatUseCase       *usecase.GroupChatUseCase
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
-}
-
-type ImageMessageRequest struct {
-	DialogType int `form:"dialog_type" json:"dialog_type" binding:"required,oneof=1 2" label:"dialog_type"`
-	ReceiverId int `form:"receiver_id" json:"receiver_id" binding:"required,numeric,gt=0" label:"receiver_id"`
-}
-
-func (c *Message) Image(ctx *core.Context) error {
-	params := &ImageMessageRequest{}
-	if err := ctx.Context.ShouldBind(params); err != nil {
-		return ctx.InvalidParams(err)
-	}
-
-	file, err := ctx.Context.FormFile("image")
-	if err != nil {
-		return ctx.InvalidParams("поле 'image' обязательно!")
-	}
-
-	if !sliceutil.Include(strutil.FileSuffix(file.Filename), []string{"png", "jpg", "jpeg", "gif", "webp", "svg", "PNG", "JPG", "JPEG", "GIF", "WEBP", "SVG"}) {
-		return ctx.InvalidParams("Некорректный формат загружаемого файла. Поддерживаются только форматы: png, jpg, jpeg, svg, gif и webp.")
-	}
-
-	if file.Size > 5<<20 {
-		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5МБ")
-	}
-
-	if err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
-		DialogType:        params.DialogType,
-		UserId:            ctx.UserId(),
-		ReceiverId:        params.ReceiverId,
-		IsVerifyGroupMute: true,
-	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
-	}
-
-	stream, err := minio.ReadMultipartStream(file)
-	if err != nil {
-		return err
-	}
-
-	meta := utils.ReadImageMeta(bytes.NewReader(stream))
-	ext := strutil.FileSuffix(file.Filename)
-
-	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
-	if err = c.Minio.Write(c.Minio.BucketPublicName(), src, stream); err != nil {
-		return ctx.ErrorBusiness("Ошибка загрузки")
-	}
-
-	if err := c.MessageSendUseCase.SendImage(ctx.Ctx(), ctx.UserId(), &v1Pb.ImageMessageRequest{
-		Url:    c.Minio.PublicUrl(c.Minio.BucketPublicName(), src),
-		Width:  int32(meta.Width),
-		Height: int32(meta.Height),
-		Size:   int32(file.Size),
-		Receiver: &v1Pb.MessageReceiver{
-			DialogType: int32(params.DialogType),
-			ReceiverId: int32(params.ReceiverId),
-		},
-	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
-	}
-
-	return ctx.Success(nil)
-}
-
-type FileMessageRequest struct {
-	DialogType int    `form:"dialog_type" json:"dialog_type" binding:"required,oneof=1 2" label:"dialog_type"`
-	ReceiverId int    `form:"receiver_id" json:"receiver_id" binding:"required,numeric,gt=0" label:"receiver_id"`
-	UploadId   string `form:"upload_id" json:"upload_id" binding:"required"`
-}
-
-func (c *Message) File(ctx *core.Context) error {
-	params := &FileMessageRequest{}
-	if err := ctx.Context.ShouldBind(params); err != nil {
-		return ctx.InvalidParams(err)
-	}
-
-	uid := ctx.UserId()
-	if err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
-		DialogType:        params.DialogType,
-		UserId:            uid,
-		ReceiverId:        params.ReceiverId,
-		IsVerifyGroupMute: true,
-	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
-	}
-
-	if err := c.MessageSendUseCase.SendFile(ctx.Ctx(), uid, &v1Pb.FileMessageRequest{
-		UploadId: params.UploadId,
-		Receiver: &v1Pb.MessageReceiver{
-			DialogType: int32(params.DialogType),
-			ReceiverId: int32(params.ReceiverId),
-		},
-	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
-	}
-
-	return ctx.Success(nil)
 }
 
 type VoteMessageRequest struct {
@@ -337,41 +237,6 @@ func (c *Message) Download(ctx *core.Context) error {
 	)
 
 	return nil
-}
-
-type StickerMessageRequest struct {
-	DialogType int `form:"dialog_type" json:"dialog_type" binding:"required,oneof=1 2" label:"dialog_type"`
-	ReceiverId int `form:"receiver_id" json:"receiver_id" binding:"required,numeric,gt=0" label:"receiver_id"`
-	StickerId  int `form:"sticker_id" json:"sticker_id" binding:"required,numeric,gt=0"`
-}
-
-func (c *Message) Sticker(ctx *core.Context) error {
-	params := &StickerMessageRequest{}
-	if err := ctx.Context.ShouldBind(params); err != nil {
-		return ctx.InvalidParams(err)
-	}
-
-	uid := ctx.UserId()
-	if err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
-		DialogType:        params.DialogType,
-		UserId:            uid,
-		ReceiverId:        params.ReceiverId,
-		IsVerifyGroupMute: true,
-	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
-	}
-
-	if err := c.MessageSendUseCase.SendSticker(ctx.Ctx(), uid, &v1Pb.StickerMessageRequest{
-		StickerId: int32(params.StickerId),
-		Receiver: &v1Pb.MessageReceiver{
-			DialogType: int32(params.DialogType),
-			ReceiverId: int32(params.ReceiverId),
-		},
-	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
-	}
-
-	return ctx.Success(nil)
 }
 
 type CollectMessageRequest struct {

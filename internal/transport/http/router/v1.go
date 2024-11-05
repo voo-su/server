@@ -84,16 +84,13 @@ func NewV1(router *gin.Engine, conf *config.Config, handler *handler.Handler, se
 		{
 			message.GET("", core.HandlerFunc(handler.V1.Message.GetRecords))
 			message.POST("/send", core.HandlerFunc(handler.V1.MessagePublish.Publish))
-			message.POST("/file", core.HandlerFunc(handler.V1.Message.File))
 			message.GET("/file/download", core.HandlerFunc(handler.V1.Message.Download))
-			message.POST("/image", core.HandlerFunc(handler.V1.Message.Image))
 			message.POST("/delete", core.HandlerFunc(handler.V1.Message.Delete))
 			message.POST("/revoke", core.HandlerFunc(handler.V1.Message.Revoke))
 			message.POST("/vote", core.HandlerFunc(handler.V1.Message.Vote))
 			message.POST("/vote/handle", core.HandlerFunc(handler.V1.Message.HandleVote))
-			message.POST("/stickers", core.HandlerFunc(handler.V1.Message.Sticker))
 			message.GET("/stickers", core.HandlerFunc(handler.V1.Sticker.CollectList))
-			message.POST("/stickers/create", core.HandlerFunc(handler.V1.Sticker.Upload))
+			message.POST("/stickers", core.HandlerFunc(handler.V1.Sticker.Upload))
 			message.POST("/stickers/delete", core.HandlerFunc(handler.V1.Sticker.DeleteCollect))
 			message.GET("/stickers/system/list", core.HandlerFunc(handler.V1.Sticker.SystemList))
 			message.POST("/stickers/system/install", core.HandlerFunc(handler.V1.Sticker.SetSystemSticker))
@@ -101,10 +98,10 @@ func NewV1(router *gin.Engine, conf *config.Config, handler *handler.Handler, se
 		}
 		upload := v1.Group("/upload").Use(authorize)
 		{
-			upload.POST("/avatar", core.HandlerFunc(handler.V1.Upload.Avatar))
-			upload.POST("/image", core.HandlerFunc(handler.V1.Upload.Image))
+			upload.POST("", core.HandlerFunc(handler.V1.Upload.Upload))
 			upload.POST("/multipart/initiate", core.HandlerFunc(handler.V1.Upload.InitiateMultipart))
 			upload.POST("/multipart", core.HandlerFunc(handler.V1.Upload.MultipartUpload))
+			upload.POST("/avatar", core.HandlerFunc(handler.V1.Upload.Avatar))
 		}
 		bot := v1.Group("/bots").Use(authorize)
 		{
