@@ -11,6 +11,7 @@ import (
 	"voo.su/internal/provider"
 	"voo.su/internal/repository"
 	"voo.su/internal/repository/cache"
+	"voo.su/internal/service"
 	"voo.su/internal/transport/grpc"
 	"voo.su/internal/transport/http"
 	"voo.su/internal/transport/ws"
@@ -32,6 +33,8 @@ var providerSet = wire.NewSet(
 	logic.ProviderSet,
 	usecase.ProviderSet,
 	repository.ProviderSet,
+
+	service.NewPushService,
 )
 
 func NewHttpInjector(conf *config.Config) *http.AppProvider {

@@ -17,6 +17,7 @@ import (
 	"voo.su/internal/repository"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/repo"
+	"voo.su/internal/service"
 	"voo.su/internal/transport/grpc"
 	handler3 "voo.su/internal/transport/grpc/handler"
 	"voo.su/internal/transport/grpc/middleware"
@@ -435,4 +436,4 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 
 // wire.go:
 
-var providerSet = wire.NewSet(provider.NewPostgresqlClient, provider.NewClickHouseClient, provider.NewRedisClient, provider.NewHttpClient, provider.NewEmailClient, provider.NewMinioClient, provider.NewRequestClient, wire.Struct(new(provider.Providers), "*"), cache.ProviderSet, logic.ProviderSet, usecase.ProviderSet, repository.ProviderSet)
+var providerSet = wire.NewSet(provider.NewPostgresqlClient, provider.NewClickHouseClient, provider.NewRedisClient, provider.NewHttpClient, provider.NewEmailClient, provider.NewMinioClient, provider.NewRequestClient, wire.Struct(new(provider.Providers), "*"), cache.ProviderSet, logic.ProviderSet, usecase.ProviderSet, repository.ProviderSet, service.NewPushService)
