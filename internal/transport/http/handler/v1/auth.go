@@ -33,7 +33,7 @@ func (a *Auth) Login(ctx *core.Context) error {
 	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(constant.ExpiresTime))
-	token := jwt.GenerateToken("auth", a.Conf.Jwt.Secret, &jwt.Options{
+	token := jwt.GenerateToken("auth", a.Conf.App.Jwt.Secret, &jwt.Options{
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		ID:        params.Email,
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -59,7 +59,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		return ctx.InvalidParams("Неверный код")
 	}
 
-	claims, err := jwt.ParseToken(params.Token, a.Conf.Jwt.Secret)
+	claims, err := jwt.ParseToken(params.Token, a.Conf.App.Jwt.Secret)
 	if err != nil {
 		return ctx.InvalidParams("Неверный токен")
 	}
@@ -96,8 +96,8 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		})
 	}
 
-	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.Jwt.ExpiresTime))
-	token := jwt.GenerateToken("api", a.Conf.Jwt.Secret, &jwt.Options{
+	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
+	token := jwt.GenerateToken("api", a.Conf.App.Jwt.Secret, &jwt.Options{
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		ID:        strconv.Itoa(user.Id),
 		Issuer:    "web",
@@ -117,7 +117,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 	return ctx.Success(&v1Pb.AuthVerifyResponse{
 		Type:        "Bearer",
 		AccessToken: token,
-		ExpiresIn:   int32(a.Conf.Jwt.ExpiresTime),
+		ExpiresIn:   int32(a.Conf.App.Jwt.ExpiresTime),
 	})
 }
 

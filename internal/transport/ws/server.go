@@ -60,8 +60,8 @@ func Run(ctx *cli.Context, app *AppProvider) error {
 
 	log.Printf("ID сервера: %s", app.Conf.ServerId())
 	log.Printf("PID сервера: %d", os.Getpid())
-	log.Printf("Порт прослушивания Websocket: %d", app.Conf.Server.Websocket)
-	log.Printf("Порт прослушивания TCP: %d", app.Conf.Server.Tcp)
+	log.Printf("Websocket: %s", app.Conf.Server.Websocket.GetWebsocket())
+	log.Printf("TCP: %s", app.Conf.Server.Tcp.GetTcp())
 
 	go NewTcpServer(app)
 
@@ -70,7 +70,7 @@ func Run(ctx *cli.Context, app *AppProvider) error {
 
 func start(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppProvider) error {
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", app.Conf.Server.Websocket),
+		Addr:    app.Conf.Server.Websocket.GetWebsocket(),
 		Handler: app.Engine,
 	}
 	eg.Go(func() error {
@@ -109,7 +109,7 @@ func start(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppPr
 }
 
 func NewTcpServer(app *AppProvider) {
-	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", app.Conf.Server.Tcp))
+	listener, err := net.Listen("tcp", app.Conf.Server.Tcp.GetTcp())
 	if err != nil {
 		panic(err)
 	}

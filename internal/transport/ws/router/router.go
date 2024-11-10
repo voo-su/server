@@ -23,7 +23,7 @@ func NewRouter(conf *config.Config, handle *handler.Handler, session *cache.JwtT
 		})
 	}))
 
-	authorize := middleware.Auth(conf.Jwt.Secret, "api", session)
+	authorize := middleware.Auth(conf.App.Jwt.Secret, "api", session)
 
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, response.Response{

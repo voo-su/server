@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
@@ -14,12 +13,12 @@ import (
 
 func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.JwtTokenStorage) *gin.Engine {
 	router := gin.New()
-	src, err := os.OpenFile(fmt.Sprintf("%s/http_access.log", conf.App.Log), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	src, err := os.OpenFile(conf.App.LogPath("http_access.log"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}
 
-	router.Use(middleware.Cors(conf.Cors))
+	router.Use(middleware.Cors(conf.App.Cors))
 	router.Use(middleware.AccessLog(src))
 
 	router.Use(gin.RecoveryWithWriter(gin.DefaultWriter, func(c *gin.Context, err any) {

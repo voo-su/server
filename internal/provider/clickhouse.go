@@ -13,7 +13,7 @@ func NewClickHouseClient(conf *config.Config) clickHouseDriver.Conn {
 	if err != nil {
 		panic(fmt.Errorf("ошибка подключения к базе: %v", err))
 	}
-	fmt.Println(12)
+
 	ctx := context.Background()
 	if err := conn.Ping(ctx); err != nil {
 		if exception, ok := err.(*clickhouse.Exception); ok {

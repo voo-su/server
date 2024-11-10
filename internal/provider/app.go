@@ -21,19 +21,20 @@ type Command struct {
 }
 
 func NewApp() *App {
-	app := &cli.App{
-		Name: "Voo.su",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "config",
-				Aliases:     []string{"c"},
-				Value:       "/etc/voo-su/",
-				Usage:       "Путь к папке с файлами конфигурации",
-				DefaultText: "/etc/voo-su/",
+	return &App{
+		app: &cli.App{
+			Name: "Voo.su",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "config",
+					Aliases:     []string{"c"},
+					Value:       "/etc/voo-su/voo-su.yaml",
+					Usage:       "Путь к файлу конфигурации",
+					DefaultText: "/etc/voo-su/voo-su.yaml",
+				},
 			},
 		},
 	}
-	return &App{app: app}
 }
 
 func (c *App) Register(cm Command) {
@@ -50,8 +51,7 @@ func (c *App) createCommand(cm Command) *cli.Command {
 
 	if cm.Action != nil {
 		cd.Action = func(ctx *cli.Context) error {
-			conf := config.LoadConfig(ctx.String("config"))
-			return cm.Action(ctx, conf)
+			return cm.Action(ctx, config.New(ctx.String("config")))
 		}
 	}
 

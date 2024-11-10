@@ -61,7 +61,7 @@ func NewAuthHandler(
 
 func (a *AuthHandler) Login(ctx context.Context, in *authPb.AuthLoginRequest) (*authPb.AuthLoginResponse, error) {
 	expiresAt := time.Now().Add(time.Second * time.Duration(constant.ExpiresTime))
-	token := jwt.GenerateToken("grpc-auth", a.Conf.Jwt.Secret, &jwt.Options{
+	token := jwt.GenerateToken("grpc-auth", a.Conf.App.Jwt.Secret, &jwt.Options{
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		ID:        in.Email,
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -100,7 +100,7 @@ func (a *AuthHandler) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) 
 		return nil, status.Error(codes.Unauthenticated, "Неверный код")
 	}
 
-	claims, err := jwt.ParseToken(in.Token, a.Conf.Jwt.Secret)
+	claims, err := jwt.ParseToken(in.Token, a.Conf.App.Jwt.Secret)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "Неверный токен")
 	}
@@ -149,8 +149,8 @@ func (a *AuthHandler) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) 
 		})
 	}
 
-	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.Jwt.ExpiresTime))
-	token := jwt.GenerateToken("grpc-auth", a.Conf.Jwt.Secret, &jwt.Options{
+	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
+	token := jwt.GenerateToken("grpc-auth", a.Conf.App.Jwt.Secret, &jwt.Options{
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		ID:        strconv.Itoa(user.Id),
 		Issuer:    "grpc",
@@ -170,6 +170,6 @@ func (a *AuthHandler) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) 
 	return &authPb.AuthVerifyResponse{
 		Type:        "Bearer",
 		AccessToken: token,
-		ExpiresIn:   int32(a.Conf.Jwt.ExpiresTime),
+		ExpiresIn:   int32(a.Conf.App.Jwt.ExpiresTime),
 	}, nil
 }

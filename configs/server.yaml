@@ -1,8 +1,0 @@
-server:
-  http: xxxx
-  ws: xxxx
-  tcp: xxxx
-  grpc_host: "127.0.0.1"
-  grpc_port: xxxx
-  grpc_protocol: "tcp"
-

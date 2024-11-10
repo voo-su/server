@@ -1,67 +1,63 @@
 package config
 
-import (
-	"fmt"
-	"gopkg.in/yaml.v3"
-	"os"
-	"time"
-	"voo.su/pkg/encrypt"
-	"voo.su/pkg/strutil"
-)
+import "fmt"
 
 type App struct {
-	Env string `yaml:"env"`
-	Log string `yaml:"log"`
+	Env  string `yaml:"env"`
+	Jwt  *Jwt   `yaml:"jwt"`
+	Cors *Cors  `yaml:"cors"`
 }
 
-type Config struct {
-	sid        string
-	App        *App        `yaml:"app"`
-	Server     *Server     `yaml:"server"`
-	Postgresql *Postgresql `yaml:"postgresql"`
-	Redis      *Redis      `yaml:"redis"`
-	ClickHouse ClickHouse  `yaml:"clickhouse"`
-	Jwt        *Jwt        `yaml:"jwt"`
-	Cors       *Cors       `yaml:"cors"`
-	Minio      *Minio      `yaml:"minio"`
-	Email      *Email      `yaml:"email"`
+func (a App) LogPath(filename string) string {
+	return fmt.Sprintf("./runtime/logs/%s", filename)
 }
 
-func loadFile(filename string, target interface{}) error {
-	content, err := os.ReadFile(filename)
-	if err != nil {
-		return fmt.Errorf("ошибка чтения файла: %v", err)
-	}
-
-	if err := yaml.Unmarshal(content, target); err != nil {
-		return fmt.Errorf("ошибка разбора YAML: %v", err)
-	}
-
-	return nil
+func (a *App) GetOrigin() string {
+	return a.Env
 }
 
-// LoadConfig загружает конфигурацию из всех YAML файлов
-func LoadConfig(configPath string) *Config {
-	conf := &Config{}
-	filenames := []string{
-		configPath + "app.yaml",
-		configPath + "server.yaml",
-		configPath + "database.yaml",
-		configPath + "auth.yaml",
-		configPath + "storage.yaml",
-		configPath + "email.yaml",
-	}
-
-	for _, filename := range filenames {
-		if err := loadFile(filename, conf); err != nil {
-			fmt.Printf("Предупреждение: Не удалось загрузить конфигурацию из %s: %v\n", filename, err)
-		}
-	}
-
-	conf.sid = encrypt.Md5(fmt.Sprintf("%d%s", time.Now().UnixNano(), strutil.Random(6)))
-	return conf
+type Cors struct {
+	Origin      string `yaml:"origin"`
+	Headers     string `yaml:"headers"`
+	Methods     string `yaml:"methods"`
+	Credentials string `yaml:"credentials"`
+	MaxAge      string `yaml:"max_age"`
 }
 
-func (c *Config) ServerId() string {
-	return c.sid
+func (c *Cors) GetOrigin() string {
+	return c.Origin
+}
+
+func (c *Cors) GetHeaders() string {
+	return c.Headers
+}
+
+func (c *Cors) GetMethods() string {
+	return c.Methods
+}
+
+func (c *Cors) GetCredentials() string {
+	return c.Credentials
+}
+
+func (c *Cors) GetMaxAge() string {
+	return c.MaxAge
+}
+
+type Jwt struct {
+	Secret      string `yaml:"secret"`
+	ExpiresTime int64  `yaml:"expires_time"`
+	BufferTime  int64  `yaml:"buffer_time"`
+}
+
+func (j *Jwt) GetSecret() string {
+	return j.Secret
+}
+
+func (j *Jwt) GetExpiresTime() int64 {
+	return j.ExpiresTime
+}
+
+func (j *Jwt) GetBufferTime() int64 {
+	return j.BufferTime
 }

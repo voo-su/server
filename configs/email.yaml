@@ -1,8 +1,0 @@
-email:
-  host: xxx.xxx.xxx.xxx
-  port: 25
-  username:
-  password:
-  from: xxx@xxx.xxx
-  name: Voo.su
-  report: xxx@xxx.xxx

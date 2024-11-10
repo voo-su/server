@@ -1,3 +1,0 @@
-app:
-  env: dev
-  log: ./runtime/log
