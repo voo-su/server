@@ -318,56 +318,6 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	return appProvider
 }
 
-func NewCronInjector(conf *config.Config) *cli.CronProvider {
-	client := provider.NewRedisClient(conf)
-	serverStorage := cache.NewSidStorage(client)
-	clearWsCache := cron.NewClearWsCache(serverStorage)
-	db := provider.NewPostgresqlClient(conf)
-	iMinio := provider.NewMinioClient(conf)
-	clearTmpFile := cron.NewClearTmpFile(db, iMinio)
-	clearExpireServer := cron.NewClearExpireServer(serverStorage)
-	crontab := &cli.Crontab{
-		ClearWsCache:      clearWsCache,
-		ClearTmpFile:      clearTmpFile,
-		ClearExpireServer: clearExpireServer,
-	}
-	cronProvider := &cli.CronProvider{
-		Conf:    conf,
-		Crontab: crontab,
-	}
-	return cronProvider
-}
-
-func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
-	db := provider.NewPostgresqlClient(conf)
-	client := provider.NewRedisClient(conf)
-	emailHandle := queue.EmailHandle{
-		Redis: client,
-	}
-	loginHandle := queue.LoginHandle{
-		Redis: client,
-	}
-	queueJobs := &cli.QueueJobs{
-		EmailHandle: emailHandle,
-		LoginHandle: loginHandle,
-	}
-	queueProvider := &cli.QueueProvider{
-		Conf: conf,
-		DB:   db,
-		Jobs: queueJobs,
-	}
-	return queueProvider
-}
-
-func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
-	db := provider.NewPostgresqlClient(conf)
-	migrateProvider := &cli.MigrateProvider{
-		Conf: conf,
-		DB:   db,
-	}
-	return migrateProvider
-}
-
 func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	tokenMiddleware := middleware.NewTokenMiddleware(conf)
 	grpcMethodService := middleware.NewGrpMethodsService()
@@ -434,6 +384,61 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	return appProvider
 }
 
+func NewCronInjector(conf *config.Config) *cli.CronProvider {
+	client := provider.NewRedisClient(conf)
+	serverStorage := cache.NewSidStorage(client)
+	clearWsCache := cron.NewClearWsCache(serverStorage)
+	db := provider.NewPostgresqlClient(conf)
+	iMinio := provider.NewMinioClient(conf)
+	clearTmpFile := cron.NewClearTmpFile(db, iMinio)
+	clearExpireServer := cron.NewClearExpireServer(serverStorage)
+	crontab := &cli.Crontab{
+		ClearWsCache:      clearWsCache,
+		ClearTmpFile:      clearTmpFile,
+		ClearExpireServer: clearExpireServer,
+	}
+	cronProvider := &cli.CronProvider{
+		Conf:    conf,
+		Crontab: crontab,
+	}
+	return cronProvider
+}
+
+func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
+	db := provider.NewPostgresqlClient(conf)
+	client := provider.NewRedisClient(conf)
+	emailHandle := queue.EmailHandle{
+		Redis: client,
+	}
+	loginHandle := queue.LoginHandle{
+		Redis: client,
+	}
+	queueJobs := &cli.QueueJobs{
+		EmailHandle: emailHandle,
+		LoginHandle: loginHandle,
+	}
+	queueProvider := &cli.QueueProvider{
+		Conf: conf,
+		DB:   db,
+		Jobs: queueJobs,
+	}
+	return queueProvider
+}
+
+func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
+	db := provider.NewPostgresqlClient(conf)
+	migrateProvider := &cli.MigrateProvider{
+		Conf: conf,
+		DB:   db,
+	}
+	return migrateProvider
+}
+
+func NewGenerateInjector(conf *config.Config) *cli.GenerateProvider {
+	generateProvider := &cli.GenerateProvider{}
+	return generateProvider
+}
+
 // wire.go:
 
-var providerSet = wire.NewSet(provider.NewPostgresqlClient, provider.NewClickHouseClient, provider.NewRedisClient, provider.NewHttpClient, provider.NewEmailClient, provider.NewMinioClient, provider.NewRequestClient, wire.Struct(new(provider.Providers), "*"), cache.ProviderSet, logic.ProviderSet, usecase.ProviderSet, repository.ProviderSet, service.NewPushService)
+var providerSet = wire.NewSet(provider.NewPostgresqlClient, provider.NewClickHouseClient, provider.NewRedisClient, provider.NewHttpClient, provider.NewEmailClient, provider.NewMinioClient, provider.NewRequestClient, provider.NewNatsClient, wire.Struct(new(provider.Providers), "*"), cache.ProviderSet, logic.ProviderSet, usecase.ProviderSet, repository.ProviderSet, service.NewPushService)

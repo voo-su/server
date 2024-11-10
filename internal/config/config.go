@@ -13,11 +13,13 @@ type Config struct {
 	sid        string
 	App        *App        `yaml:"app"`
 	Server     *Server     `yaml:"server"`
-	Redis      *Redis      `yaml:"redis"`
 	Postgres   *Postgres   `yaml:"postgres"`
 	ClickHouse *ClickHouse `yaml:"clickhouse"`
 	Minio      *Minio      `yaml:"minio"`
+	Redis      *Redis      `yaml:"redis"`
+	Nats       *Nats       `yaml:"nats"`
 	Email      *Email      `yaml:"email"`
+	Push       *Push       `yaml:"push"`
 }
 
 func New(filename string) *Config {

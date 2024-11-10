@@ -53,6 +53,10 @@ redis:
   auth:
   database: 0
 
+nats:
+  host: xxx.xxx.xxx.xxx
+  port: 4222
+
 email:
   host: xxx.xxx.xxx.xxx
   port: 25
@@ -61,3 +65,8 @@ email:
   from: xxx@xxx.xxx
   name: xxxxxxxxxx
   report: xxx@xxx.xxx
+
+push:
+  web_push:
+    private_key: xxxxxxxxxx
+    public_key: xxxxxxxxxx

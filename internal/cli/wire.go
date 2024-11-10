@@ -25,3 +25,7 @@ var QueueProviderSet = wire.NewSet(
 var MigrateProviderSet = wire.NewSet(
 	wire.Struct(new(MigrateProvider), "*"),
 )
+
+var GenerateProviderSet = wire.NewSet(
+	wire.Struct(new(GenerateProvider), "*"),
+)

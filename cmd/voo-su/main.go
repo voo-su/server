@@ -48,7 +48,7 @@ func NewCronCommand() provider.Command {
 	return provider.Command{
 		Name: "cli-cron",
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
-			logger.InitLogger(conf.App.LogPath("cli_cron.log"), logger.LevelInfo, "cli-cron")
+			logger.InitLogger(conf.App.LogPath("cli-cron.log"), logger.LevelInfo, "cli-cron")
 
 			return cli.Cron(ctx, NewCronInjector(conf))
 		},
@@ -59,7 +59,7 @@ func NewQueueCommand() provider.Command {
 	return provider.Command{
 		Name: "cli-queue",
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
-			logger.InitLogger(conf.App.LogPath("cli_queue.log"), logger.LevelInfo, "cli-queue")
+			logger.InitLogger(conf.App.LogPath("cli-queue.log"), logger.LevelInfo, "cli-queue")
 
 			return cli.Queue(ctx, NewQueueInjector(conf))
 		},
@@ -70,9 +70,20 @@ func NewMigrateCommand() provider.Command {
 	return provider.Command{
 		Name: "cli-migrate",
 		Action: func(ctx *cliV2.Context, conf *config.Config) error {
-			logger.InitLogger(conf.App.LogPath("cli_migrate.log"), logger.LevelInfo, "cli-migrate")
+			logger.InitLogger(conf.App.LogPath("cli-migrate.log"), logger.LevelInfo, "cli-migrate")
 
 			return cli.Migrate(ctx, NewMigrateInjector(conf))
+		},
+	}
+}
+
+func NewGenerateCommand() provider.Command {
+	return provider.Command{
+		Name: "cli-generate",
+		Action: func(ctx *cliV2.Context, conf *config.Config) error {
+			logger.InitLogger(conf.App.LogPath("cli-generate.log"), logger.LevelInfo, "cli-generate")
+
+			return cli.Generate(ctx, NewGenerateInjector(conf))
 		},
 	}
 }
@@ -81,9 +92,10 @@ func main() {
 	app := provider.NewApp()
 	app.Register(NewHttpCommand())
 	app.Register(NewWsCommand())
+	app.Register(NewGrpcCommand())
 	app.Register(NewCronCommand())
 	app.Register(NewQueueCommand())
 	app.Register(NewMigrateCommand())
-	app.Register(NewGrpcCommand())
+	app.Register(NewGenerateCommand())
 	app.Run()
 }

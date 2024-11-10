@@ -2,28 +2,34 @@ package service
 
 import (
 	"fmt"
+	_nats "github.com/nats-io/nats.go"
 	"io/ioutil"
+	"voo.su/pkg/nats"
 	webPush "voo.su/pkg/push/web_push"
 )
 
 type PushService struct {
+	Nats nats.INatsClient
 }
 
 func NewPushService() *PushService {
 	return &PushService{}
 }
 
-func (c *PushService) Generate() {
-	privateKey, publicKey, err := webPush.GenerateVAPIDKeys()
+func (p *PushService) Push() {
+	if err := p.Nats.Publish("web-push", "Test"); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func (p *PushService) Web() {
+	_, err := p.Nats.Subscribe("web-push", func(msg *_nats.Msg) {
+		fmt.Printf("Received message: %s\n", string(msg.Data))
+	})
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(privateKey)
-	fmt.Println(publicKey)
-}
-
-func (c *PushService) Web() {
 	subscription := &webPush.Subscription{
 		Endpoint: "",
 		Keys: webPush.Keys{
