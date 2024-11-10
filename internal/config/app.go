@@ -18,48 +18,32 @@ type Config struct {
 	sid        string
 	App        *App        `yaml:"app"`
 	Server     *Server     `yaml:"server"`
-	Postgresql *Postgresql `yaml:"postgresql"`
-	Redis      *Redis      `yaml:"redis"`
-	ClickHouse ClickHouse  `yaml:"clickhouse"`
 	Jwt        *Jwt        `yaml:"jwt"`
 	Cors       *Cors       `yaml:"cors"`
+	Redis      *Redis      `yaml:"redis"`
+	Postgresql *Postgresql `yaml:"postgresql"`
+	ClickHouse *ClickHouse `yaml:"clickHouse"`
 	Minio      *Minio      `yaml:"minio"`
 	Email      *Email      `yaml:"email"`
 }
 
-func loadFile(filename string, target interface{}) error {
+func New(filename string) *Config {
+	//loc, _ := time.LoadLocation("Europe/Moscow")
+	//time.Local = loc
+
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		return fmt.Errorf("ошибка чтения файла: %v", err)
+		panic(err)
 	}
 
-	if err := yaml.Unmarshal(content, target); err != nil {
-		return fmt.Errorf("ошибка разбора YAML: %v", err)
-	}
-
-	return nil
-}
-
-// LoadConfig загружает конфигурацию из всех YAML файлов
-func LoadConfig(configPath string) *Config {
-	conf := &Config{}
-	filenames := []string{
-		configPath + "app.yaml",
-		configPath + "server.yaml",
-		configPath + "database.yaml",
-		configPath + "auth.yaml",
-		configPath + "storage.yaml",
-		configPath + "email.yaml",
-	}
-
-	for _, filename := range filenames {
-		if err := loadFile(filename, conf); err != nil {
-			fmt.Printf("Предупреждение: Не удалось загрузить конфигурацию из %s: %v\n", filename, err)
-		}
+	var conf Config
+	if yaml.Unmarshal(content, &conf) != nil {
+		panic(fmt.Sprintf("Ошибка при разборе: %v", err))
 	}
 
 	conf.sid = encrypt.Md5(fmt.Sprintf("%d%s", time.Now().UnixNano(), strutil.Random(6)))
-	return conf
+
+	return &conf
 }
 
 func (c *Config) ServerId() string {
