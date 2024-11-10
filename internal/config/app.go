@@ -1,51 +1,63 @@
 package config
 
-import (
-	"fmt"
-	"gopkg.in/yaml.v3"
-	"os"
-	"time"
-	"voo.su/pkg/encrypt"
-	"voo.su/pkg/strutil"
-)
+import "fmt"
 
 type App struct {
-	Env string `yaml:"env"`
-	Log string `yaml:"log"`
+	Env  string `yaml:"env"`
+	Jwt  *Jwt   `yaml:"jwt"`
+	Cors *Cors  `yaml:"cors"`
 }
 
-type Config struct {
-	sid        string
-	App        *App        `yaml:"app"`
-	Server     *Server     `yaml:"server"`
-	Jwt        *Jwt        `yaml:"jwt"`
-	Cors       *Cors       `yaml:"cors"`
-	Redis      *Redis      `yaml:"redis"`
-	Postgresql *Postgresql `yaml:"postgresql"`
-	ClickHouse *ClickHouse `yaml:"clickHouse"`
-	Minio      *Minio      `yaml:"minio"`
-	Email      *Email      `yaml:"email"`
+func (a App) LogPath(filename string) string {
+	return fmt.Sprintf("./runtime/logs/%s", filename)
 }
 
-func New(filename string) *Config {
-	//loc, _ := time.LoadLocation("Europe/Moscow")
-	//time.Local = loc
-
-	content, err := os.ReadFile(filename)
-	if err != nil {
-		panic(err)
-	}
-
-	var conf Config
-	if yaml.Unmarshal(content, &conf) != nil {
-		panic(fmt.Sprintf("Ошибка при разборе: %v", err))
-	}
-
-	conf.sid = encrypt.Md5(fmt.Sprintf("%d%s", time.Now().UnixNano(), strutil.Random(6)))
-
-	return &conf
+func (a *App) GetOrigin() string {
+	return a.Env
 }
 
-func (c *Config) ServerId() string {
-	return c.sid
+type Cors struct {
+	Origin      string `yaml:"origin"`
+	Headers     string `yaml:"headers"`
+	Methods     string `yaml:"methods"`
+	Credentials string `yaml:"credentials"`
+	MaxAge      string `yaml:"max_age"`
+}
+
+func (c *Cors) GetOrigin() string {
+	return c.Origin
+}
+
+func (c *Cors) GetHeaders() string {
+	return c.Headers
+}
+
+func (c *Cors) GetMethods() string {
+	return c.Methods
+}
+
+func (c *Cors) GetCredentials() string {
+	return c.Credentials
+}
+
+func (c *Cors) GetMaxAge() string {
+	return c.MaxAge
+}
+
+type Jwt struct {
+	Secret      string `yaml:"secret"`
+	ExpiresTime int64  `yaml:"expires_time"`
+	BufferTime  int64  `yaml:"buffer_time"`
+}
+
+func (j *Jwt) GetSecret() string {
+	return j.Secret
+}
+
+func (j *Jwt) GetExpiresTime() int64 {
+	return j.ExpiresTime
+}
+
+func (j *Jwt) GetBufferTime() int64 {
+	return j.BufferTime
 }

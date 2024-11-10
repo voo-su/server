@@ -3,7 +3,6 @@ package http
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -27,15 +26,15 @@ func Run(ctx *cli.Context, app *AppProvider) error {
 
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
 
-	log.Printf("HTTP Порт прослушивания: %d", app.Conf.Server.Http)
 	log.Printf("HTTP PID сервера: %d", os.Getpid())
+	log.Printf("HTTP: %s", app.Conf.Server.Http.GetHttp())
 
 	return run(c, eg, groupCtx, app)
 }
 
 func run(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppProvider) error {
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", app.Conf.Server.Http),
+		Addr:    app.Conf.Server.Http.GetHttp(),
 		Handler: app.Engine,
 	}
 

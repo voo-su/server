@@ -10,7 +10,7 @@ import (
 )
 
 func NewV1(router *gin.Engine, conf *config.Config, handler *handler.Handler, session *cache.JwtTokenStorage) {
-	authorize := middleware.Auth(conf.Jwt.Secret, "api", session)
+	authorize := middleware.Auth(conf.App.Jwt.Secret, "api", session)
 	v1 := router.Group("/v1")
 	{
 		auth := v1.Group("/auth")

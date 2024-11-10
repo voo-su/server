@@ -57,7 +57,7 @@ func (m *Migrator) ApplyMigrations(db *sql.DB) error {
 }
 
 func Postgres(conf *config.Config) error {
-	conn, err := sql.Open("postgres", conf.Postgresql.GetDsn())
+	conn, err := sql.Open("postgres", conf.Postgres.GetDsn())
 	if err != nil {
 		log.Fatalf("Не удалось подключиться к базе данных: %v", err)
 	}

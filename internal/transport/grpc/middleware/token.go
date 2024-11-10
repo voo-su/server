@@ -43,7 +43,7 @@ func (t *TokenMiddleware) CreateToken(user *model.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(t.Conf.Jwt.Secret))
+	return token.SignedString([]byte(t.Conf.App.Jwt.Secret))
 }
 
 func (t *TokenMiddleware) ParseToken(tokenString string) (*UserClaims, error) {
@@ -52,7 +52,7 @@ func (t *TokenMiddleware) ParseToken(tokenString string) (*UserClaims, error) {
 			return nil, fmt.Errorf("Неожиданный метод подписи: %v", token.Header["alg"])
 		}
 
-		return []byte(t.Conf.Jwt.Secret), nil
+		return []byte(t.Conf.App.Jwt.Secret), nil
 	})
 
 	if err != nil {

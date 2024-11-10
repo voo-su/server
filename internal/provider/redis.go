@@ -8,12 +8,7 @@ import (
 )
 
 func NewRedisClient(conf *config.Config) *redis.Client {
-	client := redis.NewClient(&redis.Options{
-		Addr:        conf.Redis.Host,
-		Password:    conf.Redis.Auth,
-		DB:          conf.Redis.Database,
-		ReadTimeout: -1,
-	})
+	client := redis.NewClient(conf.Redis.Options())
 	if _, err := client.Ping(context.TODO()).Result(); err != nil {
 		panic(fmt.Errorf("ошибка клиента redis: %s", err))
 	}

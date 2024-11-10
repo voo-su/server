@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	cliV2 "github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
@@ -28,8 +27,8 @@ type AppProvider struct {
 
 func serve(app *AppProvider) error {
 	listener, err := net.Listen(
-		app.Conf.Server.GrpcProtocol,
-		fmt.Sprintf("%s:%d", app.Conf.Server.GrpcHost, app.Conf.Server.GrpcPort),
+		app.Conf.Server.Grpc.Protocol,
+		app.Conf.Server.Grpc.GetGrpc(),
 	)
 	if err != nil {
 		return err
@@ -68,9 +67,9 @@ func Run(ctx2 *cliV2.Context, app *AppProvider) error {
 	group.Go(func() error {
 		log.Printf(
 			"GRPC %s://%s:%d \n",
-			app.Conf.Server.GrpcProtocol,
-			app.Conf.Server.GrpcHost,
-			app.Conf.Server.GrpcPort,
+			app.Conf.Server.Grpc.Protocol,
+			app.Conf.Server.Grpc.Host,
+			app.Conf.Server.Grpc.Port,
 		)
 		return serve(app)
 	})
