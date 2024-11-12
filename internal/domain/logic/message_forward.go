@@ -33,8 +33,8 @@ func (m *MessageForwardLogic) Verify(ctx context.Context, uid int, req *v1Pb.For
 	query := m.db.WithContext(ctx).Model(&model.Message{})
 	query.Where("id in ?", req.MessageIds)
 	if req.Receiver.DialogType == constant.ChatPrivateMode {
-		subWhere := m.db.Where("user_id = ? and receiver_id = ?", uid, req.Receiver.ReceiverId)
-		subWhere.Or("user_id = ? and receiver_id = ?", req.Receiver.ReceiverId, uid)
+		subWhere := m.db.Where("user_id = ? AND receiver_id = ?", uid, req.Receiver.ReceiverId)
+		subWhere.Or("user_id = ? AND receiver_id = ?", req.Receiver.ReceiverId, uid)
 		query.Where(subWhere)
 	}
 

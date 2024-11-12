@@ -15,7 +15,7 @@ type ContactFolder struct {
 func (c *ContactFolder) List(ctx *core.Context) error {
 	uid := ctx.UserId()
 	items := make([]*v1Pb.ContactFolderListResponse_Item, 0)
-	count, err := c.ContactFolderUseCase.ContactRepo.QueryCount(ctx.Ctx(), "user_id = ? and status = 1", uid)
+	count, err := c.ContactFolderUseCase.ContactRepo.QueryCount(ctx.Ctx(), "user_id = ? AND status = 1", uid)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -87,18 +87,18 @@ func (c *ContactFolder) Save(ctx *core.Context) error {
 		}
 
 		if len(deleteItems) > 0 {
-			err := tx.Delete(model.ContactFolder{}, "id in (?) and user_id = ?", deleteItems, uid).Error
+			err := tx.Delete(model.ContactFolder{}, "id in (?) AND user_id = ?", deleteItems, uid).Error
 			if err != nil {
 				return err
 			}
 			tx.Table("contacts").
-				Where("user_id = ? and group_id in (?)", uid, deleteItems).
+				Where("user_id = ? AND group_id in (?)", uid, deleteItems).
 				UpdateColumn("group_id", 0)
 		}
 
 		for _, item := range updateItems {
 			err = tx.Table("contact_folders").
-				Where("id = ? and user_id = ?", item.Id, uid).
+				Where("id = ? AND user_id = ?", item.Id, uid).
 				Updates(map[string]any{
 					"name": item.Name,
 					"sort": item.Sort,

@@ -14,29 +14,27 @@ import (
 
 type ChatHandler struct {
 	chatPb.UnimplementedChatServiceServer
-	Conf               *config.Config
-	ContactUseCase     *usecase.ContactUseCase
-	ChatUseCase        *usecase.ChatUseCase
-	MessageSendUseCase usecase.MessageSendUseCase
-	MessageStorage     *cache.MessageStorage
-	UnreadStorage      *cache.UnreadStorage
+	Conf           *config.Config
+	ContactUseCase *usecase.ContactUseCase
+	ChatUseCase    *usecase.ChatUseCase
+	MessageUseCase usecase.IMessageUseCase
+	MessageStorage *cache.MessageStorage
+	UnreadStorage  *cache.UnreadStorage
 }
 
 func NewChatHandler(
 	conf *config.Config,
 	contactUseCase *usecase.ContactUseCase,
 	chatUseCase *usecase.ChatUseCase,
-	messageSendUseCase usecase.MessageSendUseCase,
 	messageStorage *cache.MessageStorage,
 	unreadStorage *cache.UnreadStorage,
 ) *ChatHandler {
 	return &ChatHandler{
-		Conf:               conf,
-		ContactUseCase:     contactUseCase,
-		ChatUseCase:        chatUseCase,
-		MessageSendUseCase: messageSendUseCase,
-		MessageStorage:     messageStorage,
-		UnreadStorage:      unreadStorage,
+		Conf:           conf,
+		ContactUseCase: contactUseCase,
+		ChatUseCase:    chatUseCase,
+		MessageStorage: messageStorage,
+		UnreadStorage:  unreadStorage,
 	}
 }
 

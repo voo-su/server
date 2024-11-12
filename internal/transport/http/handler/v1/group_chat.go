@@ -20,7 +20,7 @@ type GroupChat struct {
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
 	ChatUseCase            *usecase.ChatUseCase
 	ContactUseCase         *usecase.ContactUseCase
-	MessageSendUseCase     usecase.MessageSendUseCase
+	MessageUseCase         usecase.IMessageUseCase
 	UserUseCase            *usecase.UserUseCase
 	RedisLock              *cache.RedisLock
 }
@@ -132,7 +132,7 @@ func (g *GroupChat) Setting(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	//_ = g.MessageSendUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
+	//_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 	//	Content: "Владелец группы или администратор изменили информацию о группе",
 	//	Receiver: &v1Pb.MessageReceiver{
 	//		DialogType: constant.ChatPrivateMode,
@@ -333,7 +333,7 @@ func (g *GroupChat) Dismiss(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось расформировать группу")
 	}
 
-	_ = g.MessageSendUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
+	_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 		Content: "Группа была расформирована владельцем группы",
 		Receiver: &v1Pb.MessageReceiver{
 			DialogType: constant.ChatGroupMode,
@@ -399,7 +399,7 @@ func (g *GroupChat) Mute(ctx *core.Context) error {
 		}
 	}
 
-	_ = g.MessageSendUseCase.SendSysOther(ctx.Ctx(), &model.Message{
+	_ = g.MessageUseCase.SendSysOther(ctx.Ctx(), &model.Message{
 		MsgType:    msgType,
 		DialogType: constant.DialogRecordDialogTypeGroup,
 		UserId:     uid,

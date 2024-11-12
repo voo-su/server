@@ -32,7 +32,7 @@ func (g *GroupChatAds) GetListAll(ctx context.Context, groupId int) ([]*entity.S
 	}
 	query := g.Repo.Db.WithContext(ctx).Table("group_chat_ads")
 	query.Joins("LEFT JOIN users on users.id = group_chat_ads.creator_id")
-	query.Where("group_chat_ads.group_id = ? and group_chat_ads.is_delete = ?", groupId, 0)
+	query.Where("group_chat_ads.group_id = ? AND group_chat_ads.is_delete = ?", groupId, 0)
 	query.Order("group_chat_ads.is_top desc")
 	query.Order("group_chat_ads.created_at desc")
 
@@ -46,7 +46,7 @@ func (g *GroupChatAds) GetListAll(ctx context.Context, groupId int) ([]*entity.S
 
 func (g *GroupChatAds) GetLatestAds(ctx context.Context, groupId int) (*model.GroupChatAds, error) {
 	var info model.GroupChatAds
-	err := g.Repo.Db.WithContext(ctx).Last(&info, "group_id = ? and is_delete = ?", groupId, 0).Error
+	err := g.Repo.Db.WithContext(ctx).Last(&info, "group_id = ? AND is_delete = ?", groupId, 0).Error
 	if err != nil {
 		return nil, err
 	}

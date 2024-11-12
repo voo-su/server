@@ -17,11 +17,10 @@ import (
 )
 
 type ChatEvent struct {
-	Redis               *redis.Client
-	Conf                *config.Config
-	RoomStorage         *cache.RoomStorage
-	GroupChatMemberRepo *repo.GroupChatMember
-
+	Redis                  *redis.Client
+	Conf                   *config.Config
+	RoomStorage            *cache.RoomStorage
+	GroupChatMemberRepo    *repo.GroupChatMember
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
 	Handler                *chat.Handler
 }

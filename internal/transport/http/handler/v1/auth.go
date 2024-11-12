@@ -15,15 +15,15 @@ import (
 )
 
 type Auth struct {
-	Conf               *config.Config
-	AuthUseCase        *usecase.AuthUseCase
-	JwtTokenStorage    *cache.JwtTokenStorage
-	RedisLock          *cache.RedisLock
-	IpAddressUseCase   *usecase.IpAddressUseCase
-	ChatUseCase        *usecase.ChatUseCase
-	BotUseCase         *usecase.BotUseCase
-	UserUseCase        *usecase.UserUseCase
-	MessageSendUseCase usecase.MessageSendUseCase
+	Conf             *config.Config
+	AuthUseCase      *usecase.AuthUseCase
+	JwtTokenStorage  *cache.JwtTokenStorage
+	RedisLock        *cache.RedisLock
+	IpAddressUseCase *usecase.IpAddressUseCase
+	ChatUseCase      *usecase.ChatUseCase
+	BotUseCase       *usecase.BotUseCase
+	UserUseCase      *usecase.UserUseCase
+	MessageUseCase   usecase.IMessageUseCase
 }
 
 func (a *Auth) Login(ctx *core.Context) error {
@@ -89,7 +89,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 			ReceiverId: root.UserId,
 			IsBoot:     true,
 		})
-		_ = a.MessageSendUseCase.SendLogin(ctx.Ctx(), user.Id, &usecase.SendLogin{
+		_ = a.MessageUseCase.SendLogin(ctx.Ctx(), user.Id, &usecase.SendLogin{
 			Ip:      ip,
 			Agent:   ctx.Context.GetHeader("user-agent"),
 			Address: address,

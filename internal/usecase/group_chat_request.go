@@ -31,7 +31,7 @@ func (s *GroupChatRequestUseCase) Auth(ctx context.Context, id, userId int) bool
 	var member model.GroupChatMember
 	err = s.Source.Db().Debug().WithContext(ctx).
 		Select("id").
-		First(&member, "group_id = ? and user_id = ? and leader in (1,2) and is_quit = 0", info.GroupId, userId).Error
+		First(&member, "group_id = ? AND user_id = ? AND leader in (1,2) AND is_quit = 0", info.GroupId, userId).Error
 
 	return err == nil && member.Id > 0
 }

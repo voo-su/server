@@ -28,7 +28,7 @@ func NewContactFolderUseCase(
 
 func (c *ContactFolderUseCase) Delete(ctx context.Context, id int, uid int) error {
 	return c.ContactFolderRepo.Txx(ctx, func(tx *gorm.DB) error {
-		res := tx.Delete(&model.ContactFolder{}, "id = ? and user_id = ?", id, uid)
+		res := tx.Delete(&model.ContactFolder{}, "id = ? AND user_id = ?", id, uid)
 		if err := res.Error; err != nil {
 			return err
 		}
@@ -36,7 +36,7 @@ func (c *ContactFolderUseCase) Delete(ctx context.Context, id int, uid int) erro
 			return errors.New("данные не существуют")
 		}
 		return tx.Table("contacts").
-			Where("user_id = ? and group_id = ?", uid, id).
+			Where("user_id = ? AND group_id = ?", uid, id).
 			UpdateColumn("group_id", 0).Error
 	})
 }
@@ -55,7 +55,7 @@ func (c *ContactFolderUseCase) GetUserGroup(ctx context.Context, uid int) ([]*mo
 }
 
 func (c *ContactFolderUseCase) MoveGroup(ctx context.Context, uid int, friendId int, groupId int) error {
-	contact, err := c.ContactRepo.FindByWhere(ctx, "user_id = ? and friend_id  = ?", uid, friendId)
+	contact, err := c.ContactRepo.FindByWhere(ctx, "user_id = ? AND friend_id  = ?", uid, friendId)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (c *ContactFolderUseCase) MoveGroup(ctx context.Context, uid int, friendId 
 	return c.Source.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if contact.FolderId > 0 {
 			err := tx.Table("contact_folders").
-				Where("id = ? and user_id = ?", contact.FolderId, uid).
+				Where("id = ? AND user_id = ?", contact.FolderId, uid).
 				Updates(map[string]any{
 					"num": gorm.Expr("num - 1"),
 				}).Error
@@ -73,14 +73,14 @@ func (c *ContactFolderUseCase) MoveGroup(ctx context.Context, uid int, friendId 
 			}
 		}
 		err := tx.Table("contacts").
-			Where("user_id = ? and friend_id = ? and group_id = ?", uid, friendId, contact.FolderId).
+			Where("user_id = ? AND friend_id = ? AND group_id = ?", uid, friendId, contact.FolderId).
 			UpdateColumn("group_id", groupId).
 			Error
 		if err != nil {
 			return err
 		}
 
-		return tx.Table("contact_folders").Where("id = ? and user_id = ?", groupId, uid).Updates(map[string]any{
+		return tx.Table("contact_folders").Where("id = ? AND user_id = ?", groupId, uid).Updates(map[string]any{
 			"num": gorm.Expr("num + 1"),
 		}).Error
 	})

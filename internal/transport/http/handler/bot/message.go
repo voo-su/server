@@ -7,8 +7,8 @@ import (
 )
 
 type Message struct {
-	MessageSendUseCase usecase.MessageSendUseCase
-	BotUseCase         *usecase.BotUseCase
+	MessageUseCase usecase.IMessageUseCase
+	BotUseCase     *usecase.BotUseCase
 }
 
 func (m *Message) Send(ctx *core.Context) error {
@@ -24,7 +24,7 @@ func (m *Message) Send(ctx *core.Context) error {
 		return ctx.ErrorBusiness("")
 	}
 
-	if err := m.MessageSendUseCase.SendText(ctx.Ctx(), bot.UserId, &usecase.SendText{
+	if err := m.MessageUseCase.SendText(ctx.Ctx(), bot.UserId, &usecase.SendText{
 		Receiver: usecase.Receiver{
 			DialogType: 2,
 			ReceiverId: params.ChatId,

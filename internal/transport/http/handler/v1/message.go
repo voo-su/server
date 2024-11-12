@@ -17,10 +17,8 @@ import (
 type Message struct {
 	ChatUseCase            *usecase.ChatUseCase
 	AuthUseCase            *usecase.AuthUseCase
-	MessageSendUseCase     usecase.MessageSendUseCase
+	MessageUseCase         usecase.IMessageUseCase
 	Minio                  minio.IMinio
-	MessageUseCase         *usecase.MessageUseCase
-	GroupChatUseCase       *usecase.GroupChatUseCase
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
 }
 
@@ -56,7 +54,7 @@ func (c *Message) Vote(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	if err := c.MessageSendUseCase.SendVote(ctx.Ctx(), uid, &v1Pb.VoteMessageRequest{
+	if err := c.MessageUseCase.SendVote(ctx.Ctx(), uid, &v1Pb.VoteMessageRequest{
 		Mode:      int32(params.Mode),
 		Title:     params.Title,
 		Options:   params.Options,
@@ -82,7 +80,7 @@ func (c *Message) Revoke(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.Revoke(ctx.Ctx(), ctx.UserId(), params.MsgId); err != nil {
+	if err := c.MessageUseCase.Revoke(ctx.Ctx(), ctx.UserId(), params.MsgId); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -124,7 +122,7 @@ func (c *Message) HandleVote(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	data, err := c.MessageSendUseCase.Vote(ctx.Ctx(), ctx.UserId(), params.RecordId, params.Options)
+	data, err := c.MessageUseCase.Vote(ctx.Ctx(), ctx.UserId(), params.RecordId, params.Options)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -208,7 +206,7 @@ func (c *Message) Download(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	record, err := c.MessageUseCase.MessageRepo.FindById(ctx.Ctx(), params.RecordId)
+	record, err := c.MessageUseCase.GetMessageByRecordId(ctx.Ctx(), params.RecordId)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}

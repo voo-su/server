@@ -35,9 +35,9 @@ func (s *Sequence) try(ctx context.Context, userId int, receiverId int) error {
 		defer s.cache.Redis().Del(ctx, lockName)
 		tx := s.db.WithContext(ctx).Model(&model.Message{})
 		if userId == 0 {
-			tx = tx.Where("receiver_id = ? and dialog_type = ?", receiverId, constant.ChatGroupMode)
+			tx = tx.Where("receiver_id = ? AND dialog_type = ?", receiverId, constant.ChatGroupMode)
 		} else {
-			tx = tx.Where("user_id = ? and receiver_id = ?", userId, receiverId).Or("user_id = ? and receiver_id = ?", receiverId, userId)
+			tx = tx.Where("user_id = ? AND receiver_id = ?", userId, receiverId).Or("user_id = ? AND receiver_id = ?", receiverId, userId)
 		}
 
 		var seq int64

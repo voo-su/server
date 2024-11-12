@@ -28,7 +28,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	apply, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.FindByWhere(ctx.Ctx(), "group_id = ? and status = ?", params.GroupId, constant.GroupChatRequestStatusWait)
+	apply, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.FindByWhere(ctx.Ctx(), "group_id = ? AND status = ?", params.GroupId, constant.GroupChatRequestStatusWait)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return ctx.Error(err.Error())
 	}
@@ -53,7 +53,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 		return ctx.Error(err.Error())
 	}
 
-	find, err := g.GroupChatMemberUseCase.MemberRepo.FindByWhere(ctx.Ctx(), "group_id = ? and leader = ?", params.GroupId, 2)
+	find, err := g.GroupChatMemberUseCase.MemberRepo.FindByWhere(ctx.Ctx(), "group_id = ? AND leader = ?", params.GroupId, 2)
 	if err == nil && find != nil {
 		g.GroupRequestStorage.Incr(ctx.Ctx(), find.UserId)
 	}

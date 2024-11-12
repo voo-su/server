@@ -39,8 +39,9 @@ func (h *Handler) onReadMessage(ctx context.Context, client socket.IClient, data
 		return
 	}
 
-	if err := h.MemberUseCase.Db().Model(&model.Message{}).
-		Where("msg_id in ? and receiver_id = ? and is_read = 0", in.Content.MsgIds, client.Uid()).
+	if err := h.MemberUseCase.Db().
+		Model(&model.Message{}).
+		Where("msg_id in ? AND receiver_id = ? AND is_read = 0", in.Content.MsgIds, client.Uid()).
 		Update("is_read", 1).Error; err != nil {
 		log.Println("Чат onReadMessage ошибка: ", err)
 		return

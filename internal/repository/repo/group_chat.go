@@ -29,7 +29,7 @@ func (g *GroupChat) SearchOvertList(ctx context.Context, opt *SearchOvertListOpt
 		}
 		db.Where("is_overt = ?", 1)
 		db.Where("id NOT IN (?)", g.Repo.Db.Select("group_id").
-			Where("user_id = ? and is_quit= ?", opt.UserId, 0).
+			Where("user_id = ? AND is_quit= ?", opt.UserId, 0).
 			Table("group_chat_members"),
 		)
 		db.Where("is_dismiss = 0").

@@ -31,7 +31,7 @@ func (c *Contact) IsFriend(ctx context.Context, uid int, friendId int, cache boo
 	if cache && c.relation.IsContactRelation(ctx, uid, friendId) == nil {
 		return true
 	}
-	count, err := c.Repo.QueryCount(ctx, "((user_id = ? and friend_id = ?) or (user_id = ? and friend_id = ?)) and status = ?", uid, friendId, friendId, uid, constant.ContactStatusNormal)
+	count, err := c.Repo.QueryCount(ctx, "((user_id = ? AND friend_id = ?) or (user_id = ? AND friend_id = ?)) AND status = ?", uid, friendId, friendId, uid, constant.ContactStatusNormal)
 	if err != nil {
 		return false
 	}
@@ -51,7 +51,7 @@ func (c *Contact) GetFriendRemark(ctx context.Context, uid int, friendId int) st
 	}
 
 	var remark string
-	c.Repo.Model(ctx).Where("user_id = ? and friend_id = ?", uid, friendId).Pluck("remark", &remark)
+	c.Repo.Model(ctx).Where("user_id = ? AND friend_id = ?", uid, friendId).Pluck("remark", &remark)
 
 	return remark
 }
@@ -62,7 +62,7 @@ func (c *Contact) SetFriendRemark(ctx context.Context, uid int, friendId int, re
 
 func (c *Contact) LoadContactCache(ctx context.Context, uid int) error {
 	all, err := c.Repo.FindAll(ctx, func(db *gorm.DB) {
-		db.Select("friend_id,remark").Where("user_id = ? and status = ?", uid, constant.ContactStatusNormal)
+		db.Select("friend_id,remark").Where("user_id = ? AND status = ?", uid, constant.ContactStatusNormal)
 	})
 	if err != nil {
 		return err

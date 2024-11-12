@@ -61,6 +61,6 @@ func (s *StickerUseCase) AddUserSysSticker(uid int, stickerId int) error {
 
 func (s *StickerUseCase) DeleteCollect(uid int, ids []int) error {
 	return s.Source.Db().
-		Delete(&model.StickerItem{}, "id in ? and sticker_id = 0 and user_id = ?", ids, uid).
+		Delete(&model.StickerItem{}, "id in ? AND sticker_id = 0 AND user_id = ?", ids, uid).
 		Error
 }

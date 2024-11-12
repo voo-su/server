@@ -14,18 +14,16 @@ type Handler struct {
 	Redis          *redis.Client
 	MemberUseCase  *usecase.GroupChatMemberUseCase
 	Handlers       map[string]func(ctx context.Context, client socket.IClient, data []byte)
-	MessageUseCase usecase.MessageSendUseCase
+	MessageUseCase usecase.IMessageUseCase
 }
 
 func NewHandler(
 	redis *redis.Client,
 	memberUseCase *usecase.GroupChatMemberUseCase,
-	messageUseCase *usecase.MessageUseCase,
 ) *Handler {
 	return &Handler{
-		Redis:          redis,
-		MemberUseCase:  memberUseCase,
-		MessageUseCase: messageUseCase,
+		Redis:         redis,
+		MemberUseCase: memberUseCase,
 	}
 }
 

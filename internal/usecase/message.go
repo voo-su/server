@@ -2,12 +2,14 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"html"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -23,13 +25,12 @@ import (
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/minio"
+	"voo.su/pkg/nats"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
 
-var _ MessageSendUseCase = (*MessageUseCase)(nil)
-
-type MessageSendUseCase interface {
+type IMessageUseCase interface {
 	SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error
 	SendText(ctx context.Context, uid int, req *SendText) error
 	SendImage(ctx context.Context, uid int, req *v1Pb.ImageMessageRequest) error
@@ -45,7 +46,12 @@ type MessageSendUseCase interface {
 	SendLogin(ctx context.Context, uid int, req *SendLogin) error
 	SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error
 	SendCode(ctx context.Context, uid int, req *v1Pb.CodeMessageRequest) error
+	GetDialogRecords(ctx context.Context, opt *QueryDialogRecordsOpt) ([]*DialogRecordsItem, error)
+	GetDialogRecord(ctx context.Context, recordId int64) (*DialogRecordsItem, error)
+	GetMessageByRecordId(ctx context.Context, recordId int) (*model.Message, error)
 }
+
+var _ IMessageUseCase = (*MessageUseCase)(nil)
 
 type MessageUseCase struct {
 	*repo.Source
@@ -62,6 +68,7 @@ type MessageUseCase struct {
 	ServerStorage       *cache.ServerStorage
 	ClientStorage       *cache.ClientStorage
 	DialogVoteCache     *cache.Vote
+	Nats                nats.INatsClient
 }
 
 type DialogRecordsItem struct {
@@ -138,14 +145,14 @@ func (m *MessageUseCase) GetDialogRecords(ctx context.Context, opt *QueryDialogR
 	)
 	query := m.Source.Db().WithContext(ctx).Table("messages")
 	query.Joins("LEFT JOIN users on messages.user_id = users.id")
-	query.Joins("LEFT JOIN message_delete on messages.id = message_delete.record_id and message_delete.user_id = ?", opt.UserId)
+	query.Joins("LEFT JOIN message_delete on messages.id = message_delete.record_id AND message_delete.user_id = ?", opt.UserId)
 	if opt.RecordId > 0 {
 		query.Where("messages.sequence < ?", opt.RecordId)
 	}
 
 	if opt.DialogType == constant.ChatPrivateMode {
-		subQuery := m.Source.Db().Where("messages.user_id = ? and messages.receiver_id = ?", opt.UserId, opt.ReceiverId)
-		subQuery.Or("messages.user_id = ? and messages.receiver_id = ?", opt.ReceiverId, opt.UserId)
+		subQuery := m.Source.Db().Where("messages.user_id = ? AND messages.receiver_id = ?", opt.UserId, opt.ReceiverId)
+		subQuery.Or("messages.user_id = ? AND messages.receiver_id = ?", opt.ReceiverId, opt.UserId)
 		query.Where(subQuery)
 	} else {
 		query.Where("messages.receiver_id = ?", opt.ReceiverId)
@@ -683,14 +690,14 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsVa
 
 	if vote.DialogType == constant.ChatGroupMode {
 		var count int64
-		db.Table("group_chat_members").Where("group_id = ? and user_id = ? and is_quit = 0", vote.ReceiverId, uid).Count(&count)
+		db.Table("group_chat_members").Where("group_id = ? AND user_id = ? AND is_quit = 0", vote.ReceiverId, uid).Count(&count)
 		if count == 0 {
 			return nil, errors.New("нет прав на голосование")
 		}
 	}
 
 	var count int64
-	db.Table("message_vote_answers").Where("vote_id = ? and user_id = ?", vote.VoteId, uid).Count(&count)
+	db.Table("message_vote_answers").Where("vote_id = ? AND user_id = ?", vote.VoteId, uid).Count(&count)
 	if count > 0 {
 		return nil, fmt.Errorf("повторное голосование %d", vote.VoteId)
 	}
@@ -870,6 +877,26 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message,
 	if err := m.Source.Redis().Publish(ctx, constant.ImTopicChat, content).Err(); err != nil {
 		logger.Errorf("Ошибка отправки уведомления %s", err.Error())
 	}
+
+	// TODO
+
+	webPushContent := &entity.WebPush{
+		Endpoint: "",
+		Keys: entity.WebPushKeys{
+			P256dh: "",
+			Auth:   "",
+		},
+		Message: opt["text"],
+	}
+
+	webPushData, err := json.Marshal(webPushContent)
+	if err != nil {
+		log.Fatal("Не удалось сериализовать данные в JSON: ", err)
+	}
+
+	if err := m.Nats.Publish("web-push", webPushData); err != nil {
+		fmt.Println(err)
+	}
 }
 
 type SendLogin struct {
@@ -902,7 +929,7 @@ func (m *MessageUseCase) SendLogin(ctx context.Context, uid int, req *SendLogin)
 
 func (m *MessageUseCase) SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error {
 	var sticker model.StickerItem
-	if err := m.Source.Db().First(&sticker, "id = ? and user_id = ?", req.StickerId, uid).Error; err != nil {
+	if err := m.Source.Db().First(&sticker, "id = ? AND user_id = ?", req.StickerId, uid).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return errors.New("информация о смайлик не существует")
 		}
@@ -936,4 +963,13 @@ func (m *MessageUseCase) SendCode(ctx context.Context, uid int, req *v1Pb.CodeMe
 		}),
 	}
 	return m.save(ctx, data)
+}
+
+func (m *MessageUseCase) GetMessageByRecordId(ctx context.Context, recordId int) (*model.Message, error) {
+	record, err := m.MessageRepo.FindById(ctx, recordId)
+	if err != nil {
+		return nil, err
+	}
+
+	return record, nil
 }

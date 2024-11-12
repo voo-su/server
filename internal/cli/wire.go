@@ -19,7 +19,7 @@ var QueueProviderSet = wire.NewSet(
 	wire.Struct(new(QueueProvider), "*"),
 	wire.Struct(new(QueueJobs), "*"),
 	wire.Struct(new(queue.EmailHandle), "*"),
-	wire.Struct(new(queue.LoginHandle), "*"),
+	wire.Struct(new(queue.PushHandle), "*"),
 )
 
 var MigrateProviderSet = wire.NewSet(

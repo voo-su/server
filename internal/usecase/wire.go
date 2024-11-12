@@ -6,7 +6,7 @@ import (
 
 var ProviderSet = wire.NewSet(
 	wire.Struct(new(MessageUseCase), "*"),
-	wire.Bind(new(MessageSendUseCase), new(*MessageUseCase)),
+	wire.Bind(new(IMessageUseCase), new(*MessageUseCase)),
 
 	NewAuthUseCase,
 	NewContactUseCase,

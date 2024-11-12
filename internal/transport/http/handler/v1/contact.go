@@ -11,11 +11,11 @@ import (
 )
 
 type Contact struct {
-	ContactUseCase     *usecase.ContactUseCase
-	ClientStorage      *cache.ClientStorage
-	ChatUseCase        *usecase.ChatUseCase
-	UserUseCase        *usecase.UserUseCase
-	MessageSendUseCase usecase.MessageSendUseCase
+	ContactUseCase *usecase.ContactUseCase
+	ClientStorage  *cache.ClientStorage
+	ChatUseCase    *usecase.ChatUseCase
+	UserUseCase    *usecase.UserUseCase
+	MessageUseCase usecase.IMessageUseCase
 }
 
 func (c *Contact) List(ctx *core.Context) error {
@@ -71,7 +71,7 @@ func (c *Contact) Get(ctx *core.Context) error {
 	}
 	if uid != user.Id {
 		data.FriendStatus = 1
-		contact, err := c.ContactUseCase.ContactRepo.FindByWhere(ctx.Ctx(), "user_id = ? and friend_id = ?", uid, user.Id)
+		contact, err := c.ContactUseCase.ContactRepo.FindByWhere(ctx.Ctx(), "user_id = ? AND friend_id = ?", uid, user.Id)
 		if err != nil && err != gorm.ErrRecordNotFound {
 			return err
 		}
@@ -99,7 +99,7 @@ func (c *Contact) Delete(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	_ = c.MessageSendUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
+	_ = c.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 		Content: "Контакт удален",
 		Receiver: &v1Pb.MessageReceiver{
 			DialogType: constant.ChatPrivateMode,
