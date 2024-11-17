@@ -29,9 +29,12 @@ func (s *GroupChatRequestUseCase) Auth(ctx context.Context, id, userId int) bool
 	}
 
 	var member model.GroupChatMember
-	err = s.Source.Db().Debug().WithContext(ctx).
+	err = s.Source.Db().
+		Debug().
+		WithContext(ctx).
 		Select("id").
-		First(&member, "group_id = ? AND user_id = ? AND leader in (1,2) AND is_quit = 0", info.GroupId, userId).Error
+		First(&member, "group_id = ? AND user_id = ? AND leader in (1,2) AND is_quit = 0", info.GroupId, userId).
+		Error
 
 	return err == nil && member.Id > 0
 }
@@ -49,5 +52,8 @@ func (s *GroupChatRequestUseCase) Delete(ctx context.Context, id, userId int) er
 		return errors.New("не удалось выполнить аутентификацию")
 	}
 
-	return s.Source.Db().WithContext(ctx).Delete(&model.GroupChatRequest{}, "id = ?", id).Error
+	return s.Source.Db().
+		WithContext(ctx).
+		Delete(&model.GroupChatRequest{}, "id = ?", id).
+		Error
 }

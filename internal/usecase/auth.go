@@ -25,7 +25,7 @@ type AuthUseCase struct {
 	GroupChatMember *repo.GroupChatMember
 	GroupChat       *repo.GroupChat
 	Conf            *config.Config
-	Email           *email.Client
+	Email           *email.Email
 	User            *repo.User
 }
 
@@ -35,7 +35,7 @@ func NewAuthUseCase(
 	groupChatMember *repo.GroupChatMember,
 	groupChat *repo.GroupChat,
 	conf *config.Config,
-	email *email.Client,
+	email *email.Email,
 	repo *repo.User,
 ) *AuthUseCase {
 	return &AuthUseCase{

@@ -26,10 +26,10 @@ func (g *GroupChatRequest) List(ctx context.Context, groupIds []int) ([]*entity.
 		"users.avatar",
 		"users.username",
 	}
-	query := g.Repo.Db.WithContext(ctx).Table("group_chat_requests")
-	query.Joins("LEFT JOIN users on users.id = group_chat_requests.user_id")
-	query.Where("group_chat_requests.status = ?", constant.GroupChatRequestStatusWait)
-	query.Order("group_chat_requests.updated_at desc,group_chat_requests.id desc")
+	query := g.Repo.Db.WithContext(ctx).Table("group_chat_requests").
+		Joins("LEFT JOIN users on users.id = group_chat_requests.user_id").
+		Where("group_chat_requests.status = ?", constant.GroupChatRequestStatusWait).
+		Order("group_chat_requests.updated_at desc,group_chat_requests.id desc")
 
 	var items []*entity.GroupApplyList
 	if err := query.Select(fields).Scan(&items).Error; err != nil {

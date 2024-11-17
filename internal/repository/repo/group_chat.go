@@ -27,12 +27,12 @@ func (g *GroupChat) SearchOvertList(ctx context.Context, opt *SearchOvertListOpt
 		if opt.Name != "" {
 			db.Where("group_name like ?", "%"+opt.Name+"%")
 		}
-		db.Where("is_overt = ?", 1)
-		db.Where("id NOT IN (?)", g.Repo.Db.Select("group_id").
-			Where("user_id = ? AND is_quit= ?", opt.UserId, 0).
-			Table("group_chat_members"),
-		)
-		db.Where("is_dismiss = 0").
+		db.Where("is_overt = ?", 1).
+			Where("id NOT IN (?)", g.Repo.Db.Select("group_id").
+				Where("user_id = ? AND is_quit= ?", opt.UserId, 0).
+				Table("group_chat_members"),
+			).
+			Where("is_dismiss = 0").
 			Order("created_at desc").
 			Offset((opt.Page - 1) * opt.Size).
 			Limit(opt.Size)

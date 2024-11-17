@@ -35,7 +35,8 @@ func (e *Sticker) GetDetailsAll(stickerId, uid int) ([]*model.StickerItem, error
 	var items []*model.StickerItem
 	if err := e.Repo.Db.Model(model.StickerItem{}).
 		Where("sticker_id = ? AND user_id = ? order by id desc", stickerId, uid).
-		Scan(&items).Error; err != nil {
+		Scan(&items).
+		Error; err != nil {
 		return nil, err
 	}
 

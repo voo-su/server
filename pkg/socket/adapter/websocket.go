@@ -6,7 +6,7 @@ import (
 )
 
 type WsAdapter struct {
-	conn *websocket.Conn
+	Conn *websocket.Conn
 }
 
 var defaultUpGrader = websocket.Upgrader{
@@ -23,7 +23,7 @@ func NewWsAdapter(w http.ResponseWriter, r *http.Request) (*WsAdapter, error) {
 		return nil, err
 	}
 
-	return &WsAdapter{conn: conn}, nil
+	return &WsAdapter{Conn: conn}, nil
 }
 
 func (w *WsAdapter) Network() string {
@@ -31,18 +31,18 @@ func (w *WsAdapter) Network() string {
 }
 
 func (w *WsAdapter) Read() ([]byte, error) {
-	_, content, err := w.conn.ReadMessage()
+	_, content, err := w.Conn.ReadMessage()
 	return content, err
 }
 
 func (w *WsAdapter) Write(bytes []byte) error {
-	return w.conn.WriteMessage(websocket.TextMessage, bytes)
+	return w.Conn.WriteMessage(websocket.TextMessage, bytes)
 }
 
 func (w *WsAdapter) Close() error {
-	return w.conn.Close()
+	return w.Conn.Close()
 }
 
 func (w *WsAdapter) SetCloseHandler(fn func(code int, text string) error) {
-	w.conn.SetCloseHandler(fn)
+	w.Conn.SetCloseHandler(fn)
 }

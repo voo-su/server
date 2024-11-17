@@ -9,7 +9,8 @@ type App struct {
 }
 
 func (a App) LogPath(filename string) string {
-	return fmt.Sprintf("./runtime/logs/%s", filename)
+	// TODO
+	return fmt.Sprintf("/var/log/voo-su/%s", filename)
 }
 
 func (a *App) GetOrigin() string {

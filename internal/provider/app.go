@@ -37,16 +37,16 @@ func NewApp() *App {
 	}
 }
 
-func (c *App) Register(cm Command) {
-	c.app.Commands = append(c.app.Commands, c.createCommand(cm))
+func (a *App) Register(cm Command) {
+	a.app.Commands = append(a.app.Commands, a.createCommand(cm))
 }
 
-func (c *App) createCommand(cm Command) *cli.Command {
+func (a *App) createCommand(cm Command) *cli.Command {
 	cd := &cli.Command{
 		Name:        cm.Name,
 		Usage:       cm.Usage,
 		Flags:       cm.Flags,
-		Subcommands: c.createSubcommands(cm.Subcommands),
+		Subcommands: a.createSubcommands(cm.Subcommands),
 	}
 
 	if cm.Action != nil {
@@ -58,14 +58,14 @@ func (c *App) createCommand(cm Command) *cli.Command {
 	return cd
 }
 
-func (c *App) createSubcommands(commands []Command) []*cli.Command {
+func (a *App) createSubcommands(commands []Command) []*cli.Command {
 	var subcommands []*cli.Command
 	for _, subCmd := range commands {
-		subcommands = append(subcommands, c.createCommand(subCmd))
+		subcommands = append(subcommands, a.createCommand(subCmd))
 	}
 	return subcommands
 }
 
-func (c *App) Run() {
-	_ = c.app.Run(os.Args)
+func (a *App) Run() {
+	_ = a.app.Run(os.Args)
 }

@@ -15,12 +15,15 @@ import (
 )
 
 type MessageForwardLogic struct {
-	db       *gorm.DB
-	sequence *repo.Sequence
+	DB       *gorm.DB
+	Sequence *repo.Sequence
 }
 
 func NewMessageForwardLogic(db *gorm.DB, sequence *repo.Sequence) *MessageForwardLogic {
-	return &MessageForwardLogic{db: db, sequence: sequence}
+	return &MessageForwardLogic{
+		DB:       db,
+		Sequence: sequence,
+	}
 }
 
 type ForwardRecord struct {
@@ -30,10 +33,10 @@ type ForwardRecord struct {
 }
 
 func (m *MessageForwardLogic) Verify(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error {
-	query := m.db.WithContext(ctx).Model(&model.Message{})
+	query := m.DB.WithContext(ctx).Model(&model.Message{})
 	query.Where("id in ?", req.MessageIds)
 	if req.Receiver.DialogType == constant.ChatPrivateMode {
-		subWhere := m.db.Where("user_id = ? AND receiver_id = ?", uid, req.Receiver.ReceiverId)
+		subWhere := m.DB.Where("user_id = ? AND receiver_id = ?", uid, req.Receiver.ReceiverId)
 		subWhere.Or("user_id = ? AND receiver_id = ?", req.Receiver.ReceiverId, uid)
 		query.Where(subWhere)
 	}
@@ -88,13 +91,13 @@ func (m *MessageForwardLogic) MultiMergeForward(ctx context.Context, uid int, re
 			Extra:      extra,
 		}
 		if data.DialogType == constant.ChatGroupMode {
-			data.Sequence = m.sequence.Get(ctx, 0, data.ReceiverId)
+			data.Sequence = m.Sequence.Get(ctx, 0, data.ReceiverId)
 		} else {
-			data.Sequence = m.sequence.Get(ctx, uid, data.ReceiverId)
+			data.Sequence = m.Sequence.Get(ctx, uid, data.ReceiverId)
 		}
 		records = append(records, data)
 	}
-	if err := m.db.WithContext(ctx).Create(records).Error; err != nil {
+	if err := m.DB.WithContext(ctx).Create(records).Error; err != nil {
 		return nil, err
 	}
 
@@ -114,7 +117,7 @@ func (m *MessageForwardLogic) MultiSplitForward(ctx context.Context, uid int, re
 	var (
 		receives = make([]map[string]int, 0)
 		records  = make([]*model.Message, 0)
-		db       = m.db.WithContext(ctx)
+		db       = m.DB.WithContext(ctx)
 	)
 	for _, userId := range req.Uids {
 		receives = append(receives, map[string]int{
@@ -138,9 +141,9 @@ func (m *MessageForwardLogic) MultiSplitForward(ctx context.Context, uid int, re
 	for _, v := range receives {
 		var sequences []int64
 		if v["dialog_type"] == constant.DialogRecordDialogTypeGroup {
-			sequences = m.sequence.BatchGet(ctx, 0, v["receiver_id"], recordsLen)
+			sequences = m.Sequence.BatchGet(ctx, 0, v["receiver_id"], recordsLen)
 		} else {
-			sequences = m.sequence.BatchGet(ctx, uid, v["receiver_id"], recordsLen)
+			sequences = m.Sequence.BatchGet(ctx, uid, v["receiver_id"], recordsLen)
 		}
 
 		for i, item := range records {
@@ -180,7 +183,7 @@ type forwardItem struct {
 
 func (m *MessageForwardLogic) aggregation(ctx context.Context, req *v1Pb.ForwardMessageRequest) ([]map[string]any, error) {
 	rows := make([]*forwardItem, 0, 3)
-	query := m.db.WithContext(ctx).Table("messages")
+	query := m.DB.WithContext(ctx).Table("messages")
 	query.Joins("LEFT JOIN users on users.id = messages.user_id")
 	ids := req.MessageIds
 	if len(ids) > 3 {

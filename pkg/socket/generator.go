@@ -6,6 +6,10 @@ type IdGenerator interface {
 	IdGen() int64
 }
 
+type SnowflakeGenerator struct {
+	Snowflake *snowflake.Node
+}
+
 var defaultIdGenerator IdGenerator
 
 func init() {
@@ -15,14 +19,10 @@ func init() {
 	}
 
 	defaultIdGenerator = &SnowflakeGenerator{
-		snowflake: node,
+		Snowflake: node,
 	}
 }
 
-type SnowflakeGenerator struct {
-	snowflake *snowflake.Node
-}
-
 func (s *SnowflakeGenerator) IdGen() int64 {
-	return s.snowflake.Generate().Int64()
+	return s.Snowflake.Generate().Int64()
 }

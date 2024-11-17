@@ -7,9 +7,9 @@ import (
 )
 
 type entry[T any] struct {
-	key    string
-	value  T
-	expire int64
+	Key    string
+	Value  T
+	Expire int64
 }
 
 type SimpleTimeWheel[T any] struct {
@@ -41,51 +41,51 @@ func NewSimpleTimeWheel[T any](delay time.Duration, numSlot int, handler SimpleH
 	return timeWheel
 }
 
-func (t *SimpleTimeWheel[T]) Start() {
-	go t.run()
+func (s *SimpleTimeWheel[T]) Start() {
+	go s.run()
 	for {
 		select {
-		case <-t.quitChan:
+		case <-s.quitChan:
 			return
-		case el := <-t.taskChan:
-			t.Remove(el.key)
-			slotIndex := t.getCircleAndSlot(el)
-			t.slot[slotIndex].Set(el.key, el)
-			t.indicator.Set(el.key, slotIndex)
+		case el := <-s.taskChan:
+			s.Remove(el.Key)
+			slotIndex := s.getCircleAndSlot(el)
+			s.slot[slotIndex].Set(el.Key, el)
+			s.indicator.Set(el.Key, slotIndex)
 		}
 	}
 }
 
-func (t *SimpleTimeWheel[T]) Stop() {
-	close(t.quitChan)
+func (s *SimpleTimeWheel[T]) Stop() {
+	close(s.quitChan)
 }
 
-func (t *SimpleTimeWheel[T]) run() {
+func (s *SimpleTimeWheel[T]) run() {
 	worker := pool.New().WithMaxGoroutines(10)
 	for {
 		select {
-		case <-t.quitChan:
-			t.ticker.Stop()
+		case <-s.quitChan:
+			s.ticker.Stop()
 
 			return
-		case <-t.ticker.C:
-			tickIndex := t.tickIndex
-			t.tickIndex++
-			if t.tickIndex >= len(t.slot) {
-				t.tickIndex = 0
+		case <-s.ticker.C:
+			tickIndex := s.tickIndex
+			s.tickIndex++
+			if s.tickIndex >= len(s.slot) {
+				s.tickIndex = 0
 			}
 
-			slot := t.slot[tickIndex]
+			slot := s.slot[tickIndex]
 			for item := range slot.IterBuffered() {
 				v := item.Val
-				slot.Remove(v.key)
-				t.indicator.Remove(v.key)
+				slot.Remove(v.Key)
+				s.indicator.Remove(v.Key)
 				worker.Go(func() {
 					unix := time.Now().Unix()
-					if v.expire <= unix {
-						t.onTick(t, v.key, v.value)
+					if v.Expire <= unix {
+						s.onTick(s, v.Key, v.Value)
 					} else {
-						t.Add(v.key, v.value, time.Duration(v.expire-unix)*time.Second)
+						s.Add(v.Key, v.Value, time.Duration(v.Expire-unix)*time.Second)
 					}
 				})
 			}
@@ -93,22 +93,22 @@ func (t *SimpleTimeWheel[T]) run() {
 	}
 }
 
-func (t *SimpleTimeWheel[T]) Add(key string, value T, delay time.Duration) {
-	t.taskChan <- &entry[T]{key: key, value: value, expire: time.Now().Add(delay).Unix()}
+func (s *SimpleTimeWheel[T]) Add(key string, value T, delay time.Duration) {
+	s.taskChan <- &entry[T]{Key: key, Value: value, Expire: time.Now().Add(delay).Unix()}
 }
 
-func (t *SimpleTimeWheel[T]) Remove(key string) {
-	if value, ok := t.indicator.Get(key); ok {
-		t.slot[value].Remove(key)
-		t.indicator.Remove(key)
+func (s *SimpleTimeWheel[T]) Remove(key string) {
+	if value, ok := s.indicator.Get(key); ok {
+		s.slot[value].Remove(key)
+		s.indicator.Remove(key)
 	}
 }
 
-func (t *SimpleTimeWheel[T]) getCircleAndSlot(e *entry[T]) int {
-	remainingTime := int(e.expire - time.Now().Unix())
+func (s *SimpleTimeWheel[T]) getCircleAndSlot(e *entry[T]) int {
+	remainingTime := int(e.Expire - time.Now().Unix())
 	if remainingTime <= 0 {
 		remainingTime = 0
 	}
 
-	return (t.tickIndex + remainingTime/int(t.interval.Seconds())) % len(t.slot)
+	return (s.tickIndex + remainingTime/int(s.interval.Seconds())) % len(s.slot)
 }

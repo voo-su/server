@@ -10,12 +10,12 @@ type GrpcMethod struct {
 }
 
 type GrpcMethodService struct {
-	publicMethods []*GrpcMethod
+	PublicMethods []*GrpcMethod
 }
 
 func NewGrpMethodsService() *GrpcMethodService {
 	return &GrpcMethodService{
-		publicMethods: []*GrpcMethod{
+		PublicMethods: []*GrpcMethod{
 			{
 				Name: "/auth.AuthService/Login",
 			},
@@ -26,9 +26,9 @@ func NewGrpMethodsService() *GrpcMethodService {
 	}
 }
 
-func (s *GrpcMethodService) IsPublicMethod(method string) bool {
+func (g *GrpcMethodService) IsPublicMethod(method string) bool {
 	isPublic := false
-	for _, route := range s.publicMethods {
+	for _, route := range g.PublicMethods {
 		if route.Name == method {
 			isPublic = true
 		}

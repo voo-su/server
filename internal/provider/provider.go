@@ -3,5 +3,5 @@ package provider
 import "voo.su/pkg/email"
 
 type Providers struct {
-	EmailClient *email.Client
+	EmailClient *email.Email
 }

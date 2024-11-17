@@ -9,21 +9,21 @@ import (
 )
 
 type JwtTokenStorage struct {
-	Redis *redis.Client
+	Rds *redis.Client
 }
 
 func NewTokenSessionStorage(redis *redis.Client) *JwtTokenStorage {
 	return &JwtTokenStorage{redis}
 }
 
-func (s *JwtTokenStorage) SetBlackList(ctx context.Context, token string, exp time.Duration) error {
-	return s.Redis.Set(ctx, s.name(token), 1, exp).Err()
+func (j *JwtTokenStorage) SetBlackList(ctx context.Context, token string, exp time.Duration) error {
+	return j.Rds.Set(ctx, j.name(token), 1, exp).Err()
 }
 
-func (s *JwtTokenStorage) IsBlackList(ctx context.Context, token string) bool {
-	return s.Redis.Get(ctx, s.name(token)).Val() != ""
+func (j *JwtTokenStorage) IsBlackList(ctx context.Context, token string) bool {
+	return j.Rds.Get(ctx, j.name(token)).Val() != ""
 }
 
-func (s *JwtTokenStorage) name(token string) string {
+func (j *JwtTokenStorage) name(token string) string {
 	return fmt.Sprintf("jwt:blacklist:%s", encrypt.Md5(token))
 }

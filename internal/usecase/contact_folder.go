@@ -32,25 +32,29 @@ func (c *ContactFolderUseCase) Delete(ctx context.Context, id int, uid int) erro
 		if err := res.Error; err != nil {
 			return err
 		}
+
 		if res.RowsAffected == 0 {
 			return errors.New("данные не существуют")
 		}
+
 		return tx.Table("contacts").
 			Where("user_id = ? AND group_id = ?", uid, id).
-			UpdateColumn("group_id", 0).Error
+			UpdateColumn("group_id", 0).
+			Error
 	})
 }
 
 func (c *ContactFolderUseCase) GetUserGroup(ctx context.Context, uid int) ([]*model.ContactFolder, error) {
 	var items []*model.ContactFolder
-	err := c.Source.Db().WithContext(ctx).
+	if err := c.Source.Db().WithContext(ctx).
 		Table("contact_folders").
 		Where("user_id = ?", uid).
 		Order("sort asc").
-		Scan(&items).Error
-	if err != nil {
+		Scan(&items).
+		Error; err != nil {
 		return nil, err
 	}
+
 	return items, nil
 }
 
@@ -72,16 +76,19 @@ func (c *ContactFolderUseCase) MoveGroup(ctx context.Context, uid int, friendId 
 				return err
 			}
 		}
-		err := tx.Table("contacts").
+
+		if err := tx.Table("contacts").
 			Where("user_id = ? AND friend_id = ? AND group_id = ?", uid, friendId, contact.FolderId).
 			UpdateColumn("group_id", groupId).
-			Error
-		if err != nil {
+			Error; err != nil {
 			return err
 		}
 
-		return tx.Table("contact_folders").Where("id = ? AND user_id = ?", groupId, uid).Updates(map[string]any{
-			"num": gorm.Expr("num + 1"),
-		}).Error
+		return tx.Table("contact_folders").
+			Where("id = ? AND user_id = ?", groupId, uid).
+			Updates(map[string]any{
+				"num": gorm.Expr("num + 1"),
+			}).
+			Error
 	})
 }

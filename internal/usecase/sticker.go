@@ -41,7 +41,9 @@ func (s *StickerUseCase) RemoveUserSysSticker(uid int, stickerId int) error {
 		}
 	}
 
-	return s.Source.Db().Table("sticker_users").Where("user_id = ?", uid).
+	return s.Source.Db().
+		Table("sticker_users").
+		Where("user_id = ?", uid).
 		Update("sticker_ids", strings.Join(items, ",")).
 		Error
 }
@@ -53,7 +55,8 @@ func (s *StickerUseCase) AddUserSysSticker(uid int, stickerId int) error {
 	}
 
 	ids = append(ids, stickerId)
-	return s.Source.Db().Table("sticker_users").
+	return s.Source.Db().
+		Table("sticker_users").
 		Where("user_id = ?", uid).
 		Update("sticker_ids", sliceutil.ToIds(ids)).
 		Error

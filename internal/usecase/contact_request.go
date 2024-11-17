@@ -137,10 +137,10 @@ func (c *ContactRequestUseCase) List(ctx context.Context, uid int) ([]*entity.Ap
 		"contact_requests.friend_id",
 		"contact_requests.created_at",
 	}
-	tx := c.Source.Db().WithContext(ctx).Table("contact_requests")
-	tx.Joins("LEFT JOIN users AS u ON u.id = contact_requests.user_id")
-	tx.Where("contact_requests.friend_id = ?", uid)
-	tx.Order("contact_requests.id DESC")
+	tx := c.Source.Db().WithContext(ctx).Table("contact_requests").
+		Joins("LEFT JOIN users AS u ON u.id = contact_requests.user_id").
+		Where("contact_requests.friend_id = ?", uid).
+		Order("contact_requests.id DESC")
 	var items []*entity.ApplyItem
 	if err := tx.Select(fields).Scan(&items).Error; err != nil {
 		return nil, err

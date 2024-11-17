@@ -5,7 +5,7 @@ import (
 	"voo.su/pkg/email"
 )
 
-func NewEmailClient(conf *config.Config) *email.Client {
+func NewEmailClient(conf *config.Config) *email.Email {
 	return email.NewEmail(&email.Config{
 		Host:     conf.Email.Host,
 		Port:     conf.Email.Port,

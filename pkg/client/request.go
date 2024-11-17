@@ -10,8 +10,8 @@ import (
 )
 
 type RequestClient struct {
-	debug  bool
-	client *http.Client
+	Debug  bool
+	Client *http.Client
 }
 
 type FileData struct {
@@ -21,14 +21,14 @@ type FileData struct {
 }
 
 func NewRequestClient(client *http.Client) *RequestClient {
-	return &RequestClient{client: client}
+	return &RequestClient{Client: client}
 }
 
-func (c *RequestClient) SetDebug() {
-	c.debug = true
+func (r *RequestClient) SetDebug() {
+	r.Debug = true
 }
 
-func (c *RequestClient) Get(url string, params *url.Values) ([]byte, error) {
+func (r *RequestClient) Get(url string, params *url.Values) ([]byte, error) {
 	if params != nil {
 		if strings.Contains(url, "?") {
 			url = fmt.Sprintf("%s&%s", url, params.Encode())
@@ -37,7 +37,7 @@ func (c *RequestClient) Get(url string, params *url.Values) ([]byte, error) {
 		}
 	}
 
-	resp, err := c.client.Get(url)
+	resp, err := r.Client.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *RequestClient) Get(url string, params *url.Values) ([]byte, error) {
 		return nil, err
 	}
 
-	if c.debug {
+	if r.Debug {
 		fmt.Printf("\n[GET] HTTP Запрос\n")
 		fmt.Printf("URL запроса: %s\n", url)
 		fmt.Printf("Статусный код ответа: %d\n", resp.StatusCode)
@@ -59,8 +59,8 @@ func (c *RequestClient) Get(url string, params *url.Values) ([]byte, error) {
 	return res, nil
 }
 
-func (c *RequestClient) Post(url string, params *url.Values) ([]byte, error) {
-	resp, err := c.client.PostForm(url, *params)
+func (r *RequestClient) Post(url string, params *url.Values) ([]byte, error) {
+	resp, err := r.Client.PostForm(url, *params)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (c *RequestClient) Post(url string, params *url.Values) ([]byte, error) {
 		return nil, err
 	}
 
-	if c.debug {
+	if r.Debug {
 		fmt.Printf("\n[POST] HTTP Запрос\n")
 		fmt.Printf("URL запроса: %s\n", url)
 		fmt.Printf("Данные запроса: %s\n", params.Encode())
@@ -83,12 +83,12 @@ func (c *RequestClient) Post(url string, params *url.Values) ([]byte, error) {
 	return res, nil
 }
 
-func (c *RequestClient) PostJson(url string, params any) ([]byte, error) {
+func (r *RequestClient) PostJson(url string, params any) ([]byte, error) {
 	text, _ := json.Marshal(params)
 	req, _ := http.NewRequest("POST", url, strings.NewReader(string(text)))
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := c.client.Do(req)
+	resp, err := r.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (c *RequestClient) PostJson(url string, params any) ([]byte, error) {
 		return nil, err
 	}
 
-	if c.debug {
+	if r.Debug {
 		fmt.Printf("\n[POST] HTTP Запрос\n")
 		fmt.Printf("URL запроса: %s\n", url)
 		fmt.Printf("Данные запроса: %s\n", string(text))
@@ -111,6 +111,6 @@ func (c *RequestClient) PostJson(url string, params any) ([]byte, error) {
 	return res, nil
 }
 
-func (c *RequestClient) PostFrom(url string, params *url.Values, files []*FileData) {
+func (r *RequestClient) PostFrom(url string, params *url.Values, files []*FileData) {
 
 }

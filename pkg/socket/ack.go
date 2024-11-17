@@ -11,52 +11,52 @@ import (
 var ack *AckBuffer
 
 type AckBuffer struct {
-	timeWheel *timewheel.SimpleTimeWheel[*AckBufferContent]
+	TimeWheel *timewheel.SimpleTimeWheel[*AckBufferContent]
 }
 
 type AckBufferContent struct {
-	cid      int64
-	uid      int64
-	channel  string
-	response *ClientResponse
+	Cid      int64
+	Uid      int64
+	Channel  string
+	Response *ClientResponse
 }
 
 func InitAck() {
 	ack = &AckBuffer{}
-	ack.timeWheel = timewheel.NewSimpleTimeWheel[*AckBufferContent](1*time.Second, 30, ack.handle)
+	ack.TimeWheel = timewheel.NewSimpleTimeWheel[*AckBufferContent](1*time.Second, 30, ack.handle)
 }
 
 func (a *AckBuffer) Start(ctx context.Context) error {
-	go a.timeWheel.Start()
+	go a.TimeWheel.Start()
 	<-ctx.Done()
-	a.timeWheel.Stop()
+	a.TimeWheel.Stop()
 	return errors.New("сервис подтверждений остановлен")
 }
 
 func (a *AckBuffer) insert(ackKey string, value *AckBufferContent) {
-	a.timeWheel.Add(ackKey, value, time.Duration(5)*time.Second)
+	a.TimeWheel.Add(ackKey, value, time.Duration(5)*time.Second)
 }
 
 func (a *AckBuffer) delete(ackKey string) {
-	a.timeWheel.Remove(ackKey)
+	a.TimeWheel.Remove(ackKey)
 }
 
 func (a *AckBuffer) handle(_ *timewheel.SimpleTimeWheel[*AckBufferContent], _ string, bufferContent *AckBufferContent) {
-	ch, ok := Session.Channel(bufferContent.channel)
+	ch, ok := Session.Channel(bufferContent.Channel)
 	if !ok {
 		return
 	}
 
-	client, ok := ch.Client(bufferContent.cid)
+	client, ok := ch.Client(bufferContent.Cid)
 	if !ok {
 		return
 	}
 
-	if client.Closed() || int64(client.uid) != bufferContent.uid {
+	if client.Closed() || int64(client.uid) != bufferContent.Uid {
 		return
 	}
 
-	if err := client.Write(bufferContent.response); err != nil {
+	if err := client.Write(bufferContent.Response); err != nil {
 		log.Println("ошибка: ", err)
 	}
 }

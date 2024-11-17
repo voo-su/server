@@ -32,17 +32,17 @@ func NewGroupMemberUseCase(
 
 func (g *GroupChatMemberUseCase) Handover(ctx context.Context, groupId int, userId int, memberId int) error {
 	return g.Source.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		err := tx.Model(&groupChat.GroupChatMember{}).
+		if err := tx.Model(&groupChat.GroupChatMember{}).
 			Where("group_id = ? AND user_id = ? AND leader = 2", groupId, userId).
-			Update("leader", 0).Error
-		if err != nil {
+			Update("leader", 0).
+			Error; err != nil {
 			return err
 		}
 
-		err = tx.Model(&groupChat.GroupChatMember{}).
+		if err := tx.Model(&groupChat.GroupChatMember{}).
 			Where("group_id = ? AND user_id = ?", groupId, memberId).
-			Update("leader", 2).Error
-		if err != nil {
+			Update("leader", 2).
+			Error; err != nil {
 			return err
 		}
 

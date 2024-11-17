@@ -34,8 +34,7 @@ func NewEncode(data []byte) ([]byte, error) {
 
 func NewDecode(r io.Reader) ([]byte, error) {
 	var length int32
-	err := binary.Read(r, binary.LittleEndian, &length)
-	if err != nil {
+	if err := binary.Read(r, binary.LittleEndian, &length); err != nil {
 		return nil, err
 	}
 	if length < 0 {

@@ -370,6 +370,7 @@ func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *v1Pb.
 		ReceiverId: int(req.Receiver.ReceiverId),
 		Content:    html.EscapeString(req.Content),
 	}
+
 	return m.save(ctx, data)
 }
 
@@ -445,6 +446,7 @@ func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *v1Pb.Video
 			Duration: int(req.Duration),
 		}),
 	}
+
 	return m.save(ctx, data)
 }
 
@@ -522,11 +524,14 @@ func (m *MessageUseCase) SendVote(ctx context.Context, uid int, req *v1Pb.VoteMe
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 	}
+
 	m.loadSequence(ctx, data)
+
 	options := make(map[int]string)
 	for i, value := range req.Options {
 		options[i+1] = value
 	}
+
 	num := m.GroupChatMemberRepo.CountMemberTotal(ctx, int(req.Receiver.ReceiverId))
 	err := m.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(data).Error; err != nil {
@@ -604,9 +609,7 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 }
 
 func (m *MessageUseCase) SendMixedMessage(ctx context.Context, uid int, req *v1Pb.MixedMessageRequest) error {
-
 	items := make([]*entity.DialogRecordExtraMixedItem, 0)
-
 	for _, item := range req.Items {
 		items = append(items, &entity.DialogRecordExtraMixedItem{
 			Type:    int(item.Type),
@@ -635,6 +638,7 @@ func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) erro
 	if err := m.Source.Db().First(&record, "msg_id = ?", msgId).Error; err != nil {
 		return err
 	}
+
 	if record.IsRevoke == 1 {
 		return nil
 	}
@@ -672,9 +676,15 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsVa
 	db := m.Source.Db().WithContext(ctx)
 	query := db.Table("messages")
 	query.Select([]string{
-		"messages.receiver_id", "messages.dialog_type", "messages.msg_type",
-		"vote.id as vote_id", "vote.id as record_id", "vote.answer_mode", "vote.answer_option",
-		"vote.answer_num", "vote.status as vote_status",
+		"messages.receiver_id",
+		"messages.dialog_type",
+		"messages.msg_type",
+		"vote.id as vote_id",
+		"vote.id as record_id",
+		"vote.answer_mode",
+		"vote.answer_option",
+		"vote.answer_num",
+		"vote.status as vote_status",
 	})
 	query.Joins("LEFT JOIN message_votes as vote on vote.record_id = messages.id")
 	query.Where("messages.id = ?", msgId)
@@ -782,25 +792,27 @@ func (m *MessageUseCase) loadReply(_ context.Context, data *model.Message) {
 	if data.QuoteId == "" {
 		return
 	}
+
 	if data.Extra == "" {
 		data.Extra = "{}"
 	}
+
 	extra := make(map[string]any)
-	err := jsonutil.Decode(data.Extra, &extra)
-	if err != nil {
+	if err := jsonutil.Decode(data.Extra, &extra); err != nil {
 		logger.Errorf("MessageUseCase Json Decode err: %s", err.Error())
 		return
 	}
+
 	var record model.Message
-	err = m.Source.Db().Table("messages").Find(&record, "msg_id = ?", data.QuoteId).Error
-	if err != nil {
+	if err := m.Source.Db().Table("messages").Find(&record, "msg_id = ?", data.QuoteId).Error; err != nil {
 		return
 	}
+
 	var user model.User
-	err = m.Source.Db().Table("users").Select("username").Find(&user, "id = ?", record.UserId).Error
-	if err != nil {
+	if err := m.Source.Db().Table("users").Select("username").Find(&user, "id = ?", record.UserId).Error; err != nil {
 		return
 	}
+
 	reply := entity.Reply{
 		UserId:   record.UserId,
 		Username: user.Username,
@@ -808,12 +820,14 @@ func (m *MessageUseCase) loadReply(_ context.Context, data *model.Message) {
 		Content:  record.Content,
 		MsgId:    record.MsgId,
 	}
+
 	if record.MsgType != constant.ChatMsgTypeText {
 		reply.Content = "Неизвестно"
 		if value, ok := constant.ChatMsgTypeMapping[record.MsgType]; ok {
 			reply.Content = value
 		}
 	}
+
 	extra["reply"] = reply
 	data.Extra = jsonutil.Encode(extra)
 }
@@ -839,6 +853,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message,
 				m.UnreadStorage.PipeIncr(ctx, pipe, constant.ChatGroupMode, record.ReceiverId, uid)
 			}
 		}
+
 		_, _ = pipe.Exec(ctx)
 	}
 
@@ -866,9 +881,11 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message,
 					if !m.ClientStorage.IsCurrentServerOnline(ctx, sid, constant.ImChannelChat, strconv.Itoa(uid)) {
 						continue
 					}
+
 					pipe.Publish(ctx, fmt.Sprintf(constant.ImTopicChatPrivate, sid), content)
 				}
 			}
+
 			if _, err := pipe.Exec(ctx); err == nil {
 				return
 			}

@@ -47,9 +47,9 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	contact := repo.NewContact(db, contactRemark, relation)
 	groupChatMember := repo.NewGroupMember(db, relation)
 	groupChat := repo.NewGroupChat(db)
-	emailClient := provider.NewEmailClient(conf)
+	email := provider.NewEmailClient(conf)
 	user := repo.NewUser(db)
-	authUseCase := usecase.NewAuthUseCase(smsStorage, contact, groupChatMember, groupChat, conf, emailClient, user)
+	authUseCase := usecase.NewAuthUseCase(smsStorage, contact, groupChatMember, groupChat, conf, email, user)
 	jwtTokenStorage := cache.NewTokenSessionStorage(client)
 	redisLock := cache.NewRedisLock(client)
 	source := repo.NewSource(db, client)
@@ -313,9 +313,9 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 		MessageSubscribe: messageSubscribe,
 	}
 	server := process.NewServer(subServers)
-	emailClient := provider.NewEmailClient(conf)
+	email := provider.NewEmailClient(conf)
 	providers := &provider.Providers{
-		EmailClient: emailClient,
+		EmailClient: email,
 	}
 	appProvider := &ws.AppProvider{
 		Conf:      conf,
@@ -338,9 +338,9 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	contact := repo.NewContact(db, contactRemark, relation)
 	groupChatMember := repo.NewGroupMember(db, relation)
 	groupChat := repo.NewGroupChat(db)
-	emailClient := provider.NewEmailClient(conf)
+	email := provider.NewEmailClient(conf)
 	user := repo.NewUser(db)
-	authUseCase := usecase.NewAuthUseCase(smsStorage, contact, groupChatMember, groupChat, conf, emailClient, user)
+	authUseCase := usecase.NewAuthUseCase(smsStorage, contact, groupChatMember, groupChat, conf, email, user)
 	jwtTokenStorage := cache.NewTokenSessionStorage(client)
 	source := repo.NewSource(db, client)
 	httpClient := provider.NewHttpClient()

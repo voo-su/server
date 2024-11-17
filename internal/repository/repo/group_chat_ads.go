@@ -30,14 +30,16 @@ func (g *GroupChatAds) GetListAll(ctx context.Context, groupId int) ([]*entity.S
 		"users.avatar",
 		"users.username",
 	}
-	query := g.Repo.Db.WithContext(ctx).Table("group_chat_ads")
-	query.Joins("LEFT JOIN users on users.id = group_chat_ads.creator_id")
-	query.Where("group_chat_ads.group_id = ? AND group_chat_ads.is_delete = ?", groupId, 0)
-	query.Order("group_chat_ads.is_top desc")
-	query.Order("group_chat_ads.created_at desc")
+	query := g.Repo.Db.WithContext(ctx).
+		Select(fields).
+		Table("group_chat_ads").
+		Joins("LEFT JOIN users on users.id = group_chat_ads.creator_id").
+		Where("group_chat_ads.group_id = ? AND group_chat_ads.is_delete = ?", groupId, 0).
+		Order("group_chat_ads.is_top desc").
+		Order("group_chat_ads.created_at desc")
 
 	var items []*entity.SearchAdsItem
-	if err := query.Select(fields).Scan(&items).Error; err != nil {
+	if err := query.Scan(&items).Error; err != nil {
 		return nil, err
 	}
 
@@ -46,8 +48,9 @@ func (g *GroupChatAds) GetListAll(ctx context.Context, groupId int) ([]*entity.S
 
 func (g *GroupChatAds) GetLatestAds(ctx context.Context, groupId int) (*model.GroupChatAds, error) {
 	var info model.GroupChatAds
-	err := g.Repo.Db.WithContext(ctx).Last(&info, "group_id = ? AND is_delete = ?", groupId, 0).Error
-	if err != nil {
+	if err := g.Repo.Db.WithContext(ctx).
+		Last(&info, "group_id = ? AND is_delete = ?", groupId, 0).
+		Error; err != nil {
 		return nil, err
 	}
 
