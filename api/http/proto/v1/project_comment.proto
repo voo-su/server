@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package v1;
+
+import "third_party/tagger/tagger.proto";
+
+option go_package = "./v1;api_v1";
+
+message ProjectCommentCreateRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    string comment = 2;
+}
+
+message ProjectCommentCreateResponse{
+    int64 id = 1;
+}
+
+message ProjectCommentRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+}
+
+message ProjectCommentResponse{
+    message User{
+        int64 id = 1;
+        string avatar = 2;
+        string username = 3;
+        string name = 4;
+        string surname = 5;
+    }
+
+    message Item{
+        int64 id = 1;
+        int64 taskId = 2;
+        string comment = 3;
+        User user = 4;
+        string created_at = 5;
+    }
+
+    repeated Item items = 1;
+}

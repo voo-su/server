@@ -14,7 +14,7 @@ import (
 const JWTSessionConst = "__JWT_SESSION__"
 
 var (
-	ErrorNoLogin = errors.New("пожалуйста, войдите в систему перед выполнением операции")
+	ErrorNoLogin = errors.New("Пожалуйста, войдите в систему перед выполнением операции")
 )
 
 type IStorage interface {

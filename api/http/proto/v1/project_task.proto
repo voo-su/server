@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package v1;
+
+import "third_party/tagger/tagger.proto";
+
+option go_package = "./v1;api_v1";
+
+message ProjectTaskCreateRequest{
+    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\""];
+    int64 type_id = 2;
+    string title = 3;
+    string description = 4;
+}
+
+message ProjectTaskCreateResponse{
+    int64 id = 1;
+}
+
+message ProjectTaskRequest{
+    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\""];
+}
+
+message ProjectTaskResponse{
+    message Tasks{
+        int64 id = 1;
+        string title = 2;
+    }
+
+    message Categories{
+        int64 id = 1;
+        string title = 2;
+        repeated Tasks tasks = 3;
+    }
+
+    repeated Categories categories = 1;
+}
+
+message ProjectExecutorRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    int64 member_id = 2 [(tagger.tags) = "form:\"member_id\" binding:\"required\""];
+}
+
+message ProjectExecutorResponse{}
+
+message ProjectTaskMoveRequest{
+    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\""];
+    int64 task_id = 2 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    int64 from_id = 3 [(tagger.tags) = "form:\"from_id\" binding:\"required\""];
+    int64 to_id = 4 [(tagger.tags) = "form:\"to_id\" binding:\"required\""];
+}
+
+message ProjectTaskMoveResponse{}
+
+message ProjectTaskDetailRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+}
+
+message ProjectTaskDetailResponse{
+    message Member{
+        int64 id = 1;
+        string username = 2;
+    }
+
+    string title = 1;
+    string description = 2;
+    string created_at = 3;
+    Member assigner = 4;
+    Member executor = 5;
+}
+
+message ProjectTaskTypeNameRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    string name = 2 [(tagger.tags) = "form:\"name\" binding:\"required\""];
+}
+
+message ProjectTaskTypeNameResponse{}
+
+message ProjectCoexecutorInviteRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    string member_ids = 2 [(tagger.tags) = "form:\"member_ids\" binding:\"required\""];
+}
+
+message ProjectCoexecutorInviteResponse{}
+
+message ProjectCoexecutorsRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+}
+
+message ProjectCoexecutorsResponse{
+    message Item {
+        int64 id = 1;
+        string username = 2;
+    }
+
+    repeated Item items = 1;
+}
+
+message ProjectWatcherInviteRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+    string member_ids = 2 [(tagger.tags) = "form:\"member_ids\" binding:\"required\""];
+}
+
+message ProjectWatcherInviteResponse{}
+
+message ProjectWatchersRequest{
+    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];
+}
+
+message ProjectWatchersResponse{
+    message Item {
+        int64 id = 1;
+        string username = 2;
+    }
+
+    repeated Item items = 1;
+}

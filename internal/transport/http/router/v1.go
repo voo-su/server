@@ -109,5 +109,24 @@ func NewV1(router *gin.Engine, conf *config.Config, handler *handler.Handler, se
 			bot.POST("", core.HandlerFunc(handler.V1.Bot.Create))
 			bot.GET("", core.HandlerFunc(handler.V1.Bot.List))
 		}
+		project := v1.Group("/projects").Use(authorize)
+		{
+			project.GET("", core.HandlerFunc(handler.V1.Project.Projects))
+			project.POST("/create", core.HandlerFunc(handler.V1.Project.Create))
+			project.GET("/members", core.HandlerFunc(handler.V1.Project.Members))
+			project.POST("/invite", core.HandlerFunc(handler.V1.Project.Invite))
+			project.PUT("/task-type-name", core.HandlerFunc(handler.V1.ProjectTask.TaskTypeName))
+			project.GET("/tasks", core.HandlerFunc(handler.V1.ProjectTask.Tasks))
+			project.POST("/tasks/create", core.HandlerFunc(handler.V1.ProjectTask.Create))
+			project.GET("/tasks/detail", core.HandlerFunc(handler.V1.ProjectTask.TaskDetail))
+			project.PUT("/tasks/executor", core.HandlerFunc(handler.V1.ProjectTask.Executor))
+			project.PUT("/tasks/move", core.HandlerFunc(handler.V1.ProjectTask.TaskMove))
+			project.GET("/tasks/coexecutors", core.HandlerFunc(handler.V1.ProjectTask.TaskCoexecutors))
+			project.POST("/tasks/coexecutors/invite", core.HandlerFunc(handler.V1.ProjectTask.TaskCoexecutorInvite))
+			project.GET("/tasks/watchers", core.HandlerFunc(handler.V1.ProjectTask.TaskWatchers))
+			project.POST("/tasks/watchers/invite", core.HandlerFunc(handler.V1.ProjectTask.TaskWatcherInvite))
+			project.GET("/tasks/comments", core.HandlerFunc(handler.V1.ProjectComment.Comments))
+			project.POST("/tasks/comments/create", core.HandlerFunc(handler.V1.ProjectComment.Create))
+		}
 	}
 }
