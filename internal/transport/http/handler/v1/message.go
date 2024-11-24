@@ -17,10 +17,8 @@ import (
 type Message struct {
 	ChatUseCase            *usecase.ChatUseCase
 	AuthUseCase            *usecase.AuthUseCase
-	MessageSendUseCase     usecase.MessageSendUseCase
+	MessageUseCase         usecase.IMessageUseCase
 	Minio                  minio.IMinio
-	MessageUseCase         *usecase.MessageUseCase
-	GroupChatUseCase       *usecase.GroupChatUseCase
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
 }
 
@@ -32,7 +30,7 @@ type VoteMessageRequest struct {
 	Options    []string `form:"options" json:"options"`
 }
 
-func (c *Message) Vote(ctx *core.Context) error {
+func (m *Message) Vote(ctx *core.Context) error {
 	params := &VoteMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -47,7 +45,7 @@ func (c *Message) Vote(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
+	if err := m.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
 		DialogType:        constant.ChatGroupMode,
 		UserId:            uid,
 		ReceiverId:        params.ReceiverId,
@@ -56,7 +54,7 @@ func (c *Message) Vote(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	if err := c.MessageSendUseCase.SendVote(ctx.Ctx(), uid, &v1Pb.VoteMessageRequest{
+	if err := m.MessageUseCase.SendVote(ctx.Ctx(), uid, &v1Pb.VoteMessageRequest{
 		Mode:      int32(params.Mode),
 		Title:     params.Title,
 		Options:   params.Options,
@@ -76,13 +74,13 @@ type RevokeMessageRequest struct {
 	MsgId string `form:"msg_id" json:"msg_id" binding:"required" label:"msg_id"`
 }
 
-func (c *Message) Revoke(ctx *core.Context) error {
+func (m *Message) Revoke(ctx *core.Context) error {
 	params := &RevokeMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.Revoke(ctx.Ctx(), ctx.UserId(), params.MsgId); err != nil {
+	if err := m.MessageUseCase.Revoke(ctx.Ctx(), ctx.UserId(), params.MsgId); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -95,13 +93,13 @@ type DeleteMessageRequest struct {
 	RecordIds  string `form:"record_id" json:"record_id" binding:"required,ids" label:"record_id"`
 }
 
-func (c *Message) Delete(ctx *core.Context) error {
+func (m *Message) Delete(ctx *core.Context) error {
 	params := &DeleteMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.ChatUseCase.DeleteRecordList(ctx.Ctx(), &usecase.RemoveRecordListOpt{
+	if err := m.ChatUseCase.DeleteRecordList(ctx.Ctx(), &usecase.RemoveRecordListOpt{
 		UserId:     ctx.UserId(),
 		DialogType: params.DialogType,
 		ReceiverId: params.ReceiverId,
@@ -118,13 +116,13 @@ type VoteMessageHandleRequest struct {
 	Options  string `form:"options" json:"options" binding:"required"`
 }
 
-func (c *Message) HandleVote(ctx *core.Context) error {
+func (m *Message) HandleVote(ctx *core.Context) error {
 	params := &VoteMessageHandleRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	data, err := c.MessageSendUseCase.Vote(ctx.Ctx(), ctx.UserId(), params.RecordId, params.Options)
+	data, err := m.MessageUseCase.Vote(ctx.Ctx(), ctx.UserId(), params.RecordId, params.Options)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -140,7 +138,7 @@ type GetDialogRecordsRequest struct {
 	Limit      int `form:"limit" json:"limit" binding:"required,numeric,max=100"`
 }
 
-func (c *Message) GetRecords(ctx *core.Context) error {
+func (m *Message) GetRecords(ctx *core.Context) error {
 	params := &GetDialogRecordsRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -148,7 +146,7 @@ func (c *Message) GetRecords(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if params.DialogType == constant.ChatGroupMode {
-		err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
+		err := m.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
 			DialogType: params.DialogType,
 			UserId:     uid,
 			ReceiverId: params.ReceiverId,
@@ -175,7 +173,7 @@ func (c *Message) GetRecords(ctx *core.Context) error {
 		}
 	}
 
-	records, err := c.MessageUseCase.GetDialogRecords(ctx.Ctx(), &usecase.QueryDialogRecordsOpt{
+	records, err := m.MessageUseCase.GetDialogRecords(ctx.Ctx(), &usecase.QueryDialogRecordsOpt{
 		DialogType: params.DialogType,
 		UserId:     ctx.UserId(),
 		ReceiverId: params.ReceiverId,
@@ -202,13 +200,13 @@ type DownloadChatFileRequest struct {
 	RecordId int `form:"cr_id" json:"cr_id" binding:"required,min=1"`
 }
 
-func (c *Message) Download(ctx *core.Context) error {
+func (m *Message) Download(ctx *core.Context) error {
 	params := &DownloadChatFileRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	record, err := c.MessageUseCase.MessageRepo.FindById(ctx.Ctx(), params.RecordId)
+	record, err := m.MessageUseCase.GetMessageByRecordId(ctx.Ctx(), params.RecordId)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -220,7 +218,7 @@ func (c *Message) Download(ctx *core.Context) error {
 				return ctx.Forbidden("Отсутствует доступ")
 			}
 		} else {
-			if !c.GroupChatMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), record.ReceiverId, uid, false) {
+			if !m.GroupChatMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), record.ReceiverId, uid, false) {
 				return ctx.Forbidden("Отсутствует доступ")
 			}
 		}
@@ -233,7 +231,7 @@ func (c *Message) Download(ctx *core.Context) error {
 
 	ctx.Context.Redirect(
 		http.StatusFound,
-		c.Minio.PrivateUrl(c.Minio.BucketPrivateName(), fileInfo.Path, fileInfo.Name, 60*time.Second),
+		m.Minio.PrivateUrl(m.Minio.BucketPrivateName(), fileInfo.Path, fileInfo.Name, 60*time.Second),
 	)
 
 	return nil
@@ -243,13 +241,13 @@ type CollectMessageRequest struct {
 	RecordId int `form:"record_id" json:"record_id" binding:"required,numeric,gt=0" label:"record_id"`
 }
 
-func (c *Message) Collect(ctx *core.Context) error {
+func (m *Message) Collect(ctx *core.Context) error {
 	params := &CollectMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.ChatUseCase.Collect(ctx.Ctx(), ctx.UserId(), params.RecordId); err != nil {
+	if err := m.ChatUseCase.Collect(ctx.Ctx(), ctx.UserId(), params.RecordId); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

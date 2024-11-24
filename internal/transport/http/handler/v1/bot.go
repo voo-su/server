@@ -9,8 +9,8 @@ import (
 )
 
 type Bot struct {
-	BotUseCase         *usecase.BotUseCase
-	MessageSendUseCase usecase.MessageSendUseCase
+	BotUseCase     *usecase.BotUseCase
+	MessageUseCase usecase.IMessageUseCase
 }
 
 func (b *Bot) Create(ctx *core.Context) error {

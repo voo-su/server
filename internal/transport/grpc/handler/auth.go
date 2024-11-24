@@ -24,15 +24,15 @@ import (
 
 type AuthHandler struct {
 	authPb.UnimplementedAuthServiceServer
-	Conf               *config.Config
-	TokenMiddleware    *middleware.TokenMiddleware
-	AuthUseCase        *usecase.AuthUseCase
-	JwtTokenStorage    *cache.JwtTokenStorage
-	IpAddressUseCase   *usecase.IpAddressUseCase
-	ChatUseCase        *usecase.ChatUseCase
-	BotRepo            *repo.Bot
-	MessageSendUseCase usecase.MessageSendUseCase
-	UserSession        *repo.UserSession
+	Conf             *config.Config
+	TokenMiddleware  *middleware.TokenMiddleware
+	AuthUseCase      *usecase.AuthUseCase
+	JwtTokenStorage  *cache.JwtTokenStorage
+	IpAddressUseCase *usecase.IpAddressUseCase
+	ChatUseCase      *usecase.ChatUseCase
+	BotRepo          *repo.Bot
+	MessageUseCase   usecase.IMessageUseCase
+	UserSession      *repo.UserSession
 }
 
 func NewAuthHandler(
@@ -43,19 +43,17 @@ func NewAuthHandler(
 	ipAddressUseCase *usecase.IpAddressUseCase,
 	chatUseCase *usecase.ChatUseCase,
 	botRepo *repo.Bot,
-	messageSendUseCase usecase.MessageSendUseCase,
 	userSession *repo.UserSession,
 ) *AuthHandler {
 	return &AuthHandler{
-		Conf:               conf,
-		TokenMiddleware:    tokenMiddleware,
-		AuthUseCase:        authUseCase,
-		JwtTokenStorage:    jwtTokenStorage,
-		IpAddressUseCase:   ipAddressUseCase,
-		ChatUseCase:        chatUseCase,
-		BotRepo:            botRepo,
-		MessageSendUseCase: messageSendUseCase,
-		UserSession:        userSession,
+		Conf:             conf,
+		TokenMiddleware:  tokenMiddleware,
+		AuthUseCase:      authUseCase,
+		JwtTokenStorage:  jwtTokenStorage,
+		IpAddressUseCase: ipAddressUseCase,
+		ChatUseCase:      chatUseCase,
+		BotRepo:          botRepo,
+		UserSession:      userSession,
 	}
 }
 
@@ -142,7 +140,7 @@ func (a *AuthHandler) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) 
 			IsBoot:     true,
 		})
 
-		_ = a.MessageSendUseCase.SendLogin(ctx, user.Id, &usecase.SendLogin{
+		_ = a.MessageUseCase.SendLogin(ctx, user.Id, &usecase.SendLogin{
 			Ip:      ip,
 			Agent:   userAgent[0],
 			Address: address,

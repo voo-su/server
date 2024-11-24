@@ -13,7 +13,7 @@ import (
 
 type QueueJobs struct {
 	queue.EmailHandle
-	queue.LoginHandle
+	queue.PushHandle
 }
 
 type QueueProvider struct {
@@ -25,6 +25,10 @@ type QueueProvider struct {
 func Queue(ctx *cli.Context, app *QueueProvider) error {
 	if err := app.Jobs.EmailHandle.Handle(ctx.Context); err != nil {
 		fmt.Println("EmailHandle>>", err)
+	}
+
+	if err := app.Jobs.PushHandle.Handle(ctx.Context); err != nil {
+		fmt.Println("PushHandle>>", err)
 	}
 
 	ch := make(chan os.Signal, 1)

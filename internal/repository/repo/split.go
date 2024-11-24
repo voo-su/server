@@ -17,10 +17,10 @@ func NewFileSplit(db *gorm.DB) *Split {
 
 func (s *Split) GetSplitList(ctx context.Context, uploadId string) ([]*model.Split, error) {
 	return s.Repo.FindAll(ctx, func(db *gorm.DB) {
-		db.Where("upload_id = ? and type = 2", uploadId)
+		db.Where("upload_id = ? AND type = 2", uploadId)
 	})
 }
 
 func (s *Split) GetFile(ctx context.Context, uid int, uploadId string) (*model.Split, error) {
-	return s.Repo.FindByWhere(ctx, "user_id = ? and upload_id = ? and type = 1", uid, uploadId)
+	return s.Repo.FindByWhere(ctx, "user_id = ? AND upload_id = ? AND type = 1", uid, uploadId)
 }

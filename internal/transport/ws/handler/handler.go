@@ -20,9 +20,9 @@ type Handler struct {
 }
 
 type AuthConn struct {
+	Conn    *adapter.TcpAdapter
 	Uid     int    `json:"uid"`
 	Channel string `json:"channel"`
-	conn    *adapter.TcpAdapter
 }
 
 type Authorize struct {
@@ -55,7 +55,7 @@ func (h *Handler) Dispatch(conn net.Conn) {
 	case info := <-ch:
 		fmt.Println(conn.RemoteAddr(), "аутентификация успешна", time.Now().Unix())
 		if info.Channel == constant.ImChannelChat {
-			_ = h.Chat.NewClient(info.Uid, info.conn)
+			_ = h.Chat.NewClient(info.Uid, info.Conn)
 		}
 	}
 }
@@ -93,5 +93,9 @@ func (h *Handler) auth(connect net.Conn, data chan *AuthConn) {
 		return
 	}
 
-	data <- &AuthConn{Uid: uid, conn: conn, Channel: detail.Channel}
+	data <- &AuthConn{
+		Conn:    conn,
+		Uid:     uid,
+		Channel: detail.Channel,
+	}
 }

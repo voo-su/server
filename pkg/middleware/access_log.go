@@ -51,9 +51,9 @@ type responseWriter struct {
 	body *bytes.Buffer
 }
 
-func (w responseWriter) Write(b []byte) (int, error) {
-	w.body.Write(b)
-	return w.ResponseWriter.Write(b)
+func (r responseWriter) Write(b []byte) (int, error) {
+	r.body.Write(b)
+	return r.ResponseWriter.Write(b)
 }
 
 type AccessLogStore struct {

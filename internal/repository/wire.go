@@ -22,4 +22,5 @@ var ProviderSet = wire.NewSet(
 	repo.NewSequence,
 	repo.NewBot,
 	repo.NewSticker,
+	repo.NewPushToken,
 )

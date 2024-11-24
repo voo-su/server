@@ -12,9 +12,9 @@ import (
 
 type ConsumeDialog struct {
 	DialogType int   `json:"dialog_type"`
-	SenderID   int64 `json:"sender_id"`
-	ReceiverID int64 `json:"receiver_id"`
-	RecordID   int64 `json:"record_id"`
+	SenderId   int64 `json:"sender_id"`
+	ReceiverId int64 `json:"receiver_id"`
+	RecordId   int64 `json:"record_id"`
 }
 
 func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
@@ -26,7 +26,7 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 
 	var clientIds []int64
 	if in.DialogType == constant.ChatPrivateMode {
-		for _, val := range [2]int64{in.SenderID, in.ReceiverID} {
+		for _, val := range [2]int64{in.SenderId, in.ReceiverId} {
 			ids := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.FormatInt(val, 10))
 
 			clientIds = append(clientIds, ids...)
@@ -35,7 +35,7 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 		ids := h.RoomStorage.All(ctx, &cache.RoomOption{
 			Channel:  socket.Session.Chat.Name(),
 			RoomType: constant.RoomImGroup,
-			Number:   strconv.Itoa(int(in.ReceiverID)),
+			Number:   strconv.Itoa(int(in.ReceiverId)),
 			Sid:      h.Conf.ServerId(),
 		})
 		clientIds = append(clientIds, ids...)
@@ -44,7 +44,7 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 		return
 	}
 
-	data, err := h.MessageUseCase.GetDialogRecord(ctx, in.RecordID)
+	data, err := h.MessageUseCase.GetDialogRecord(ctx, in.RecordId)
 	if err != nil {
 		return
 	}
@@ -53,8 +53,8 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 	c.SetReceive(clientIds...)
 	c.SetAck(true)
 	c.SetMessage(constant.PushEventImMessage, map[string]any{
-		"sender_id":   in.SenderID,
-		"receiver_id": in.ReceiverID,
+		"sender_id":   in.SenderId,
+		"receiver_id": in.ReceiverId,
 		"dialog_type": in.DialogType,
 		"data":        data,
 	})

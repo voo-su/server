@@ -8,7 +8,7 @@ import (
 )
 
 type RedisLock struct {
-	Redis *redis.Client
+	Rds *redis.Client
 }
 
 func NewRedisLock(rds *redis.Client) *RedisLock {
@@ -16,7 +16,7 @@ func NewRedisLock(rds *redis.Client) *RedisLock {
 }
 
 func (r *RedisLock) Lock(ctx context.Context, name string, expire int) bool {
-	return r.Redis.SetNX(ctx, r.name(name), 1, time.Duration(expire)*time.Second).Val()
+	return r.Rds.SetNX(ctx, r.name(name), 1, time.Duration(expire)*time.Second).Val()
 }
 
 func (r *RedisLock) UnLock(ctx context.Context, name string) bool {
@@ -26,7 +26,7 @@ func (r *RedisLock) UnLock(ctx context.Context, name string) bool {
 	else
 		return false
 	end`
-	return r.Redis.Eval(ctx, script, []string{r.name(name)}, 1).Err() == nil
+	return r.Rds.Eval(ctx, script, []string{r.name(name)}, 1).Err() == nil
 }
 
 func (r *RedisLock) name(name string) string {

@@ -37,12 +37,12 @@ func (c *ClearTmpFile) Handle(ctx context.Context) error {
 	lastId, size := 0, 100
 	for {
 		items := make([]*model.Split, 0)
-		err := c.DB.Model(&model.Split{}).
+		if err := c.DB.Model(&model.Split{}).
 			Where("id > ? AND type = 1 AND drive = 1 AND created_at <= ?", lastId, time.Now().Add(-24*time.Hour)).
 			Order("id asc").
 			Limit(size).
-			Scan(&items).Error
-		if err != nil {
+			Scan(&items).
+			Error; err != nil {
 			return err
 		}
 

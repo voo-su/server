@@ -413,6 +413,51 @@ func (*AccountEmailUpdateResponse) Descriptor() ([]byte, []int) {
 	return file_v1_account_proto_rawDescGZIP(), []int{6}
 }
 
+type AccountPushRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Subscription string `protobuf:"bytes,1,opt,name=subscription,proto3" json:"subscription,omitempty" binding:"required"`
+}
+
+func (x *AccountPushRequest) Reset() {
+	*x = AccountPushRequest{}
+	mi := &file_v1_account_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccountPushRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccountPushRequest) ProtoMessage() {}
+
+func (x *AccountPushRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_account_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccountPushRequest.ProtoReflect.Descriptor instead.
+func (*AccountPushRequest) Descriptor() ([]byte, []int) {
+	return file_v1_account_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *AccountPushRequest) GetSubscription() string {
+	if x != nil {
+		return x.Subscription
+	}
+	return ""
+}
+
 var File_v1_account_proto protoreflect.FileDescriptor
 
 var file_v1_account_proto_rawDesc = []byte{
@@ -469,8 +514,13 @@ var file_v1_account_proto_rawDesc = []byte{
 	0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65,
 	0x64, 0x22, 0x52, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x22, 0x1c, 0x0a, 0x1a, 0x41, 0x63, 0x63,
 	0x6f, 0x75, 0x6e, 0x74, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x2f, 0x76, 0x31, 0x3b,
-	0x76, 0x31, 0x5f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x51, 0x0a, 0x12, 0x41, 0x63, 0x63, 0x6f, 0x75,
+	0x6e, 0x74, 0x50, 0x75, 0x73, 0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x3b, 0x0a,
+	0x0c, 0x73, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x42, 0x17, 0x9a, 0x84, 0x9e, 0x03, 0x12, 0x62, 0x69, 0x6e, 0x64, 0x69, 0x6e,
+	0x67, 0x3a, 0x22, 0x72, 0x65, 0x71, 0x75, 0x69, 0x72, 0x65, 0x64, 0x22, 0x52, 0x0c, 0x73, 0x75,
+	0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x2f,
+	0x76, 0x31, 0x3b, 0x76, 0x31, 0x5f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -485,7 +535,7 @@ func file_v1_account_proto_rawDescGZIP() []byte {
 	return file_v1_account_proto_rawDescData
 }
 
-var file_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_v1_account_proto_goTypes = []any{
 	(*AccountResponse)(nil),               // 0: v1.AccountResponse
 	(*AccountDetailUpdateRequest)(nil),    // 1: v1.AccountDetailUpdateRequest
@@ -494,6 +544,7 @@ var file_v1_account_proto_goTypes = []any{
 	(*AccountUsernameUpdateResponse)(nil), // 4: v1.AccountUsernameUpdateResponse
 	(*AccountEmailUpdateRequest)(nil),     // 5: v1.AccountEmailUpdateRequest
 	(*AccountEmailUpdateResponse)(nil),    // 6: v1.AccountEmailUpdateResponse
+	(*AccountPushRequest)(nil),            // 7: v1.AccountPushRequest
 }
 var file_v1_account_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -514,7 +565,7 @@ func file_v1_account_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_v1_account_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

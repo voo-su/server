@@ -68,7 +68,10 @@ func (s *SplitUseCase) InitiateMultipartUpload(ctx context.Context, params *Mult
 
 	m.UploadId = uploadId
 
-	if err := s.Source.Db().WithContext(ctx).Create(m).Error; err != nil {
+	if err := s.Source.Db().
+		WithContext(ctx).
+		Create(m).
+		Error; err != nil {
 		return nil, err
 	}
 
@@ -141,7 +144,8 @@ func (s *SplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUpload
 
 func (s *SplitUseCase) merge(info *model.Split) error {
 	items, err := s.SplitRepo.FindAll(context.Background(), func(db *gorm.DB) {
-		db.Where("upload_id =? AND type = 2", info.UploadId).Order("split_index asc")
+		db.Where("upload_id =? AND type = 2", info.UploadId).
+			Order("split_index asc")
 	})
 
 	if err != nil {

@@ -45,6 +45,11 @@ type IMinio interface {
 
 var _ IMinio = (*Minio)(nil)
 
+type Minio struct {
+	Core   *minio.Core
+	Config Config
+}
+
 type Config struct {
 	Endpoint      string
 	SSL           bool
@@ -54,24 +59,19 @@ type Config struct {
 	BucketPrivate string
 }
 
-type Minio struct {
-	Core   *minio.Core
-	Config Config
-}
-
-func NewMinio(config Config) *Minio {
-	client, err := minio.NewCore(config.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(config.SecretId, config.SecretKey, ""),
-		Secure: config.SSL,
+func NewMinio(conf Config) *Minio {
+	client, err := minio.NewCore(conf.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(conf.SecretId, conf.SecretKey, ""),
+		Secure: conf.SSL,
 	})
 
 	if err != nil {
-		panic(fmt.Sprintf("Не удалось инициализировать minio-клиент, %s", err))
+		panic(fmt.Sprintf("Не удалось инициализировать minio-клиент: %s", err))
 	}
 
 	return &Minio{
 		Core:   client,
-		Config: config,
+		Config: conf,
 	}
 }
 

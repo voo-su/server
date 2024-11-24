@@ -36,8 +36,8 @@ func NewEvent(opts ...EventOption) IEvent {
 	return o
 }
 
-func (c *Event) Open(client IClient) {
-	if c.open == nil {
+func (e *Event) Open(client IClient) {
+	if e.open == nil {
 		return
 	}
 
@@ -47,11 +47,11 @@ func (c *Event) Open(client IClient) {
 		}
 	}()
 
-	c.open(client)
+	e.open(client)
 }
 
-func (c *Event) Message(client IClient, data []byte) {
-	if c.message == nil {
+func (e *Event) Message(client IClient, data []byte) {
+	if e.message == nil {
 		return
 	}
 	defer func() {
@@ -60,11 +60,11 @@ func (c *Event) Message(client IClient, data []byte) {
 		}
 	}()
 
-	c.message(client, data)
+	e.message(client, data)
 }
 
-func (c *Event) Close(client IClient, code int, text string) {
-	if c.close == nil {
+func (e *Event) Close(client IClient, code int, text string) {
+	if e.close == nil {
 		return
 	}
 
@@ -74,11 +74,11 @@ func (c *Event) Close(client IClient, code int, text string) {
 		}
 	}()
 
-	c.close(client, code, text)
+	e.close(client, code, text)
 }
 
-func (c *Event) Destroy(client IClient) {
-	if c.destroy == nil {
+func (e *Event) Destroy(client IClient) {
+	if e.destroy == nil {
 		return
 	}
 
@@ -88,7 +88,7 @@ func (c *Event) Destroy(client IClient) {
 		}
 	}()
 
-	c.destroy(client)
+	e.destroy(client)
 }
 
 func WithOpenEvent(e OpenEvent) EventOption {

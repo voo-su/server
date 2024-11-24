@@ -5,8 +5,8 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-type Client struct {
-	config *Config
+type Email struct {
+	Conf *Config
 }
 
 type Config struct {
@@ -18,9 +18,9 @@ type Config struct {
 	Name     string
 }
 
-func NewEmail(config *Config) *Client {
-	return &Client{
-		config: config,
+func NewEmail(config *Config) *Email {
+	return &Email{
+		Conf: config,
 	}
 }
 
@@ -32,16 +32,16 @@ type Option struct {
 
 type OptionFunc func(msg *gomail.Message)
 
-func (c *Client) do(msg *gomail.Message) error {
-	dialer := gomail.NewDialer(c.config.Host, c.config.Port, c.config.UserName, c.config.Password)
+func (e *Email) do(msg *gomail.Message) error {
+	dialer := gomail.NewDialer(e.Conf.Host, e.Conf.Port, e.Conf.UserName, e.Conf.Password)
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	return dialer.DialAndSend(msg)
 }
 
-func (c *Client) SendMail(email *Option, opt ...OptionFunc) error {
+func (e *Email) SendMail(email *Option, opt ...OptionFunc) error {
 	m := gomail.NewMessage()
-	m.SetHeader("From", m.FormatAddress(c.config.From, c.config.Name))
+	m.SetHeader("From", m.FormatAddress(e.Conf.From, e.Conf.Name))
 
 	if len(email.To) > 0 {
 		m.SetHeader("To", email.To)
@@ -59,5 +59,5 @@ func (c *Client) SendMail(email *Option, opt ...OptionFunc) error {
 		o(m)
 	}
 
-	return c.do(m)
+	return e.do(m)
 }

@@ -10,9 +10,9 @@ import (
 )
 
 type element struct {
-	key    string
-	value  any
-	expire int64
+	Key    string
+	Value  any
+	Expire int64
 }
 
 type slot struct {
@@ -28,7 +28,7 @@ func newSlot(id int) *slot {
 }
 
 func (s *slot) add(el *element) {
-	s.elements.LoadOrStore(el.key, el)
+	s.elements.LoadOrStore(el.Key, el)
 }
 
 func (s *slot) remove(key any) {
@@ -101,7 +101,7 @@ func (t *TimeWheel) Start() {
 			circleIndex, slotIndex := t.getCircleAndSlot(el)
 			circleSlot := t.circle[circleIndex].slot[slotIndex]
 			circleSlot.add(el)
-			t.indicator.Store(el.value, circleSlot)
+			t.indicator.Store(el.Value, circleSlot)
 		}
 	}
 }
@@ -110,7 +110,7 @@ func (t *TimeWheel) getCircleAndSlot(el *element) (int, int64) {
 	var (
 		circleIndex   int
 		slotIndex     int64
-		remainingTime = int(el.expire - time.Now().Unix())
+		remainingTime = int(el.Expire - time.Now().Unix())
 	)
 	if remainingTime <= 0 {
 		remainingTime = 0
@@ -147,14 +147,14 @@ func (t *TimeWheel) runTimeWheel(circle *circle) {
 			circleSlot := circle.slot[tickIndex]
 			circleSlot.elements.Range(func(_, value any) bool {
 				if el, ok := value.(*element); ok {
-					t.indicator.Delete(el.value)
-					circleSlot.remove(el.value)
+					t.indicator.Delete(el.Value)
+					circleSlot.remove(el.Value)
 					worker.Go(func() {
-						if el.expire <= time.Now().Unix() {
-							t.onTick(t, el.value)
+						if el.Expire <= time.Now().Unix() {
+							t.onTick(t, el.Value)
 						} else {
-							second := el.expire - time.Now().Unix()
-							if err := t.Add(el.value, time.Duration(second)*time.Second); err != nil {
+							second := el.Expire - time.Now().Unix()
+							if err := t.Add(el.Value, time.Duration(second)*time.Second); err != nil {
 								log.Printf("Ошибка при понижении уровня временного колеса: %s", err.Error())
 							}
 						}
@@ -174,7 +174,7 @@ func (t *TimeWheel) Add(task any, delay time.Duration) error {
 	if delay > 24*time.Hour {
 		return errors.New("максимальная задержка 24 часа")
 	}
-	t.taskChan <- &element{value: task, expire: time.Now().Add(delay).Unix()}
+	t.taskChan <- &element{Value: task, Expire: time.Now().Add(delay).Unix()}
 
 	return nil
 }

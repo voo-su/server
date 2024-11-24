@@ -52,7 +52,7 @@ func (g *GroupChatAdsUseCase) Update(ctx context.Context, opt *GroupChatAdsEditO
 		"is_top":     opt.IsTop,
 		"is_confirm": opt.IsConfirm,
 		"updated_at": time.Now(),
-	}, "id = ? and group_id = ?", opt.AdsId, opt.GroupId)
+	}, "id = ? AND group_id = ?", opt.AdsId, opt.GroupId)
 
 	return err
 }
@@ -62,7 +62,7 @@ func (g *GroupChatAdsUseCase) Delete(ctx context.Context, groupId, id int) error
 		"is_delete":  1,
 		"deleted_at": timeutil.DateTime(),
 		"updated_at": time.Now(),
-	}, "id = ? and group_id = ?", id, groupId)
+	}, "id = ? AND group_id = ?", id, groupId)
 
 	return err
 }

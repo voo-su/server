@@ -9,7 +9,7 @@ import (
 type ContactRequest struct {
 	ContactRequestUseCase *usecase.ContactRequestUseCase
 	ContactUseCase        *usecase.ContactUseCase
-	MessageSendUseCase    usecase.MessageSendUseCase
+	MessageUseCase        usecase.IMessageUseCase
 }
 
 func (c *ContactRequest) ApplyUnreadNum(ctx *core.Context) error {

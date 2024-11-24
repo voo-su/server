@@ -59,7 +59,7 @@ func (h *Handler) onConsumeGroupApply(ctx context.Context, body []byte) {
 	}
 
 	var groupMember model.GroupChatMember
-	if err := h.Source.Db().First(&groupMember, "group_id = ? and leader = ?", in.GroupId, 2).Error; err != nil {
+	if err := h.Source.Db().First(&groupMember, "group_id = ? AND leader = ?", in.GroupId, 2).Error; err != nil {
 		return
 	}
 

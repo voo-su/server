@@ -181,10 +181,10 @@ func (c *Client) loopWrite() {
 			if data.IsAck && data.Retry > 0 {
 				data.Retry--
 				ackBufferContent := &AckBufferContent{}
-				ackBufferContent.cid = c.cid
-				ackBufferContent.uid = int64(c.uid)
-				ackBufferContent.channel = c.channel.Name()
-				ackBufferContent.response = data
+				ackBufferContent.Cid = c.cid
+				ackBufferContent.Uid = int64(c.uid)
+				ackBufferContent.Channel = c.channel.Name()
+				ackBufferContent.Response = data
 				ack.insert(data.Sid, ackBufferContent)
 			}
 		}

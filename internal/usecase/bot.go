@@ -93,7 +93,7 @@ func (b *BotUseCase) Chats(ctx context.Context, botId int) ([]*entity.SearchChat
 	query := b.Source.Db().WithContext(ctx).Table("chats c")
 	//query.Joins("LEFT JOIN users AS u ON c.receiver_id = u.id AND c.dialog_type = 1")
 	query.Joins("LEFT JOIN group_chats AS g ON c.receiver_id = g.id")
-	query.Where("c.user_id = ? AND c.dialog_type = 2 AND c.is_delete = 0", 2)
+	query.Where("c.user_id = ? AND c.dialog_type = 2 AND c.is_delete = 0", botId)
 	query.Order("c.updated_at DESC")
 
 	var items []*entity.SearchChat

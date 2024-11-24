@@ -40,3 +40,7 @@ message AccountEmailUpdateRequest{
 }
 
 message AccountEmailUpdateResponse{}
+
+message AccountPushRequest{
+    string subscription = 1 [(tagger.tags) = "binding:\"required\""];
+}

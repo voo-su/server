@@ -12,11 +12,11 @@ var once sync.Once
 
 type session struct {
 	Chat     *Channel
-	channels map[string]*Channel
+	Channels map[string]*Channel
 }
 
 func (s *session) Channel(name string) (*Channel, bool) {
-	val, ok := s.channels[name]
+	val, ok := s.Channels[name]
 
 	return val, ok
 }
@@ -31,10 +31,10 @@ func Initialize(ctx context.Context, eg *errgroup.Group, fn func(name string)) {
 func initialize(ctx context.Context, eg *errgroup.Group, fn func(name string)) {
 	Session = &session{
 		Chat:     NewChannel("chat", make(chan *SenderContent, 5<<20)),
-		channels: map[string]*Channel{},
+		Channels: map[string]*Channel{},
 	}
 
-	Session.channels["chat"] = Session.Chat
+	Session.Channels["chat"] = Session.Chat
 
 	time.AfterFunc(3*time.Second, func() {
 		eg.Go(func() error {

@@ -52,11 +52,11 @@ func (c *ChatUseCase) List(ctx context.Context, uid int) ([]*entity.SearchChat, 
 		"u.surname",
 	}
 
-	query := c.Source.Db().WithContext(ctx).Table("chats c")
-	query.Joins("LEFT JOIN users AS u ON c.receiver_id = u.id AND c.dialog_type = 1")
-	query.Joins("LEFT JOIN group_chats AS g ON c.receiver_id = g.id AND c.dialog_type = 2")
-	query.Where("c.user_id = ? and c.is_delete = 0", uid)
-	query.Order("c.updated_at DESC")
+	query := c.Source.Db().WithContext(ctx).Table("chats c").
+		Joins("LEFT JOIN users AS u ON c.receiver_id = u.id AND c.dialog_type = 1").
+		Joins("LEFT JOIN group_chats AS g ON c.receiver_id = g.id AND c.dialog_type = 2").
+		Where("c.user_id = ? AND c.is_delete = 0", uid).
+		Order("c.updated_at DESC")
 
 	var items []*entity.SearchChat
 	if err := query.Select(fields).Scan(&items).Error; err != nil {
@@ -74,7 +74,7 @@ type CreateChatOpt struct {
 }
 
 func (c *ChatUseCase) Create(ctx context.Context, opt *CreateChatOpt) (*model.Chat, error) {
-	result, err := c.ChatRepo.FindByWhere(ctx, "dialog_type = ? and user_id = ? and receiver_id = ?", opt.DialogType, opt.UserId, opt.ReceiverId)
+	result, err := c.ChatRepo.FindByWhere(ctx, "dialog_type = ? AND user_id = ? AND receiver_id = ?", opt.DialogType, opt.UserId, opt.ReceiverId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -103,7 +103,10 @@ func (c *ChatUseCase) Create(ctx context.Context, opt *CreateChatOpt) (*model.Ch
 }
 
 func (c *ChatUseCase) Delete(ctx context.Context, uid int, id int) error {
-	_, err := c.ChatRepo.UpdateWhere(ctx, map[string]any{"is_delete": 1, "updated_at": time.Now()}, "id = ? and user_id = ?", id, uid)
+	_, err := c.ChatRepo.UpdateWhere(ctx, map[string]any{
+		"is_delete":  1,
+		"updated_at": time.Now(),
+	}, "id = ? AND user_id = ?", id, uid)
 	return err
 }
 
@@ -121,8 +124,8 @@ func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordLis
 		ids     = sliceutil.Unique(sliceutil.ParseIds(opt.RecordIds))
 	)
 	if opt.DialogType == constant.ChatPrivateMode {
-		subQuery := db.Where("user_id = ? and receiver_id = ?", opt.UserId, opt.ReceiverId).
-			Or("user_id = ? and receiver_id = ?", opt.ReceiverId, opt.UserId)
+		subQuery := db.Where("user_id = ? AND receiver_id = ?", opt.UserId, opt.ReceiverId).
+			Or("user_id = ? AND receiver_id = ?", opt.ReceiverId, opt.UserId)
 		db.Model(&model.Message{}).
 			Where("id in ?", ids).
 			Where("dialog_type = ?", constant.ChatPrivateMode).
@@ -134,7 +137,7 @@ func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordLis
 		}
 
 		db.Model(&model.Message{}).
-			Where("id in ? and dialog_type = ?", ids, constant.ChatGroupMode).
+			Where("id in ? AND dialog_type = ?", ids, constant.ChatGroupMode).
 			Pluck("id", &findIds)
 	}
 	if len(ids) != len(findIds) {
@@ -163,7 +166,7 @@ func (c *ChatUseCase) Top(ctx context.Context, opt *ChatTopOpt) error {
 	_, err := c.ChatRepo.UpdateWhere(ctx, map[string]any{
 		"is_top":     strutil.BoolToInt(opt.Type == 1),
 		"updated_at": time.Now(),
-	}, "id = ? and user_id = ?", opt.Id, opt.UserId)
+	}, "id = ? AND user_id = ?", opt.Id, opt.UserId)
 	return err
 }
 
@@ -178,7 +181,7 @@ func (c *ChatUseCase) Disturb(ctx context.Context, opt *ChatDisturbOpt) error {
 	_, err := c.ChatRepo.UpdateWhere(ctx, map[string]any{
 		"is_disturb": opt.IsDisturb,
 		"updated_at": time.Now(),
-	}, "user_id = ? and receiver_id = ? and dialog_type = ?", opt.UserId, opt.ReceiverId, opt.DialogType)
+	}, "user_id = ? AND receiver_id = ? AND dialog_type = ?", opt.UserId, opt.ReceiverId, opt.DialogType)
 	return err
 }
 

@@ -17,7 +17,7 @@ type Handler struct {
 	ClientStorage  *cache.ClientStorage
 	RoomStorage    *cache.RoomStorage
 	ChatUseCase    *usecase.ChatUseCase
-	MessageUseCase *usecase.MessageUseCase
+	MessageUseCase usecase.IMessageUseCase
 	ContactUseCase *usecase.ContactUseCase
 	Source         *repo.Source
 }
@@ -27,7 +27,6 @@ func NewHandler(
 	clientStorage *cache.ClientStorage,
 	roomStorage *cache.RoomStorage,
 	chatUseCase *usecase.ChatUseCase,
-	messageUseCase *usecase.MessageUseCase,
 	contactUseCase *usecase.ContactUseCase,
 	source *repo.Source,
 ) *Handler {
@@ -36,7 +35,6 @@ func NewHandler(
 		ClientStorage:  clientStorage,
 		RoomStorage:    roomStorage,
 		ChatUseCase:    chatUseCase,
-		MessageUseCase: messageUseCase,
 		ContactUseCase: contactUseCase,
 		Source:         source,
 	}

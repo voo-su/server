@@ -10,7 +10,7 @@ import (
 )
 
 type RoomStorage struct {
-	Redis *redis.Client
+	Rds *redis.Client
 }
 
 type RoomOption struct {
@@ -22,21 +22,21 @@ type RoomOption struct {
 }
 
 func NewRoomStorage(redis *redis.Client) *RoomStorage {
-	return &RoomStorage{Redis: redis}
+	return &RoomStorage{Rds: redis}
 }
 
 func (r *RoomStorage) Add(ctx context.Context, opt *RoomOption) error {
 	key := r.name(opt)
-	err := r.Redis.SAdd(ctx, key, opt.Cid).Err()
+	err := r.Rds.SAdd(ctx, key, opt.Cid).Err()
 	if err == nil {
-		r.Redis.Expire(ctx, key, time.Hour*24*7)
+		r.Rds.Expire(ctx, key, time.Hour*24*7)
 	}
 
 	return err
 }
 
 func (r *RoomStorage) BatchAdd(ctx context.Context, opts []*RoomOption) error {
-	pipeline := r.Redis.Pipeline()
+	pipeline := r.Rds.Pipeline()
 	for _, opt := range opts {
 		key := r.name(opt)
 		if err := pipeline.SAdd(ctx, key, opt.Cid).Err(); err == nil {
@@ -49,11 +49,11 @@ func (r *RoomStorage) BatchAdd(ctx context.Context, opts []*RoomOption) error {
 }
 
 func (r *RoomStorage) Del(ctx context.Context, opt *RoomOption) error {
-	return r.Redis.SRem(ctx, r.name(opt), opt.Cid).Err()
+	return r.Rds.SRem(ctx, r.name(opt), opt.Cid).Err()
 }
 
 func (r *RoomStorage) BatchDel(ctx context.Context, opts []*RoomOption) error {
-	pipeline := r.Redis.Pipeline()
+	pipeline := r.Rds.Pipeline()
 	for _, opt := range opts {
 		pipeline.SRem(ctx, r.name(opt), opt.Cid)
 	}
@@ -63,7 +63,7 @@ func (r *RoomStorage) BatchDel(ctx context.Context, opts []*RoomOption) error {
 }
 
 func (r *RoomStorage) All(ctx context.Context, opt *RoomOption) []int64 {
-	arr := r.Redis.SMembers(ctx, r.name(opt)).Val()
+	arr := r.Rds.SMembers(ctx, r.name(opt)).Val()
 	cids := make([]int64, 0, len(arr))
 	for _, val := range arr {
 		if cid, err := strconv.ParseInt(val, 10, 64); err == nil {

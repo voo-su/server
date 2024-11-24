@@ -6,13 +6,15 @@ import (
 )
 
 type ChatSubscribe struct {
-	handler *chat.Handler
+	Handler *chat.Handler
 }
 
 func NewChatSubscribe(handel *chat.Handler) *ChatSubscribe {
-	return &ChatSubscribe{handler: handel}
+	return &ChatSubscribe{
+		Handler: handel,
+	}
 }
 
-func (s *ChatSubscribe) Call(event string, data []byte) {
-	s.handler.Call(context.TODO(), event, data)
+func (c *ChatSubscribe) Call(event string, data []byte) {
+	c.Handler.Call(context.TODO(), event, data)
 }

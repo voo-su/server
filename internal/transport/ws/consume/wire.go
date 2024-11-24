@@ -6,6 +6,7 @@ import (
 )
 
 var ProviderSet = wire.NewSet(
+	wire.Struct(new(chat.Handler), "*"),
 	NewChatSubscribe,
-	chat.NewHandler,
+	//chat.NewHandler,
 )

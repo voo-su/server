@@ -11,7 +11,7 @@ import (
 
 type MessageVote struct {
 	repo.Repo[model.MessageVote]
-	cache *cache.Vote
+	Cache *cache.Vote
 }
 
 type VoteStatistics struct {
@@ -20,15 +20,15 @@ type VoteStatistics struct {
 }
 
 func NewMessageVote(db *gorm.DB, cache *cache.Vote) *MessageVote {
-	return &MessageVote{Repo: repo.NewRepo[model.MessageVote](db), cache: cache}
+	return &MessageVote{Repo: repo.NewRepo[model.MessageVote](db), Cache: cache}
 }
 
-func (t *MessageVote) GetVoteAnswerUser(ctx context.Context, vid int) ([]int, error) {
-	if uids, err := t.cache.GetVoteAnswerUser(ctx, vid); err == nil {
+func (m *MessageVote) GetVoteAnswerUser(ctx context.Context, vid int) ([]int, error) {
+	if uids, err := m.Cache.GetVoteAnswerUser(ctx, vid); err == nil {
 		return uids, nil
 	}
 
-	uids, err := t.SetVoteAnswerUser(ctx, vid)
+	uids, err := m.SetVoteAnswerUser(ctx, vid)
 	if err != nil {
 		return nil, err
 	}
@@ -36,21 +36,21 @@ func (t *MessageVote) GetVoteAnswerUser(ctx context.Context, vid int) ([]int, er
 	return uids, nil
 }
 
-func (t *MessageVote) SetVoteAnswerUser(ctx context.Context, vid int) ([]int, error) {
+func (m *MessageVote) SetVoteAnswerUser(ctx context.Context, vid int) ([]int, error) {
 	uids := make([]int, 0)
-	err := t.Repo.Db.WithContext(ctx).Table("message_vote_answers").Where("vote_id = ?", vid).Pluck("user_id", &uids).Error
+	err := m.Repo.Db.WithContext(ctx).Table("message_vote_answers").Where("vote_id = ?", vid).Pluck("user_id", &uids).Error
 	if err != nil {
 		return nil, err
 	}
 
-	_ = t.cache.SetVoteAnswerUser(ctx, vid, uids)
+	_ = m.Cache.SetVoteAnswerUser(ctx, vid, uids)
 	return uids, nil
 }
 
-func (t *MessageVote) GetVoteStatistics(ctx context.Context, vid int) (*VoteStatistics, error) {
-	value, err := t.cache.GetVoteStatistics(ctx, vid)
+func (m *MessageVote) GetVoteStatistics(ctx context.Context, vid int) (*VoteStatistics, error) {
+	value, err := m.Cache.GetVoteStatistics(ctx, vid)
 	if err != nil {
-		return t.SetVoteStatistics(ctx, vid)
+		return m.SetVoteStatistics(ctx, vid)
 	}
 
 	statistic := &VoteStatistics{}
@@ -58,13 +58,13 @@ func (t *MessageVote) GetVoteStatistics(ctx context.Context, vid int) (*VoteStat
 	return statistic, nil
 }
 
-func (t *MessageVote) SetVoteStatistics(ctx context.Context, vid int) (*VoteStatistics, error) {
+func (m *MessageVote) SetVoteStatistics(ctx context.Context, vid int) (*VoteStatistics, error) {
 	var (
 		vote         model.MessageVote
 		answerOption map[string]any
 		options      = make([]string, 0)
 	)
-	tx := t.Repo.Db.WithContext(ctx)
+	tx := m.Repo.Db.WithContext(ctx)
 	if err := tx.Table("message_votes").First(&vote, vid).Error; err != nil {
 		return nil, err
 	}
@@ -73,8 +73,10 @@ func (t *MessageVote) SetVoteStatistics(ctx context.Context, vid int) (*VoteStat
 		return nil, err
 	}
 
-	err := tx.Table("message_vote_answers").Where("vote_id = ?", vid).Pluck("option", &options).Error
-	if err != nil {
+	if err := tx.Table("message_vote_answers").
+		Where("vote_id = ?", vid).
+		Pluck("option", &options).
+		Error; err != nil {
 		return nil, err
 	}
 
@@ -92,7 +94,7 @@ func (t *MessageVote) SetVoteStatistics(ctx context.Context, vid int) (*VoteStat
 		Count:   len(options),
 	}
 
-	_ = t.cache.SetVoteStatistics(ctx, vid, jsonutil.Encode(statistic))
+	_ = m.Cache.SetVoteStatistics(ctx, vid, jsonutil.Encode(statistic))
 
 	return statistic, nil
 }

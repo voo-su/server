@@ -14,7 +14,7 @@ import (
 type GroupChatAds struct {
 	GroupMemberUseCase  *usecase.GroupChatMemberUseCase
 	GroupChatAdsUseCase *usecase.GroupChatAdsUseCase
-	MessageSendUseCase  usecase.MessageSendUseCase
+	MessageUseCase      usecase.IMessageUseCase
 }
 
 func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
@@ -58,7 +58,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	_ = g.MessageSendUseCase.SendSysOther(ctx.Ctx(), &model.Message{
+	_ = g.MessageUseCase.SendSysOther(ctx.Ctx(), &model.Message{
 		DialogType: constant.DialogRecordDialogTypeGroup,
 		MsgType:    constant.ChatMsgSysGroupAds,
 		UserId:     uid,

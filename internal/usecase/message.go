@@ -2,12 +2,14 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"html"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -23,13 +25,12 @@ import (
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/minio"
+	"voo.su/pkg/nats"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
 
-var _ MessageSendUseCase = (*MessageUseCase)(nil)
-
-type MessageSendUseCase interface {
+type IMessageUseCase interface {
 	SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error
 	SendText(ctx context.Context, uid int, req *SendText) error
 	SendImage(ctx context.Context, uid int, req *v1Pb.ImageMessageRequest) error
@@ -45,7 +46,12 @@ type MessageSendUseCase interface {
 	SendLogin(ctx context.Context, uid int, req *SendLogin) error
 	SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error
 	SendCode(ctx context.Context, uid int, req *v1Pb.CodeMessageRequest) error
+	GetDialogRecords(ctx context.Context, opt *QueryDialogRecordsOpt) ([]*DialogRecordsItem, error)
+	GetDialogRecord(ctx context.Context, recordId int64) (*DialogRecordsItem, error)
+	GetMessageByRecordId(ctx context.Context, recordId int) (*model.Message, error)
 }
+
+var _ IMessageUseCase = (*MessageUseCase)(nil)
 
 type MessageUseCase struct {
 	*repo.Source
@@ -62,6 +68,7 @@ type MessageUseCase struct {
 	ServerStorage       *cache.ServerStorage
 	ClientStorage       *cache.ClientStorage
 	DialogVoteCache     *cache.Vote
+	Nats                nats.INatsClient
 }
 
 type DialogRecordsItem struct {
@@ -138,14 +145,14 @@ func (m *MessageUseCase) GetDialogRecords(ctx context.Context, opt *QueryDialogR
 	)
 	query := m.Source.Db().WithContext(ctx).Table("messages")
 	query.Joins("LEFT JOIN users on messages.user_id = users.id")
-	query.Joins("LEFT JOIN message_delete on messages.id = message_delete.record_id and message_delete.user_id = ?", opt.UserId)
+	query.Joins("LEFT JOIN message_delete on messages.id = message_delete.record_id AND message_delete.user_id = ?", opt.UserId)
 	if opt.RecordId > 0 {
 		query.Where("messages.sequence < ?", opt.RecordId)
 	}
 
 	if opt.DialogType == constant.ChatPrivateMode {
-		subQuery := m.Source.Db().Where("messages.user_id = ? and messages.receiver_id = ?", opt.UserId, opt.ReceiverId)
-		subQuery.Or("messages.user_id = ? and messages.receiver_id = ?", opt.ReceiverId, opt.UserId)
+		subQuery := m.Source.Db().Where("messages.user_id = ? AND messages.receiver_id = ?", opt.UserId, opt.ReceiverId)
+		subQuery.Or("messages.user_id = ? AND messages.receiver_id = ?", opt.ReceiverId, opt.UserId)
 		query.Where(subQuery)
 	} else {
 		query.Where("messages.receiver_id = ?", opt.ReceiverId)
@@ -363,6 +370,7 @@ func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *v1Pb.
 		ReceiverId: int(req.Receiver.ReceiverId),
 		Content:    html.EscapeString(req.Content),
 	}
+
 	return m.save(ctx, data)
 }
 
@@ -438,6 +446,7 @@ func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *v1Pb.Video
 			Duration: int(req.Duration),
 		}),
 	}
+
 	return m.save(ctx, data)
 }
 
@@ -515,11 +524,14 @@ func (m *MessageUseCase) SendVote(ctx context.Context, uid int, req *v1Pb.VoteMe
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 	}
+
 	m.loadSequence(ctx, data)
+
 	options := make(map[int]string)
 	for i, value := range req.Options {
 		options[i+1] = value
 	}
+
 	num := m.GroupChatMemberRepo.CountMemberTotal(ctx, int(req.Receiver.ReceiverId))
 	err := m.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(data).Error; err != nil {
@@ -597,9 +609,7 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 }
 
 func (m *MessageUseCase) SendMixedMessage(ctx context.Context, uid int, req *v1Pb.MixedMessageRequest) error {
-
 	items := make([]*entity.DialogRecordExtraMixedItem, 0)
-
 	for _, item := range req.Items {
 		items = append(items, &entity.DialogRecordExtraMixedItem{
 			Type:    int(item.Type),
@@ -628,6 +638,7 @@ func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) erro
 	if err := m.Source.Db().First(&record, "msg_id = ?", msgId).Error; err != nil {
 		return err
 	}
+
 	if record.IsRevoke == 1 {
 		return nil
 	}
@@ -665,9 +676,15 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsVa
 	db := m.Source.Db().WithContext(ctx)
 	query := db.Table("messages")
 	query.Select([]string{
-		"messages.receiver_id", "messages.dialog_type", "messages.msg_type",
-		"vote.id as vote_id", "vote.id as record_id", "vote.answer_mode", "vote.answer_option",
-		"vote.answer_num", "vote.status as vote_status",
+		"messages.receiver_id",
+		"messages.dialog_type",
+		"messages.msg_type",
+		"vote.id as vote_id",
+		"vote.id as record_id",
+		"vote.answer_mode",
+		"vote.answer_option",
+		"vote.answer_num",
+		"vote.status as vote_status",
 	})
 	query.Joins("LEFT JOIN message_votes as vote on vote.record_id = messages.id")
 	query.Where("messages.id = ?", msgId)
@@ -683,14 +700,14 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsVa
 
 	if vote.DialogType == constant.ChatGroupMode {
 		var count int64
-		db.Table("group_chat_members").Where("group_id = ? and user_id = ? and is_quit = 0", vote.ReceiverId, uid).Count(&count)
+		db.Table("group_chat_members").Where("group_id = ? AND user_id = ? AND is_quit = 0", vote.ReceiverId, uid).Count(&count)
 		if count == 0 {
 			return nil, errors.New("нет прав на голосование")
 		}
 	}
 
 	var count int64
-	db.Table("message_vote_answers").Where("vote_id = ? and user_id = ?", vote.VoteId, uid).Count(&count)
+	db.Table("message_vote_answers").Where("vote_id = ? AND user_id = ?", vote.VoteId, uid).Count(&count)
 	if count > 0 {
 		return nil, fmt.Errorf("повторное голосование %d", vote.VoteId)
 	}
@@ -775,25 +792,27 @@ func (m *MessageUseCase) loadReply(_ context.Context, data *model.Message) {
 	if data.QuoteId == "" {
 		return
 	}
+
 	if data.Extra == "" {
 		data.Extra = "{}"
 	}
+
 	extra := make(map[string]any)
-	err := jsonutil.Decode(data.Extra, &extra)
-	if err != nil {
+	if err := jsonutil.Decode(data.Extra, &extra); err != nil {
 		logger.Errorf("MessageUseCase Json Decode err: %s", err.Error())
 		return
 	}
+
 	var record model.Message
-	err = m.Source.Db().Table("messages").Find(&record, "msg_id = ?", data.QuoteId).Error
-	if err != nil {
+	if err := m.Source.Db().Table("messages").Find(&record, "msg_id = ?", data.QuoteId).Error; err != nil {
 		return
 	}
+
 	var user model.User
-	err = m.Source.Db().Table("users").Select("username").Find(&user, "id = ?", record.UserId).Error
-	if err != nil {
+	if err := m.Source.Db().Table("users").Select("username").Find(&user, "id = ?", record.UserId).Error; err != nil {
 		return
 	}
+
 	reply := entity.Reply{
 		UserId:   record.UserId,
 		Username: user.Username,
@@ -801,12 +820,14 @@ func (m *MessageUseCase) loadReply(_ context.Context, data *model.Message) {
 		Content:  record.Content,
 		MsgId:    record.MsgId,
 	}
+
 	if record.MsgType != constant.ChatMsgTypeText {
 		reply.Content = "Неизвестно"
 		if value, ok := constant.ChatMsgTypeMapping[record.MsgType]; ok {
 			reply.Content = value
 		}
 	}
+
 	extra["reply"] = reply
 	data.Extra = jsonutil.Encode(extra)
 }
@@ -832,6 +853,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message,
 				m.UnreadStorage.PipeIncr(ctx, pipe, constant.ChatGroupMode, record.ReceiverId, uid)
 			}
 		}
+
 		_, _ = pipe.Exec(ctx)
 	}
 
@@ -859,9 +881,11 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message,
 					if !m.ClientStorage.IsCurrentServerOnline(ctx, sid, constant.ImChannelChat, strconv.Itoa(uid)) {
 						continue
 					}
+
 					pipe.Publish(ctx, fmt.Sprintf(constant.ImTopicChatPrivate, sid), content)
 				}
 			}
+
 			if _, err := pipe.Exec(ctx); err == nil {
 				return
 			}
@@ -869,6 +893,42 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message,
 	}
 	if err := m.Source.Redis().Publish(ctx, constant.ImTopicChat, content).Err(); err != nil {
 		logger.Errorf("Ошибка отправки уведомления %s", err.Error())
+	}
+
+	return
+
+	// TODO
+	uids := make([]int, 0)
+
+	uids = append(uids, 1)
+
+	pushTokens := make([]*model.PushToken, 0)
+	if err := m.Source.Db().
+		Table("push_tokens").
+		Where("user_id in ?", uids).
+		Scan(&pushTokens).
+		Error; err != nil {
+		fmt.Println(err)
+	}
+
+	for _, item := range pushTokens {
+		webPushContent := &entity.WebPush{
+			Endpoint: item.WebEndpoint,
+			Keys: entity.WebPushKeys{
+				P256dh: item.WebP256dh,
+				Auth:   item.WebAuth,
+			},
+			Message: opt["text"],
+		}
+
+		webPushData, err := json.Marshal(webPushContent)
+		if err != nil {
+			log.Fatal("Не удалось сериализовать данные в JSON: ", err)
+		}
+
+		if err := m.Nats.Publish("web-push", webPushData); err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
@@ -902,7 +962,7 @@ func (m *MessageUseCase) SendLogin(ctx context.Context, uid int, req *SendLogin)
 
 func (m *MessageUseCase) SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error {
 	var sticker model.StickerItem
-	if err := m.Source.Db().First(&sticker, "id = ? and user_id = ?", req.StickerId, uid).Error; err != nil {
+	if err := m.Source.Db().First(&sticker, "id = ? AND user_id = ?", req.StickerId, uid).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return errors.New("информация о смайлик не существует")
 		}
@@ -936,4 +996,13 @@ func (m *MessageUseCase) SendCode(ctx context.Context, uid int, req *v1Pb.CodeMe
 		}),
 	}
 	return m.save(ctx, data)
+}
+
+func (m *MessageUseCase) GetMessageByRecordId(ctx context.Context, recordId int) (*model.Message, error) {
+	record, err := m.MessageRepo.FindById(ctx, recordId)
+	if err != nil {
+		return nil, err
+	}
+
+	return record, nil
 }

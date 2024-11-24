@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"os"
 	"voo.su/internal/config"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/transport/ws/handler"
@@ -14,6 +15,13 @@ import (
 
 func NewRouter(conf *config.Config, handle *handler.Handler, session *cache.JwtTokenStorage) *gin.Engine {
 	router := gin.New()
+	src, err := os.OpenFile(conf.App.LogPath("ws_access.log"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	router.Use(middleware.AccessLog(src))
+
 	router.Use(gin.RecoveryWithWriter(gin.DefaultWriter, func(c *gin.Context, err any) {
 		log.Println(err)
 

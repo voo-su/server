@@ -58,17 +58,16 @@ type ContactApplyAcceptOpt struct {
 func (c *ContactRequestUseCase) Accept(ctx context.Context, opt *ContactApplyAcceptOpt) (*model.ContactRequest, error) {
 	db := c.Source.Db().WithContext(ctx)
 	var applyInfo model.ContactRequest
-	if err := db.First(&applyInfo, "id = ? and friend_id = ?", opt.ApplyId, opt.UserId).Error; err != nil {
+	if err := db.First(&applyInfo, "id = ? AND friend_id = ?", opt.ApplyId, opt.UserId).Error; err != nil {
 		return nil, err
 	}
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		addFriendFunc := func(uid, fid int) error {
 			var contact model.Contact
-			err := tx.Where("user_id = ? and friend_id = ?", uid, fid).First(&contact).Error
+			err := tx.Where("user_id = ? AND friend_id = ?", uid, fid).First(&contact).Error
 			if err == nil {
-				return tx.
-					Model(&model.Contact{}).
+				return tx.Model(&model.Contact{}).
 					Where("id = ?", contact.Id).
 					Updates(&model.Contact{
 						Remark: "",
@@ -98,7 +97,7 @@ func (c *ContactRequestUseCase) Accept(ctx context.Context, opt *ContactApplyAcc
 		if err := addFriendFunc(applyInfo.FriendId, applyInfo.UserId); err != nil {
 			return err
 		}
-		return tx.Delete(&model.ContactRequest{}, "user_id = ? and friend_id = ?", applyInfo.UserId, applyInfo.FriendId).Error
+		return tx.Delete(&model.ContactRequest{}, "user_id = ? AND friend_id = ?", applyInfo.UserId, applyInfo.FriendId).Error
 	})
 	return &applyInfo, err
 }
@@ -109,8 +108,10 @@ type ContactApplyDeclineOpt struct {
 }
 
 func (c *ContactRequestUseCase) Decline(ctx context.Context, opt *ContactApplyDeclineOpt) error {
-	err := c.Source.Db().WithContext(ctx).Delete(&model.ContactRequest{}, "id = ? and friend_id = ?", opt.ApplyId, opt.UserId).Error
-	if err != nil {
+	if err := c.Source.Db().
+		WithContext(ctx).
+		Delete(&model.ContactRequest{}, "id = ? AND friend_id = ?", opt.ApplyId, opt.UserId).
+		Error; err != nil {
 		return err
 	}
 
@@ -137,10 +138,10 @@ func (c *ContactRequestUseCase) List(ctx context.Context, uid int) ([]*entity.Ap
 		"contact_requests.friend_id",
 		"contact_requests.created_at",
 	}
-	tx := c.Source.Db().WithContext(ctx).Table("contact_requests")
-	tx.Joins("LEFT JOIN users AS u ON u.id = contact_requests.user_id")
-	tx.Where("contact_requests.friend_id = ?", uid)
-	tx.Order("contact_requests.id DESC")
+	tx := c.Source.Db().WithContext(ctx).Table("contact_requests").
+		Joins("LEFT JOIN users AS u ON u.id = contact_requests.user_id").
+		Where("contact_requests.friend_id = ?", uid).
+		Order("contact_requests.id DESC")
 	var items []*entity.ApplyItem
 	if err := tx.Select(fields).Scan(&items).Error; err != nil {
 		return nil, err

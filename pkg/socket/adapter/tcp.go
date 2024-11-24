@@ -9,13 +9,16 @@ import (
 )
 
 type TcpAdapter struct {
-	conn      net.Conn
-	reader    *bufio.Reader
-	hookClose func(code int, text string) error
+	Conn      net.Conn
+	Reader    *bufio.Reader
+	HookClose func(code int, text string) error
 }
 
 func NewTcpAdapter(conn net.Conn) (*TcpAdapter, error) {
-	return &TcpAdapter{conn: conn, reader: bufio.NewReader(conn)}, nil
+	return &TcpAdapter{
+		Conn:   conn,
+		Reader: bufio.NewReader(conn),
+	}, nil
 }
 
 func (t *TcpAdapter) Network() string {
@@ -23,10 +26,10 @@ func (t *TcpAdapter) Network() string {
 }
 
 func (t *TcpAdapter) Read() ([]byte, error) {
-	msg, err := encoding.NewDecode(t.reader)
+	msg, err := encoding.NewDecode(t.Reader)
 	if err == io.EOF {
-		if t.hookClose != nil {
-			if err := t.hookClose(1000, "Клиент закрыт"); err != nil {
+		if t.HookClose != nil {
+			if err := t.HookClose(1000, "Клиент закрыт"); err != nil {
 				return nil, err
 			}
 		}
@@ -46,14 +49,14 @@ func (t *TcpAdapter) Write(bytes []byte) error {
 		return err
 	}
 
-	_, err = t.conn.Write(binaryData)
+	_, err = t.Conn.Write(binaryData)
 	return err
 }
 
 func (t *TcpAdapter) Close() error {
-	return t.conn.Close()
+	return t.Conn.Close()
 }
 
 func (t *TcpAdapter) SetCloseHandler(fn func(code int, text string) error) {
-	t.hookClose = fn
+	t.HookClose = fn
 }

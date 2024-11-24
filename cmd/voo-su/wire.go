@@ -25,6 +25,7 @@ var providerSet = wire.NewSet(
 	provider.NewEmailClient,
 	provider.NewMinioClient,
 	provider.NewRequestClient,
+	provider.NewNatsClient,
 
 	wire.Struct(new(provider.Providers), "*"),
 
@@ -35,53 +36,31 @@ var providerSet = wire.NewSet(
 )
 
 func NewHttpInjector(conf *config.Config) *http.AppProvider {
-	panic(
-		wire.Build(
-			providerSet,
-			http.ProviderSet,
-		),
-	)
+	panic(wire.Build(providerSet, http.ProviderSet))
 }
 
 func NewWsInjector(conf *config.Config) *ws.AppProvider {
-	panic(
-		wire.Build(
-			providerSet,
-			ws.ProviderSet,
-		),
-	)
-}
-
-func NewCronInjector(conf *config.Config) *cli.CronProvider {
-	panic(
-		wire.Build(
-			providerSet,
-			cli.CronProviderSet,
-		),
-	)
-}
-
-func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
-	panic(
-		wire.Build(
-			providerSet,
-			cli.QueueProviderSet,
-		),
-	)
-}
-
-func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
-	panic(
-		wire.Build(
-			providerSet,
-			cli.MigrateProviderSet,
-		),
-	)
+	panic(wire.Build(providerSet, ws.ProviderSet))
 }
 
 func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
-	panic(wire.Build(
-		providerSet,
-		grpc.ProviderSet,
-	))
+	panic(wire.Build(providerSet, grpc.ProviderSet))
+}
+
+func NewCronInjector(conf *config.Config) *cli.CronProvider {
+	panic(wire.Build(providerSet, cli.CronProviderSet))
+}
+
+func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
+	panic(wire.Build(providerSet, cli.QueueProviderSet))
+}
+
+func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
+	panic(wire.Build(providerSet, cli.MigrateProviderSet))
+}
+
+func NewGenerateInjector(conf *config.Config) *cli.GenerateProvider {
+
+	// TODO
+	panic(wire.Build(cli.GenerateProviderSet))
 }

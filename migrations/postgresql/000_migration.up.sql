@@ -10,8 +10,8 @@ create table users
     about      varchar(100) default ''::character varying not null,
     birthday   varchar(10)  default ''::character varying not null,
     is_bot     smallint     default 0                     not null,
-    created_at timestamp                                  not null,
-    updated_at timestamp                                  not null
+    created_at timestamp    default now()                 not null,
+    updated_at timestamp    default now()                 not null
 );
 
 create table user_sessions
@@ -63,9 +63,9 @@ create table splits
     id            serial primary key,
     type          smallint     default 1                     not null,
     drive         smallint     default 1                     not null,
-    upload_id     varchar(100) default ''::character varying not null,
+    upload_id     varchar      default ''::character varying not null,
     user_id       integer      default 0                     not null,
-    original_name varchar(100) default ''::character varying not null,
+    original_name varchar      default ''::character varying not null,
     split_index   integer      default 0                     not null,
     split_num     integer      default 0                     not null,
     path          varchar(255) default ''::character varying not null,
@@ -75,6 +75,19 @@ create table splits
     attr          jsonb                                      not null,
     created_at    timestamp                                  not null,
     updated_at    timestamp                                  not null
+);
+
+create table push_tokens
+(
+    id           serial primary key,
+    user_id      integer      not null,
+    platform     varchar(255) not null,
+    token        text         not null,
+    web_endpoint text,
+    web_p256dh   text,
+    web_auth     text,
+    is_active    boolean   default true,
+    created_at   timestamp default CURRENT_TIMESTAMP
 );
 
 create table messages
@@ -263,8 +276,9 @@ create table bots
     name        varchar(255) default ''::character varying not null,
     description varchar(255) default ''::character varying not null,
     avatar      varchar(255) default ''::character varying not null,
-    created_at  timestamp                                  not null,
-    token       varchar(255)                               not null unique
+    created_at  timestamp    default now()                 not null,
+    token       varchar(255)                               not null unique,
+    creator_id  integer
 );
 
 create table schema_migrations

@@ -70,7 +70,9 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 		}
 
 		addMembers := make([]entity.DialogRecordExtraGroupMembers, 0, len(opt.MemberIds))
-		tx.Table("users").Select("id as user_id", "username").Where("id in ?", opt.MemberIds).
+		tx.Table("users").
+			Select("id as user_id", "username").
+			Where("id in ?", opt.MemberIds).
 			Scan(&addMembers)
 		for _, val := range uids {
 			leader := 0
@@ -99,8 +101,10 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 		}
 
 		var user model.User
-		err = tx.Table("users").Where("id = ?", opt.UserId).Scan(&user).Error
-		if err != nil {
+		if err = tx.Table("users").
+			Where("id = ?", opt.UserId).
+			Scan(&user).
+			Error; err != nil {
 			return err
 		}
 
@@ -160,9 +164,12 @@ func (g *GroupChatUseCase) Dismiss(ctx context.Context, groupId int, uid int) er
 			return err
 		}
 
-		if err := g.Source.Db().Model(&model.GroupChatMember{}).Where("group_id = ?", groupId).Updates(&model.GroupChatMember{
-			IsQuit: 1,
-		}).Error; err != nil {
+		if err := g.Source.Db().
+			Model(&model.GroupChatMember{}).
+			Where("group_id = ?", groupId).
+			Updates(&model.GroupChatMember{
+				IsQuit: 1,
+			}).Error; err != nil {
 			return err
 		}
 		return nil
@@ -173,7 +180,10 @@ func (g *GroupChatUseCase) Dismiss(ctx context.Context, groupId int, uid int) er
 
 func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) error {
 	var info model.GroupChatMember
-	if err := g.Source.Db().Where("group_id = ? AND user_id = ? and is_quit = 0", groupId, uid).First(&info).Error; err != nil {
+	if err := g.Source.Db().
+		Where("group_id = ? AND user_id = ? AND is_quit = 0", groupId, uid).
+		First(&info).
+		Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return errors.New("данных не существует")
 		}
@@ -184,13 +194,12 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 	}
 
 	var user model.User
-	err := g.Source.Db().
+	if err := g.Source.Db().
 		Table("users").
 		Select("id, username").
 		Where("id = ?", uid).
 		First(&user).
-		Error
-	if err != nil {
+		Error; err != nil {
 		return err
 	}
 
@@ -205,7 +214,7 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 			OwnerName: user.Username,
 		}),
 	}
-	err = g.Source.Db().Transaction(func(tx *gorm.DB) error {
+	err := g.Source.Db().Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&model.GroupChatMember{}).
 			Where("group_id = ? AND user_id = ?", groupId, uid).
 			Updates(&model.GroupChatMember{
@@ -270,18 +279,22 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 
 	listHash := make(map[int]*model.Chat)
 	db.Select("id", "user_id", "is_delete").
-		Where("user_id in ? and receiver_id = ? and dialog_type = 2", opt.MemberIds, opt.GroupId).
+		Where("user_id in ? AND receiver_id = ? AND dialog_type = 2", opt.MemberIds, opt.GroupId).
 		Find(&dialogList)
 	for _, item := range dialogList {
 		listHash[item.UserId] = item
 	}
+
 	mids := make([]int, 0)
 	mids = append(mids, opt.MemberIds...)
 	mids = append(mids, opt.UserId)
 
 	memberItems := make([]*model.User, 0)
-	err = db.Table("users").Select("id, username").Where("id in ?", mids).Scan(&memberItems).Error
-	if err != nil {
+	if err = db.Table("users").
+		Select("id, username").
+		Where("id in ?", mids).
+		Scan(&memberItems).
+		Error; err != nil {
 		return err
 	}
 
@@ -296,6 +309,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 			UserId:   value,
 			Username: memberMaps[value].Username,
 		})
+
 		if _, ok := m[value]; !ok {
 			addMembers = append(addMembers, &model.GroupChatMember{
 				GroupId:  opt.GroupId,
@@ -303,6 +317,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 				JoinTime: time.Now(),
 			})
 		}
+
 		if item, ok := listHash[value]; !ok {
 			addDialogList = append(addDialogList, &model.Chat{
 				DialogType: constant.ChatGroupMode,
@@ -324,13 +339,15 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		MsgType:    constant.ChatMsgSysGroupMemberJoin,
 		Sequence:   g.SequenceRepo.Get(ctx, 0, opt.GroupId),
 	}
+
 	record.Extra = jsonutil.Encode(&entity.DialogRecordExtraGroupJoin{
 		OwnerId:   memberMaps[opt.UserId].Id,
 		OwnerName: memberMaps[opt.UserId].Username,
 		Members:   members,
 	})
+
 	err = db.Transaction(func(tx *gorm.DB) error {
-		tx.Delete(&model.GroupChatMember{}, "group_id = ? and user_id in ? and is_quit = ?", opt.GroupId, opt.MemberIds, constant.GroupMemberQuitStatusYes)
+		tx.Delete(&model.GroupChatMember{}, "group_id = ? AND user_id in ? AND is_quit = ?", opt.GroupId, opt.MemberIds, constant.GroupMemberQuitStatusYes)
 		if err = tx.Create(&addMembers).Error; err != nil {
 			return err
 		}
@@ -386,7 +403,11 @@ type GroupRemoveMembersOpt struct {
 
 func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMembersOpt) error {
 	var num int64
-	if err := g.Source.Db().Model(&model.GroupChatMember{}).Where("group_id = ? and user_id in ? and is_quit = 0", opt.GroupId, opt.MemberIds).Count(&num).Error; err != nil {
+	if err := g.Source.Db().
+		Model(&model.GroupChatMember{}).
+		Where("group_id = ? AND user_id in ? AND is_quit = 0", opt.GroupId, opt.MemberIds).
+		Count(&num).
+		Error; err != nil {
 		return err
 	}
 	if int(num) != len(opt.MemberIds) {
@@ -397,12 +418,13 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 	mids = append(mids, opt.MemberIds...)
 	mids = append(mids, opt.UserId)
 	memberItems := make([]*model.User, 0)
-	err := g.Source.Db().
+
+	if err := g.Source.Db().
 		Table("users").
 		Select("id, username").
 		Where("id in ?", mids).
-		Scan(&memberItems).Error
-	if err != nil {
+		Scan(&memberItems).
+		Error; err != nil {
 		return err
 	}
 
@@ -431,9 +453,9 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 			Members:   members,
 		}),
 	}
-	err = g.Source.Db().Transaction(func(tx *gorm.DB) error {
+	err := g.Source.Db().Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&model.GroupChatMember{}).
-			Where("group_id = ? and user_id in ? and is_quit = 0", opt.GroupId, opt.MemberIds).
+			Where("group_id = ? AND user_id in ? AND is_quit = 0", opt.GroupId, opt.MemberIds).
 			Updates(map[string]any{
 				"is_quit":    1,
 				"updated_at": time.Now(),
@@ -459,6 +481,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 				"uids":     opt.MemberIds,
 			}),
 		}))
+
 		pipe.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
 			"event": constant.SubEventImMessage,
 			"data": jsonutil.Encode(map[string]any{
@@ -480,11 +503,11 @@ type session struct {
 }
 
 func (g *GroupChatUseCase) List(userId int) ([]*entity.GroupItem, error) {
-	tx := g.Source.Db().Table("group_chat_members")
-	tx.Select("gc.id AS id, gc.group_name AS group_name, gc.avatar AS avatar, gc.description AS description, group_chat_members.leader AS leader, gc.creator_id AS creator_id")
-	tx.Joins("LEFT JOIN group_chats gc on gc.id = group_chat_members.group_id")
-	tx.Where("group_chat_members.user_id = ? and group_chat_members.is_quit = ?", userId, 0)
-	tx.Order("group_chat_members.created_at desc")
+	tx := g.Source.Db().Table("group_chat_members").
+		Select("gc.id AS id, gc.group_name AS group_name, gc.avatar AS avatar, gc.description AS description, group_chat_members.leader AS leader, gc.creator_id AS creator_id").
+		Joins("LEFT JOIN group_chats gc on gc.id = group_chat_members.group_id").
+		Where("group_chat_members.user_id = ? AND group_chat_members.is_quit = ?", userId, 0).
+		Order("group_chat_members.created_at desc")
 
 	items := make([]*entity.GroupItem, 0)
 	if err := tx.Scan(&items).Error; err != nil {
@@ -500,9 +523,10 @@ func (g *GroupChatUseCase) List(userId int) ([]*entity.GroupItem, error) {
 	for i := range items {
 		ids = append(ids, items[i].Id)
 	}
+
 	query := g.Source.Db().Table("chats")
 	query.Select("receiver_id,is_disturb")
-	query.Where("dialog_type = ? and receiver_id in ?", 2, ids)
+	query.Where("dialog_type = ? AND receiver_id in ?", 2, ids)
 	list := make([]*session, 0)
 	if err := query.Find(&list).Error; err != nil {
 		return nil, err

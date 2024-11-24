@@ -10,23 +10,23 @@ import (
 var mapping map[string]func(ctx *core.Context) error
 
 type Publish struct {
-	AuthUseCase        *usecase.AuthUseCase
-	MessageSendUseCase usecase.MessageSendUseCase
+	AuthUseCase    *usecase.AuthUseCase
+	MessageUseCase usecase.IMessageUseCase
 }
 
-func (c *Publish) transfer(ctx *core.Context, typeValue string) error {
+func (p *Publish) transfer(ctx *core.Context, typeValue string) error {
 	if mapping == nil {
 		mapping = make(map[string]func(ctx *core.Context) error)
-		mapping["text"] = c.onSendText
-		mapping["image"] = c.onSendImage
-		mapping["vote"] = c.onSendVote
-		mapping["voice"] = c.onSendVoice
-		mapping["video"] = c.onSendVideo
-		mapping["file"] = c.onSendFile
-		mapping["forward"] = c.onSendForward
-		mapping["mixed"] = c.onMixedMessage
-		mapping["sticker"] = c.onSendSticker
-		mapping["code"] = c.onSendCode
+		mapping["text"] = p.onSendText
+		mapping["image"] = p.onSendImage
+		mapping["vote"] = p.onSendVote
+		mapping["voice"] = p.onSendVoice
+		mapping["video"] = p.onSendVideo
+		mapping["file"] = p.onSendFile
+		mapping["forward"] = p.onSendForward
+		mapping["mixed"] = p.onMixedMessage
+		mapping["sticker"] = p.onSendSticker
+		mapping["code"] = p.onSendCode
 	}
 	if call, ok := mapping[typeValue]; ok {
 		return call(ctx)
@@ -43,13 +43,13 @@ type PublishBaseMessageRequest struct {
 	} `json:"receiver" binding:"required"`
 }
 
-func (c *Publish) Publish(ctx *core.Context) error {
+func (p *Publish) Publish(ctx *core.Context) error {
 	params := &PublishBaseMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
+	if err := p.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
 		DialogType:        params.Receiver.DialogType,
 		UserId:            ctx.UserId(),
 		ReceiverId:        params.Receiver.ReceiverId,
@@ -58,16 +58,16 @@ func (c *Publish) Publish(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return c.transfer(ctx, params.Type)
+	return p.transfer(ctx, params.Type)
 }
 
-func (c *Publish) onSendText(ctx *core.Context) error {
+func (p *Publish) onSendText(ctx *core.Context) error {
 	params := &v1Pb.TextMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.SendText(ctx.Ctx(), ctx.UserId(), &usecase.SendText{
+	if err := p.MessageUseCase.SendText(ctx.Ctx(), ctx.UserId(), &usecase.SendText{
 		Receiver: usecase.Receiver{
 			DialogType: params.Receiver.DialogType,
 			ReceiverId: params.Receiver.ReceiverId,
@@ -81,74 +81,74 @@ func (c *Publish) onSendText(ctx *core.Context) error {
 	return ctx.Success(nil)
 }
 
-func (c *Publish) onSendImage(ctx *core.Context) error {
+func (p *Publish) onSendImage(ctx *core.Context) error {
 	params := &v1Pb.ImageMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.SendImage(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendImage(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (c *Publish) onSendVoice(ctx *core.Context) error {
+func (p *Publish) onSendVoice(ctx *core.Context) error {
 
 	params := &v1Pb.VoiceMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.SendVoice(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendVoice(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (c *Publish) onSendVideo(ctx *core.Context) error {
+func (p *Publish) onSendVideo(ctx *core.Context) error {
 
 	params := &v1Pb.VideoMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.SendVideo(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendVideo(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (c *Publish) onSendFile(ctx *core.Context) error {
+func (p *Publish) onSendFile(ctx *core.Context) error {
 	params := &v1Pb.FileMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.SendFile(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendFile(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (c *Publish) onSendForward(ctx *core.Context) error {
+func (p *Publish) onSendForward(ctx *core.Context) error {
 	params := &v1Pb.ForwardMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.SendForward(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendForward(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (c *Publish) onSendVote(ctx *core.Context) error {
+func (p *Publish) onSendVote(ctx *core.Context) error {
 	params := &v1Pb.VoteMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
@@ -162,46 +162,46 @@ func (c *Publish) onSendVote(ctx *core.Context) error {
 		return ctx.InvalidParams("количество вариантов (options) не может превышать 6!")
 	}
 
-	if err := c.MessageSendUseCase.SendVote(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendVote(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (c *Publish) onMixedMessage(ctx *core.Context) error {
+func (p *Publish) onMixedMessage(ctx *core.Context) error {
 	params := &v1Pb.MixedMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.SendMixedMessage(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendMixedMessage(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (c *Publish) onSendSticker(ctx *core.Context) error {
+func (p *Publish) onSendSticker(ctx *core.Context) error {
 	params := &v1Pb.StickerMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.SendSticker(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendSticker(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (c *Publish) onSendCode(ctx *core.Context) error {
+func (p *Publish) onSendCode(ctx *core.Context) error {
 	params := &v1Pb.CodeMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := c.MessageSendUseCase.SendCode(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendCode(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
