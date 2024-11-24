@@ -22,4 +22,5 @@ var ProviderSet = wire.NewSet(
 	NewStickerUseCase,
 	NewBotUseCase,
 	NewUserUseCase,
+	NewProjectUseCase,
 )

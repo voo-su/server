@@ -1,23 +1,23 @@
 package v1
 
 import (
-	"voo.su/api/pb/v1"
-	"voo.su/internal/service"
+	v1Pb "voo.su/api/http/pb/v1"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/timeutil"
 )
 
 type ProjectTaskComment struct {
-	ProjectService *service.ProjectService
+	ProjectUseCase *usecase.ProjectUseCase
 }
 
 func (p *ProjectTaskComment) Create(ctx *core.Context) error {
-	params := &api_v1.ProjectCommentCreateRequest{}
+	params := &v1Pb.ProjectCommentCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	commentId, err := p.ProjectService.CreateComment(ctx.Ctx(), &service.ProjectCommentOpt{
+	commentId, err := p.ProjectUseCase.CreateComment(ctx.Ctx(), &usecase.ProjectCommentOpt{
 		TaskId:    params.TaskId,
 		Comment:   params.Comment,
 		CreatedBy: ctx.UserId(),
@@ -26,32 +26,32 @@ func (p *ProjectTaskComment) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже: " + err.Error())
 	}
 
-	return ctx.Success(&api_v1.ProjectCreateResponse{Id: commentId})
+	return ctx.Success(&v1Pb.ProjectCreateResponse{Id: commentId})
 }
 
 func (p *ProjectTaskComment) Comments(ctx *core.Context) error {
-	params := &api_v1.ProjectCommentRequest{}
+	params := &v1Pb.ProjectCommentRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	data, err := p.ProjectService.Comments(ctx.Ctx(), params.TaskId)
+	data, err := p.ProjectUseCase.Comments(ctx.Ctx(), params.TaskId)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	items := make([]*api_v1.ProjectCommentResponse_Item, 0)
+	items := make([]*v1Pb.ProjectCommentResponse_Item, 0)
 	for _, item := range data {
-		user, err := p.ProjectService.UserRepo.FindById(ctx.Ctx(), item.CreatedBy)
+		user, err := p.ProjectUseCase.UserRepo.FindById(ctx.Ctx(), item.CreatedBy)
 		if err != nil {
 			return ctx.ErrorBusiness(err.Error())
 		}
 
-		items = append(items, &api_v1.ProjectCommentResponse_Item{
+		items = append(items, &v1Pb.ProjectCommentResponse_Item{
 			Id:      item.Id,
 			TaskId:  item.TaskId,
 			Comment: item.Comment,
-			User: &api_v1.ProjectCommentResponse_User{
+			User: &v1Pb.ProjectCommentResponse_User{
 				Id:       int64(user.Id),
 				Avatar:   user.Avatar,
 				Username: user.Username,
@@ -62,5 +62,5 @@ func (p *ProjectTaskComment) Comments(ctx *core.Context) error {
 		})
 	}
 
-	return ctx.Success(api_v1.ProjectCommentResponse{Items: items})
+	return ctx.Success(v1Pb.ProjectCommentResponse{Items: items})
 }

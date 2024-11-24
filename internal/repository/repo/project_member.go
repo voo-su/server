@@ -4,15 +4,15 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type ProjectMember struct {
-	core.Repo[model.ProjectMember]
+	repo.Repo[model.ProjectMember]
 }
 
 func NewProjectMember(db *gorm.DB) *ProjectMember {
-	return &ProjectMember{Repo: core.NewRepo[model.ProjectMember](db)}
+	return &ProjectMember{Repo: repo.NewRepo[model.ProjectMember](db)}
 }
 
 func (p *ProjectMember) GetMemberIds(ctx context.Context, projectId int) []int {

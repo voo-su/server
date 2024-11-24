@@ -1,4 +1,4 @@
-package service
+package usecase
 
 import (
 	"context"
@@ -16,7 +16,7 @@ type ProjectTaskOpt struct {
 	CreatedBy   int
 }
 
-func (p *ProjectService) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (int64, error) {
+func (p *ProjectUseCase) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (int64, error) {
 	task := &model.ProjectTask{
 		ProjectId:   opt.ProjectId,
 		TypeId:      opt.TypeId,
@@ -35,7 +35,7 @@ func (p *ProjectService) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (i
 	return task.Id, nil
 }
 
-func (p *ProjectService) TypeTasks(ctx context.Context, projectId int64) ([]*model.ProjectTaskType, error) {
+func (p *ProjectUseCase) TypeTasks(ctx context.Context, projectId int64) ([]*model.ProjectTaskType, error) {
 	tx := p.Db().WithContext(ctx).Table("project_task_types")
 	tx.Where("project_id = ?", projectId)
 
@@ -47,7 +47,7 @@ func (p *ProjectService) TypeTasks(ctx context.Context, projectId int64) ([]*mod
 	return items, nil
 }
 
-func (p *ProjectService) Tasks(ctx context.Context, projectId int64, typeId int64) ([]*model.ProjectTask, error) {
+func (p *ProjectUseCase) Tasks(ctx context.Context, projectId int64, typeId int64) ([]*model.ProjectTask, error) {
 	tx := p.Db().WithContext(ctx).Table("project_tasks")
 	tx.Where("project_id = ? AND type_id = ?", projectId, typeId)
 
@@ -59,7 +59,7 @@ func (p *ProjectService) Tasks(ctx context.Context, projectId int64, typeId int6
 	return items, nil
 }
 
-func (p *ProjectService) TaskDetail(ctx context.Context, taskId int64) (*model.ProjectTaskDetailWithMember, error) {
+func (p *ProjectUseCase) TaskDetail(ctx context.Context, taskId int64) (*model.ProjectTaskDetailWithMember, error) {
 	fields := []string{
 		"project_tasks.*",
 		"assigner.id AS assigner_id",
@@ -83,7 +83,7 @@ func (p *ProjectService) TaskDetail(ctx context.Context, taskId int64) (*model.P
 	return &taskDetail, nil
 }
 
-func (p *ProjectService) TaskExecutor(ctx context.Context, taskId int64, memberId int64) error {
+func (p *ProjectUseCase) TaskExecutor(ctx context.Context, taskId int64, memberId int64) error {
 	_, err := p.ProjectTaskRepo.UpdateById(ctx, taskId, map[string]any{
 		"executor_id": memberId,
 	})
@@ -94,7 +94,7 @@ func (p *ProjectService) TaskExecutor(ctx context.Context, taskId int64, memberI
 	return nil
 }
 
-func (p *ProjectService) TaskMove(ctx context.Context, projectId int64, taskId int64, fromId int64, toId int64) error {
+func (p *ProjectUseCase) TaskMove(ctx context.Context, projectId int64, taskId int64, fromId int64, toId int64) error {
 	_, err := p.ProjectTaskRepo.UpdateWhere(ctx, map[string]any{
 		"type_id": toId,
 	}, "id = ? AND project_id = ? AND type_id = ?", taskId, projectId, fromId)
@@ -105,7 +105,7 @@ func (p *ProjectService) TaskMove(ctx context.Context, projectId int64, taskId i
 	return nil
 }
 
-func (p *ProjectService) TaskTypeName(ctx context.Context, taskId int64, name string) error {
+func (p *ProjectUseCase) TaskTypeName(ctx context.Context, taskId int64, name string) error {
 	_, err := p.ProjectTaskTypeRepo.UpdateWhere(ctx, map[string]any{
 		"title": name,
 	}, "id = ?", taskId)
@@ -116,7 +116,7 @@ func (p *ProjectService) TaskTypeName(ctx context.Context, taskId int64, name st
 	return nil
 }
 
-func (p *ProjectService) IsMemberProjectByTask(ctx context.Context, taskId int64, uid int) bool {
+func (p *ProjectUseCase) IsMemberProjectByTask(ctx context.Context, taskId int64, uid int) bool {
 	tx := p.Db().WithContext(ctx).
 		Table("project_tasks").
 		Joins("INNER JOIN project_members ON project_members.project_id = project_tasks.project_id").
@@ -130,7 +130,7 @@ func (p *ProjectService) IsMemberProjectByTask(ctx context.Context, taskId int64
 	return count > 0
 }
 
-func (p *ProjectService) InviteCoexecutor(ctx context.Context, taskId int64, memberIds []int, uid int) error {
+func (p *ProjectUseCase) InviteCoexecutor(ctx context.Context, taskId int64, memberIds []int, uid int) error {
 	var (
 		err            error
 		addCoexecutors []*model.ProjectTaskCoexecutor
@@ -169,7 +169,7 @@ func (p *ProjectService) InviteCoexecutor(ctx context.Context, taskId int64, mem
 	return nil
 }
 
-func (p *ProjectService) GetCoexecutors(ctx context.Context, taskId int64) ([]*model.ProjectMemberItem, error) {
+func (p *ProjectUseCase) GetCoexecutors(ctx context.Context, taskId int64) ([]*model.ProjectMemberItem, error) {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",
@@ -188,7 +188,7 @@ func (p *ProjectService) GetCoexecutors(ctx context.Context, taskId int64) ([]*m
 	return items, nil
 }
 
-func (p *ProjectService) InviteWatcher(ctx context.Context, taskId int64, memberIds []int, uid int) error {
+func (p *ProjectUseCase) InviteWatcher(ctx context.Context, taskId int64, memberIds []int, uid int) error {
 	var (
 		err         error
 		addWatchers []*model.ProjectTaskWatcher
@@ -227,7 +227,7 @@ func (p *ProjectService) InviteWatcher(ctx context.Context, taskId int64, member
 	return nil
 }
 
-func (p *ProjectService) GetWatchers(ctx context.Context, taskId int64) ([]*model.ProjectMemberItem, error) {
+func (p *ProjectUseCase) GetWatchers(ctx context.Context, taskId int64) ([]*model.ProjectMemberItem, error) {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",

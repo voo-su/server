@@ -1,81 +1,81 @@
-create table chats
+CREATE TABLE chats
 (
     id          serial primary key,
-    dialog_type smallint default 1 not null,
-    user_id     integer  default 0 not null,
-    receiver_id integer  default 0 not null,
-    is_top      smallint default 0 not null,
-    is_disturb  smallint default 0 not null,
-    is_delete   smallint default 0 not null,
-    is_bot      smallint default 0 not null,
-    created_at  timestamp          not null,
-    updated_at  timestamp          not null
+    dialog_type smallint default 1 NOT NULL,
+    user_id     integer  default 0 NOT NULL,
+    receiver_id integer  default 0 NOT NULL,
+    is_top      smallint default 0 NOT NULL,
+    is_disturb  smallint default 0 NOT NULL,
+    is_delete   smallint default 0 NOT NULL,
+    is_bot      smallint default 0 NOT NULL,
+    created_at  timestamp          NOT NULL,
+    updated_at  timestamp          NOT NULL
 );
 
 create index chats_dialog_type_user_id_receiver_id_idx on chats (dialog_type, user_id, receiver_id);
 
-create table contacts
+CREATE TABLE contacts
 (
     id         serial primary key,
-    user_id    integer     default 0                     not null,
-    friend_id  integer     default 0                     not null,
-    remark     varchar(20) default ''::character varying not null,
-    status     smallint    default 0                     not null,
-    group_id   integer     default 0                     not null,
-    created_at timestamp   default CURRENT_TIMESTAMP     not null,
-    updated_at timestamp   default CURRENT_TIMESTAMP     not null
+    user_id    integer     default 0                     NOT NULL,
+    friend_id  integer     default 0                     NOT NULL,
+    remark     varchar(20) default ''::character varying NOT NULL,
+    status     smallint    default 0                     NOT NULL,
+    group_id   integer     default 0                     NOT NULL,
+    created_at timestamp   default CURRENT_TIMESTAMP     NOT NULL,
+    updated_at timestamp   default CURRENT_TIMESTAMP     NOT NULL
 );
 
-create table contact_requests
+CREATE TABLE contact_requests
 (
     id         serial primary key,
-    user_id    integer     default 0                     not null,
-    friend_id  integer     default 0                     not null,
-    remark     varchar(50) default ''::character varying not null,
-    created_at timestamp                                 not null
+    user_id    integer     default 0                     NOT NULL,
+    friend_id  integer     default 0                     NOT NULL,
+    remark     varchar(50) default ''::character varying NOT NULL,
+    created_at timestamp                                 NOT NULL
 );
 
-create table messages
+CREATE TABLE messages
 (
     id          bigserial primary key,
-    msg_id      varchar(50) default ''::character varying not null,
-    sequence    integer     default 0                     not null,
-    dialog_type smallint    default 1                     not null,
-    msg_type    integer     default 1                     not null,
-    user_id     integer     default 0                     not null,
-    receiver_id integer     default 0                     not null,
-    is_revoke   smallint    default 0                     not null,
-    is_mark     smallint    default 0                     not null,
-    is_read     smallint    default 0                     not null,
-    quote_id    varchar(50)                               not null,
+    msg_id      varchar(50) default ''::character varying NOT NULL,
+    sequence    integer     default 0                     NOT NULL,
+    dialog_type smallint    default 1                     NOT NULL,
+    msg_type    integer     default 1                     NOT NULL,
+    user_id     integer     default 0                     NOT NULL,
+    receiver_id integer     default 0                     NOT NULL,
+    is_revoke   smallint    default 0                     NOT NULL,
+    is_mark     smallint    default 0                     NOT NULL,
+    is_read     smallint    default 0                     NOT NULL,
+    quote_id    varchar(50)                               NOT NULL,
     content     text,
-    extra       jsonb                                     not null
+    extra       jsonb                                     NOT NULL
         constraint dialog_records_extra_check  check (extra IS JSON),
-    created_at  timestamp                                 not null,
-    updated_at  timestamp                                 not null
+    created_at  timestamp                                 NOT NULL,
+    updated_at  timestamp                                 NOT NULL
 );
 
-create table users
+CREATE TABLE users
 (
     id         serial primary key,
-    email      varchar(255) default ''::character varying not null,
-    username   varchar(255) default ''::character varying not null,
+    email      varchar(255) default ''::character varying NOT NULL,
+    username   varchar(255) default ''::character varying NOT NULL,
     name       varchar(255),
     surname    varchar(255),
-    avatar     varchar(255) default ''::character varying not null,
-    gender     smallint     default 0                     not null,
-    about      varchar(100) default ''::character varying not null,
-    birthday   varchar(10)  default ''::character varying not null,
-    is_bot     smallint     default 0                     not null,
-    created_at timestamp                                  not null,
-    updated_at timestamp                                  not null
+    avatar     varchar(255) default ''::character varying NOT NULL,
+    gender     smallint     default 0                     NOT NULL,
+    about      varchar(100) default ''::character varying NOT NULL,
+    birthday   varchar(10)  default ''::character varying NOT NULL,
+    is_bot     smallint     default 0                     NOT NULL,
+    created_at timestamp                                  NOT NULL,
+    updated_at timestamp                                  NOT NULL
 );
 
-create table user_sessions
+CREATE TABLE user_sessions
 (
     id           serial primary key,
-    user_id      integer      not null,
-    access_token varchar(255) not null,
+    user_id      integer      NOT NULL,
+    access_token varchar(255) NOT NULL,
     is_logout    boolean   default false,
     updated_at   timestamp,
     logout_at    timestamp,
@@ -84,77 +84,10 @@ create table user_sessions
     created_at   timestamp default CURRENT_TIMESTAMP
 );
 
-create table schema_migrations
+CREATE TABLE schema_migrations
 (
-    version bigint  not null primary key,
-    dirty   boolean not null
+    version bigint  NOT NULL primary key,
+    dirty   boolean NOT NULL
 );
 
-INSERT INTO schema_migrations (version, dirty) VALUES (1, false);
-
-
-CREATE TABLE projects
-(
-    id         SERIAL PRIMARY KEY,
-    name       VARCHAR(255),
-    created_by INT,
-    created_at TIMESTAMPTZ
-);
-
-CREATE TABLE project_members
-(
-    id         SERIAL PRIMARY KEY,
-    project_id INT,
-    user_id    INT,
-    created_by INT,
-    created_at TIMESTAMPTZ
-);
-
-CREATE TABLE project_task_types
-(
-    id         SERIAL PRIMARY KEY,
-    project_id INT,
-    title      VARCHAR(255),
-    created_by INT,
-    created_at TIMESTAMPTZ
-);
-
-CREATE TABLE project_tasks
-(
-    id          SERIAL PRIMARY KEY,
-    project_id  INT,
-    type_id     INT,
-    title       VARCHAR(255),
-    description TEXT,
-    assigner_id INT,
-    executor_id INT,
-    created_by  INT,
-    created_at  TIMESTAMPTZ
-);
-
-CREATE TABLE project_task_coexecutors
-(
-    id         SERIAL PRIMARY KEY,
-    task_id    INT,
-    member_id  INT,
-    created_by INT,
-    created_at TIMESTAMPTZ
-);
-
-CREATE TABLE project_task_watchers
-(
-    id         SERIAL PRIMARY KEY,
-    task_id    INT,
-    member_id  INT,
-    created_by INT,
-    created_at TIMESTAMPTZ
-);
-
-CREATE TABLE project_task_comments
-(
-    id           SERIAL PRIMARY KEY,
-    task_id      INT,
-    comment_text TEXT,
-    created_by   INT,
-    created_at   TIMESTAMPTZ
-);
+-- INSERT INTO schema_migrations (version, dirty) VALUES (1, false);

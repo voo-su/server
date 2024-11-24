@@ -1,4 +1,4 @@
-package service
+package usecase
 
 import (
 	"context"
@@ -12,7 +12,7 @@ type ProjectCommentOpt struct {
 	CreatedBy int
 }
 
-func (p *ProjectService) CreateComment(ctx context.Context, opt *ProjectCommentOpt) (int64, error) {
+func (p *ProjectUseCase) CreateComment(ctx context.Context, opt *ProjectCommentOpt) (int64, error) {
 	comment := &model.ProjectTaskComment{
 		TaskId:    opt.TaskId,
 		Comment:   opt.Comment,
@@ -28,7 +28,7 @@ func (p *ProjectService) CreateComment(ctx context.Context, opt *ProjectCommentO
 	return comment.Id, nil
 }
 
-func (p *ProjectService) Comments(ctx context.Context, TaskId int64) ([]*model.ProjectTaskComment, error) {
+func (p *ProjectUseCase) Comments(ctx context.Context, TaskId int64) ([]*model.ProjectTaskComment, error) {
 	tx := p.Db().WithContext(ctx).Table("project_task_comments")
 	tx.Where("task_id = ?", TaskId)
 

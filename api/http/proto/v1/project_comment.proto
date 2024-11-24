@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package v1;
 
-import "third_party/tagger/tagger.proto";
+import "tagger/tagger.proto";
 
-option go_package = "./v1;api_v1";
+option go_package = "./v1;v1_pb";
 
 message ProjectCommentCreateRequest{
     int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\""];

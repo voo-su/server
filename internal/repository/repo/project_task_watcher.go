@@ -4,15 +4,15 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type ProjectTaskWatcher struct {
-	core.Repo[model.ProjectTaskWatcher]
+	repo.Repo[model.ProjectTaskWatcher]
 }
 
 func NewProjectTaskWatcher(db *gorm.DB) *ProjectTaskWatcher {
-	return &ProjectTaskWatcher{Repo: core.NewRepo[model.ProjectTaskWatcher](db)}
+	return &ProjectTaskWatcher{Repo: repo.NewRepo[model.ProjectTaskWatcher](db)}
 }
 
 func (p *ProjectTaskWatcher) GetWatcherIds(ctx context.Context, taskId int64) []int {

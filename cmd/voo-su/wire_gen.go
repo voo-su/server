@@ -198,22 +198,43 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		BotUseCase:     botUseCase,
 		MessageUseCase: messageUseCase,
 	}
+	project := repo.NewProject(db)
+	projectMember := repo.NewProjectMember(db)
+	projectTaskType := repo.NewProjectTaskType(db)
+	projectTask := repo.NewProjectTask(db)
+	projectTaskComment := repo.NewProjectTaskComment(db)
+	projectTaskCoexecutor := repo.NewProjectTaskCoexecutor(db)
+	projectTaskWatcher := repo.NewProjectTaskWatcher(db)
+	projectUseCase := usecase.NewProjectUseCase(source, project, projectMember, projectTaskType, projectTask, projectTaskComment, user, relation, projectTaskCoexecutor, projectTaskWatcher)
+	v1Project := &v1.Project{
+		ProjectUseCase: projectUseCase,
+		RedisLock:      redisLock,
+	}
+	v1ProjectTask := &v1.ProjectTask{
+		ProjectUseCase: projectUseCase,
+	}
+	v1ProjectTaskComment := &v1.ProjectTaskComment{
+		ProjectUseCase: projectUseCase,
+	}
 	v1Handler := &v1.Handler{
-		Auth:             auth,
-		Account:          account,
-		Contact:          v1Contact,
-		ContactRequest:   contactRequest,
-		Chat:             v1Chat,
-		Message:          v1Message,
-		MessagePublish:   publish,
-		Upload:           upload,
-		GroupChat:        v1GroupChat,
-		GroupChatRequest: v1GroupChatRequest,
-		Sticker:          v1Sticker,
-		ContactFolder:    v1ContactFolder,
-		GroupChatAds:     v1GroupChatAds,
-		Search:           search,
-		Bot:              v1Bot,
+		Auth:               auth,
+		Account:            account,
+		Contact:            v1Contact,
+		ContactRequest:     contactRequest,
+		Chat:               v1Chat,
+		Message:            v1Message,
+		MessagePublish:     publish,
+		Upload:             upload,
+		GroupChat:          v1GroupChat,
+		GroupChatRequest:   v1GroupChatRequest,
+		Sticker:            v1Sticker,
+		ContactFolder:      v1ContactFolder,
+		GroupChatAds:       v1GroupChatAds,
+		Search:             search,
+		Bot:                v1Bot,
+		Project:            v1Project,
+		ProjectTask:        v1ProjectTask,
+		ProjectTaskComment: v1ProjectTaskComment,
 	}
 	botMessage := &bot.Message{
 		MessageUseCase: messageUseCase,

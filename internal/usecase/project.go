@@ -1,4 +1,4 @@
-package service
+package usecase
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"voo.su/internal/repository/repo"
 )
 
-type ProjectService struct {
+type ProjectUseCase struct {
 	*repo.Source
 	ProjectRepo               *repo.Project
 	ProjectMemberRepo         *repo.ProjectMember
@@ -23,7 +23,7 @@ type ProjectService struct {
 	ProjectTaskWatcherRepo    *repo.ProjectTaskWatcher
 }
 
-func NewProjectService(
+func NewProjectUseCase(
 	source *repo.Source,
 	projectRepo *repo.Project,
 	projectMemberRepo *repo.ProjectMember,
@@ -34,8 +34,8 @@ func NewProjectService(
 	relation *cache.Relation,
 	projectTaskCoexecutorRepo *repo.ProjectTaskCoexecutor,
 	projectTaskWatcherRepo *repo.ProjectTaskWatcher,
-) *ProjectService {
-	return &ProjectService{
+) *ProjectUseCase {
+	return &ProjectUseCase{
 		Source:                    source,
 		ProjectRepo:               projectRepo,
 		ProjectMemberRepo:         projectMemberRepo,
@@ -54,7 +54,7 @@ type ProjectOpt struct {
 	Title  string
 }
 
-func (p *ProjectService) CreateProject(ctx context.Context, opt *ProjectOpt) (int64, error) {
+func (p *ProjectUseCase) CreateProject(ctx context.Context, opt *ProjectOpt) (int64, error) {
 	var (
 		err       error
 		members   []*model.ProjectMember
@@ -101,7 +101,7 @@ func (p *ProjectService) CreateProject(ctx context.Context, opt *ProjectOpt) (in
 	return int64(project.Id), nil
 }
 
-func (p *ProjectService) Projects(userId int) ([]*model.ProjectItem, error) {
+func (p *ProjectUseCase) Projects(userId int) ([]*model.ProjectItem, error) {
 	tx := p.Source.Db().Table("project_members")
 	tx.Select("p.id AS id, p.name AS name")
 	tx.Joins("LEFT JOIN projects p ON p.id = project_members.project_id")
@@ -126,7 +126,7 @@ func (p *ProjectService) Projects(userId int) ([]*model.ProjectItem, error) {
 	return items, nil
 }
 
-func (p *ProjectService) GetMembers(ctx context.Context, projectId int64) []*model.ProjectMemberItem {
+func (p *ProjectUseCase) GetMembers(ctx context.Context, projectId int64) []*model.ProjectMemberItem {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",
@@ -143,7 +143,7 @@ func (p *ProjectService) GetMembers(ctx context.Context, projectId int64) []*mod
 	return items
 }
 
-func (p *ProjectService) IsMember(ctx context.Context, gid, uid int, cache bool) bool {
+func (p *ProjectUseCase) IsMember(ctx context.Context, gid, uid int, cache bool) bool {
 	if cache && p.Relation.IsGroupRelation(ctx, uid, gid) == nil {
 		return true
 	}
@@ -165,7 +165,7 @@ type ProjectInviteOpt struct {
 	MemberIds []int
 }
 
-func (p *ProjectService) Invite(ctx context.Context, opt *ProjectInviteOpt) error {
+func (p *ProjectUseCase) Invite(ctx context.Context, opt *ProjectInviteOpt) error {
 	var (
 		err        error
 		addMembers []*model.ProjectMember

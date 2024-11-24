@@ -1,24 +1,24 @@
 package v1
 
 import (
-	"voo.su/api/pb/v1"
-	"voo.su/internal/service"
+	v1Pb "voo.su/api/http/pb/v1"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/timeutil"
 )
 
 type ProjectTask struct {
-	ProjectService *service.ProjectService
+	ProjectUseCase *usecase.ProjectUseCase
 }
 
 func (p *ProjectTask) Create(ctx *core.Context) error {
-	params := &api_v1.ProjectTaskCreateRequest{}
+	params := &v1Pb.ProjectTaskCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	taskId, err := p.ProjectService.CreateTask(ctx.Ctx(), &service.ProjectTaskOpt{
+	taskId, err := p.ProjectUseCase.CreateTask(ctx.Ctx(), &usecase.ProjectTaskOpt{
 		ProjectId:   params.ProjectId,
 		TypeId:      int(params.TypeId),
 		Title:       params.Title,
@@ -29,70 +29,70 @@ func (p *ProjectTask) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже" + err.Error())
 	}
 
-	return ctx.Success(&api_v1.ProjectTaskCreateResponse{
+	return ctx.Success(&v1Pb.ProjectTaskCreateResponse{
 		Id: taskId,
 	})
 }
 
 func (p *ProjectTask) Tasks(ctx *core.Context) error {
-	params := &api_v1.ProjectTaskRequest{}
+	params := &v1Pb.ProjectTaskRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	data, err := p.ProjectService.TypeTasks(ctx.Ctx(), params.ProjectId)
+	data, err := p.ProjectUseCase.TypeTasks(ctx.Ctx(), params.ProjectId)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	categories := make([]*api_v1.ProjectTaskResponse_Categories, 0)
+	categories := make([]*v1Pb.ProjectTaskResponse_Categories, 0)
 	for _, item := range data {
 
-		tasks, _err := p.ProjectService.Tasks(ctx.Ctx(), params.ProjectId, item.Id)
+		tasks, _err := p.ProjectUseCase.Tasks(ctx.Ctx(), params.ProjectId, item.Id)
 		if _err != nil {
 			return ctx.ErrorBusiness(_err.Error())
 		}
 
-		taskItems := make([]*api_v1.ProjectTaskResponse_Tasks, 0)
+		taskItems := make([]*v1Pb.ProjectTaskResponse_Tasks, 0)
 		for _, taskItem := range tasks {
-			taskItems = append(taskItems, &api_v1.ProjectTaskResponse_Tasks{
+			taskItems = append(taskItems, &v1Pb.ProjectTaskResponse_Tasks{
 				Id:    taskItem.Id,
 				Title: taskItem.Title,
 			})
 		}
 
-		categories = append(categories, &api_v1.ProjectTaskResponse_Categories{
+		categories = append(categories, &v1Pb.ProjectTaskResponse_Categories{
 			Id:    item.Id,
 			Title: item.Title,
 			Tasks: taskItems,
 		})
 	}
 
-	return ctx.Success(api_v1.ProjectTaskResponse{
+	return ctx.Success(v1Pb.ProjectTaskResponse{
 		Categories: categories,
 	})
 }
 
 func (p *ProjectTask) TaskDetail(ctx *core.Context) error {
-	params := &api_v1.ProjectTaskDetailRequest{}
+	params := &v1Pb.ProjectTaskDetailRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	task, err := p.ProjectService.TaskDetail(ctx.Ctx(), params.TaskId)
+	task, err := p.ProjectUseCase.TaskDetail(ctx.Ctx(), params.TaskId)
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(api_v1.ProjectTaskDetailResponse{
+	return ctx.Success(v1Pb.ProjectTaskDetailResponse{
 		Title:       task.Title,
 		Description: task.Description,
 		CreatedAt:   timeutil.FormatDatetime(task.CreatedAt),
-		Assigner: &api_v1.ProjectTaskDetailResponse_Member{
+		Assigner: &v1Pb.ProjectTaskDetailResponse_Member{
 			Id:       task.AssignerId,
 			Username: task.AssignerUsername,
 		},
-		Executor: &api_v1.ProjectTaskDetailResponse_Member{
+		Executor: &v1Pb.ProjectTaskDetailResponse_Member{
 			Id:       task.ExecutorId,
 			Username: task.ExecutorUsername,
 		},
@@ -100,17 +100,17 @@ func (p *ProjectTask) TaskDetail(ctx *core.Context) error {
 }
 
 func (p *ProjectTask) Executor(ctx *core.Context) error {
-	params := &api_v1.ProjectExecutorRequest{}
+	params := &v1Pb.ProjectExecutorRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	uid := ctx.UserId()
-	if !p.ProjectService.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
+	if !p.ProjectUseCase.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
 		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать")
 	}
 
-	if err := p.ProjectService.TaskExecutor(
+	if err := p.ProjectUseCase.TaskExecutor(
 		ctx.Ctx(),
 		params.TaskId,
 		params.MemberId,
@@ -118,16 +118,16 @@ func (p *ProjectTask) Executor(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(api_v1.ProjectExecutorResponse{})
+	return ctx.Success(v1Pb.ProjectExecutorResponse{})
 }
 
 func (p *ProjectTask) TaskMove(ctx *core.Context) error {
-	params := &api_v1.ProjectTaskMoveRequest{}
+	params := &v1Pb.ProjectTaskMoveRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := p.ProjectService.TaskMove(
+	if err := p.ProjectUseCase.TaskMove(
 		ctx.Ctx(),
 		params.ProjectId,
 		params.TaskId,
@@ -137,16 +137,16 @@ func (p *ProjectTask) TaskMove(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(api_v1.ProjectTaskMoveResponse{})
+	return ctx.Success(v1Pb.ProjectTaskMoveResponse{})
 }
 
 func (p *ProjectTask) TaskTypeName(ctx *core.Context) error {
-	params := &api_v1.ProjectTaskTypeNameRequest{}
+	params := &v1Pb.ProjectTaskTypeNameRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := p.ProjectService.TaskTypeName(
+	if err := p.ProjectUseCase.TaskTypeName(
 		ctx.Ctx(),
 		params.TaskId,
 		params.Name,
@@ -154,11 +154,11 @@ func (p *ProjectTask) TaskTypeName(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	return ctx.Success(api_v1.ProjectTaskTypeNameResponse{})
+	return ctx.Success(v1Pb.ProjectTaskTypeNameResponse{})
 }
 
 func (p *ProjectTask) TaskCoexecutorInvite(ctx *core.Context) error {
-	params := &api_v1.ProjectCoexecutorInviteRequest{}
+	params := &v1Pb.ProjectCoexecutorInviteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -169,40 +169,40 @@ func (p *ProjectTask) TaskCoexecutorInvite(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if !p.ProjectService.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
+	if !p.ProjectUseCase.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
 		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать")
 	}
 
-	if err := p.ProjectService.InviteCoexecutor(ctx.Ctx(), params.TaskId, mids, uid); err != nil {
+	if err := p.ProjectUseCase.InviteCoexecutor(ctx.Ctx(), params.TaskId, mids, uid); err != nil {
 		return ctx.ErrorBusiness("Не удалось пригласить: " + err.Error())
 	}
 
-	return ctx.Success(api_v1.ProjectCoexecutorInviteResponse{})
+	return ctx.Success(v1Pb.ProjectCoexecutorInviteResponse{})
 }
 
 func (p *ProjectTask) TaskCoexecutors(ctx *core.Context) error {
-	params := &api_v1.ProjectCoexecutorsRequest{}
+	params := &v1Pb.ProjectCoexecutorsRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	list, _ := p.ProjectService.GetCoexecutors(ctx.Ctx(), params.TaskId)
+	list, _ := p.ProjectUseCase.GetCoexecutors(ctx.Ctx(), params.TaskId)
 
-	items := make([]*api_v1.ProjectCoexecutorsResponse_Item, 0)
+	items := make([]*v1Pb.ProjectCoexecutorsResponse_Item, 0)
 	for _, item := range list {
-		items = append(items, &api_v1.ProjectCoexecutorsResponse_Item{
+		items = append(items, &v1Pb.ProjectCoexecutorsResponse_Item{
 			Id:       item.Id,
 			Username: item.Username,
 		})
 	}
 
-	return ctx.Success(api_v1.ProjectCoexecutorsResponse{
+	return ctx.Success(v1Pb.ProjectCoexecutorsResponse{
 		Items: items,
 	})
 }
 
 func (p *ProjectTask) TaskWatcherInvite(ctx *core.Context) error {
-	params := &api_v1.ProjectWatcherInviteRequest{}
+	params := &v1Pb.ProjectWatcherInviteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -213,34 +213,34 @@ func (p *ProjectTask) TaskWatcherInvite(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if !p.ProjectService.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
+	if !p.ProjectUseCase.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
 		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать")
 	}
 
-	if err := p.ProjectService.InviteWatcher(ctx.Ctx(), params.TaskId, mids, uid); err != nil {
+	if err := p.ProjectUseCase.InviteWatcher(ctx.Ctx(), params.TaskId, mids, uid); err != nil {
 		return ctx.ErrorBusiness("Не удалось пригласить: " + err.Error())
 	}
 
-	return ctx.Success(api_v1.ProjectWatcherInviteResponse{})
+	return ctx.Success(v1Pb.ProjectWatcherInviteResponse{})
 }
 
 func (p *ProjectTask) TaskWatchers(ctx *core.Context) error {
-	params := &api_v1.ProjectWatchersRequest{}
+	params := &v1Pb.ProjectWatchersRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	list, _ := p.ProjectService.GetWatchers(ctx.Ctx(), params.TaskId)
+	list, _ := p.ProjectUseCase.GetWatchers(ctx.Ctx(), params.TaskId)
 
-	items := make([]*api_v1.ProjectWatchersResponse_Item, 0)
+	items := make([]*v1Pb.ProjectWatchersResponse_Item, 0)
 	for _, item := range list {
-		items = append(items, &api_v1.ProjectWatchersResponse_Item{
+		items = append(items, &v1Pb.ProjectWatchersResponse_Item{
 			Id:       item.Id,
 			Username: item.Username,
 		})
 	}
 
-	return ctx.Success(api_v1.ProjectWatchersResponse{
+	return ctx.Success(v1Pb.ProjectWatchersResponse{
 		Items: items,
 	})
 }

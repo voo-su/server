@@ -4,15 +4,15 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type ProjectTaskCoexecutor struct {
-	core.Repo[model.ProjectTaskCoexecutor]
+	repo.Repo[model.ProjectTaskCoexecutor]
 }
 
 func NewProjectTaskCoexecutor(db *gorm.DB) *ProjectTaskCoexecutor {
-	return &ProjectTaskCoexecutor{Repo: core.NewRepo[model.ProjectTaskCoexecutor](db)}
+	return &ProjectTaskCoexecutor{Repo: repo.NewRepo[model.ProjectTaskCoexecutor](db)}
 }
 
 func (p *ProjectTaskCoexecutor) GetCoexecutorIds(ctx context.Context, taskId int64) []int {

@@ -2,25 +2,25 @@ package v1
 
 import (
 	"fmt"
-	"voo.su/api/pb/v1"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/cache"
-	"voo.su/internal/service"
+	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/sliceutil"
 )
 
 type Project struct {
-	ProjectService *service.ProjectService
+	ProjectUseCase *usecase.ProjectUseCase
 	RedisLock      *cache.RedisLock
 }
 
 func (p *Project) Create(ctx *core.Context) error {
-	params := &api_v1.ProjectCreateRequest{}
+	params := &v1Pb.ProjectCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	projectId, err := p.ProjectService.CreateProject(ctx.Ctx(), &service.ProjectOpt{
+	projectId, err := p.ProjectUseCase.CreateProject(ctx.Ctx(), &usecase.ProjectOpt{
 		UserId: ctx.UserId(),
 		Title:  params.Title,
 	})
@@ -28,47 +28,47 @@ func (p *Project) Create(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже: " + err.Error())
 	}
 
-	return ctx.Success(&api_v1.ProjectCreateResponse{Id: projectId})
+	return ctx.Success(&v1Pb.ProjectCreateResponse{Id: projectId})
 }
 
 func (p *Project) Projects(ctx *core.Context) error {
-	data, err := p.ProjectService.Projects(ctx.UserId())
+	data, err := p.ProjectUseCase.Projects(ctx.UserId())
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	items := make([]*api_v1.ProjectListResponse_Item, 0)
+	items := make([]*v1Pb.ProjectListResponse_Item, 0)
 	for _, item := range data {
-		items = append(items, &api_v1.ProjectListResponse_Item{
+		items = append(items, &v1Pb.ProjectListResponse_Item{
 			Id:    int64(item.Id),
 			Title: item.Name,
 		})
 	}
 
-	return ctx.Success(api_v1.ProjectListResponse{Items: items})
+	return ctx.Success(v1Pb.ProjectListResponse{Items: items})
 }
 
 func (p *Project) Members(ctx *core.Context) error {
-	params := &api_v1.ProjectMembersRequest{}
+	params := &v1Pb.ProjectMembersRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	list := p.ProjectService.GetMembers(ctx.Ctx(), params.ProjectId)
+	list := p.ProjectUseCase.GetMembers(ctx.Ctx(), params.ProjectId)
 
-	items := make([]*api_v1.ProjectMembersResponse_Item, 0)
+	items := make([]*v1Pb.ProjectMembersResponse_Item, 0)
 	for _, item := range list {
-		items = append(items, &api_v1.ProjectMembersResponse_Item{
+		items = append(items, &v1Pb.ProjectMembersResponse_Item{
 			Id:       item.Id,
 			Username: item.Username,
 		})
 	}
 
-	return ctx.Success(api_v1.ProjectMembersResponse{Items: items})
+	return ctx.Success(v1Pb.ProjectMembersResponse{Items: items})
 }
 
 func (p *Project) Invite(ctx *core.Context) error {
-	params := &api_v1.ProjectInviteRequest{}
+	params := &v1Pb.ProjectInviteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -80,7 +80,7 @@ func (p *Project) Invite(ctx *core.Context) error {
 
 	defer p.RedisLock.UnLock(ctx.Ctx(), key)
 
-	project, err := p.ProjectService.ProjectRepo.FindById(ctx.Ctx(), int(params.ProjectId))
+	project, err := p.ProjectUseCase.ProjectRepo.FindById(ctx.Ctx(), int(params.ProjectId))
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка сети, попробуйте повторить попытку позже")
 	}
@@ -95,11 +95,11 @@ func (p *Project) Invite(ctx *core.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if !p.ProjectService.IsMember(ctx.Ctx(), int(params.ProjectId), uid, true) {
+	if !p.ProjectUseCase.IsMember(ctx.Ctx(), int(params.ProjectId), uid, true) {
 		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать других")
 	}
 
-	if err := p.ProjectService.Invite(ctx.Ctx(), &service.ProjectInviteOpt{
+	if err := p.ProjectUseCase.Invite(ctx.Ctx(), &usecase.ProjectInviteOpt{
 		ProjectId: int(params.ProjectId),
 		UserId:    uid,
 		MemberIds: uids,
@@ -107,5 +107,5 @@ func (p *Project) Invite(ctx *core.Context) error {
 		return ctx.ErrorBusiness("Не удалось отправить приглашения: " + err.Error())
 	}
 
-	return ctx.Success(&api_v1.ProjectInviteResponse{})
+	return ctx.Success(&v1Pb.ProjectInviteResponse{})
 }

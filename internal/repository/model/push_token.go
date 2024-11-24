@@ -4,8 +4,8 @@ import "time"
 
 type PushToken struct {
 	Id          int64     `gorm:"column:id;primaryKey;autoIncrement"`
-	UserId      int64     `gorm:"column:user_id;index;not null"`
-	Platform    string    `gorm:"column:platform;not null"`
+	UserId      int64     `gorm:"column:user_id;index;NOT NULL"`
+	Platform    string    `gorm:"column:platform;NOT NULL"`
 	Token       string    `gorm:"column:token"`
 	WebEndpoint string    `gorm:"column:web_endpoint"`
 	WebP256dh   string    `gorm:"column:web_p256dh"`

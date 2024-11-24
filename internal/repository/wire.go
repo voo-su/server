@@ -23,4 +23,11 @@ var ProviderSet = wire.NewSet(
 	repo.NewBot,
 	repo.NewSticker,
 	repo.NewPushToken,
+	repo.NewProject,
+	repo.NewProjectMember,
+	repo.NewProjectTaskType,
+	repo.NewProjectTask,
+	repo.NewProjectTaskComment,
+	repo.NewProjectTaskCoexecutor,
+	repo.NewProjectTaskWatcher,
 )

@@ -3,13 +3,13 @@ package repo
 import (
 	"gorm.io/gorm"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type ProjectTaskType struct {
-	core.Repo[model.ProjectTaskType]
+	repo.Repo[model.ProjectTaskType]
 }
 
 func NewProjectTaskType(db *gorm.DB) *ProjectTaskType {
-	return &ProjectTaskType{Repo: core.NewRepo[model.ProjectTaskType](db)}
+	return &ProjectTaskType{Repo: repo.NewRepo[model.ProjectTaskType](db)}
 }

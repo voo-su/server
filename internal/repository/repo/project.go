@@ -3,13 +3,13 @@ package repo
 import (
 	"gorm.io/gorm"
 	"voo.su/internal/repository/model"
-	"voo.su/pkg/core"
+	"voo.su/pkg/repo"
 )
 
 type Project struct {
-	core.Repo[model.Project]
+	repo.Repo[model.Project]
 }
 
 func NewProject(db *gorm.DB) *Project {
-	return &Project{Repo: core.NewRepo[model.Project](db)}
+	return &Project{Repo: repo.NewRepo[model.Project](db)}
 }
