@@ -132,8 +132,8 @@ func (a *Auth) Logout(ctx *core.Context) error {
 	return ctx.Success(nil)
 }
 
-//func (c *Auth) Refresh(ctx *core.Context) error {
-//	c.toBlackList(ctx)
+//func (a *Auth) Refresh(ctx *core.Context) error {
+//	a.toBlackList(ctx)
 //	return ctx.Success(&v1Pb.AuthRefreshResponse{
 //		Type:        "Bearer",
 //		AccessToken: c.token(ctx.UserId()),

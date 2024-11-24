@@ -67,8 +67,7 @@ func (c *ContactRequestUseCase) Accept(ctx context.Context, opt *ContactApplyAcc
 			var contact model.Contact
 			err := tx.Where("user_id = ? AND friend_id = ?", uid, fid).First(&contact).Error
 			if err == nil {
-				return tx.
-					Model(&model.Contact{}).
+				return tx.Model(&model.Contact{}).
 					Where("id = ?", contact.Id).
 					Updates(&model.Contact{
 						Remark: "",
@@ -109,8 +108,10 @@ type ContactApplyDeclineOpt struct {
 }
 
 func (c *ContactRequestUseCase) Decline(ctx context.Context, opt *ContactApplyDeclineOpt) error {
-	err := c.Source.Db().WithContext(ctx).Delete(&model.ContactRequest{}, "id = ? AND friend_id = ?", opt.ApplyId, opt.UserId).Error
-	if err != nil {
+	if err := c.Source.Db().
+		WithContext(ctx).
+		Delete(&model.ContactRequest{}, "id = ? AND friend_id = ?", opt.ApplyId, opt.UserId).
+		Error; err != nil {
 		return err
 	}
 

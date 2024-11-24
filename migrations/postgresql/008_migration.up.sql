@@ -12,4 +12,17 @@ ALTER TABLE bots ADD COLUMN token VARCHAR(255) UNIQUE NOT NULL;
 alter table splits alter column upload_id type varchar using upload_id::varchar;
 alter table splits alter column original_name type varchar using original_name::varchar;
 
+CREATE TABLE push_tokens
+(
+    id           SERIAL PRIMARY KEY,
+    user_id      INT          NOT NULL,
+    platform     VARCHAR(255) NOT NULL,
+    token        TEXT         NOT NULL,
+    web_endpoint TEXT,
+    web_p256dh   TEXT,
+    web_auth     TEXT,
+    is_active    BOOLEAN   DEFAULT TRUE,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO schema_migrations (version, dirty) VALUES (8, false);

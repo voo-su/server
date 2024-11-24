@@ -1,12 +1,15 @@
 package v1
 
 import (
+	"encoding/json"
 	"gorm.io/gorm"
 	"regexp"
 	v1Pb "voo.su/api/http/pb/v1"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/logger"
 	"voo.su/pkg/timeutil"
 )
 
@@ -84,6 +87,25 @@ func (a *Account) ChangeUsername(ctx *core.Context) error {
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка")
 	}
+
+	return ctx.Success("Успешно")
+}
+
+func (a *Account) Push(ctx *core.Context) error {
+	params := &v1Pb.AccountPushRequest{}
+	if err := ctx.Context.ShouldBindJSON(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	uid := ctx.UserId()
+
+	var in entity.WebPush
+	if err := json.Unmarshal([]byte(params.Subscription), &in); err != nil {
+		logger.Errorf("Ошибка при декодировании: ", err)
+		return ctx.ErrorBusiness("Ошибка")
+	}
+
+	a.UserUseCase.WebPushInit(ctx.Ctx(), int64(uid), in)
 
 	return ctx.Success("Успешно")
 }

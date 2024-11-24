@@ -22,14 +22,14 @@ func NewGroupRequestUseCase(
 	}
 }
 
-func (s *GroupChatRequestUseCase) Auth(ctx context.Context, id, userId int) bool {
-	info, err := s.GroupChatRequestRepo.FindById(ctx, id)
+func (g *GroupChatRequestUseCase) Auth(ctx context.Context, id, userId int) bool {
+	info, err := g.GroupChatRequestRepo.FindById(ctx, id)
 	if err != nil {
 		return false
 	}
 
 	var member model.GroupChatMember
-	err = s.Source.Db().
+	err = g.Source.Db().
 		Debug().
 		WithContext(ctx).
 		Select("id").
@@ -39,20 +39,20 @@ func (s *GroupChatRequestUseCase) Auth(ctx context.Context, id, userId int) bool
 	return err == nil && member.Id > 0
 }
 
-func (s *GroupChatRequestUseCase) Insert(ctx context.Context, groupId, userId int /*, remark string*/) error {
-	return s.GroupChatRequestRepo.Create(ctx, &model.GroupChatRequest{
+func (g *GroupChatRequestUseCase) Insert(ctx context.Context, groupId, userId int /*, remark string*/) error {
+	return g.GroupChatRequestRepo.Create(ctx, &model.GroupChatRequest{
 		GroupId: groupId,
 		UserId:  userId,
 		//Remark:  remark,
 	})
 }
 
-func (s *GroupChatRequestUseCase) Delete(ctx context.Context, id, userId int) error {
-	if !s.Auth(ctx, id, userId) {
+func (g *GroupChatRequestUseCase) Delete(ctx context.Context, id, userId int) error {
+	if !g.Auth(ctx, id, userId) {
 		return errors.New("не удалось выполнить аутентификацию")
 	}
 
-	return s.Source.Db().
+	return g.Source.Db().
 		WithContext(ctx).
 		Delete(&model.GroupChatRequest{}, "id = ?", id).
 		Error

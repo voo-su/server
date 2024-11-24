@@ -54,7 +54,7 @@ func (i *IpAddressUseCase) FindAddress(ip string) (string, error) {
 	if err := json.Unmarshal(resp, data); err != nil {
 		return "", err
 	}
-	fmt.Println(data)
+
 	if data.Status != "success" {
 		return "", errors.New(data.Message)
 	}

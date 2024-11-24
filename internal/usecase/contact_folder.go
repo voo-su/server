@@ -66,13 +66,11 @@ func (c *ContactFolderUseCase) MoveGroup(ctx context.Context, uid int, friendId 
 
 	return c.Source.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if contact.FolderId > 0 {
-			err := tx.Table("contact_folders").
+			if err := tx.Table("contact_folders").
 				Where("id = ? AND user_id = ?", contact.FolderId, uid).
 				Updates(map[string]any{
 					"num": gorm.Expr("num - 1"),
-				}).Error
-
-			if err != nil {
+				}).Error; err != nil {
 				return err
 			}
 		}

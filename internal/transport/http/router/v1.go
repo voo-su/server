@@ -25,6 +25,7 @@ func NewV1(router *gin.Engine, conf *config.Config, handler *handler.Handler, se
 			account.GET("", core.HandlerFunc(handler.V1.Account.Get))
 			account.PUT("", core.HandlerFunc(handler.V1.Account.ChangeDetail))
 			account.PUT("/username", core.HandlerFunc(handler.V1.Account.ChangeUsername))
+			account.POST("/push", core.HandlerFunc(handler.V1.Account.Push))
 		}
 		user := v1.Group("/search").Use(authorize)
 		{

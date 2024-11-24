@@ -101,11 +101,10 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 		}
 
 		var user model.User
-		err = tx.Table("users").
+		if err = tx.Table("users").
 			Where("id = ?", opt.UserId).
 			Scan(&user).
-			Error
-		if err != nil {
+			Error; err != nil {
 			return err
 		}
 
@@ -195,13 +194,12 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 	}
 
 	var user model.User
-	err := g.Source.Db().
+	if err := g.Source.Db().
 		Table("users").
 		Select("id, username").
 		Where("id = ?", uid).
 		First(&user).
-		Error
-	if err != nil {
+		Error; err != nil {
 		return err
 	}
 
@@ -216,7 +214,7 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 			OwnerName: user.Username,
 		}),
 	}
-	err = g.Source.Db().Transaction(func(tx *gorm.DB) error {
+	err := g.Source.Db().Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&model.GroupChatMember{}).
 			Where("group_id = ? AND user_id = ?", groupId, uid).
 			Updates(&model.GroupChatMember{
@@ -292,12 +290,11 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 	mids = append(mids, opt.UserId)
 
 	memberItems := make([]*model.User, 0)
-	err = db.Table("users").
+	if err = db.Table("users").
 		Select("id, username").
 		Where("id in ?", mids).
 		Scan(&memberItems).
-		Error
-	if err != nil {
+		Error; err != nil {
 		return err
 	}
 

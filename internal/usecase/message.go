@@ -895,24 +895,40 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message,
 		logger.Errorf("Ошибка отправки уведомления %s", err.Error())
 	}
 
+	return
+
 	// TODO
+	uids := make([]int, 0)
 
-	webPushContent := &entity.WebPush{
-		Endpoint: "",
-		Keys: entity.WebPushKeys{
-			P256dh: "",
-			Auth:   "",
-		},
-		Message: opt["text"],
-	}
+	uids = append(uids, 1)
 
-	webPushData, err := json.Marshal(webPushContent)
-	if err != nil {
-		log.Fatal("Не удалось сериализовать данные в JSON: ", err)
-	}
-
-	if err := m.Nats.Publish("web-push", webPushData); err != nil {
+	pushTokens := make([]*model.PushToken, 0)
+	if err := m.Source.Db().
+		Table("push_tokens").
+		Where("user_id in ?", uids).
+		Scan(&pushTokens).
+		Error; err != nil {
 		fmt.Println(err)
+	}
+
+	for _, item := range pushTokens {
+		webPushContent := &entity.WebPush{
+			Endpoint: item.WebEndpoint,
+			Keys: entity.WebPushKeys{
+				P256dh: item.WebP256dh,
+				Auth:   item.WebAuth,
+			},
+			Message: opt["text"],
+		}
+
+		webPushData, err := json.Marshal(webPushContent)
+		if err != nil {
+			log.Fatal("Не удалось сериализовать данные в JSON: ", err)
+		}
+
+		if err := m.Nats.Publish("web-push", webPushData); err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
