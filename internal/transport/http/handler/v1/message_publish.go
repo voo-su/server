@@ -87,7 +87,16 @@ func (p *Publish) onSendImage(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := p.MessageUseCase.SendImage(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendImage(ctx.Ctx(), ctx.UserId(), &usecase.SendImage{
+		Receiver: usecase.Receiver{
+			DialogType: params.Receiver.DialogType,
+			ReceiverId: params.Receiver.ReceiverId,
+		},
+		Url:     params.Url,
+		Width:   params.Width,
+		Height:  params.Height,
+		QuoteId: params.QuoteId,
+	}); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -95,7 +104,6 @@ func (p *Publish) onSendImage(ctx *core.Context) error {
 }
 
 func (p *Publish) onSendVoice(ctx *core.Context) error {
-
 	params := &v1Pb.VoiceMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
@@ -109,7 +117,6 @@ func (p *Publish) onSendVoice(ctx *core.Context) error {
 }
 
 func (p *Publish) onSendVideo(ctx *core.Context) error {
-
 	params := &v1Pb.VideoMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)

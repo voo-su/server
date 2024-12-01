@@ -73,19 +73,19 @@ func NewUuid() string {
 
 func GenMediaObjectName(ext string, width, height int) string {
 	var (
-		mediaType = "common"
+		mediaType = "files"
 		fileName  = GenFileName(ext)
 	)
 
 	switch ext {
 	case "png", "jpeg", "jpg", "gif", "webp", "svg", "ico":
-		mediaType = "image"
+		mediaType = "images"
 		fileName = GenImageName(ext, width, height)
 	case "mp3", "wav", "aac", "ogg", "flac":
 		mediaType = "audio"
 	case "mp4", "avi", "mov", "wmv", "mkv":
-		mediaType = "video"
+		mediaType = "videos"
 	}
 
-	return fmt.Sprintf("media/%s/%s/%s", mediaType, time.Now().Format("200601"), fileName)
+	return fmt.Sprintf("%s/%s/%s", mediaType, time.Now().Format("2006/01/02"), fileName)
 }

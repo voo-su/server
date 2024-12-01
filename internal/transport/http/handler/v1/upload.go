@@ -100,14 +100,13 @@ func (u *Upload) MultipartUpload(ctx *core.Context) error {
 		return ctx.InvalidParams("Ошибка загрузки файла")
 	}
 
-	err = u.SplitUseCase.MultipartUpload(ctx.Ctx(), &usecase.MultipartUploadOpt{
+	if err = u.SplitUseCase.MultipartUpload(ctx.Ctx(), &usecase.MultipartUploadOpt{
 		UserId:     ctx.UserId(),
 		UploadId:   params.UploadId,
 		SplitIndex: int(params.SplitIndex),
 		SplitNum:   int(params.SplitNum),
 		File:       file,
-	})
-	if err != nil {
+	}); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

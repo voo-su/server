@@ -7,8 +7,8 @@ import "tagger/tagger.proto";
 option go_package = "./bot;bot_pb";
 
 message MessageSendRequest{
-    int32 chatId = 1 [(tagger.tags) = "form:\"chatId\" binding:\"required\""];
-    string content = 2 [(tagger.tags) = "form:\"content\" binding:\"required\""];
+    int32 chat_id = 1 [(tagger.tags) = "form:\"chat_id\" binding:\"required\""];
+    string text = 2 [(tagger.tags) = "form:\"text\" binding:\"required\""];
 }
 
 message MessageSendResponse{}
@@ -22,4 +22,10 @@ message MessageChatsResponse{
     }
 
     repeated Item items = 1;
+}
+
+// TODO DELETE
+message MessageRequest{
+    int32 chatId = 1 [(tagger.tags) = "form:\"chatId\" binding:\"required\""];
+    string content = 2 [(tagger.tags) = "form:\"content\" binding:\"required\""];
 }

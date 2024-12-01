@@ -1,28 +1,36 @@
 package usecase
 
 import (
+	"bytes"
 	"context"
+	"mime/multipart"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 	"voo.su/pkg/encrypt"
+	"voo.su/pkg/minio"
+	"voo.su/pkg/strutil"
+	"voo.su/pkg/utils"
 )
 
 type BotUseCase struct {
 	*repo.Source
 	BotRepo  *repo.Bot
 	UserRepo *repo.User
+	Minio    minio.IMinio
 }
 
 func NewBotUseCase(
 	source *repo.Source,
 	botRepo *repo.Bot,
 	userRepo *repo.User,
+	minio minio.IMinio,
 ) *BotUseCase {
 	return &BotUseCase{
 		Source:   source,
 		BotRepo:  botRepo,
 		UserRepo: userRepo,
+		Minio:    minio,
 	}
 }
 
@@ -102,4 +110,23 @@ func (b *BotUseCase) Chats(ctx context.Context, botId int) ([]*entity.SearchChat
 	}
 
 	return items, nil
+}
+
+func (b *BotUseCase) FileUpload(ctx context.Context, file *multipart.FileHeader) (*string, error) {
+	stream, err := minio.ReadMultipartStream(file)
+	if err != nil {
+		return nil, err
+	}
+
+	meta := utils.ReadImageMeta(bytes.NewReader(stream))
+	ext := strutil.FileSuffix(file.Filename)
+
+	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
+	if err = b.Minio.Write(b.Minio.BucketPublicName(), src, stream); err != nil {
+		return nil, err
+	}
+
+	path := b.Minio.PublicUrl(b.Minio.BucketPublicName(), src)
+
+	return &path, nil
 }

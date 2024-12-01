@@ -33,7 +33,7 @@ import (
 type IMessageUseCase interface {
 	SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error
 	SendText(ctx context.Context, uid int, req *SendText) error
-	SendImage(ctx context.Context, uid int, req *v1Pb.ImageMessageRequest) error
+	SendImage(ctx context.Context, uid int, req *SendImage) error
 	SendVoice(ctx context.Context, uid int, req *v1Pb.VoiceMessageRequest) error
 	SendVideo(ctx context.Context, uid int, req *v1Pb.VideoMessageRequest) error
 	SendFile(ctx context.Context, uid int, req *v1Pb.FileMessageRequest) error
@@ -398,7 +398,16 @@ func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *SendText /*
 	return m.save(ctx, data)
 }
 
-func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *v1Pb.ImageMessageRequest) error {
+type SendImage struct {
+	Receiver Receiver
+	Url      string
+	Width    int32
+	Height   int32
+	QuoteId  string
+	Content  string
+}
+
+func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *SendImage /**v1Pb.ImageMessageRequest*/) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    constant.ChatMsgTypeImage,
@@ -410,6 +419,7 @@ func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *v1Pb.Image
 			Height: int(req.Height),
 		}),
 		QuoteId: req.QuoteId,
+		Content: req.Content,
 	}
 
 	return m.save(ctx, data)
@@ -451,16 +461,15 @@ func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *v1Pb.Video
 }
 
 func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *v1Pb.FileMessageRequest) error {
-	now := time.Now()
-
 	file, err := m.SplitRepo.GetFile(ctx, uid, req.UploadId)
 	if err != nil {
 		return err
 	}
 
-	publicUrl := ""
+	now := time.Now()
 	filePath := fmt.Sprintf("private-dialog/%s/%s.%s", now.Format("200601"), uuid.New().String(), file.FileExt)
 
+	publicUrl := ""
 	if entity.GetMediaType(file.FileExt) <= 3 {
 		filePath = strutil.GenMediaObjectName(file.FileExt, 0, 0)
 		if err := m.Minio.CopyObject(
