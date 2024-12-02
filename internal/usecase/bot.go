@@ -130,3 +130,20 @@ func (b *BotUseCase) FileUpload(ctx context.Context, file *multipart.FileHeader)
 
 	return &path, nil
 }
+
+func (b *BotUseCase) FileDocumentUpload(ctx context.Context, file *multipart.FileHeader) (*string, error) {
+	stream, err := minio.ReadMultipartStream(file)
+	if err != nil {
+		return nil, err
+	}
+
+	meta := utils.ReadImageMeta(bytes.NewReader(stream))
+	ext := strutil.FileSuffix(file.Filename)
+
+	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
+	if err = b.Minio.Write(b.Minio.BucketPrivateName(), src, stream); err != nil {
+		return nil, err
+	}
+
+	return &src, nil
+}

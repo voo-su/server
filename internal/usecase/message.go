@@ -34,9 +34,10 @@ type IMessageUseCase interface {
 	SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error
 	SendText(ctx context.Context, uid int, req *SendText) error
 	SendImage(ctx context.Context, uid int, req *SendImage) error
-	SendVoice(ctx context.Context, uid int, req *v1Pb.VoiceMessageRequest) error
-	SendVideo(ctx context.Context, uid int, req *v1Pb.VideoMessageRequest) error
-	SendFile(ctx context.Context, uid int, req *v1Pb.FileMessageRequest) error
+	SendVideo(ctx context.Context, uid int, req *SendVideo) error
+	SendAudio(ctx context.Context, uid int, req *SendAudio) error
+	SendFile(ctx context.Context, uid int, req *SendFile) error
+	SendBotFile(ctx context.Context, uid int, req *SendBotFile) error
 	SendVote(ctx context.Context, uid int, req *v1Pb.VoteMessageRequest) error
 	SendForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error
 	SendSysOther(ctx context.Context, data *model.Message) error
@@ -374,18 +375,18 @@ func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *v1Pb.
 	return m.save(ctx, data)
 }
 
-type Receiver struct {
+type MessageReceiver struct {
 	DialogType int32
 	ReceiverId int32
 }
 
 type SendText struct {
-	Receiver Receiver
+	Receiver MessageReceiver
 	Content  string
 	QuoteId  string
 }
 
-func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *SendText /*req1 *v1Pb.TextMessageRequest*/) error {
+func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *SendText) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    constant.ChatMsgTypeText,
@@ -399,7 +400,7 @@ func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *SendText /*
 }
 
 type SendImage struct {
-	Receiver Receiver
+	Receiver MessageReceiver
 	Url      string
 	Width    int32
 	Height   int32
@@ -407,7 +408,7 @@ type SendImage struct {
 	Content  string
 }
 
-func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *SendImage /**v1Pb.ImageMessageRequest*/) error {
+func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *SendImage) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    constant.ChatMsgTypeImage,
@@ -425,24 +426,16 @@ func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *SendImage 
 	return m.save(ctx, data)
 }
 
-func (m *MessageUseCase) SendVoice(ctx context.Context, uid int, req *v1Pb.VoiceMessageRequest) error {
-	data := &model.Message{
-		DialogType: int(req.Receiver.DialogType),
-		MsgType:    constant.ChatMsgTypeAudio,
-		UserId:     uid,
-		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraAudio{
-			Suffix:   strutil.FileSuffix(req.Url),
-			Size:     int(req.Size),
-			Url:      req.Url,
-			Duration: 0,
-		}),
-	}
-
-	return m.save(ctx, data)
+type SendVideo struct {
+	Receiver MessageReceiver
+	Url      string
+	Duration int32
+	Size     int32
+	Cover    string
+	Content  string
 }
 
-func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *v1Pb.VideoMessageRequest) error {
+func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *SendVideo) error {
 	data := &model.Message{
 		DialogType: int(req.Receiver.DialogType),
 		MsgType:    constant.ChatMsgTypeVideo,
@@ -455,12 +448,43 @@ func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *v1Pb.Video
 			Url:      req.Url,
 			Duration: int(req.Duration),
 		}),
+		Content: req.Content,
 	}
 
 	return m.save(ctx, data)
 }
 
-func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *v1Pb.FileMessageRequest) error {
+type SendAudio struct {
+	Receiver MessageReceiver
+	Url      string
+	Size     int32
+	Content  string
+}
+
+func (m *MessageUseCase) SendAudio(ctx context.Context, uid int, req *SendAudio) error {
+	data := &model.Message{
+		DialogType: int(req.Receiver.DialogType),
+		MsgType:    constant.ChatMsgTypeAudio,
+		UserId:     uid,
+		ReceiverId: int(req.Receiver.ReceiverId),
+		Extra: jsonutil.Encode(&entity.DialogRecordExtraAudio{
+			Suffix:   strutil.FileSuffix(req.Url),
+			Size:     int(req.Size),
+			Url:      req.Url,
+			Duration: 0,
+		}),
+		Content: req.Content,
+	}
+
+	return m.save(ctx, data)
+}
+
+type SendFile struct {
+	Receiver MessageReceiver
+	UploadId string
+}
+
+func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *SendFile) error {
 	file, err := m.SplitRepo.GetFile(ctx, uid, req.UploadId)
 	if err != nil {
 		return err
@@ -522,6 +546,35 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *v1Pb.FileMe
 		})
 	}
 
+	return m.save(ctx, data)
+}
+
+type SendBotFile struct {
+	Receiver     MessageReceiver
+	Drive        int
+	OriginalName string
+	FileExt      string
+	FileSize     int
+	FilePath     string
+	Content      string
+}
+
+func (m *MessageUseCase) SendBotFile(ctx context.Context, uid int, req *SendBotFile) error {
+	data := &model.Message{
+		MsgId:      strutil.NewMsgId(),
+		DialogType: int(req.Receiver.DialogType),
+		UserId:     uid,
+		ReceiverId: int(req.Receiver.ReceiverId),
+		MsgType:    constant.ChatMsgTypeFile,
+		Extra: jsonutil.Encode(&entity.DialogRecordExtraFile{
+			Drive:  req.Drive,
+			Name:   req.OriginalName,
+			Suffix: req.FileExt,
+			Size:   req.FileSize,
+			Path:   req.FilePath,
+		}),
+		Content: req.Content,
+	}
 	return m.save(ctx, data)
 }
 

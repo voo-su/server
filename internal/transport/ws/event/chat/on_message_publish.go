@@ -52,7 +52,7 @@ func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data
 	}
 	err := h.MessageUseCase.SendText(ctx, client.Uid(), &usecase.SendText{
 		Content: in.Content.Content,
-		Receiver: usecase.Receiver{
+		Receiver: usecase.MessageReceiver{
 			DialogType: in.Content.Receiver.DialogType,
 			ReceiverId: in.Content.Receiver.ReceiverId,
 		},

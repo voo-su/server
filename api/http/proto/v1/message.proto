@@ -44,6 +44,14 @@ message VideoMessageRequest{
     string cover = 6;
 }
 
+message AudioMessageRequest{
+    MessageReceiver receiver = 1;
+    string type = 2;
+    string url = 3 [(tagger.tags) = "binding:\"required\""];
+    int32 duration = 4 [(tagger.tags) = "binding:\"required,gt=0\""];
+    int32 size = 5 [(tagger.tags) = "binding:\"required\""];
+}
+
 message FileMessageRequest{
     MessageReceiver receiver = 1;
     string type = 2;
@@ -57,14 +65,6 @@ message VoteMessageRequest{
     int32 mode = 4 [(tagger.tags) = "binding:\"required\""];
     int32 anonymous = 5 [(tagger.tags) = "binding:\"required\""];
     repeated string options = 6 [(tagger.tags) = "binding:\"required\""];
-}
-
-message VoiceMessageRequest{
-    MessageReceiver receiver = 1;
-    string type = 2;
-    string url = 3 [(tagger.tags) = "binding:\"required\""];
-    int32 duration = 4 [(tagger.tags) = "binding:\"required,gt=0\""];
-    int32 size = 5 [(tagger.tags) = "binding:\"required\""];
 }
 
 message StickerMessageRequest{

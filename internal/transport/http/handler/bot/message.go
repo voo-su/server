@@ -2,9 +2,10 @@ package bot
 
 import (
 	"fmt"
+	"path"
 	"strconv"
+	"strings"
 	botPb "voo.su/api/http/pb/bot"
-	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
@@ -64,7 +65,7 @@ func (m *Message) Send(ctx *core.Context) error {
 	}
 
 	if err := m.MessageUseCase.SendText(ctx.Ctx(), bot.UserId, &usecase.SendText{
-		Receiver: usecase.Receiver{
+		Receiver: usecase.MessageReceiver{
 			DialogType: 2,
 			ReceiverId: params.ChatId,
 		},
@@ -88,7 +89,7 @@ func (m *Message) Message(ctx *core.Context) error {
 	}
 
 	if err := m.MessageUseCase.SendText(ctx.Ctx(), bot.UserId, &usecase.SendText{
-		Receiver: usecase.Receiver{
+		Receiver: usecase.MessageReceiver{
 			DialogType: 2,
 			ReceiverId: params.ChatId,
 		},
@@ -129,7 +130,7 @@ func (m *Message) Photo(ctx *core.Context) error {
 	}
 
 	if err := m.MessageUseCase.SendImage(ctx.Ctx(), bot.UserId, &usecase.SendImage{
-		Receiver: usecase.Receiver{
+		Receiver: usecase.MessageReceiver{
 			DialogType: 2,
 			ReceiverId: int32(chatId),
 		},
@@ -150,10 +151,11 @@ func (m *Message) Video(ctx *core.Context) error {
 
 	file, err := ctx.Context.FormFile("video")
 	if err != nil {
+		fmt.Println(err)
 		return ctx.InvalidParams("Ошибка загрузки файла")
 	}
 
-	// caption := ctx.Context.DefaultPostForm("caption", "")
+	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > 5<<20 {
 		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5МБ")
@@ -170,13 +172,13 @@ func (m *Message) Video(ctx *core.Context) error {
 		return err
 	}
 
-	if err := m.MessageUseCase.SendVideo(ctx.Ctx(), bot.UserId, &v1Pb.VideoMessageRequest{
-		Receiver: &v1Pb.MessageReceiver{
+	if err := m.MessageUseCase.SendVideo(ctx.Ctx(), bot.UserId, &usecase.SendVideo{
+		Receiver: usecase.MessageReceiver{
 			DialogType: 2,
 			ReceiverId: int32(chatId),
 		},
-		Url: *filePath,
-		// TODO
+		Url:     *filePath,
+		Content: strutil.EscapeHtml(caption),
 	}); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -195,7 +197,7 @@ func (m *Message) Audio(ctx *core.Context) error {
 		return ctx.InvalidParams("Ошибка загрузки файла")
 	}
 
-	// caption := ctx.Context.DefaultPostForm("caption", "")
+	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > 5<<20 {
 		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5МБ")
@@ -212,13 +214,13 @@ func (m *Message) Audio(ctx *core.Context) error {
 		return err
 	}
 
-	if err := m.MessageUseCase.SendVoice(ctx.Ctx(), bot.UserId, &v1Pb.VoiceMessageRequest{
-		Receiver: &v1Pb.MessageReceiver{
+	if err := m.MessageUseCase.SendAudio(ctx.Ctx(), bot.UserId, &usecase.SendAudio{
+		Receiver: usecase.MessageReceiver{
 			DialogType: 2,
 			ReceiverId: int32(chatId),
 		},
-		Url: *filePath,
-		// TODO
+		Url:     *filePath,
+		Content: strutil.EscapeHtml(caption),
 	}); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -237,13 +239,13 @@ func (m *Message) Document(ctx *core.Context) error {
 		return ctx.InvalidParams("Ошибка загрузки файла")
 	}
 
-	// caption := ctx.Context.DefaultPostForm("caption", "")
+	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > 5<<20 {
 		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5МБ")
 	}
 
-	filePath, err := m.BotUseCase.FileUpload(ctx.Ctx(), file)
+	filePath, err := m.BotUseCase.FileDocumentUpload(ctx.Ctx(), file)
 	if err != nil {
 		fmt.Println(err)
 		return ctx.InvalidParams("Ошибка загрузки")
@@ -254,9 +256,20 @@ func (m *Message) Document(ctx *core.Context) error {
 		return err
 	}
 
-	fmt.Println(chatId)
-	fmt.Println(filePath)
-	fmt.Println(bot)
+	if err := m.MessageUseCase.SendBotFile(ctx.Ctx(), bot.UserId, &usecase.SendBotFile{
+		Receiver: usecase.MessageReceiver{
+			DialogType: 2,
+			ReceiverId: int32(chatId),
+		},
+		Drive:        1,
+		OriginalName: file.Filename,
+		FileExt:      strings.TrimPrefix(path.Ext(file.Filename), "."),
+		FileSize:     int(file.Size),
+		FilePath:     *filePath,
+		Content:      strutil.EscapeHtml(caption),
+	}); err != nil {
+		return err
+	}
 
 	return ctx.Success(&botPb.MessageSendResponse{})
 }

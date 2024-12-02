@@ -19,10 +19,10 @@ func (p *Publish) transfer(ctx *core.Context, typeValue string) error {
 		mapping = make(map[string]func(ctx *core.Context) error)
 		mapping["text"] = p.onSendText
 		mapping["image"] = p.onSendImage
-		mapping["vote"] = p.onSendVote
-		mapping["voice"] = p.onSendVoice
+		mapping["voice"] = p.onSendAudio
 		mapping["video"] = p.onSendVideo
 		mapping["file"] = p.onSendFile
+		mapping["vote"] = p.onSendVote
 		mapping["forward"] = p.onSendForward
 		mapping["mixed"] = p.onMixedMessage
 		mapping["sticker"] = p.onSendSticker
@@ -68,7 +68,7 @@ func (p *Publish) onSendText(ctx *core.Context) error {
 	}
 
 	if err := p.MessageUseCase.SendText(ctx.Ctx(), ctx.UserId(), &usecase.SendText{
-		Receiver: usecase.Receiver{
+		Receiver: usecase.MessageReceiver{
 			DialogType: params.Receiver.DialogType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
@@ -88,7 +88,7 @@ func (p *Publish) onSendImage(ctx *core.Context) error {
 	}
 
 	if err := p.MessageUseCase.SendImage(ctx.Ctx(), ctx.UserId(), &usecase.SendImage{
-		Receiver: usecase.Receiver{
+		Receiver: usecase.MessageReceiver{
 			DialogType: params.Receiver.DialogType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
@@ -103,26 +103,42 @@ func (p *Publish) onSendImage(ctx *core.Context) error {
 	return ctx.Success(nil)
 }
 
-func (p *Publish) onSendVoice(ctx *core.Context) error {
-	params := &v1Pb.VoiceMessageRequest{}
-	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
-		return ctx.InvalidParams(err)
-	}
-
-	if err := p.MessageUseCase.SendVoice(ctx.Ctx(), ctx.UserId(), params); err != nil {
-		return ctx.ErrorBusiness(err.Error())
-	}
-
-	return ctx.Success(nil)
-}
-
 func (p *Publish) onSendVideo(ctx *core.Context) error {
 	params := &v1Pb.VideoMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := p.MessageUseCase.SendVideo(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendVideo(ctx.Ctx(), ctx.UserId(), &usecase.SendVideo{
+		Receiver: usecase.MessageReceiver{
+			DialogType: params.Receiver.DialogType,
+			ReceiverId: params.Receiver.ReceiverId,
+		},
+		Url:      params.Url,
+		Duration: params.Duration,
+		Size:     params.Size,
+		Cover:    params.Cover,
+	}); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (p *Publish) onSendAudio(ctx *core.Context) error {
+	params := &v1Pb.AudioMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := p.MessageUseCase.SendAudio(ctx.Ctx(), ctx.UserId(), &usecase.SendAudio{
+		Receiver: usecase.MessageReceiver{
+			DialogType: params.Receiver.DialogType,
+			ReceiverId: params.Receiver.ReceiverId,
+		},
+		Url:  params.Url,
+		Size: params.Size,
+	}); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
@@ -135,7 +151,13 @@ func (p *Publish) onSendFile(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := p.MessageUseCase.SendFile(ctx.Ctx(), ctx.UserId(), params); err != nil {
+	if err := p.MessageUseCase.SendFile(ctx.Ctx(), ctx.UserId(), &usecase.SendFile{
+		Receiver: usecase.MessageReceiver{
+			DialogType: params.Receiver.DialogType,
+			ReceiverId: params.Receiver.ReceiverId,
+		},
+		UploadId: params.UploadId,
+	}); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
