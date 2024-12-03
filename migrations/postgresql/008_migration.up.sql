@@ -25,4 +25,6 @@ CREATE TABLE push_tokens
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+alter table splits alter column file_ext type varchar(255) using file_ext::varchar(255);
+
 -- INSERT INTO schema_migrations (version, dirty) VALUES (8, false);

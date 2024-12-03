@@ -5,17 +5,24 @@ import (
 	"gorm.io/gorm"
 	"path"
 	"time"
+	"voo.su/internal/config"
 	"voo.su/internal/repository/model"
 	"voo.su/pkg/minio"
 )
 
 type ClearTmpFile struct {
+	Conf  *config.Config
 	DB    *gorm.DB
 	Minio minio.IMinio
 }
 
-func NewClearTmpFile(db *gorm.DB, minio minio.IMinio) *ClearTmpFile {
+func NewClearTmpFile(
+	conf *config.Config,
+	db *gorm.DB,
+	minio minio.IMinio,
+) *ClearTmpFile {
 	return &ClearTmpFile{
+		Conf:  conf,
 		DB:    db,
 		Minio: minio,
 	}
@@ -53,15 +60,15 @@ func (c *ClearTmpFile) Handle(ctx context.Context) error {
 				Scan(&list)
 
 			for _, value := range list {
-				_ = c.Minio.Delete(c.Minio.BucketPublicName(), value.Path)
+				_ = c.Minio.Delete(c.Conf.Minio.GetBucket(), value.Path)
 				c.DB.Delete(model.Split{}, value.Id)
 			}
 
 			if len(list) > 0 {
-				_ = c.Minio.Delete(c.Minio.BucketPrivateName(), path.Dir(item.Path))
+				_ = c.Minio.Delete(c.Conf.Minio.GetBucket(), path.Dir(item.Path))
 			}
 
-			if err := c.Minio.Delete(c.Minio.BucketPrivateName(), item.Path); err == nil {
+			if err := c.Minio.Delete(c.Conf.Minio.GetBucket(), item.Path); err == nil {
 				c.DB.Delete(model.Split{}, item.Id)
 			}
 		}

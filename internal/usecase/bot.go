@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"mime/multipart"
+	"voo.su/internal/config"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
@@ -15,6 +16,7 @@ import (
 
 type BotUseCase struct {
 	*repo.Source
+	Conf     *config.Config
 	BotRepo  *repo.Bot
 	UserRepo *repo.User
 	Minio    minio.IMinio
@@ -22,12 +24,14 @@ type BotUseCase struct {
 
 func NewBotUseCase(
 	source *repo.Source,
+	conf *config.Config,
 	botRepo *repo.Bot,
 	userRepo *repo.User,
 	minio minio.IMinio,
 ) *BotUseCase {
 	return &BotUseCase{
 		Source:   source,
+		Conf:     conf,
 		BotRepo:  botRepo,
 		UserRepo: userRepo,
 		Minio:    minio,
@@ -122,11 +126,11 @@ func (b *BotUseCase) FileUpload(ctx context.Context, file *multipart.FileHeader)
 	ext := strutil.FileSuffix(file.Filename)
 
 	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
-	if err = b.Minio.Write(b.Minio.BucketPublicName(), src, stream); err != nil {
+	if err = b.Minio.Write(b.Conf.Minio.GetBucket(), src, stream); err != nil {
 		return nil, err
 	}
 
-	path := b.Minio.PublicUrl(b.Minio.BucketPublicName(), src)
+	path := b.Minio.PublicUrl(b.Conf.Minio.GetBucket(), src)
 
 	return &path, nil
 }
@@ -141,7 +145,7 @@ func (b *BotUseCase) FileDocumentUpload(ctx context.Context, file *multipart.Fil
 	ext := strutil.FileSuffix(file.Filename)
 
 	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
-	if err = b.Minio.Write(b.Minio.BucketPrivateName(), src, stream); err != nil {
+	if err = b.Minio.Write(b.Conf.Minio.GetBucket(), src, stream); err != nil {
 		return nil, err
 	}
 

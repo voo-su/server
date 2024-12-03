@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"html"
@@ -15,6 +14,7 @@ import (
 	"strings"
 	"time"
 	v1Pb "voo.su/api/http/pb/v1"
+	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/domain/logic"
@@ -56,6 +56,7 @@ var _ IMessageUseCase = (*MessageUseCase)(nil)
 
 type MessageUseCase struct {
 	*repo.Source
+	Conf                *config.Config
 	MessageForwardLogic *logic.MessageForwardLogic
 	Minio               minio.IMinio
 	GroupChatMemberRepo *repo.GroupChatMember
@@ -490,22 +491,19 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *SendFile) e
 		return err
 	}
 
-	now := time.Now()
-	filePath := fmt.Sprintf("private-dialog/%s/%s.%s", now.Format("200601"), uuid.New().String(), file.FileExt)
-
+	filePath := strutil.GenMediaObjectName(file.FileExt, 0, 0)
 	publicUrl := ""
 	if entity.GetMediaType(file.FileExt) <= 3 {
-		filePath = strutil.GenMediaObjectName(file.FileExt, 0, 0)
 		if err := m.Minio.CopyObject(
-			m.Minio.BucketPrivateName(), file.Path,
-			m.Minio.BucketPublicName(), filePath,
+			m.Conf.Minio.GetBucket(), file.Path,
+			m.Conf.Minio.GetBucket(), filePath,
 		); err != nil {
 			return err
 		}
 
-		publicUrl = m.Minio.PublicUrl(m.Minio.BucketPublicName(), filePath)
+		publicUrl = m.Minio.PublicUrl(m.Conf.Minio.GetBucket(), filePath)
 	} else {
-		if err := m.Minio.Copy(m.Minio.BucketPrivateName(), file.Path, filePath); err != nil {
+		if err := m.Minio.Copy(m.Conf.Minio.GetBucket(), file.Path, filePath); err != nil {
 			return err
 		}
 	}

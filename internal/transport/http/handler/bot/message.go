@@ -104,24 +104,24 @@ func (m *Message) Message(ctx *core.Context) error {
 func (m *Message) Photo(ctx *core.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
-		return ctx.InvalidParams("")
+		return ctx.InvalidParams("Неверный формат chat_id. Пожалуйста, укажите правильный идентификатор чата.")
 	}
 
 	file, err := ctx.Context.FormFile("photo")
 	if err != nil {
-		return ctx.InvalidParams("Ошибка загрузки файла")
+		return ctx.InvalidParams("Ошибка загрузки файла изображения. Пожалуйста, попробуйте загрузить файл снова.")
 	}
 
 	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > 5<<20 {
-		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5МБ")
+		return ctx.InvalidParams("Размер загружаемого изображения не может превышать 5 МБ. Пожалуйста, выберите файл меньшего размера.")
 	}
 
 	filePath, err := m.BotUseCase.FileUpload(ctx.Ctx(), file)
 	if err != nil {
 		fmt.Println(err)
-		return ctx.InvalidParams("Ошибка загрузки")
+		return ctx.InvalidParams("Ошибка загрузки изображения. Пожалуйста, попробуйте снова.")
 	}
 
 	bot, err := m.checkBot(ctx)
@@ -146,25 +146,24 @@ func (m *Message) Photo(ctx *core.Context) error {
 func (m *Message) Video(ctx *core.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
-		return ctx.InvalidParams("")
+		return ctx.InvalidParams("Неверный формат chat_id. Пожалуйста, укажите правильный идентификатор чата.")
 	}
 
 	file, err := ctx.Context.FormFile("video")
 	if err != nil {
-		fmt.Println(err)
-		return ctx.InvalidParams("Ошибка загрузки файла")
+		return ctx.InvalidParams("Ошибка загрузки видеофайла. Пожалуйста, попробуйте загрузить файл снова.")
 	}
 
 	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > 5<<20 {
-		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5МБ")
+		return ctx.InvalidParams("Размер загружаемого видео не может превышать 5 МБ. Пожалуйста, выберите файл меньшего размера.")
 	}
 
 	filePath, err := m.BotUseCase.FileUpload(ctx.Ctx(), file)
 	if err != nil {
 		fmt.Println(err)
-		return ctx.InvalidParams("Ошибка загрузки")
+		return ctx.InvalidParams("Ошибка загрузки видеофайла. Пожалуйста, попробуйте снова.")
 	}
 
 	bot, err := m.checkBot(ctx)
@@ -189,24 +188,24 @@ func (m *Message) Video(ctx *core.Context) error {
 func (m *Message) Audio(ctx *core.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
-		return ctx.InvalidParams("")
+		return ctx.InvalidParams("Неверный формат chat_id. Пожалуйста, укажите правильный идентификатор чата.")
 	}
 
 	file, err := ctx.Context.FormFile("audio")
 	if err != nil {
-		return ctx.InvalidParams("Ошибка загрузки файла")
+		return ctx.InvalidParams("Ошибка загрузки аудиофайла. Пожалуйста, попробуйте загрузить файл снова.")
 	}
 
 	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > 5<<20 {
-		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5МБ")
+		return ctx.InvalidParams("Размер загружаемого аудиофайла не может превышать 5 МБ. Пожалуйста, выберите файл меньшего размера.")
 	}
 
 	filePath, err := m.BotUseCase.FileUpload(ctx.Ctx(), file)
 	if err != nil {
 		fmt.Println(err)
-		return ctx.InvalidParams("Ошибка загрузки")
+		return ctx.InvalidParams("Ошибка загрузки аудиофайла. Пожалуйста, попробуйте снова.")
 	}
 
 	bot, err := m.checkBot(ctx)
@@ -231,24 +230,24 @@ func (m *Message) Audio(ctx *core.Context) error {
 func (m *Message) Document(ctx *core.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
-		return ctx.InvalidParams("")
+		return ctx.InvalidParams("Неверный формат chat_id. Пожалуйста, укажите правильный идентификатор чата.")
 	}
 
 	file, err := ctx.Context.FormFile("document")
 	if err != nil {
-		return ctx.InvalidParams("Ошибка загрузки файла")
+		return ctx.InvalidParams("Ошибка загрузки документа. Пожалуйста, попробуйте загрузить файл снова.")
 	}
 
 	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > 5<<20 {
-		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5МБ")
+		return ctx.InvalidParams("Размер загружаемого документа не может превышать 5 МБ. Пожалуйста, выберите файл меньшего размера.")
 	}
 
 	filePath, err := m.BotUseCase.FileDocumentUpload(ctx.Ctx(), file)
 	if err != nil {
 		fmt.Println(err)
-		return ctx.InvalidParams("Ошибка загрузки")
+		return ctx.InvalidParams("Ошибка загрузки документа. Пожалуйста, попробуйте снова.")
 	}
 
 	bot, err := m.checkBot(ctx)
@@ -268,7 +267,7 @@ func (m *Message) Document(ctx *core.Context) error {
 		FilePath:     *filePath,
 		Content:      strutil.EscapeHtml(caption),
 	}); err != nil {
-		return err
+		return ctx.ErrorBusiness(err.Error())
 	}
 
 	return ctx.Success(&botPb.MessageSendResponse{})

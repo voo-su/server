@@ -14,10 +14,6 @@ import (
 )
 
 type IMinio interface {
-	BucketPublicName() string
-
-	BucketPrivateName() string
-
 	Stat(bucketName string, objectName string) (*FileStatInfo, error)
 
 	Write(bucketName string, objectName string, stream []byte) error
@@ -51,12 +47,10 @@ type Minio struct {
 }
 
 type Config struct {
-	Endpoint      string
-	SSL           bool
-	SecretId      string
-	SecretKey     string
-	BucketPublic  string
-	BucketPrivate string
+	Endpoint  string
+	SSL       bool
+	SecretId  string
+	SecretKey string
 }
 
 func NewMinio(conf Config) *Minio {
@@ -73,14 +67,6 @@ func NewMinio(conf Config) *Minio {
 		Core:   client,
 		Config: conf,
 	}
-}
-
-func (m Minio) BucketPublicName() string {
-	return m.Config.BucketPublic
-}
-
-func (m Minio) BucketPrivateName() string {
-	return m.Config.BucketPrivate
 }
 
 type FileStatInfo struct {
@@ -151,15 +137,12 @@ func (m Minio) PublicUrl(bucketName, objectName string) string {
 		panic(err)
 	}
 
-	if m.BucketPublicName() == bucketName {
-		uri.RawQuery = ""
-	}
+	uri.RawQuery = ""
 
 	return uri.String()
 }
 
 func (m Minio) PrivateUrl(bucketName, objectName string, filename string, expire time.Duration) string {
-	// set request parameters for content-disposition.
 	reqParams := make(url.Values)
 	reqParams.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 

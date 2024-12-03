@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	v1Pb "voo.su/api/http/pb/v1"
+	"voo.su/internal/config"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/usecase"
@@ -15,6 +16,7 @@ import (
 )
 
 type Sticker struct {
+	Conf           *config.Config
 	StickerUseCase *usecase.StickerUseCase
 	Minio          minio.IMinio
 	RedisLock      *cache.RedisLock
@@ -98,14 +100,14 @@ func (s *Sticker) Upload(ctx *core.Context) error {
 	ext := strutil.FileSuffix(file.Filename)
 
 	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
-	if err = s.Minio.Write(s.Minio.BucketPublicName(), src, stream); err != nil {
+	if err = s.Minio.Write(s.Conf.Minio.GetBucket(), src, stream); err != nil {
 		return ctx.ErrorBusiness("Ошибка загрузки")
 	}
 
 	m := &model.StickerItem{
 		UserId:      ctx.UserId(),
 		Description: "Пользовательский набор",
-		Url:         s.Minio.PublicUrl(s.Minio.BucketPublicName(), src),
+		Url:         s.Minio.PublicUrl(s.Conf.Minio.GetBucket(), src),
 		FileSuffix:  ext,
 		FileSize:    int(file.Size),
 	}

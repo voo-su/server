@@ -7,11 +7,9 @@ import (
 
 func NewMinioClient(conf *config.Config) minio.IMinio {
 	return minio.NewMinio(minio.Config{
-		Endpoint:      conf.Minio.Host,
-		SSL:           conf.Minio.SSL,
-		SecretId:      conf.Minio.SecretId,
-		SecretKey:     conf.Minio.SecretKey,
-		BucketPublic:  conf.Minio.BucketPublic,
-		BucketPrivate: conf.Minio.BucketPrivate,
+		Endpoint:  conf.Minio.Host,
+		SSL:       conf.Minio.SSL,
+		SecretId:  conf.Minio.SecretId,
+		SecretKey: conf.Minio.SecretKey,
 	})
 }

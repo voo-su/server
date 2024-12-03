@@ -2,8 +2,8 @@ package v1
 
 import (
 	"net/http"
-	"time"
 	v1Pb "voo.su/api/http/pb/v1"
+	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/usecase"
@@ -15,6 +15,7 @@ import (
 )
 
 type Message struct {
+	Conf                   *config.Config
 	ChatUseCase            *usecase.ChatUseCase
 	AuthUseCase            *usecase.AuthUseCase
 	MessageUseCase         usecase.IMessageUseCase
@@ -231,7 +232,8 @@ func (m *Message) Download(ctx *core.Context) error {
 
 	ctx.Context.Redirect(
 		http.StatusFound,
-		m.Minio.PrivateUrl(m.Minio.BucketPrivateName(), fileInfo.Path, fileInfo.Name, 60*time.Second),
+		m.Minio.PublicUrl(m.Conf.Minio.GetBucket(), fileInfo.Path),
+		//m.Minio.PrivateUrl(m.Conf.Minio.GetBucket(), fileInfo.Path, fileInfo.Name, 60*time.Second),
 	)
 
 	return nil

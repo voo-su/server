@@ -20,21 +20,21 @@ import (
 
 type SplitUseCase struct {
 	*repo.Source
+	Conf      *config.Config
 	SplitRepo *repo.Split
-	Config    *config.Config
 	Minio     minio.IMinio
 }
 
 func NewSplitUseCase(
 	source *repo.Source,
-	splitRepo *repo.Split,
 	conf *config.Config,
+	splitRepo *repo.Split,
 	minio minio.IMinio,
 ) *SplitUseCase {
 	return &SplitUseCase{
 		Source:    source,
+		Conf:      conf,
 		SplitRepo: splitRepo,
-		Config:    conf,
 		Minio:     minio,
 	}
 }
@@ -61,7 +61,7 @@ func (s *SplitUseCase) InitiateMultipartUpload(ctx context.Context, params *Mult
 		Attr:         "{}",
 	}
 
-	uploadId, err := s.Minio.InitiateMultipartUpload(s.Minio.BucketPrivateName(), m.Path)
+	uploadId, err := s.Minio.InitiateMultipartUpload(s.Conf.Minio.GetBucket(), m.Path)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (s *SplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUpload
 	read := bytes.NewReader(stream)
 
 	objectPart, err := s.Minio.PutObjectPart(
-		s.Minio.BucketPrivateName(),
+		s.Conf.Minio.GetBucket(),
 		info.Path,
 		info.UploadId,
 		opt.SplitIndex,
@@ -162,7 +162,7 @@ func (s *SplitUseCase) merge(info *model.Split) error {
 		parts = append(parts, obj)
 	}
 
-	if err := s.Minio.CompleteMultipartUpload(s.Minio.BucketPrivateName(), info.Path, info.UploadId, parts); err != nil {
+	if err := s.Minio.CompleteMultipartUpload(s.Conf.Minio.GetBucket(), info.Path, info.UploadId, parts); err != nil {
 		return err
 	}
 

@@ -60,7 +60,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	chatUseCase := usecase.NewChatUseCase(source, chat, groupChatMember)
 	repoBot := repo.NewBot(db)
 	iMinio := provider.NewMinioClient(conf)
-	botUseCase := usecase.NewBotUseCase(source, repoBot, user, iMinio)
+	botUseCase := usecase.NewBotUseCase(source, conf, repoBot, user, iMinio)
 	userSession := repo.NewUserSession(db)
 	pushToken := repo.NewPushToken(db)
 	userUseCase := usecase.NewUserUseCase(source, user, userSession, pushToken)
@@ -78,6 +78,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	iNatsClient := provider.NewNatsClient(conf)
 	messageUseCase := &usecase.MessageUseCase{
 		Source:              source,
+		Conf:                conf,
 		MessageForwardLogic: messageForwardLogic,
 		Minio:               iMinio,
 		GroupChatMemberRepo: groupChatMember,
@@ -136,6 +137,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	}
 	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(source, groupChatMember)
 	v1Message := &v1.Message{
+		Conf:                   conf,
 		ChatUseCase:            chatUseCase,
 		AuthUseCase:            authUseCase,
 		MessageUseCase:         messageUseCase,
@@ -146,7 +148,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		AuthUseCase:    authUseCase,
 		MessageUseCase: messageUseCase,
 	}
-	splitUseCase := usecase.NewSplitUseCase(source, split, conf, iMinio)
+	splitUseCase := usecase.NewSplitUseCase(source, conf, split, iMinio)
 	upload := &v1.Upload{
 		Conf:         conf,
 		Minio:        iMinio,
@@ -174,6 +176,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	sticker := repo.NewSticker(db)
 	stickerUseCase := usecase.NewStickerUseCase(source, sticker, iMinio)
 	v1Sticker := &v1.Sticker{
+		Conf:           conf,
 		StickerUseCase: stickerUseCase,
 		Minio:          iMinio,
 		RedisLock:      redisLock,
@@ -301,6 +304,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	iNatsClient := provider.NewNatsClient(conf)
 	messageUseCase := &usecase.MessageUseCase{
 		Source:              source,
+		Conf:                conf,
 		MessageForwardLogic: messageForwardLogic,
 		Minio:               iMinio,
 		GroupChatMemberRepo: groupChatMember,
@@ -395,7 +399,7 @@ func NewCronInjector(conf *config.Config) *cli.CronProvider {
 	clearWsCache := cron.NewClearWsCache(serverStorage)
 	db := provider.NewPostgresqlClient(conf)
 	iMinio := provider.NewMinioClient(conf)
-	clearTmpFile := cron.NewClearTmpFile(db, iMinio)
+	clearTmpFile := cron.NewClearTmpFile(conf, db, iMinio)
 	clearExpireServer := cron.NewClearExpireServer(serverStorage)
 	crontab := &cli.Crontab{
 		ClearWsCache:      clearWsCache,

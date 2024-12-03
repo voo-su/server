@@ -1,12 +1,11 @@
 package config
 
 type Minio struct {
-	Host          string `yaml:"host"`
-	SSL           bool   `yaml:"ssl"`
-	SecretId      string `yaml:"secret_id"`
-	SecretKey     string `yaml:"secret_key"`
-	BucketPublic  string `yaml:"bucket_public"`
-	BucketPrivate string `yaml:"bucket_private"`
+	Host      string `yaml:"host"`
+	SSL       bool   `yaml:"ssl"`
+	SecretId  string `yaml:"secret_id"`
+	SecretKey string `yaml:"secret_key"`
+	Bucket    string `yaml:"bucket"`
 }
 
 func (m *Minio) GetHost() string {
@@ -25,10 +24,6 @@ func (m *Minio) GetSecretKey() string {
 	return m.SecretKey
 }
 
-func (m *Minio) GetBucketPublic() string {
-	return m.BucketPublic
-}
-
-func (m *Minio) GetBucketPrivate() string {
-	return m.BucketPrivate
+func (m *Minio) GetBucket() string {
+	return m.Bucket
 }

@@ -29,12 +29,12 @@ func (u *Upload) Avatar(ctx *core.Context) error {
 
 	stream, _ := minio.ReadMultipartStream(file)
 	object := strutil.GenMediaObjectName("png", 200, 200)
-	if err := u.Minio.Write(u.Minio.BucketPublicName(), object, stream); err != nil {
+	if err := u.Minio.Write(u.Conf.Minio.GetBucket(), object, stream); err != nil {
 		return ctx.ErrorBusiness("Ошибка загрузки файла")
 	}
 
 	return ctx.Success(v1Pb.UploadAvatarResponse{
-		Avatar: u.Minio.PublicUrl(u.Minio.BucketPublicName(), object),
+		Avatar: u.Minio.PublicUrl(u.Conf.Minio.GetBucket(), object),
 	})
 }
 
@@ -58,12 +58,12 @@ func (u *Upload) Upload(ctx *core.Context) error {
 	}
 
 	object := strutil.GenMediaObjectName(ext, width, height)
-	if err := u.Minio.Write(u.Minio.BucketPublicName(), object, stream); err != nil {
+	if err := u.Minio.Write(u.Conf.Minio.GetBucket(), object, stream); err != nil {
 		return ctx.ErrorBusiness("Не удалось загрузить файл")
 	}
 
 	return ctx.Success(v1Pb.UploadImageResponse{
-		Src: u.Minio.PublicUrl(u.Minio.BucketPublicName(), object),
+		Src: u.Minio.PublicUrl(u.Conf.Minio.GetBucket(), object),
 	})
 }
 
