@@ -1,0 +1,11 @@
+[Unit]
+Description=Voo.su http
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5s
+ExecStart=/usr/bin/voo-su http
+
+[Install]
+WantedBy=multi-user.target

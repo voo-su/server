@@ -1,0 +1,11 @@
+[Unit]
+Description=Voo.su ws
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5s
+ExecStart=/usr/bin/voo-su ws
+
+[Install]
+WantedBy=multi-user.target
