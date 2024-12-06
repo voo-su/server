@@ -2,6 +2,7 @@ package v1
 
 import (
 	"net/http"
+	"time"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
@@ -232,8 +233,7 @@ func (m *Message) Download(ctx *core.Context) error {
 
 	ctx.Context.Redirect(
 		http.StatusFound,
-		m.Minio.PublicUrl(m.Conf.Minio.GetBucket(), fileInfo.Path),
-		//m.Minio.PrivateUrl(m.Conf.Minio.GetBucket(), fileInfo.Path, fileInfo.Name, 60*time.Second),
+		m.Minio.PrivateUrl(m.Conf.Minio.GetBucket(), fileInfo.Path, fileInfo.Name, 60*time.Second),
 	)
 
 	return nil
