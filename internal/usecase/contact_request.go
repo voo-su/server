@@ -8,16 +8,16 @@ import (
 	"gorm.io/gorm"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/model"
-	"voo.su/internal/repository/repo"
 	"voo.su/pkg/jsonutil"
 )
 
 type ContactRequestUseCase struct {
-	*repo.Source
+	*repository.Source
 }
 
-func NewContactRequestUseCase(source *repo.Source) *ContactRequestUseCase {
+func NewContactRequestUseCase(source *repository.Source) *ContactRequestUseCase {
 	return &ContactRequestUseCase{Source: source}
 }
 
@@ -42,11 +42,15 @@ func (c *ContactRequestUseCase) Create(ctx context.Context, opt *ContactApplyCre
 			"type":     1,
 		}),
 	}
-	_, _ = c.Source.Redis().Pipelined(ctx, func(pipe redis.Pipeliner) error {
+	_, err := c.Source.Redis().Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.Incr(ctx, fmt.Sprintf("im:contact:apply:%d", opt.FriendId))
 		pipe.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(body))
 		return nil
 	})
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	return nil
 }
 

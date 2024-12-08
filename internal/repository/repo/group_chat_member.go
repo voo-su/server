@@ -12,11 +12,11 @@ import (
 
 type GroupChatMember struct {
 	repo.Repo[model.GroupChatMember]
-	Relation *cache.Relation
+	RelationCache *cache.RelationCache
 }
 
-func NewGroupMember(db *gorm.DB, relation *cache.Relation) *GroupChatMember {
-	return &GroupChatMember{Repo: repo.NewRepo[model.GroupChatMember](db), Relation: relation}
+func NewGroupMember(db *gorm.DB, relationCache *cache.RelationCache) *GroupChatMember {
+	return &GroupChatMember{Repo: repo.NewRepo[model.GroupChatMember](db), RelationCache: relationCache}
 }
 
 func (g *GroupChatMember) IsMaster(ctx context.Context, gid, uid int) bool {
@@ -32,7 +32,7 @@ func (g *GroupChatMember) IsLeader(ctx context.Context, gid, uid int) bool {
 }
 
 func (g *GroupChatMember) IsMember(ctx context.Context, gid, uid int, cache bool) bool {
-	if cache && g.Relation.IsGroupRelation(ctx, uid, gid) == nil {
+	if cache && g.RelationCache.IsGroupRelation(ctx, uid, gid) == nil {
 		return true
 	}
 
@@ -41,7 +41,7 @@ func (g *GroupChatMember) IsMember(ctx context.Context, gid, uid int, cache bool
 		return false
 	}
 	if exist {
-		g.Relation.SetGroupRelation(ctx, uid, gid)
+		g.RelationCache.SetGroupRelation(ctx, uid, gid)
 	}
 
 	return exist

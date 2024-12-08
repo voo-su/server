@@ -7,19 +7,19 @@ import (
 	"time"
 )
 
-type RedisLock struct {
+type RedisLockCache struct {
 	Rds *redis.Client
 }
 
-func NewRedisLock(rds *redis.Client) *RedisLock {
-	return &RedisLock{rds}
+func NewRedisLockCache(rds *redis.Client) *RedisLockCache {
+	return &RedisLockCache{rds}
 }
 
-func (r *RedisLock) Lock(ctx context.Context, name string, expire int) bool {
+func (r *RedisLockCache) Lock(ctx context.Context, name string, expire int) bool {
 	return r.Rds.SetNX(ctx, r.name(name), 1, time.Duration(expire)*time.Second).Val()
 }
 
-func (r *RedisLock) UnLock(ctx context.Context, name string) bool {
+func (r *RedisLockCache) UnLock(ctx context.Context, name string) bool {
 	script := `
 	if redis.call("GET", KEYS[1]) == ARGV[1] then
 		return redis.call("DEL", KEYS[1])
@@ -29,6 +29,6 @@ func (r *RedisLock) UnLock(ctx context.Context, name string) bool {
 	return r.Rds.Eval(ctx, script, []string{r.name(name)}, 1).Err() == nil
 }
 
-func (r *RedisLock) name(name string) string {
+func (r *RedisLockCache) name(name string) string {
 	return fmt.Sprintf("im:lock:%s", name)
 }

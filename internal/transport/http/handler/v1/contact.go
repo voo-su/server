@@ -12,7 +12,7 @@ import (
 
 type Contact struct {
 	ContactUseCase *usecase.ContactUseCase
-	ClientStorage  *cache.ClientStorage
+	ClientCache    *cache.ClientCache
 	ChatUseCase    *usecase.ChatUseCase
 	UserUseCase    *usecase.UserUseCase
 	MessageUseCase usecase.IMessageUseCase

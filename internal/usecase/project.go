@@ -5,33 +5,34 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"time"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 )
 
 type ProjectUseCase struct {
-	*repo.Source
+	*repository.Source
 	ProjectRepo               *repo.Project
 	ProjectMemberRepo         *repo.ProjectMember
 	ProjectTaskTypeRepo       *repo.ProjectTaskType
 	ProjectTaskRepo           *repo.ProjectTask
 	ProjectTaskCommentRepo    *repo.ProjectTaskComment
 	UserRepo                  *repo.User
-	Relation                  *cache.Relation
+	RelationCache             *cache.RelationCache
 	ProjectTaskCoexecutorRepo *repo.ProjectTaskCoexecutor
 	ProjectTaskWatcherRepo    *repo.ProjectTaskWatcher
 }
 
 func NewProjectUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	projectRepo *repo.Project,
 	projectMemberRepo *repo.ProjectMember,
 	projectTaskTypeRepo *repo.ProjectTaskType,
 	projectTaskRepo *repo.ProjectTask,
 	projectTaskCommentRepo *repo.ProjectTaskComment,
 	userRepo *repo.User,
-	relation *cache.Relation,
+	relationCache *cache.RelationCache,
 	projectTaskCoexecutorRepo *repo.ProjectTaskCoexecutor,
 	projectTaskWatcherRepo *repo.ProjectTaskWatcher,
 ) *ProjectUseCase {
@@ -43,7 +44,7 @@ func NewProjectUseCase(
 		ProjectTaskRepo:           projectTaskRepo,
 		ProjectTaskCommentRepo:    projectTaskCommentRepo,
 		UserRepo:                  userRepo,
-		Relation:                  relation,
+		RelationCache:             relationCache,
 		ProjectTaskCoexecutorRepo: projectTaskCoexecutorRepo,
 		ProjectTaskWatcherRepo:    projectTaskWatcherRepo,
 	}
@@ -144,7 +145,7 @@ func (p *ProjectUseCase) GetMembers(ctx context.Context, projectId int64) []*mod
 }
 
 func (p *ProjectUseCase) IsMember(ctx context.Context, gid, uid int, cache bool) bool {
-	if cache && p.Relation.IsGroupRelation(ctx, uid, gid) == nil {
+	if cache && p.RelationCache.IsGroupRelation(ctx, uid, gid) == nil {
 		return true
 	}
 
@@ -153,7 +154,7 @@ func (p *ProjectUseCase) IsMember(ctx context.Context, gid, uid int, cache bool)
 		return false
 	}
 	if exist {
-		p.Relation.SetGroupRelation(ctx, uid, gid)
+		p.RelationCache.SetGroupRelation(ctx, uid, gid)
 	}
 
 	return exist

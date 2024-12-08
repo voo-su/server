@@ -30,11 +30,11 @@ func (h *Handler) onConsumeDialogRevoke(ctx context.Context, body []byte) {
 	var clientIds []int64
 	if record.DialogType == constant.ChatPrivateMode {
 		for _, uid := range [2]int{record.UserId, record.ReceiverId} {
-			ids := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(uid))
+			ids := h.ClientCache.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(uid))
 			clientIds = append(clientIds, ids...)
 		}
 	} else if record.DialogType == constant.ChatGroupMode {
-		clientIds = h.RoomStorage.All(ctx, &cache.RoomOption{
+		clientIds = h.RoomCache.All(ctx, &cache.RoomOption{
 			Channel:  socket.Session.Chat.Name(),
 			RoomType: constant.RoomImGroup,
 			Number:   strconv.Itoa(record.ReceiverId),

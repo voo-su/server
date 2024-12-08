@@ -15,7 +15,7 @@ import (
 )
 
 type GroupChatRequest struct {
-	GroupRequestStorage     *cache.GroupChatRequestStorage
+	GroupRequestCache       *cache.GroupChatRequestCache
 	GroupChatRequestUseCase *usecase.GroupChatRequestUseCase
 	GroupChatMemberUseCase  *usecase.GroupChatMemberUseCase
 	GroupChatUseCase        *usecase.GroupChatUseCase
@@ -55,7 +55,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 
 	find, err := g.GroupChatMemberUseCase.MemberRepo.FindByWhere(ctx.Ctx(), "group_id = ? AND leader = ?", params.GroupId, 2)
 	if err == nil && find != nil {
-		g.GroupRequestStorage.Incr(ctx.Ctx(), find.UserId)
+		g.GroupRequestCache.Incr(ctx.Ctx(), find.UserId)
 	}
 
 	g.Redis.Publish(ctx.Ctx(), constant.ImTopicChat, jsonutil.Encode(map[string]interface{}{
@@ -239,13 +239,13 @@ func (g *GroupChatRequest) All(ctx *core.Context) error {
 		})
 	}
 
-	g.GroupRequestStorage.Del(ctx.Ctx(), ctx.UserId())
+	g.GroupRequestCache.Del(ctx.Ctx(), ctx.UserId())
 
 	return ctx.Success(resp)
 }
 
 func (g *GroupChatRequest) RequestUnreadNum(ctx *core.Context) error {
 	return ctx.Success(map[string]any{
-		"unread_num": g.GroupRequestStorage.Get(ctx.Ctx(), ctx.UserId()),
+		"unread_num": g.GroupRequestCache.Get(ctx.Ctx(), ctx.UserId()),
 	})
 }

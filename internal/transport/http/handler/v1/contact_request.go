@@ -53,16 +53,17 @@ func (c *ContactRequest) Accept(ctx *core.Context) error {
 	if err != nil {
 		return ctx.ErrorBusiness(err)
 	}
-	//err = ca.MessageUseCase.SendSystemText(ctx.Ctx(), applyInfo.UserId, &v1Pb.TextMessageRequest{
+
+	//if err := c.MessageUseCase.SendSystemText(ctx.Ctx(), applyInfo.UserId, &v1Pb.TextMessageRequest{
 	//	Content: "Теперь можете начать общаться",
 	//	Receiver: &v1Pb.MessageReceiver{
-	//		DialogType: domain.ChatPrivateMode,
+	//		DialogType: constant.ChatPrivateMode,
 	//		ReceiverId: int32(applyInfo.FriendId),
 	//	},
-	//})
-	//if err != nil {
+	//}); err != nil {
 	//	fmt.Println("ошибка", err.Error())
 	//}
+
 	return ctx.Success(&v1Pb.ContactRequestAcceptResponse{})
 }
 

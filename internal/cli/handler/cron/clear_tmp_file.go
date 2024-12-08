@@ -43,10 +43,10 @@ func (c *ClearTmpFile) Enable() bool {
 func (c *ClearTmpFile) Handle(ctx context.Context) error {
 	lastId, size := 0, 100
 	for {
-		items := make([]*model.Split, 0)
-		if err := c.DB.Model(&model.Split{}).
+		items := make([]*model.FileSplit, 0)
+		if err := c.DB.Model(&model.FileSplit{}).
 			Where("id > ? AND type = 1 AND drive = 1 AND created_at <= ?", lastId, time.Now().Add(-24*time.Hour)).
-			Order("id asc").
+			Order("id ASC").
 			Limit(size).
 			Scan(&items).
 			Error; err != nil {
@@ -54,14 +54,14 @@ func (c *ClearTmpFile) Handle(ctx context.Context) error {
 		}
 
 		for _, item := range items {
-			list := make([]*model.Split, 0)
+			list := make([]*model.FileSplit, 0)
 			c.DB.Table("splits").
 				Where("user_id = ? AND upload_id = ? AND type = 2", item.UserId, item.UploadId).
 				Scan(&list)
 
 			for _, value := range list {
 				_ = c.Minio.Delete(c.Conf.Minio.GetBucket(), value.Path)
-				c.DB.Delete(model.Split{}, value.Id)
+				c.DB.Delete(model.FileSplit{}, value.Id)
 			}
 
 			if len(list) > 0 {
@@ -69,7 +69,7 @@ func (c *ClearTmpFile) Handle(ctx context.Context) error {
 			}
 
 			if err := c.Minio.Delete(c.Conf.Minio.GetBucket(), item.Path); err == nil {
-				c.DB.Delete(model.Split{}, item.Id)
+				c.DB.Delete(model.FileSplit{}, item.Id)
 			}
 		}
 

@@ -11,7 +11,7 @@ import (
 	"voo.su/pkg/response"
 )
 
-func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.JwtTokenStorage) *gin.Engine {
+func NewRouter(conf *config.Config, handler *handler.Handler, session *cache.JwtTokenCache) *gin.Engine {
 	router := gin.New()
 	src, err := os.OpenFile(conf.App.LogPath("http_access.log"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {

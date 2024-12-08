@@ -8,19 +8,19 @@ import (
 	"time"
 )
 
-type ContactRemark struct {
+type ContactRemarkCache struct {
 	Rds *redis.Client
 }
 
-func NewContactRemark(redis *redis.Client) *ContactRemark {
-	return &ContactRemark{Rds: redis}
+func NewContactRemarkCache(redis *redis.Client) *ContactRemarkCache {
+	return &ContactRemarkCache{Rds: redis}
 }
 
-func (c *ContactRemark) Get(ctx context.Context, uid int, fid int) string {
+func (c *ContactRemarkCache) Get(ctx context.Context, uid int, fid int) string {
 	return c.Rds.HGet(ctx, c.name(uid), fmt.Sprintf("%d", fid)).Val()
 }
 
-func (c *ContactRemark) MGet(ctx context.Context, uid int, fids []int) (map[int]string, error) {
+func (c *ContactRemarkCache) MGet(ctx context.Context, uid int, fids []int) (map[int]string, error) {
 	values := make([]string, 0, len(fids))
 	for _, value := range fids {
 		values = append(values, strconv.Itoa(value))
@@ -44,7 +44,7 @@ func (c *ContactRemark) MGet(ctx context.Context, uid int, fids []int) (map[int]
 	return remarks, nil
 }
 
-func (c *ContactRemark) Set(ctx context.Context, uid int, friendId int, value string) error {
+func (c *ContactRemarkCache) Set(ctx context.Context, uid int, friendId int, value string) error {
 	if c.Exist(ctx, uid) {
 		return c.Rds.HSet(ctx, c.name(uid), friendId, value).Err()
 	}
@@ -52,7 +52,7 @@ func (c *ContactRemark) Set(ctx context.Context, uid int, friendId int, value st
 	return nil
 }
 
-func (c *ContactRemark) MSet(ctx context.Context, uid int, values map[string]any) error {
+func (c *ContactRemarkCache) MSet(ctx context.Context, uid int, values map[string]any) error {
 	_, err := c.Rds.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.HSet(ctx, c.name(uid), values)
 		pipe.Expire(ctx, c.name(uid), 12*time.Hour)
@@ -62,10 +62,10 @@ func (c *ContactRemark) MSet(ctx context.Context, uid int, values map[string]any
 	return err
 }
 
-func (c *ContactRemark) Exist(ctx context.Context, uid int) bool {
+func (c *ContactRemarkCache) Exist(ctx context.Context, uid int) bool {
 	return c.Rds.Exists(ctx, c.name(uid)).Val() == 1
 }
 
-func (c *ContactRemark) name(uid int) string {
+func (c *ContactRemarkCache) name(uid int) string {
 	return fmt.Sprintf("im:contact:remark:uid_%d", uid)
 }

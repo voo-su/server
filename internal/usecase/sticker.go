@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 	"voo.su/pkg/minio"
@@ -11,13 +12,13 @@ import (
 )
 
 type StickerUseCase struct {
-	*repo.Source
+	*repository.Source
 	StickerRepo *repo.Sticker
 	IMinio      minio.IMinio
 }
 
 func NewStickerUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	stickerRepo *repo.Sticker,
 	minio minio.IMinio,
 ) *StickerUseCase {

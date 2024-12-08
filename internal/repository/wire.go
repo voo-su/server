@@ -6,8 +6,8 @@ import (
 )
 
 var ProviderSet = wire.NewSet(
+	NewSource,
 	repo.NewUserSession,
-	repo.NewSource,
 	repo.NewContact,
 	repo.NewContactFolder,
 	repo.NewGroupMember,

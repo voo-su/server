@@ -15,24 +15,24 @@ import (
 )
 
 type Sequence struct {
-	DB    *gorm.DB
-	Cache *cache.Sequence
+	DB            *gorm.DB
+	SequenceCache *cache.SequenceCache
 }
 
-func NewSequence(db *gorm.DB, cache *cache.Sequence) *Sequence {
-	return &Sequence{DB: db, Cache: cache}
+func NewSequence(db *gorm.DB, sequenceCache *cache.SequenceCache) *Sequence {
+	return &Sequence{DB: db, SequenceCache: sequenceCache}
 }
 
 func (s *Sequence) try(ctx context.Context, userId int, receiverId int) error {
-	result := s.Cache.Redis().TTL(ctx, s.Cache.Name(userId, receiverId)).Val()
+	result := s.SequenceCache.Redis().TTL(ctx, s.SequenceCache.Name(userId, receiverId)).Val()
 	if result == time.Duration(-2) {
-		lockName := fmt.Sprintf("%s_lock", s.Cache.Name(userId, receiverId))
-		isTrue := s.Cache.Redis().SetNX(ctx, lockName, 1, 10*time.Second).Val()
+		lockName := fmt.Sprintf("%s_lock", s.SequenceCache.Name(userId, receiverId))
+		isTrue := s.SequenceCache.Redis().SetNX(ctx, lockName, 1, 10*time.Second).Val()
 		if !isTrue {
 			return errors.New("слишком частые запросы")
 		}
 
-		defer s.Cache.Redis().Del(ctx, lockName)
+		defer s.SequenceCache.Redis().Del(ctx, lockName)
 
 		tx := s.DB.WithContext(ctx).Model(&model.Message{})
 		if userId == 0 {
@@ -51,12 +51,12 @@ func (s *Sequence) try(ctx context.Context, userId int, receiverId int) error {
 			return err
 		}
 
-		if err := s.Cache.Set(ctx, userId, receiverId, seq); err != nil {
+		if err := s.SequenceCache.Set(ctx, userId, receiverId, seq); err != nil {
 			logger.Errorf("Установка последовательности, ошибка: %s", err.Error())
 			return err
 		}
 	} else if result < time.Hour {
-		s.Cache.Redis().Expire(ctx, s.Cache.Name(userId, receiverId), 12*time.Hour)
+		s.SequenceCache.Redis().Expire(ctx, s.SequenceCache.Name(userId, receiverId), 12*time.Hour)
 	}
 
 	return nil
@@ -69,7 +69,7 @@ func (s *Sequence) Get(ctx context.Context, userId int, receiverId int) int64 {
 		log.Println("Ошибка получения последовательности: ", err.Error())
 	}
 
-	return s.Cache.Get(ctx, userId, receiverId)
+	return s.SequenceCache.Get(ctx, userId, receiverId)
 }
 
 func (s *Sequence) BatchGet(ctx context.Context, userId int, receiverId int, num int64) []int64 {
@@ -79,5 +79,5 @@ func (s *Sequence) BatchGet(ctx context.Context, userId int, receiverId int, num
 		log.Println("Ошибка пакетного получения последовательности: ", err.Error())
 	}
 
-	return s.Cache.BatchGet(ctx, userId, receiverId, num)
+	return s.SequenceCache.BatchGet(ctx, userId, receiverId, num)
 }

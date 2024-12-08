@@ -8,6 +8,7 @@ import (
 	"time"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
@@ -18,26 +19,26 @@ import (
 )
 
 type GroupChatUseCase struct {
-	*repo.Source
+	*repository.Source
 	GroupChatRepo *repo.GroupChat
 	MemberRepo    *repo.GroupChatMember
 	SequenceRepo  *repo.Sequence
-	Relation      *cache.Relation
+	RelationCache *cache.RelationCache
 }
 
 func NewGroupChatUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	groupChatRepo *repo.GroupChat,
 	memberRepo *repo.GroupChatMember,
 	sequenceRepo *repo.Sequence,
-	relation *cache.Relation,
+	relationCache *cache.RelationCache,
 ) *GroupChatUseCase {
 	return &GroupChatUseCase{
 		Source:        source,
 		GroupChatRepo: groupChatRepo,
 		MemberRepo:    memberRepo,
 		SequenceRepo:  sequenceRepo,
-		Relation:      relation,
+		RelationCache: relationCache,
 	}
 }
 
@@ -234,7 +235,7 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 		return err
 	}
 
-	g.Relation.DelGroupRelation(ctx, uid, groupId)
+	g.RelationCache.DelGroupRelation(ctx, uid, groupId)
 	g.Source.Redis().Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
 		"event": constant.SubEventGroupChatJoin,
 		"data": jsonutil.Encode(map[string]any{
@@ -470,7 +471,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 		return err
 	}
 
-	g.Relation.BatchDelGroupRelation(ctx, opt.MemberIds, opt.GroupId)
+	g.RelationCache.BatchDelGroupRelation(ctx, opt.MemberIds, opt.GroupId)
 
 	_, _ = g.Source.Redis().Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{

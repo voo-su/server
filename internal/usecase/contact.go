@@ -5,16 +5,17 @@ import (
 	"gorm.io/gorm"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/repo"
 )
 
 type ContactUseCase struct {
-	*repo.Source
+	*repository.Source
 	ContactRepo *repo.Contact
 }
 
 func NewContactUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	contactRepo *repo.Contact,
 ) *ContactUseCase {
 	return &ContactUseCase{
@@ -64,7 +65,9 @@ func (c *ContactUseCase) Delete(ctx context.Context, uid, friendId int) error {
 		if find.FolderId > 0 {
 			if err := tx.Table("contact_folders").
 				Where("id = ? AND user_id = ?", find.FolderId, uid).
-				Updates(map[string]any{"num": gorm.Expr("num - 1")}).
+				Updates(map[string]any{
+					"num": gorm.Expr("num - 1"),
+				}).
 				Error; err != nil {
 				return err
 			}

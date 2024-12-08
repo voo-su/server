@@ -19,14 +19,17 @@ func (c *ContactFolder) List(ctx *core.Context) error {
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
+
 	items = append(items, &v1Pb.ContactFolderListResponse_Item{
 		Name:  "Все",
 		Count: int32(count),
 	})
+
 	group, err := c.ContactFolderUseCase.GetUserGroup(ctx.Ctx(), uid)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
+
 	for _, v := range group {
 		items = append(items, &v1Pb.ContactFolderListResponse_Item{
 			Id:    int32(v.Id),
@@ -87,8 +90,7 @@ func (c *ContactFolder) Save(ctx *core.Context) error {
 		}
 
 		if len(deleteItems) > 0 {
-			err := tx.Delete(model.ContactFolder{}, "id in (?) AND user_id = ?", deleteItems, uid).Error
-			if err != nil {
+			if err := tx.Delete(model.ContactFolder{}, "id in (?) AND user_id = ?", deleteItems, uid).Error; err != nil {
 				return err
 			}
 			tx.Table("contacts").
@@ -123,8 +125,7 @@ func (c *ContactFolder) Move(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	err := c.ContactFolderUseCase.MoveGroup(ctx.Ctx(), ctx.UserId(), int(params.UserId), int(params.FolderId))
-	if err != nil {
+	if err := c.ContactFolderUseCase.MoveGroup(ctx.Ctx(), ctx.UserId(), int(params.UserId), int(params.FolderId)); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
 

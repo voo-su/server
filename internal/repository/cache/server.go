@@ -13,15 +13,15 @@ const (
 	ServerOverTime  = 50
 )
 
-type ServerStorage struct {
+type ServerCache struct {
 	Rds *redis.Client
 }
 
-func NewSidStorage(rds *redis.Client) *ServerStorage {
-	return &ServerStorage{Rds: rds}
+func NewServerCache(rds *redis.Client) *ServerCache {
+	return &ServerCache{Rds: rds}
 }
 
-func (s *ServerStorage) Set(ctx context.Context, server string, time int64) error {
+func (s *ServerCache) Set(ctx context.Context, server string, time int64) error {
 	_, err := s.Rds.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.SRem(ctx, ServerKeyExpire, server)
 		pipe.HSet(ctx, ServerKey, server, time)
@@ -30,11 +30,11 @@ func (s *ServerStorage) Set(ctx context.Context, server string, time int64) erro
 	return err
 }
 
-func (s *ServerStorage) Del(ctx context.Context, server string) error {
+func (s *ServerCache) Del(ctx context.Context, server string) error {
 	return s.Rds.HDel(ctx, ServerKey, server).Err()
 }
 
-func (s *ServerStorage) All(ctx context.Context, status int) []string {
+func (s *ServerCache) All(ctx context.Context, status int) []string {
 	var (
 		unix  = time.Now().Unix()
 		slice = make([]string, 0)
@@ -64,18 +64,18 @@ func (s *ServerStorage) All(ctx context.Context, status int) []string {
 	return slice
 }
 
-func (s *ServerStorage) SetExpireServer(ctx context.Context, server string) error {
+func (s *ServerCache) SetExpireServer(ctx context.Context, server string) error {
 	return s.Rds.SAdd(ctx, ServerKeyExpire, server).Err()
 }
 
-func (s *ServerStorage) DelExpireServer(ctx context.Context, server string) error {
+func (s *ServerCache) DelExpireServer(ctx context.Context, server string) error {
 	return s.Rds.SRem(ctx, ServerKeyExpire, server).Err()
 }
 
-func (s *ServerStorage) GetExpireServerAll(ctx context.Context) []string {
+func (s *ServerCache) GetExpireServerAll(ctx context.Context) []string {
 	return s.Rds.SMembers(ctx, ServerKeyExpire).Val()
 }
 
-func (s *ServerStorage) Redis() *redis.Client {
+func (s *ServerCache) Redis() *redis.Client {
 	return s.Rds
 }

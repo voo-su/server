@@ -7,19 +7,19 @@ import (
 	"fmt"
 	"strings"
 	"voo.su/internal/config"
-	"voo.su/internal/repository/repo"
+	"voo.su/internal/repository"
 	"voo.su/pkg/client"
 	"voo.su/pkg/sliceutil"
 )
 
 type IpAddressUseCase struct {
-	*repo.Source
+	*repository.Source
 	Config     *config.Config
 	HttpClient *client.RequestClient
 }
 
 func NewIpAddressUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	conf *config.Config,
 	httpClient *client.RequestClient,
 ) *IpAddressUseCase {
@@ -62,7 +62,9 @@ func (i *IpAddressUseCase) FindAddress(ip string) (string, error) {
 	arr := []string{data.Country, data.Province, data.City, data.Isp}
 	val := strings.Join(sliceutil.Unique(arr), " ")
 	val = strings.TrimSpace(val)
-	_ = i.setCache(ip, val)
+	if err := i.setCache(ip, val); err != nil {
+		fmt.Println(err)
+	}
 
 	return val, nil
 }

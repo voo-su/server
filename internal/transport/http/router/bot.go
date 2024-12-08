@@ -8,7 +8,7 @@ import (
 	"voo.su/pkg/core"
 )
 
-func NewBot(router *gin.Engine, conf *config.Config, handler *handler.Handler, session *cache.JwtTokenStorage) {
+func NewBot(router *gin.Engine, conf *config.Config, handler *handler.Handler, session *cache.JwtTokenCache) {
 	bot := router.Group("/bot/:token")
 	{
 		bot.GET("/group-chats", core.HandlerFunc(handler.Bot.Message.GroupChats))

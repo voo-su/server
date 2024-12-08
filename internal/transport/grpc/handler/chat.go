@@ -18,23 +18,23 @@ type ChatHandler struct {
 	ContactUseCase *usecase.ContactUseCase
 	ChatUseCase    *usecase.ChatUseCase
 	MessageUseCase usecase.IMessageUseCase
-	MessageStorage *cache.MessageStorage
-	UnreadStorage  *cache.UnreadStorage
+	MessageCache   *cache.MessageCache
+	UnreadCache    *cache.UnreadCache
 }
 
 func NewChatHandler(
 	conf *config.Config,
 	contactUseCase *usecase.ContactUseCase,
 	chatUseCase *usecase.ChatUseCase,
-	messageStorage *cache.MessageStorage,
-	unreadStorage *cache.UnreadStorage,
+	messageCache *cache.MessageCache,
+	unreadCache *cache.UnreadCache,
 ) *ChatHandler {
 	return &ChatHandler{
 		Conf:           conf,
 		ContactUseCase: contactUseCase,
 		ChatUseCase:    chatUseCase,
-		MessageStorage: messageStorage,
-		UnreadStorage:  unreadStorage,
+		MessageCache:   messageCache,
+		UnreadCache:    unreadCache,
 	}
 }
 
@@ -43,7 +43,7 @@ func (c *ChatHandler) List(ctx context.Context, in *chatPb.GetChatListRequest) (
 	// TODO
 	uid := 1
 
-	unReads := c.UnreadStorage.All(ctx, uid)
+	unReads := c.UnreadCache.All(ctx, uid)
 	if len(unReads) > 0 {
 		c.ChatUseCase.BatchAddList(ctx, uid, unReads)
 	}
@@ -77,7 +77,7 @@ func (c *ChatHandler) List(ctx context.Context, in *chatPb.GetChatListRequest) (
 			value.Avatar = item.GroupAvatar
 		}
 
-		if msg, err := c.MessageStorage.Get(ctx, item.DialogType, uid, item.ReceiverId); err == nil {
+		if msg, err := c.MessageCache.Get(ctx, item.DialogType, uid, item.ReceiverId); err == nil {
 			value.MsgText = msg.Content
 			value.UpdatedAt = msg.Datetime
 		}

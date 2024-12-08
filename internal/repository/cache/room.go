@@ -9,8 +9,12 @@ import (
 	"voo.su/internal/constant"
 )
 
-type RoomStorage struct {
+type RoomCache struct {
 	Rds *redis.Client
+}
+
+func NewRoomCache(redis *redis.Client) *RoomCache {
+	return &RoomCache{Rds: redis}
 }
 
 type RoomOption struct {
@@ -21,11 +25,7 @@ type RoomOption struct {
 	Cid      int64
 }
 
-func NewRoomStorage(redis *redis.Client) *RoomStorage {
-	return &RoomStorage{Rds: redis}
-}
-
-func (r *RoomStorage) Add(ctx context.Context, opt *RoomOption) error {
+func (r *RoomCache) Add(ctx context.Context, opt *RoomOption) error {
 	key := r.name(opt)
 	err := r.Rds.SAdd(ctx, key, opt.Cid).Err()
 	if err == nil {
@@ -35,7 +35,7 @@ func (r *RoomStorage) Add(ctx context.Context, opt *RoomOption) error {
 	return err
 }
 
-func (r *RoomStorage) BatchAdd(ctx context.Context, opts []*RoomOption) error {
+func (r *RoomCache) BatchAdd(ctx context.Context, opts []*RoomOption) error {
 	pipeline := r.Rds.Pipeline()
 	for _, opt := range opts {
 		key := r.name(opt)
@@ -48,11 +48,11 @@ func (r *RoomStorage) BatchAdd(ctx context.Context, opts []*RoomOption) error {
 	return err
 }
 
-func (r *RoomStorage) Del(ctx context.Context, opt *RoomOption) error {
+func (r *RoomCache) Del(ctx context.Context, opt *RoomOption) error {
 	return r.Rds.SRem(ctx, r.name(opt), opt.Cid).Err()
 }
 
-func (r *RoomStorage) BatchDel(ctx context.Context, opts []*RoomOption) error {
+func (r *RoomCache) BatchDel(ctx context.Context, opts []*RoomOption) error {
 	pipeline := r.Rds.Pipeline()
 	for _, opt := range opts {
 		pipeline.SRem(ctx, r.name(opt), opt.Cid)
@@ -62,7 +62,7 @@ func (r *RoomStorage) BatchDel(ctx context.Context, opts []*RoomOption) error {
 	return err
 }
 
-func (r *RoomStorage) All(ctx context.Context, opt *RoomOption) []int64 {
+func (r *RoomCache) All(ctx context.Context, opt *RoomOption) []int64 {
 	arr := r.Rds.SMembers(ctx, r.name(opt)).Val()
 	cids := make([]int64, 0, len(arr))
 	for _, val := range arr {
@@ -74,6 +74,6 @@ func (r *RoomStorage) All(ctx context.Context, opt *RoomOption) []int64 {
 	return cids
 }
 
-func (r *RoomStorage) name(opt *RoomOption) string {
+func (r *RoomCache) name(opt *RoomOption) string {
 	return fmt.Sprintf("ws:%s:%s:%s", opt.Sid, opt.RoomType, opt.Number)
 }

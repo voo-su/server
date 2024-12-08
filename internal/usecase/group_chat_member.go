@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"gorm.io/gorm"
+	"voo.su/internal/repository"
 	groupChat "voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 )
@@ -16,12 +17,12 @@ type IGroupChatMemberUseCase interface {
 var _ IGroupChatMemberUseCase = (*GroupChatMemberUseCase)(nil)
 
 type GroupChatMemberUseCase struct {
-	*repo.Source
+	*repository.Source
 	MemberRepo *repo.GroupChatMember
 }
 
 func NewGroupMemberUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	memberRepo *repo.GroupChatMember,
 ) *GroupChatMemberUseCase {
 	return &GroupChatMemberUseCase{

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"voo.su/internal/constant"
-	"voo.su/internal/repository/model"
+	model2 "voo.su/internal/repository/model"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/socket"
@@ -27,7 +27,7 @@ func (h *Handler) onConsumeContactStatus(ctx context.Context, body []byte) {
 
 	clientIds := make([]int64, 0)
 	for _, uid := range sliceutil.Unique(contactIds) {
-		ids := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.FormatInt(uid, 10))
+		ids := h.ClientCache.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.FormatInt(uid, 10))
 		if len(ids) > 0 {
 			clientIds = append(clientIds, ids...)
 		}
@@ -54,17 +54,17 @@ func (h *Handler) onConsumeContactApply(ctx context.Context, body []byte) {
 		return
 	}
 
-	var apply model.ContactRequest
+	var apply model2.ContactRequest
 	if err := h.ContactUseCase.Db().First(&apply, in.ApplyId).Error; err != nil {
 		return
 	}
 
-	clientIds := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(apply.FriendId))
+	clientIds := h.ClientCache.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(apply.FriendId))
 	if len(clientIds) == 0 {
 		return
 	}
 
-	var user model.User
+	var user model2.User
 	if err := h.ContactUseCase.Db().First(&user, apply.FriendId).Error; err != nil {
 		return
 	}

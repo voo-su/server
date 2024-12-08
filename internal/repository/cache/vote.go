@@ -13,15 +13,15 @@ const (
 	VoteStatisticCache = "dialog:vote:statistic:%d"
 )
 
-type Vote struct {
+type VoteCache struct {
 	Rds *redis.Client
 }
 
-func NewVote(rds *redis.Client) *Vote {
-	return &Vote{Rds: rds}
+func NewVoteCache(rds *redis.Client) *VoteCache {
+	return &VoteCache{Rds: rds}
 }
 
-func (v *Vote) GetVoteAnswerUser(ctx context.Context, voteId int) ([]int, error) {
+func (v *VoteCache) GetVoteAnswerUser(ctx context.Context, voteId int) ([]int, error) {
 	val, err := v.Rds.Get(ctx, fmt.Sprintf(VoteUsersCache, voteId)).Result()
 	if err != nil {
 		return nil, err
@@ -35,14 +35,14 @@ func (v *Vote) GetVoteAnswerUser(ctx context.Context, voteId int) ([]int, error)
 	return ids, nil
 }
 
-func (v *Vote) SetVoteAnswerUser(ctx context.Context, vid int, uids []int) error {
+func (v *VoteCache) SetVoteAnswerUser(ctx context.Context, vid int, uids []int) error {
 	return v.Rds.Set(ctx, fmt.Sprintf(VoteUsersCache, vid), jsonutil.Encode(uids), time.Hour*24).Err()
 }
 
-func (v *Vote) GetVoteStatistics(ctx context.Context, vid int) (string, error) {
+func (v *VoteCache) GetVoteStatistics(ctx context.Context, vid int) (string, error) {
 	return v.Rds.Get(ctx, fmt.Sprintf(VoteStatisticCache, vid)).Result()
 }
 
-func (v *Vote) SetVoteStatistics(ctx context.Context, vid int, value string) error {
+func (v *VoteCache) SetVoteStatistics(ctx context.Context, vid int, value string) error {
 	return v.Rds.Set(ctx, fmt.Sprintf(VoteStatisticCache, vid), value, time.Hour*24).Err()
 }

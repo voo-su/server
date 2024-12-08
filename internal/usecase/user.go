@@ -4,19 +4,20 @@ import (
 	"context"
 	"log"
 	"voo.su/internal/domain/entity"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 )
 
 type UserUseCase struct {
-	*repo.Source
+	*repository.Source
 	UserRepo        *repo.User
 	UserSessionRepo *repo.UserSession
 	PushTokenRepo   *repo.PushToken
 }
 
 func NewUserUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	userRepo *repo.User,
 	userSessionRepo *repo.UserSession,
 	pushTokenRepo *repo.PushToken,

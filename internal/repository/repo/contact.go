@@ -12,27 +12,31 @@ import (
 
 type Contact struct {
 	repo.Repo[model.Contact]
-	Cache    *cache.ContactRemark
-	Relation *cache.Relation
+	ContactRemarkCache *cache.ContactRemarkCache
+	RelationCache      *cache.RelationCache
 }
 
-func NewContact(db *gorm.DB, cache *cache.ContactRemark, relation *cache.Relation) *Contact {
+func NewContact(
+	db *gorm.DB,
+	contactRemarkCache *cache.ContactRemarkCache,
+	relation *cache.RelationCache,
+) *Contact {
 	return &Contact{
-		Repo:     repo.NewRepo[model.Contact](db),
-		Cache:    cache,
-		Relation: relation,
+		Repo:               repo.NewRepo[model.Contact](db),
+		ContactRemarkCache: contactRemarkCache,
+		RelationCache:      relation,
 	}
 }
 
 func (c *Contact) Remarks(ctx context.Context, uid int, fids []int) (map[int]string, error) {
-	if !c.Cache.Exist(ctx, uid) {
+	if !c.ContactRemarkCache.Exist(ctx, uid) {
 		_ = c.LoadContactCache(ctx, uid)
 	}
-	return c.Cache.MGet(ctx, uid, fids)
+	return c.ContactRemarkCache.MGet(ctx, uid, fids)
 }
 
 func (c *Contact) IsFriend(ctx context.Context, uid int, friendId int, cache bool) bool {
-	if cache && c.Relation.IsContactRelation(ctx, uid, friendId) == nil {
+	if cache && c.RelationCache.IsContactRelation(ctx, uid, friendId) == nil {
 		return true
 	}
 	count, err := c.Repo.QueryCount(ctx, "((user_id = ? AND friend_id = ?) or (user_id = ? AND friend_id = ?)) AND status = ?", uid, friendId, friendId, uid, constant.ContactStatusNormal)
@@ -41,17 +45,17 @@ func (c *Contact) IsFriend(ctx context.Context, uid int, friendId int, cache boo
 	}
 
 	if count == 2 {
-		c.Relation.SetContactRelation(ctx, uid, friendId)
+		c.RelationCache.SetContactRelation(ctx, uid, friendId)
 	} else {
-		c.Relation.DelContactRelation(ctx, uid, friendId)
+		c.RelationCache.DelContactRelation(ctx, uid, friendId)
 	}
 
 	return count == 2
 }
 
 func (c *Contact) GetFriendRemark(ctx context.Context, uid int, friendId int) string {
-	if c.Cache.Exist(ctx, uid) {
-		return c.Cache.Get(ctx, uid, friendId)
+	if c.ContactRemarkCache.Exist(ctx, uid) {
+		return c.ContactRemarkCache.Get(ctx, uid, friendId)
 	}
 
 	var remark string
@@ -61,7 +65,7 @@ func (c *Contact) GetFriendRemark(ctx context.Context, uid int, friendId int) st
 }
 
 func (c *Contact) SetFriendRemark(ctx context.Context, uid int, friendId int, remark string) error {
-	return c.Cache.Set(ctx, uid, friendId, remark)
+	return c.ContactRemarkCache.Set(ctx, uid, friendId, remark)
 }
 
 func (c *Contact) LoadContactCache(ctx context.Context, uid int) error {
@@ -79,5 +83,5 @@ func (c *Contact) LoadContactCache(ctx context.Context, uid int) error {
 		}
 	}
 
-	return c.Cache.MSet(ctx, uid, items)
+	return c.ContactRemarkCache.MSet(ctx, uid, items)
 }

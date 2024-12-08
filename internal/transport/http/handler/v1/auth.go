@@ -17,8 +17,8 @@ import (
 type Auth struct {
 	Conf             *config.Config
 	AuthUseCase      *usecase.AuthUseCase
-	JwtTokenStorage  *cache.JwtTokenStorage
-	RedisLock        *cache.RedisLock
+	JwtTokenCache    *cache.JwtTokenCache
+	RedisLockCache   *cache.RedisLockCache
 	IpAddressUseCase *usecase.IpAddressUseCase
 	ChatUseCase      *usecase.ChatUseCase
 	BotUseCase       *usecase.BotUseCase
@@ -73,27 +73,38 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		return ctx.ErrorBusiness(err.Error())
 	}
 
-	a.AuthUseCase.Delete(ctx.Ctx(), constant.LoginChannel, params.Token)
+	if err := a.AuthUseCase.Delete(ctx.Ctx(), constant.LoginChannel, params.Token); err != nil {
+		fmt.Println(err)
+	}
 
 	ip := ctx.Context.ClientIP()
-	root, _ := a.BotUseCase.BotRepo.GetLoginBot(ctx.Ctx())
-	if root != nil {
+	bot, err := a.BotUseCase.BotRepo.GetLoginBot(ctx.Ctx())
+	if err != nil {
+		fmt.Println(err)
+	}
+	if bot != nil {
 		address, err := a.IpAddressUseCase.FindAddress(ip)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		_, _ = a.ChatUseCase.Create(ctx.Ctx(), &usecase.CreateChatOpt{
+		_, err = a.ChatUseCase.Create(ctx.Ctx(), &usecase.CreateChatOpt{
 			UserId:     user.Id,
 			DialogType: constant.ChatPrivateMode,
-			ReceiverId: root.UserId,
+			ReceiverId: bot.UserId,
 			IsBoot:     true,
 		})
-		_ = a.MessageUseCase.SendLogin(ctx.Ctx(), user.Id, &usecase.SendLogin{
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		if err := a.MessageUseCase.SendLogin(ctx.Ctx(), user.Id, &usecase.SendLogin{
 			Ip:      ip,
 			Agent:   ctx.Context.GetHeader("user-agent"),
 			Address: address,
-		})
+		}); err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
@@ -104,14 +115,13 @@ func (a *Auth) Verify(ctx *core.Context) error {
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	})
 
-	_err := a.UserUseCase.UserSessionRepo.Create(ctx.Ctx(), &model.UserSession{
+	if err := a.UserUseCase.UserSessionRepo.Create(ctx.Ctx(), &model.UserSession{
 		UserId:      user.Id,
 		AccessToken: token,
 		UserIp:      ip,
 		UserAgent:   ctx.Context.GetHeader("user-agent"),
-	})
-	if _err != nil {
-		fmt.Println(_err)
+	}); err != nil {
+		fmt.Println(err)
 	}
 
 	return ctx.Success(&v1Pb.AuthVerifyResponse{
@@ -125,7 +135,7 @@ func (a *Auth) Logout(ctx *core.Context) error {
 	session := ctx.JwtSession()
 	if session != nil {
 		if ex := session.ExpiresAt - time.Now().Unix(); ex > 0 {
-			_ = a.JwtTokenStorage.SetBlackList(ctx.Ctx(), session.Token, time.Duration(ex)*time.Second)
+			_ = a.JwtTokenCache.SetBlackList(ctx.Ctx(), session.Token, time.Duration(ex)*time.Second)
 		}
 	}
 

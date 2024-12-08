@@ -18,6 +18,7 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/domain/logic"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
@@ -55,21 +56,21 @@ type IMessageUseCase interface {
 var _ IMessageUseCase = (*MessageUseCase)(nil)
 
 type MessageUseCase struct {
-	*repo.Source
+	*repository.Source
 	Conf                *config.Config
 	MessageForwardLogic *logic.MessageForwardLogic
 	Minio               minio.IMinio
 	GroupChatMemberRepo *repo.GroupChatMember
-	SplitRepo           *repo.Split
+	FileSplitRepo       *repo.FileSplit
 	MessageVoteRepo     *repo.MessageVote
 	Sequence            *repo.Sequence
 	MessageRepo         *repo.Message
 	BotRepo             *repo.Bot
-	UnreadStorage       *cache.UnreadStorage
-	MessageStorage      *cache.MessageStorage
-	ServerStorage       *cache.ServerStorage
-	ClientStorage       *cache.ClientStorage
-	DialogVoteCache     *cache.Vote
+	UnreadCache         *cache.UnreadCache
+	MessageCache        *cache.MessageCache
+	ServerCache         *cache.ServerCache
+	ClientCache         *cache.ClientCache
+	DialogVoteCache     *cache.VoteCache
 	Nats                nats.INatsClient
 }
 
@@ -249,15 +250,15 @@ func (m *MessageUseCase) GetForwardRecords(ctx context.Context, uid int, recordI
 			"messages.extra",
 			"messages.created_at",
 			"users.username",
-			"users.avatar as avatar",
+			"users.avatar AS avatar",
 		}
 	)
-	query := m.Source.Db().Table("messages")
-	query.Select(fields)
-	query.Joins("LEFT JOIN users on messages.user_id = users.id")
-	query.Where("messages.id in ?", extra.MsgIds)
-	query.Order("messages.sequence asc")
-	if err := query.Scan(&items).Error; err != nil {
+	tx := m.Source.Db().Table("messages").
+		Select(fields).
+		Joins("LEFT JOIN users ON messages.user_id = users.id").
+		Where("messages.id IN ?", extra.MsgIds).
+		Order("messages.sequence ASC")
+	if err := tx.Scan(&items).Error; err != nil {
 		return nil, err
 	}
 
@@ -486,7 +487,7 @@ type SendFile struct {
 }
 
 func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *SendFile) error {
-	file, err := m.SplitRepo.GetFile(ctx, uid, req.UploadId)
+	file, err := m.FileSplitRepo.GetFile(ctx, uid, req.UploadId)
 	if err != nil {
 		return err
 	}
@@ -634,16 +635,16 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 
 	for _, record := range items {
 		if record.DialogType == constant.ChatPrivateMode {
-			m.UnreadStorage.Incr(ctx, constant.ChatPrivateMode, uid, record.ReceiverId)
+			m.UnreadCache.Incr(ctx, constant.ChatPrivateMode, uid, record.ReceiverId)
 		} else if record.DialogType == constant.ChatGroupMode {
 			pipe := m.Source.Redis().Pipeline()
 			for _, uid := range m.GroupChatMemberRepo.GetMemberIds(ctx, record.ReceiverId) {
-				m.UnreadStorage.PipeIncr(ctx, pipe, constant.ChatGroupMode, record.ReceiverId, uid)
+				m.UnreadCache.PipeIncr(ctx, pipe, constant.ChatGroupMode, record.ReceiverId, uid)
 			}
 			_, _ = pipe.Exec(ctx)
 		}
 
-		_ = m.MessageStorage.Set(ctx, record.DialogType, uid, record.ReceiverId, &cache.LastCacheMessage{
+		_ = m.MessageCache.Set(ctx, record.DialogType, uid, record.ReceiverId, &cache.LastCacheMessage{
 			Content:  "Пересланное сообщение",
 			Datetime: timeutil.DateTime(),
 		})
@@ -715,7 +716,7 @@ func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) erro
 		return err
 	}
 
-	_ = m.MessageStorage.Set(ctx, record.DialogType, record.UserId, record.ReceiverId, &cache.LastCacheMessage{
+	_ = m.MessageCache.Set(ctx, record.DialogType, record.UserId, record.ReceiverId, &cache.LastCacheMessage{
 		Content:  "Данное сообщение удалено",
 		Datetime: timeutil.DateTime(),
 	})
@@ -902,22 +903,22 @@ func (m *MessageUseCase) loadSequence(ctx context.Context, data *model.Message) 
 
 func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message, opt map[string]string) {
 	if record.DialogType == constant.ChatPrivateMode {
-		m.UnreadStorage.Incr(ctx, constant.ChatPrivateMode, record.UserId, record.ReceiverId)
+		m.UnreadCache.Incr(ctx, constant.ChatPrivateMode, record.UserId, record.ReceiverId)
 		if record.MsgType == constant.ChatMsgSysText {
-			m.UnreadStorage.Incr(ctx, 1, record.ReceiverId, record.UserId)
+			m.UnreadCache.Incr(ctx, 1, record.ReceiverId, record.UserId)
 		}
 	} else if record.DialogType == constant.ChatGroupMode {
 		pipe := m.Source.Redis().Pipeline()
 		for _, uid := range m.GroupChatMemberRepo.GetMemberIds(ctx, record.ReceiverId) {
 			if uid != record.UserId {
-				m.UnreadStorage.PipeIncr(ctx, pipe, constant.ChatGroupMode, record.ReceiverId, uid)
+				m.UnreadCache.PipeIncr(ctx, pipe, constant.ChatGroupMode, record.ReceiverId, uid)
 			}
 		}
 
 		_, _ = pipe.Exec(ctx)
 	}
 
-	_ = m.MessageStorage.Set(ctx, record.DialogType, record.UserId, record.ReceiverId, &cache.LastCacheMessage{
+	_ = m.MessageCache.Set(ctx, record.DialogType, record.UserId, record.ReceiverId, &cache.LastCacheMessage{
 		Content:  opt["text"],
 		Datetime: timeutil.DateTime(),
 	})
@@ -933,12 +934,12 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *model.Message,
 	})
 
 	if record.DialogType == constant.ChatPrivateMode {
-		sids := m.ServerStorage.All(ctx, 1)
+		sids := m.ServerCache.All(ctx, 1)
 		if len(sids) > 3 {
 			pipe := m.Source.Redis().Pipeline()
 			for _, sid := range sids {
 				for _, uid := range []int{record.UserId, record.ReceiverId} {
-					if !m.ClientStorage.IsCurrentServerOnline(ctx, sid, constant.ImChannelChat, strconv.Itoa(uid)) {
+					if !m.ClientCache.IsCurrentServerOnline(ctx, sid, constant.ImChannelChat, strconv.Itoa(uid)) {
 						continue
 					}
 

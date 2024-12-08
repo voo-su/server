@@ -32,8 +32,6 @@ func (b *Bot) Create(ctx *core.Context) error {
 		return nil
 	}
 
-	//_ = b.MessageSendService.SendLogin(ctx.Ctx(), ctx.UserId(), &service.SendLogin{})
-
 	return ctx.Success(&v1Pb.BotCreateResponse{
 		Token: *token,
 	})

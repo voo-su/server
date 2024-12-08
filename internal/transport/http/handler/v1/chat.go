@@ -15,16 +15,16 @@ import (
 )
 
 type Chat struct {
-	ChatUseCase      *usecase.ChatUseCase
-	RedisLock        *cache.RedisLock
-	ClientStorage    *cache.ClientStorage
-	MessageStorage   *cache.MessageStorage
-	ContactUseCase   *usecase.ContactUseCase
-	UnreadStorage    *cache.UnreadStorage
-	ContactRemark    *cache.ContactRemark
-	GroupChatUseCase *usecase.GroupChatUseCase
-	AuthUseCase      *usecase.AuthUseCase
-	UserUseCase      *usecase.UserUseCase
+	ChatUseCase        *usecase.ChatUseCase
+	RedisLock          *cache.RedisLockCache
+	ClientCache        *cache.ClientCache
+	MessageCache       *cache.MessageCache
+	ContactUseCase     *usecase.ContactUseCase
+	UnreadCache        *cache.UnreadCache
+	ContactRemarkCache *cache.ContactRemarkCache
+	GroupChatUseCase   *usecase.GroupChatUseCase
+	AuthUseCase        *usecase.AuthUseCase
+	UserUseCase        *usecase.UserUseCase
 }
 
 func (c *Chat) Create(ctx *core.Context) error {
@@ -75,7 +75,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 		UpdatedAt:  timeutil.DateTime(),
 	}
 	if item.DialogType == constant.ChatPrivateMode {
-		item.UnreadNum = int32(c.UnreadStorage.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
+		item.UnreadNum = int32(c.UnreadCache.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
 		item.Remark = c.ContactUseCase.ContactRepo.GetFriendRemark(ctx.Ctx(), uid, int(params.ReceiverId))
 		if user, err := c.UserUseCase.UserRepo.FindById(ctx.Ctx(), result.ReceiverId); err == nil {
 			item.Username = user.Username
@@ -89,7 +89,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 		}
 	}
 
-	if msg, err := c.MessageStorage.Get(ctx.Ctx(), result.DialogType, uid, result.ReceiverId); err == nil {
+	if msg, err := c.MessageCache.Get(ctx.Ctx(), result.DialogType, uid, result.ReceiverId); err == nil {
 		item.MsgText = msg.Content
 		item.UpdatedAt = msg.Datetime
 	}
@@ -115,7 +115,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 
 func (c *Chat) List(ctx *core.Context) error {
 	uid := ctx.UserId()
-	unReads := c.UnreadStorage.All(ctx.Ctx(), uid)
+	unReads := c.UnreadCache.All(ctx.Ctx(), uid)
 	if len(unReads) > 0 {
 		c.ChatUseCase.BatchAddList(ctx.Ctx(), uid, unReads)
 	}
@@ -164,13 +164,13 @@ func (c *Chat) List(ctx *core.Context) error {
 			//}
 			value.Surname = item.Surname
 			value.Remark = remarks[item.ReceiverId]
-			value.IsOnline = int32(strutil.BoolToInt(c.ClientStorage.IsOnline(ctx.Ctx(), constant.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))))
+			value.IsOnline = int32(strutil.BoolToInt(c.ClientCache.IsOnline(ctx.Ctx(), constant.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))))
 		} else {
 			value.Name = item.GroupName
 			value.Avatar = item.GroupAvatar
 		}
 
-		if msg, err := c.MessageStorage.Get(ctx.Ctx(), item.DialogType, uid, item.ReceiverId); err == nil {
+		if msg, err := c.MessageCache.Get(ctx.Ctx(), item.DialogType, uid, item.ReceiverId); err == nil {
 			value.MsgText = msg.Content
 			value.UpdatedAt = msg.Datetime
 		}
@@ -199,7 +199,7 @@ func (c *Chat) ClearUnreadMessage(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	c.UnreadStorage.Reset(ctx.Ctx(), int(params.DialogType), int(params.ReceiverId), ctx.UserId())
+	c.UnreadCache.Reset(ctx.Ctx(), int(params.DialogType), int(params.ReceiverId), ctx.UserId())
 
 	return ctx.Success(&v1Pb.ChatClearUnreadNumResponse{})
 }

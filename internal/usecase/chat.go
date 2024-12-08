@@ -9,6 +9,7 @@ import (
 	"time"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 	"voo.su/pkg/jsonutil"
@@ -18,13 +19,13 @@ import (
 )
 
 type ChatUseCase struct {
-	*repo.Source
+	*repository.Source
 	ChatRepo            *repo.Chat
 	GroupChatMemberRepo *repo.GroupChatMember
 }
 
 func NewChatUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	chatRepo *repo.Chat,
 	groupChatMemberRepo *repo.GroupChatMember,
 ) *ChatUseCase {

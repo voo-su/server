@@ -20,7 +20,7 @@ import (
 )
 
 type AuthUseCase struct {
-	SmsStorage      *cache.SmsStorage
+	SmsCache        *cache.SmsCache
 	ContactRepo     *repo.Contact
 	GroupChatMember *repo.GroupChatMember
 	GroupChat       *repo.GroupChat
@@ -30,7 +30,7 @@ type AuthUseCase struct {
 }
 
 func NewAuthUseCase(
-	smsStorage *cache.SmsStorage,
+	smsCache *cache.SmsCache,
 	contactRepo *repo.Contact,
 	groupChatMember *repo.GroupChatMember,
 	groupChat *repo.GroupChat,
@@ -39,7 +39,7 @@ func NewAuthUseCase(
 	repo *repo.User,
 ) *AuthUseCase {
 	return &AuthUseCase{
-		SmsStorage:      smsStorage,
+		SmsCache:        smsCache,
 		ContactRepo:     contactRepo,
 		GroupChatMember: groupChatMember,
 		GroupChat:       groupChat,
@@ -106,16 +106,16 @@ func (a *AuthUseCase) CodeTemplate(data map[string]string) (string, error) {
 }
 
 func (a *AuthUseCase) Verify(ctx context.Context, channel string, token string, code string) bool {
-	return a.SmsStorage.Verify(ctx, channel, token, code)
+	return a.SmsCache.Verify(ctx, channel, token, code)
 }
 
-func (a *AuthUseCase) Delete(ctx context.Context, channel string, token string) {
-	_ = a.SmsStorage.Del(ctx, channel, token)
+func (a *AuthUseCase) Delete(ctx context.Context, channel string, token string) error {
+	return a.SmsCache.Del(ctx, channel, token)
 }
 
 func (a *AuthUseCase) Send(ctx context.Context, channel string, _email string, token string) error {
 	code := strutil.GenValidateCode(6)
-	if err := a.SmsStorage.Set(ctx, channel, token, code, 15*time.Minute); err != nil {
+	if err := a.SmsCache.Set(ctx, channel, token, code, 15*time.Minute); err != nil {
 		return err
 	}
 
@@ -130,11 +130,13 @@ func (a *AuthUseCase) Send(ctx context.Context, channel string, _email string, t
 		return err
 	}
 
-	_ = a.Email.SendMail(&email.Option{
+	if err := a.Email.SendMail(&email.Option{
 		To:      _email,
 		Subject: "Добро пожаловать",
 		Body:    body,
-	})
+	}); err != nil {
+		fmt.Println(err)
+	}
 
 	return nil
 }

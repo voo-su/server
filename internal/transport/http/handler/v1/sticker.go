@@ -19,7 +19,7 @@ type Sticker struct {
 	Conf           *config.Config
 	StickerUseCase *usecase.StickerUseCase
 	Minio          minio.IMinio
-	RedisLock      *cache.RedisLock
+	RedisLockCache *cache.RedisLockCache
 }
 
 func (s *Sticker) CollectList(ctx *core.Context) error {
@@ -152,11 +152,11 @@ func (s *Sticker) SetSystemSticker(ctx *core.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if !s.RedisLock.Lock(ctx.Ctx(), key, 5) {
+	if !s.RedisLockCache.Lock(ctx.Ctx(), key, 5) {
 		return ctx.ErrorBusiness("Слишком частые запросы")
 	}
 
-	defer s.RedisLock.UnLock(ctx.Ctx(), key)
+	defer s.RedisLockCache.UnLock(ctx.Ctx(), key)
 	if params.Type == 2 {
 		if err = s.StickerUseCase.RemoveUserSysSticker(uid, int(params.StickerId)); err != nil {
 			return ctx.ErrorBusiness(err.Error())

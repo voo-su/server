@@ -9,7 +9,7 @@ import (
 
 const lastMessageCacheKey = "redis:hash:last-message"
 
-type MessageStorage struct {
+type MessageCache struct {
 	Rds *redis.Client
 }
 
@@ -18,16 +18,16 @@ type LastCacheMessage struct {
 	Datetime string `json:"datetime"`
 }
 
-func NewMessageStorage(rds *redis.Client) *MessageStorage {
-	return &MessageStorage{rds}
+func NewMessageCache(rds *redis.Client) *MessageCache {
+	return &MessageCache{rds}
 }
 
-func (m *MessageStorage) Set(ctx context.Context, dialogType int, sender int, receive int, message *LastCacheMessage) error {
+func (m *MessageCache) Set(ctx context.Context, dialogType int, sender int, receive int, message *LastCacheMessage) error {
 	text := jsonutil.Encode(message)
 	return m.Rds.HSet(ctx, lastMessageCacheKey, m.name(dialogType, sender, receive), text).Err()
 }
 
-func (m *MessageStorage) Get(ctx context.Context, dialogType int, sender int, receive int) (*LastCacheMessage, error) {
+func (m *MessageCache) Get(ctx context.Context, dialogType int, sender int, receive int) (*LastCacheMessage, error) {
 	res, err := m.Rds.HGet(ctx, lastMessageCacheKey, m.name(dialogType, sender, receive)).Result()
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (m *MessageStorage) Get(ctx context.Context, dialogType int, sender int, re
 	return msg, nil
 }
 
-func (m *MessageStorage) MGet(ctx context.Context, fields []string) ([]*LastCacheMessage, error) {
+func (m *MessageCache) MGet(ctx context.Context, fields []string) ([]*LastCacheMessage, error) {
 	res := m.Rds.HMGet(ctx, lastMessageCacheKey, fields...)
 	items := make([]*LastCacheMessage, 0)
 	for _, item := range res.Val() {
@@ -58,7 +58,7 @@ func (m *MessageStorage) MGet(ctx context.Context, fields []string) ([]*LastCach
 	return items, nil
 }
 
-func (m *MessageStorage) name(dialogType int, sender int, receive int) string {
+func (m *MessageCache) name(dialogType int, sender int, receive int) string {
 	if dialogType == 2 {
 		sender = 0
 	}

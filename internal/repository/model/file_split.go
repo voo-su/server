@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-type Split struct {
+type FileSplit struct {
 	Id           int       `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
 	Type         int       `gorm:"column:type;default:1;NOT NULL" json:"type"`
 	Drive        int       `gorm:"column:drive;default:1;NOT NULL" json:"drive"`
@@ -20,6 +20,6 @@ type Split struct {
 	UpdatedAt    time.Time `gorm:"column:updated_at;NOT NULL" json:"updated_at"`
 }
 
-func (Split) TableName() string {
-	return "splits"
+func (FileSplit) TableName() string {
+	return "file_splits"
 }

@@ -11,7 +11,7 @@ import (
 
 type Project struct {
 	ProjectUseCase *usecase.ProjectUseCase
-	RedisLock      *cache.RedisLock
+	RedisLockCache *cache.RedisLockCache
 }
 
 func (p *Project) Create(ctx *core.Context) error {
@@ -74,11 +74,11 @@ func (p *Project) Invite(ctx *core.Context) error {
 	}
 
 	key := fmt.Sprintf("project-join:%d", params.ProjectId)
-	if !p.RedisLock.Lock(ctx.Ctx(), key, 20) {
+	if !p.RedisLockCache.Lock(ctx.Ctx(), key, 20) {
 		return ctx.ErrorBusiness("Ошибка сети, попробуйте повторить попытку позже")
 	}
 
-	defer p.RedisLock.UnLock(ctx.Ctx(), key)
+	defer p.RedisLockCache.UnLock(ctx.Ctx(), key)
 
 	project, err := p.ProjectUseCase.ProjectRepo.FindById(ctx.Ctx(), int(params.ProjectId))
 	if err != nil {

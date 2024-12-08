@@ -6,11 +6,11 @@ import (
 )
 
 type ClearExpireServer struct {
-	Storage *cache.ServerStorage
+	ServerCache *cache.ServerCache
 }
 
-func NewClearExpireServer(storage *cache.ServerStorage) *ClearExpireServer {
-	return &ClearExpireServer{Storage: storage}
+func NewClearExpireServer(serverCache *cache.ServerCache) *ClearExpireServer {
+	return &ClearExpireServer{ServerCache: serverCache}
 }
 
 func (c *ClearExpireServer) Name() string {
@@ -26,9 +26,9 @@ func (c *ClearExpireServer) Enable() bool {
 }
 
 func (c *ClearExpireServer) Handle(ctx context.Context) error {
-	for _, sid := range c.Storage.All(ctx, 2) {
-		_ = c.Storage.Del(ctx, sid)
-		_ = c.Storage.SetExpireServer(ctx, sid)
+	for _, sid := range c.ServerCache.All(ctx, 2) {
+		_ = c.ServerCache.Del(ctx, sid)
+		_ = c.ServerCache.SetExpireServer(ctx, sid)
 	}
 
 	return nil

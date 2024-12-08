@@ -19,7 +19,7 @@ import (
 type ChatEvent struct {
 	Redis                  *redis.Client
 	Conf                   *config.Config
-	RoomStorage            *cache.RoomStorage
+	RoomCache              *cache.RoomCache
 	GroupChatMemberRepo    *repo.GroupChatMember
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
 	Handler                *chat.Handler
@@ -38,7 +38,7 @@ func (c *ChatEvent) OnOpen(client socket.IClient) {
 			Cid:      client.Cid(),
 		})
 	}
-	if err := c.RoomStorage.BatchAdd(ctx, rooms); err != nil {
+	if err := c.RoomCache.BatchAdd(ctx, rooms); err != nil {
 		log.Println("Ошибка при вступлении в групповой чат", err.Error())
 	}
 
@@ -76,7 +76,7 @@ func (c *ChatEvent) OnClose(client socket.IClient, code int, text string) {
 			Cid:      client.Cid(),
 		})
 	}
-	if err := c.RoomStorage.BatchDel(ctx, rooms); err != nil {
+	if err := c.RoomCache.BatchDel(ctx, rooms); err != nil {
 		log.Println("Ошибка при выходе из группового чата", err.Error())
 	}
 

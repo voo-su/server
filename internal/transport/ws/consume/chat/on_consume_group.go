@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
-	"voo.su/internal/repository/model"
+	model2 "voo.su/internal/repository/model"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/socket"
 )
@@ -32,7 +32,7 @@ func (h *Handler) onConsumeGroupJoin(ctx context.Context, body []byte) {
 	sid := h.Conf.ServerId()
 	for _, uid := range in.Uids {
 
-		ids := h.ClientStorage.GetUidFromClientIds(ctx, sid, socket.Session.Chat.Name(), strconv.Itoa(uid))
+		ids := h.ClientCache.GetUidFromClientIds(ctx, sid, socket.Session.Chat.Name(), strconv.Itoa(uid))
 		for _, cid := range ids {
 			opt := &cache.RoomOption{
 				Channel:  socket.Session.Chat.Name(),
@@ -43,9 +43,9 @@ func (h *Handler) onConsumeGroupJoin(ctx context.Context, body []byte) {
 			}
 
 			if in.Type == 2 {
-				_ = h.RoomStorage.Del(ctx, opt)
+				_ = h.RoomCache.Del(ctx, opt)
 			} else {
-				_ = h.RoomStorage.Add(ctx, opt)
+				_ = h.RoomCache.Add(ctx, opt)
 			}
 		}
 	}
@@ -58,17 +58,17 @@ func (h *Handler) onConsumeGroupApply(ctx context.Context, body []byte) {
 		return
 	}
 
-	var groupMember model.GroupChatMember
+	var groupMember model2.GroupChatMember
 	if err := h.Source.Db().First(&groupMember, "group_id = ? AND leader = ?", in.GroupId, 2).Error; err != nil {
 		return
 	}
 
-	var groupDetail model.GroupChat
+	var groupDetail model2.GroupChat
 	if err := h.Source.Db().First(&groupDetail, in.GroupId).Error; err != nil {
 		return
 	}
 
-	var user model.User
+	var user model2.User
 	if err := h.Source.Db().First(&user, in.UserId).Error; err != nil {
 		return
 	}
@@ -77,7 +77,7 @@ func (h *Handler) onConsumeGroupApply(ctx context.Context, body []byte) {
 	data["group_name"] = groupDetail.Name
 	data["username"] = user.Username
 
-	clientIds := h.ClientStorage.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(groupMember.UserId))
+	clientIds := h.ClientCache.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(groupMember.UserId))
 
 	c := socket.NewSenderContent()
 	c.SetReceive(clientIds...)

@@ -12,30 +12,31 @@ import (
 	"strings"
 	"time"
 	"voo.su/internal/config"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/minio"
 )
 
-type SplitUseCase struct {
-	*repo.Source
-	Conf      *config.Config
-	SplitRepo *repo.Split
-	Minio     minio.IMinio
+type FileSplitUseCase struct {
+	*repository.Source
+	Conf          *config.Config
+	FileSplitRepo *repo.FileSplit
+	Minio         minio.IMinio
 }
 
-func NewSplitUseCase(
-	source *repo.Source,
+func NewFileSplitUseCase(
+	source *repository.Source,
 	conf *config.Config,
-	splitRepo *repo.Split,
+	fileSplitRepo *repo.FileSplit,
 	minio minio.IMinio,
-) *SplitUseCase {
-	return &SplitUseCase{
-		Source:    source,
-		Conf:      conf,
-		SplitRepo: splitRepo,
-		Minio:     minio,
+) *FileSplitUseCase {
+	return &FileSplitUseCase{
+		Source:        source,
+		Conf:          conf,
+		FileSplitRepo: fileSplitRepo,
+		Minio:         minio,
 	}
 }
 
@@ -45,11 +46,11 @@ type MultipartInitiateOpt struct {
 	Size   int64
 }
 
-func (s *SplitUseCase) InitiateMultipartUpload(ctx context.Context, params *MultipartInitiateOpt) (*model.Split, error) {
+func (f *FileSplitUseCase) InitiateMultipartUpload(ctx context.Context, params *MultipartInitiateOpt) (*model.FileSplit, error) {
 	num := math.Ceil(float64(params.Size) / float64(5*1024*1024))
 
 	now := time.Now()
-	m := &model.Split{
+	m := &model.FileSplit{
 		Type:         1,
 		Drive:        0,
 		UserId:       params.UserId,
@@ -61,14 +62,14 @@ func (s *SplitUseCase) InitiateMultipartUpload(ctx context.Context, params *Mult
 		Attr:         "{}",
 	}
 
-	uploadId, err := s.Minio.InitiateMultipartUpload(s.Conf.Minio.GetBucket(), m.Path)
+	uploadId, err := f.Minio.InitiateMultipartUpload(f.Conf.Minio.GetBucket(), m.Path)
 	if err != nil {
 		return nil, err
 	}
 
 	m.UploadId = uploadId
 
-	if err := s.Source.Db().
+	if err := f.Source.Db().
 		WithContext(ctx).
 		Create(m).
 		Error; err != nil {
@@ -86,8 +87,8 @@ type MultipartUploadOpt struct {
 	File       *multipart.FileHeader
 }
 
-func (s *SplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUploadOpt) error {
-	info, err := s.SplitRepo.FindByWhere(ctx, "upload_id = ? AND type = 1", opt.UploadId)
+func (f *FileSplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUploadOpt) error {
+	info, err := f.FileSplitRepo.FindByWhere(ctx, "upload_id = ? AND type = 1", opt.UploadId)
 	if err != nil {
 		return err
 	}
@@ -97,7 +98,7 @@ func (s *SplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUpload
 		return err
 	}
 
-	data := &model.Split{
+	data := &model.FileSplit{
 		Type:         2,
 		Drive:        info.Drive,
 		UserId:       opt.UserId,
@@ -113,8 +114,8 @@ func (s *SplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUpload
 
 	read := bytes.NewReader(stream)
 
-	objectPart, err := s.Minio.PutObjectPart(
-		s.Conf.Minio.GetBucket(),
+	objectPart, err := f.Minio.PutObjectPart(
+		f.Conf.Minio.GetBucket(),
 		info.Path,
 		info.UploadId,
 		opt.SplitIndex,
@@ -131,19 +132,19 @@ func (s *SplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUpload
 
 	data.Attr = jsonutil.Encode(objectPart)
 
-	if err = s.Source.Db().Create(data).Error; err != nil {
+	if err = f.Source.Db().Create(data).Error; err != nil {
 		return err
 	}
 
 	if opt.SplitNum == opt.SplitIndex {
-		err = s.merge(info)
+		err = f.merge(info)
 	}
 
 	return err
 }
 
-func (s *SplitUseCase) merge(info *model.Split) error {
-	items, err := s.SplitRepo.FindAll(context.Background(), func(db *gorm.DB) {
+func (f *FileSplitUseCase) merge(info *model.FileSplit) error {
+	items, err := f.FileSplitRepo.FindAll(context.Background(), func(db *gorm.DB) {
 		db.Where("upload_id =? AND type = 2", info.UploadId).
 			Order("split_index asc")
 	})
@@ -162,7 +163,7 @@ func (s *SplitUseCase) merge(info *model.Split) error {
 		parts = append(parts, obj)
 	}
 
-	if err := s.Minio.CompleteMultipartUpload(s.Conf.Minio.GetBucket(), info.Path, info.UploadId, parts); err != nil {
+	if err := f.Minio.CompleteMultipartUpload(f.Conf.Minio.GetBucket(), info.Path, info.UploadId, parts); err != nil {
 		return err
 	}
 

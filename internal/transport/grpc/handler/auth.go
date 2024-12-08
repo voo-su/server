@@ -16,7 +16,7 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/repository/cache"
 	"voo.su/internal/repository/model"
-	"voo.su/internal/repository/repo"
+	repo2 "voo.su/internal/repository/repo"
 	"voo.su/internal/transport/grpc/middleware"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/jwt"
@@ -27,29 +27,29 @@ type AuthHandler struct {
 	Conf             *config.Config
 	TokenMiddleware  *middleware.TokenMiddleware
 	AuthUseCase      *usecase.AuthUseCase
-	JwtTokenStorage  *cache.JwtTokenStorage
+	JwtTokenCache    *cache.JwtTokenCache
 	IpAddressUseCase *usecase.IpAddressUseCase
 	ChatUseCase      *usecase.ChatUseCase
-	BotRepo          *repo.Bot
+	BotRepo          *repo2.Bot
 	MessageUseCase   usecase.IMessageUseCase
-	UserSession      *repo.UserSession
+	UserSession      *repo2.UserSession
 }
 
 func NewAuthHandler(
 	conf *config.Config,
 	tokenMiddleware *middleware.TokenMiddleware,
 	authUseCase *usecase.AuthUseCase,
-	jwtTokenStorage *cache.JwtTokenStorage,
+	jwtTokenCachee *cache.JwtTokenCache,
 	ipAddressUseCase *usecase.IpAddressUseCase,
 	chatUseCase *usecase.ChatUseCase,
-	botRepo *repo.Bot,
-	userSession *repo.UserSession,
+	botRepo *repo2.Bot,
+	userSession *repo2.UserSession,
 ) *AuthHandler {
 	return &AuthHandler{
 		Conf:             conf,
 		TokenMiddleware:  tokenMiddleware,
 		AuthUseCase:      authUseCase,
-		JwtTokenStorage:  jwtTokenStorage,
+		JwtTokenCache:    jwtTokenCachee,
 		IpAddressUseCase: ipAddressUseCase,
 		ChatUseCase:      chatUseCase,
 		BotRepo:          botRepo,
@@ -124,27 +124,37 @@ func (a *AuthHandler) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) 
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 
-	a.AuthUseCase.Delete(ctx, constant.LoginChannel, in.Token)
+	if err := a.AuthUseCase.Delete(ctx, constant.LoginChannel, in.Token); err != nil {
+		fmt.Println(err)
+	}
 
-	root, _ := a.BotRepo.GetLoginBot(ctx)
-	if root != nil {
+	bot, err := a.BotRepo.GetLoginBot(ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if bot != nil {
 		address, err := a.IpAddressUseCase.FindAddress(ip)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		_, _ = a.ChatUseCase.Create(ctx, &usecase.CreateChatOpt{
+		_, err = a.ChatUseCase.Create(ctx, &usecase.CreateChatOpt{
 			UserId:     user.Id,
 			DialogType: constant.ChatPrivateMode,
-			ReceiverId: root.UserId,
+			ReceiverId: bot.UserId,
 			IsBoot:     true,
 		})
+		if err != nil {
+			fmt.Println(err)
+		}
 
-		_ = a.MessageUseCase.SendLogin(ctx, user.Id, &usecase.SendLogin{
+		if err := a.MessageUseCase.SendLogin(ctx, user.Id, &usecase.SendLogin{
 			Ip:      ip,
 			Agent:   userAgent[0],
 			Address: address,
-		})
+		}); err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
@@ -155,14 +165,13 @@ func (a *AuthHandler) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) 
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	})
 
-	_err := a.UserSession.Create(ctx, &model.UserSession{
+	if err := a.UserSession.Create(ctx, &model.UserSession{
 		UserId:      user.Id,
 		AccessToken: token,
 		UserIp:      ip,
 		UserAgent:   userAgent[0],
-	})
-	if _err != nil {
-		fmt.Println(_err)
+	}); err != nil {
+		fmt.Println(err)
 	}
 
 	return &authPb.AuthVerifyResponse{

@@ -5,8 +5,8 @@ import (
 	"log"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/cache"
-	"voo.su/internal/repository/repo"
 	"voo.su/internal/usecase"
 )
 
@@ -14,26 +14,26 @@ var handlers map[string]func(ctx context.Context, data []byte)
 
 type Handler struct {
 	Conf           *config.Config
-	ClientStorage  *cache.ClientStorage
-	RoomStorage    *cache.RoomStorage
+	ClientCache    *cache.ClientCache
+	RoomCache      *cache.RoomCache
 	ChatUseCase    *usecase.ChatUseCase
 	MessageUseCase usecase.IMessageUseCase
 	ContactUseCase *usecase.ContactUseCase
-	Source         *repo.Source
+	Source         *repository.Source
 }
 
 func NewHandler(
 	conf *config.Config,
-	clientStorage *cache.ClientStorage,
-	roomStorage *cache.RoomStorage,
+	clientCache *cache.ClientCache,
+	roomCache *cache.RoomCache,
 	chatUseCase *usecase.ChatUseCase,
 	contactUseCase *usecase.ContactUseCase,
-	source *repo.Source,
+	source *repository.Source,
 ) *Handler {
 	return &Handler{
 		Conf:           conf,
-		ClientStorage:  clientStorage,
-		RoomStorage:    roomStorage,
+		ClientCache:    clientCache,
+		RoomCache:      roomCache,
 		ChatUseCase:    chatUseCase,
 		ContactUseCase: contactUseCase,
 		Source:         source,

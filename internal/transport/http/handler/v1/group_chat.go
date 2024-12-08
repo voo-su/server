@@ -22,7 +22,7 @@ type GroupChat struct {
 	ContactUseCase         *usecase.ContactUseCase
 	MessageUseCase         usecase.IMessageUseCase
 	UserUseCase            *usecase.UserUseCase
-	RedisLock              *cache.RedisLock
+	RedisLockCache         *cache.RedisLockCache
 }
 
 func (g *GroupChat) Create(ctx *core.Context) error {
@@ -51,11 +51,11 @@ func (g *GroupChat) Invite(ctx *core.Context) error {
 	}
 
 	key := fmt.Sprintf("group-join:%d", params.GroupId)
-	if !g.RedisLock.Lock(ctx.Ctx(), key, 20) {
+	if !g.RedisLockCache.Lock(ctx.Ctx(), key, 20) {
 		return ctx.ErrorBusiness("Ошибка сети, повторите попытку позже")
 	}
 
-	defer g.RedisLock.UnLock(ctx.Ctx(), key)
+	defer g.RedisLockCache.UnLock(ctx.Ctx(), key)
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
 		return ctx.ErrorBusiness("Ошибка сети, повторите попытку позже")
@@ -310,8 +310,7 @@ func (g *GroupChat) AssignAdmin(ctx *core.Context) error {
 		leader = 1
 	}
 
-	err := g.GroupChatMemberUseCase.SetLeaderStatus(ctx.Ctx(), int(params.GroupId), int(params.UserId), leader)
-	if err != nil {
+	if err := g.GroupChatMemberUseCase.SetLeaderStatus(ctx.Ctx(), int(params.GroupId), int(params.UserId), leader); err != nil {
 		logger.Errorf("Не удалось установить информацию администратора:%s", err.Error())
 		return ctx.ErrorBusiness("Не удалось установить информацию администратора!")
 	}
@@ -399,13 +398,15 @@ func (g *GroupChat) Mute(ctx *core.Context) error {
 		}
 	}
 
-	_ = g.MessageUseCase.SendSysOther(ctx.Ctx(), &model.Message{
+	if err := g.MessageUseCase.SendSysOther(ctx.Ctx(), &model.Message{
 		MsgType:    msgType,
 		DialogType: constant.DialogRecordDialogTypeGroup,
 		UserId:     uid,
 		ReceiverId: int(params.GroupId),
 		Extra:      jsonutil.Encode(extra),
-	})
+	}); err != nil {
+		fmt.Println(err)
+	}
 
 	return ctx.Success(v1Pb.GroupChatMuteResponse{})
 }

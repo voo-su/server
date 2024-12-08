@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"voo.su/internal/config"
 	"voo.su/internal/domain/entity"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 	"voo.su/pkg/encrypt"
@@ -15,7 +16,7 @@ import (
 )
 
 type BotUseCase struct {
-	*repo.Source
+	*repository.Source
 	Conf     *config.Config
 	BotRepo  *repo.Bot
 	UserRepo *repo.User
@@ -23,7 +24,7 @@ type BotUseCase struct {
 }
 
 func NewBotUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	conf *config.Config,
 	botRepo *repo.Bot,
 	userRepo *repo.User,

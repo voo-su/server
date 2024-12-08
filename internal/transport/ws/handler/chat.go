@@ -10,8 +10,8 @@ import (
 )
 
 type ChatChannel struct {
-	Storage *cache.ClientStorage
-	Event   *event.ChatEvent
+	ClientCache *cache.ClientCache
+	Event       *event.ChatEvent
 }
 
 func (c *ChatChannel) Conn(ctx *core.Context) error {
@@ -28,7 +28,7 @@ func (c *ChatChannel) NewClient(uid int, conn socket.IConn) error {
 	return socket.NewClient(conn, &socket.ClientOption{
 		Uid:     uid,
 		Channel: socket.Session.Chat,
-		Storage: c.Storage,
+		Storage: c.ClientCache,
 		Buffer:  10,
 	}, socket.NewEvent(
 		socket.WithOpenEvent(c.Event.OnOpen),

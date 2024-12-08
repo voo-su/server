@@ -1,4 +1,4 @@
-package repo
+package repository
 
 import (
 	"github.com/redis/go-redis/v9"
@@ -10,7 +10,10 @@ type Source struct {
 	redis *redis.Client
 }
 
-func NewSource(db *gorm.DB, redis *redis.Client) *Source {
+func NewSource(
+	db *gorm.DB,
+	redis *redis.Client,
+) *Source {
 	return &Source{
 		DB:    db,
 		redis: redis,

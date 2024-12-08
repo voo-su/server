@@ -3,17 +3,18 @@ package usecase
 import (
 	"context"
 	"errors"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 )
 
 type GroupChatRequestUseCase struct {
-	*repo.Source
+	*repository.Source
 	GroupChatRequestRepo *repo.GroupChatRequest
 }
 
 func NewGroupRequestUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	groupChatRequestRepo *repo.GroupChatRequest,
 ) *GroupChatRequestUseCase {
 	return &GroupChatRequestUseCase{

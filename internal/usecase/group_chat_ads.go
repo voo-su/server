@@ -3,18 +3,19 @@ package usecase
 import (
 	"context"
 	"time"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 	"voo.su/pkg/timeutil"
 )
 
 type GroupChatAdsUseCase struct {
-	*repo.Source
+	*repository.Source
 	GroupChatAdsRepo *repo.GroupChatAds
 }
 
 func NewGroupChatAdsUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	groupChatAdsRepo *repo.GroupChatAds,
 ) *GroupChatAdsUseCase {
 	return &GroupChatAdsUseCase{

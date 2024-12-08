@@ -8,15 +8,15 @@ import (
 	"voo.su/pkg/encrypt"
 )
 
-type SmsStorage struct {
+type SmsCache struct {
 	Rds *redis.Client
 }
 
-func NewSmsStorage(redis *redis.Client) *SmsStorage {
-	return &SmsStorage{redis}
+func NewSmsCache(redis *redis.Client) *SmsCache {
+	return &SmsCache{redis}
 }
 
-func (s *SmsStorage) Set(ctx context.Context, channel string, token string, code string, exp time.Duration) error {
+func (s *SmsCache) Set(ctx context.Context, channel string, token string, code string, exp time.Duration) error {
 	_, err := s.Rds.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		pipe.Del(ctx, s.failName(channel, token))
 		pipe.Set(ctx, s.name(channel, token), code, exp)
@@ -25,15 +25,15 @@ func (s *SmsStorage) Set(ctx context.Context, channel string, token string, code
 	return err
 }
 
-func (s *SmsStorage) Get(ctx context.Context, channel string, token string) (string, error) {
+func (s *SmsCache) Get(ctx context.Context, channel string, token string) (string, error) {
 	return s.Rds.Get(ctx, s.name(channel, token)).Result()
 }
 
-func (s *SmsStorage) Del(ctx context.Context, channel string, token string) error {
+func (s *SmsCache) Del(ctx context.Context, channel string, token string) error {
 	return s.Rds.Del(ctx, s.name(channel, token)).Err()
 }
 
-func (s *SmsStorage) Verify(ctx context.Context, channel string, token string, code string) bool {
+func (s *SmsCache) Verify(ctx context.Context, channel string, token string, code string) bool {
 	value, err := s.Get(ctx, channel, token)
 	if err != nil || len(value) == 0 {
 		return false
@@ -56,10 +56,10 @@ func (s *SmsStorage) Verify(ctx context.Context, channel string, token string, c
 	return false
 }
 
-func (s *SmsStorage) name(channel string, token string) string {
+func (s *SmsCache) name(channel string, token string) string {
 	return fmt.Sprintf("im:auth:sms:%s:%s", channel, encrypt.Md5(token))
 }
 
-func (s *SmsStorage) failName(channel string, token string) string {
+func (s *SmsCache) failName(channel string, token string) string {
 	return fmt.Sprintf("im:auth:sms_fail:%s:%s", channel, encrypt.Md5(token))
 }

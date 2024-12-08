@@ -146,7 +146,7 @@ func initMeta() map[string]any {
 	meta := make(map[string]any)
 	_, _, line, ok := runtime.Caller(2)
 	if ok {
-		meta["errorLine"] = line
+		meta["error_line"] = line
 	}
 
 	return meta

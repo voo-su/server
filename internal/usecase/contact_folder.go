@@ -4,18 +4,19 @@ import (
 	"context"
 	"errors"
 	"gorm.io/gorm"
+	"voo.su/internal/repository"
 	"voo.su/internal/repository/model"
 	"voo.su/internal/repository/repo"
 )
 
 type ContactFolderUseCase struct {
-	*repo.Source
+	*repository.Source
 	ContactRepo       *repo.Contact
 	ContactFolderRepo *repo.ContactFolder
 }
 
 func NewContactFolderUseCase(
-	source *repo.Source,
+	source *repository.Source,
 	contactRepo *repo.Contact,
 	contactFolderRepo *repo.ContactFolder,
 ) *ContactFolderUseCase {
@@ -49,7 +50,7 @@ func (c *ContactFolderUseCase) GetUserGroup(ctx context.Context, uid int) ([]*mo
 	if err := c.Source.Db().WithContext(ctx).
 		Table("contact_folders").
 		Where("user_id = ?", uid).
-		Order("sort asc").
+		Order("sort ASC").
 		Scan(&items).
 		Error; err != nil {
 		return nil, err
