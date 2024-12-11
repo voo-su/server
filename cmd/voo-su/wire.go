@@ -7,13 +7,12 @@ import (
 	"github.com/google/wire"
 	"voo.su/internal/cli"
 	"voo.su/internal/config"
+	"voo.su/internal/delivery/grpc"
+	"voo.su/internal/delivery/http"
+	"voo.su/internal/delivery/ws"
 	"voo.su/internal/domain/logic"
+	"voo.su/internal/infrastructure"
 	"voo.su/internal/provider"
-	"voo.su/internal/repository"
-	"voo.su/internal/repository/cache"
-	"voo.su/internal/transport/grpc"
-	"voo.su/internal/transport/http"
-	"voo.su/internal/transport/ws"
 	"voo.su/internal/usecase"
 )
 
@@ -29,10 +28,9 @@ var providerSet = wire.NewSet(
 
 	wire.Struct(new(provider.Providers), "*"),
 
-	cache.ProviderSet,
 	logic.ProviderSet,
 	usecase.ProviderSet,
-	repository.ProviderSet,
+	infrastructure.ProviderSet,
 )
 
 func NewHttpInjector(conf *config.Config) *http.AppProvider {

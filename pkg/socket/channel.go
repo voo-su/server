@@ -59,14 +59,14 @@ func (c *Channel) Start(ctx context.Context) error {
 		timer  = time.NewTicker(15 * time.Second)
 	)
 
-	defer log.Println(fmt.Errorf("Выход из канала: %s", c.Name()))
+	defer log.Println(fmt.Errorf("выход из канала: %s", c.Name()))
 
 	defer timer.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("Выход из канала: %s", c.Name())
+			return fmt.Errorf("выход из канала: %s", c.Name())
 		case <-timer.C:
 			fmt.Printf("Канал пустой name:%s unix:%d len:%d\n", c.name, time.Now().Unix(), len(c.outChan))
 		case val, ok := <-c.outChan:

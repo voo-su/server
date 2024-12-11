@@ -8,21 +8,21 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
-	"voo.su/internal/repository/model"
-	"voo.su/internal/repository/repo"
+	postgresModel "voo.su/internal/infrastructure/postgres/model"
+	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/strutil"
 )
 
 type MessageForwardLogic struct {
-	DB       *gorm.DB
-	Sequence *repo.Sequence
+	DB           *gorm.DB
+	SequenceRepo *postgresRepo.SequenceRepository
 }
 
-func NewMessageForwardLogic(db *gorm.DB, sequence *repo.Sequence) *MessageForwardLogic {
+func NewMessageForwardLogic(db *gorm.DB, sequence *postgresRepo.SequenceRepository) *MessageForwardLogic {
 	return &MessageForwardLogic{
-		DB:       db,
-		Sequence: sequence,
+		DB:           db,
+		SequenceRepo: sequence,
 	}
 }
 
@@ -33,7 +33,7 @@ type ForwardRecord struct {
 }
 
 func (m *MessageForwardLogic) Verify(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error {
-	query := m.DB.WithContext(ctx).Model(&model.Message{})
+	query := m.DB.WithContext(ctx).Model(&postgresModel.Message{})
 	query.Where("id in ?", req.MessageIds)
 	if req.Receiver.DialogType == constant.ChatPrivateMode {
 		subWhere := m.DB.Where("user_id = ? AND receiver_id = ?", uid, req.Receiver.ReceiverId)
@@ -80,9 +80,9 @@ func (m *MessageForwardLogic) MultiMergeForward(ctx context.Context, uid int, re
 		Records: tmpRecords,
 	})
 
-	records := make([]*model.Message, 0, len(receives))
+	records := make([]*postgresModel.Message, 0, len(receives))
 	for _, item := range receives {
-		data := &model.Message{
+		data := &postgresModel.Message{
 			MsgId:      strutil.NewMsgId(),
 			DialogType: item["dialog_type"],
 			MsgType:    constant.ChatMsgTypeForward,
@@ -91,9 +91,9 @@ func (m *MessageForwardLogic) MultiMergeForward(ctx context.Context, uid int, re
 			Extra:      extra,
 		}
 		if data.DialogType == constant.ChatGroupMode {
-			data.Sequence = m.Sequence.Get(ctx, 0, data.ReceiverId)
+			data.Sequence = m.SequenceRepo.Get(ctx, 0, data.ReceiverId)
 		} else {
-			data.Sequence = m.Sequence.Get(ctx, uid, data.ReceiverId)
+			data.Sequence = m.SequenceRepo.Get(ctx, uid, data.ReceiverId)
 		}
 		records = append(records, data)
 	}
@@ -116,7 +116,7 @@ func (m *MessageForwardLogic) MultiMergeForward(ctx context.Context, uid int, re
 func (m *MessageForwardLogic) MultiSplitForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) ([]*ForwardRecord, error) {
 	var (
 		receives = make([]map[string]int, 0)
-		records  = make([]*model.Message, 0)
+		records  = make([]*postgresModel.Message, 0)
 		db       = m.DB.WithContext(ctx)
 	)
 	for _, userId := range req.Uids {
@@ -132,22 +132,22 @@ func (m *MessageForwardLogic) MultiSplitForward(ctx context.Context, uid int, re
 		})
 	}
 
-	if err := db.Model(&model.Message{}).Where("id IN ?", req.MessageIds).Scan(&records).Error; err != nil {
+	if err := db.Model(&postgresModel.Message{}).Where("id IN ?", req.MessageIds).Scan(&records).Error; err != nil {
 		return nil, err
 	}
 
-	items := make([]*model.Message, 0, len(receives)*len(records))
+	items := make([]*postgresModel.Message, 0, len(receives)*len(records))
 	recordsLen := int64(len(records))
 	for _, v := range receives {
 		var sequences []int64
 		if v["dialog_type"] == constant.DialogRecordDialogTypeGroup {
-			sequences = m.Sequence.BatchGet(ctx, 0, v["receiver_id"], recordsLen)
+			sequences = m.SequenceRepo.BatchGet(ctx, 0, v["receiver_id"], recordsLen)
 		} else {
-			sequences = m.Sequence.BatchGet(ctx, uid, v["receiver_id"], recordsLen)
+			sequences = m.SequenceRepo.BatchGet(ctx, uid, v["receiver_id"], recordsLen)
 		}
 
 		for i, item := range records {
-			items = append(items, &model.Message{
+			items = append(items, &postgresModel.Message{
 				MsgId:      strutil.NewMsgId(),
 				DialogType: v["dialog_type"],
 				MsgType:    item.MsgType,

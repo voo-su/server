@@ -6,7 +6,7 @@ import (
 	"path"
 	"time"
 	"voo.su/internal/config"
-	"voo.su/internal/repository/model"
+	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/pkg/minio"
 )
 

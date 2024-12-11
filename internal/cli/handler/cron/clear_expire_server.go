@@ -2,15 +2,15 @@ package cron
 
 import (
 	"context"
-	"voo.su/internal/repository/cache"
+	redisRepo "voo.su/internal/infrastructure/redis/repository"
 )
 
 type ClearExpireServer struct {
-	ServerCache *cache.ServerCache
+	ServerCacheRepo *redisRepo.ServerCacheRepository
 }
 
-func NewClearExpireServer(serverCache *cache.ServerCache) *ClearExpireServer {
-	return &ClearExpireServer{ServerCache: serverCache}
+func NewClearExpireServer(serverCacheRepo *redisRepo.ServerCacheRepository) *ClearExpireServer {
+	return &ClearExpireServer{ServerCacheRepo: serverCacheRepo}
 }
 
 func (c *ClearExpireServer) Name() string {
@@ -26,9 +26,9 @@ func (c *ClearExpireServer) Enable() bool {
 }
 
 func (c *ClearExpireServer) Handle(ctx context.Context) error {
-	for _, sid := range c.ServerCache.All(ctx, 2) {
-		_ = c.ServerCache.Del(ctx, sid)
-		_ = c.ServerCache.SetExpireServer(ctx, sid)
+	for _, sid := range c.ServerCacheRepo.All(ctx, 2) {
+		_ = c.ServerCacheRepo.Del(ctx, sid)
+		_ = c.ServerCacheRepo.SetExpireServer(ctx, sid)
 	}
 
 	return nil

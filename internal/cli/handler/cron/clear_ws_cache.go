@@ -3,19 +3,19 @@ package cron
 import (
 	"context"
 	"fmt"
-	"voo.su/internal/repository/cache"
+	redisRepo "voo.su/internal/infrastructure/redis/repository"
 )
 
 type ClearWsCache struct {
-	ServerCache *cache.ServerCache
+	ServerCacheRepo *redisRepo.ServerCacheRepository
 }
 
-func NewClearWsCache(serverCache *cache.ServerCache) *ClearWsCache {
-	return &ClearWsCache{ServerCache: serverCache}
+func NewClearWsCache(serverCacheRepo *redisRepo.ServerCacheRepository) *ClearWsCache {
+	return &ClearWsCache{ServerCacheRepo: serverCacheRepo}
 }
 
 func (c *ClearWsCache) Name() string {
-	return "clear.ws.cache"
+	return "clear.ws.redis"
 }
 
 func (c *ClearWsCache) Spec() string {
@@ -27,7 +27,7 @@ func (c *ClearWsCache) Enable() bool {
 }
 
 func (c *ClearWsCache) Handle(ctx context.Context) error {
-	for _, sid := range c.ServerCache.GetExpireServerAll(ctx) {
+	for _, sid := range c.ServerCacheRepo.GetExpireServerAll(ctx) {
 		c.clear(ctx, sid)
 	}
 	return nil
@@ -38,14 +38,14 @@ func (c *ClearWsCache) clear(ctx context.Context, sid string) {
 	for {
 		var keys []string
 		var err error
-		keys, cursor, err = c.ServerCache.Redis().Scan(ctx, cursor, fmt.Sprintf("ws:%s:*", sid), 200).Result()
+		keys, cursor, err = c.ServerCacheRepo.Redis().Scan(ctx, cursor, fmt.Sprintf("ws:%s:*", sid), 200).Result()
 		if err != nil {
 			return
 		}
 
-		c.ServerCache.Redis().Del(ctx, keys...)
+		c.ServerCacheRepo.Redis().Del(ctx, keys...)
 		if cursor == 0 {
-			_ = c.ServerCache.DelExpireServer(ctx, sid)
+			_ = c.ServerCacheRepo.DelExpireServer(ctx, sid)
 			break
 		}
 	}

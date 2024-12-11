@@ -4,10 +4,10 @@ import (
 	cliV2 "github.com/urfave/cli/v2"
 	"voo.su/internal/cli"
 	"voo.su/internal/config"
+	"voo.su/internal/delivery/grpc"
+	"voo.su/internal/delivery/http"
+	"voo.su/internal/delivery/ws"
 	"voo.su/internal/provider"
-	"voo.su/internal/transport/grpc"
-	"voo.su/internal/transport/http"
-	"voo.su/internal/transport/ws"
 	"voo.su/pkg/logger"
 )
 

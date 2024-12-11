@@ -34,7 +34,7 @@ func (p *PushHandle) WebPush(message string) {
 	var in entity.WebPush
 	if err := json.Unmarshal([]byte(message), &in); err != nil {
 		fmt.Println(err)
-		logger.Errorf("WebPush ошибка при декодировании: ", err.Error())
+		logger.Errorf("WebPush ошибка при декодировании: %s", err.Error())
 		return
 	}
 
