@@ -194,5 +194,5 @@ func (a *AuthUseCase) Register(ctx context.Context, email string) (*postgresMode
 		}
 	}
 
-	return nil, fmt.Errorf("ошибка")
+	return nil, errors.New("ошибка")
 }

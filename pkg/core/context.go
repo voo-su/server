@@ -46,7 +46,10 @@ func (c *Context) Forbidden(message string) error {
 }
 
 func (c *Context) InvalidParams(message any) error {
-	resp := &response.Response{Code: 305, Message: "неверные параметры"}
+	resp := &response.Response{
+		Code:    305,
+		Message: "неверные параметры",
+	}
 	switch msg := message.(type) {
 	case error:
 		resp.Message = validator.Translate(msg)
@@ -62,7 +65,10 @@ func (c *Context) InvalidParams(message any) error {
 }
 
 func (c *Context) ErrorBusiness(message any) error {
-	resp := &response.Response{Code: 400, Message: "ошибка"}
+	resp := &response.Response{
+		Code:    400,
+		Message: "ошибка",
+	}
 	switch msg := message.(type) {
 	case error:
 		resp.Message = msg.Error()

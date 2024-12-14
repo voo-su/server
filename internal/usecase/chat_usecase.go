@@ -128,7 +128,7 @@ func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordLis
 		subQuery := db.Where("user_id = ? AND receiver_id = ?", opt.UserId, opt.ReceiverId).
 			Or("user_id = ? AND receiver_id = ?", opt.ReceiverId, opt.UserId)
 		db.Model(&postgresModel.Message{}).
-			Where("id in ?", ids).
+			Where("id IN ?", ids).
 			Where("dialog_type = ?", constant.ChatPrivateMode).
 			Where(subQuery).
 			Pluck("id", &findIds)

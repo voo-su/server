@@ -27,6 +27,10 @@ proto:
 	   --go-grpc_out=paths=source_relative:./api/grpc/pb \
 	   ./api/grpc/proto/*.proto
 
+.PHONY: test
+test:
+	go test -v ./...
+
 .PHONY: build
 build:
 	go build -o ./build/voo-su ./cmd/voo-su

@@ -77,5 +77,6 @@ func (t *TokenMiddleware) ValidateToken(ctx context.Context) (*UserClaims, error
 	if err != nil {
 		return nil, err
 	}
+
 	return userClaims, nil
 }

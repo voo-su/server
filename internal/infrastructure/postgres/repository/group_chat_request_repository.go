@@ -29,7 +29,7 @@ func (g *GroupChatRequestRepository) List(ctx context.Context, groupIds []int) (
 	query := g.Repo.Db.WithContext(ctx).Table("group_chat_requests").
 		Joins("LEFT JOIN users on users.id = group_chat_requests.user_id").
 		Where("group_chat_requests.status = ?", constant.GroupChatRequestStatusWait).
-		Order("group_chat_requests.updated_at desc,group_chat_requests.id desc")
+		Order("group_chat_requests.updated_at desc, group_chat_requests.id desc")
 
 	var items []*entity.GroupApplyList
 	if err := query.Select(fields).Scan(&items).Error; err != nil {

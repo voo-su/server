@@ -73,7 +73,7 @@ services:
     image: redis:alpine
     restart: always
     ports:
-      - '63790:6379'
+      - '6379:6379'
     networks:
       - network-voo
 

@@ -44,8 +44,10 @@ func (m *MessageVoteRepository) GetVoteAnswerUser(ctx context.Context, vid int) 
 
 func (m *MessageVoteRepository) SetVoteAnswerUser(ctx context.Context, vid int) ([]int, error) {
 	uids := make([]int, 0)
-	err := m.Repo.Db.WithContext(ctx).Table("message_vote_answers").Where("vote_id = ?", vid).Pluck("user_id", &uids).Error
-	if err != nil {
+	if err := m.Repo.Db.WithContext(ctx).
+		Table("message_vote_answers").
+		Where("vote_id = ?", vid).
+		Pluck("user_id", &uids).Error; err != nil {
 		return nil, err
 	}
 

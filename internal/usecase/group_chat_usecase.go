@@ -72,8 +72,8 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 
 		addMembers := make([]entity.DialogRecordExtraGroupMembers, 0, len(opt.MemberIds))
 		tx.Table("users").
-			Select("id as user_id", "username").
-			Where("id in ?", opt.MemberIds).
+			Select("id AS user_id", "username").
+			Where("id IN ?", opt.MemberIds).
 			Scan(&addMembers)
 		for _, val := range uids {
 			leader := 0
@@ -348,7 +348,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 	})
 
 	err = db.Transaction(func(tx *gorm.DB) error {
-		tx.Delete(&postgresModel.GroupChatMember{}, "group_id = ? AND user_id in ? AND is_quit = ?", opt.GroupId, opt.MemberIds, constant.GroupMemberQuitStatusYes)
+		tx.Delete(&postgresModel.GroupChatMember{}, "group_id = ? AND user_id IN ? AND is_quit = ?", opt.GroupId, opt.MemberIds, constant.GroupMemberQuitStatusYes)
 		if err = tx.Create(&addMembers).Error; err != nil {
 			return err
 		}
@@ -360,7 +360,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		}
 
 		if len(updateDialogList) > 0 {
-			tx.Model(&postgresModel.Chat{}).Where("id in ?", updateDialogList).Updates(map[string]any{
+			tx.Model(&postgresModel.Chat{}).Where("id IN ?", updateDialogList).Updates(map[string]any{
 				"is_delete":  0,
 				"created_at": timeutil.DateTime(),
 			})
@@ -423,7 +423,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 	if err := g.Source.Db().
 		Table("users").
 		Select("id, username").
-		Where("id in ?", mids).
+		Where("id IN ?", mids).
 		Scan(&memberItems).
 		Error; err != nil {
 		return err

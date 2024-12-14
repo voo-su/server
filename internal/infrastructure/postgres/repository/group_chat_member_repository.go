@@ -126,7 +126,7 @@ type CountGroupMember struct {
 func (g *GroupChatMemberRepository) CountGroupMemberNum(ids []int) ([]*CountGroupMember, error) {
 	var items []*CountGroupMember
 	if err := g.Repo.Model(context.TODO()).
-		Select("group_id,count(*) as count").
+		Select("group_id, count(*) as count").
 		Where("group_id in ? AND is_quit = ?", ids, constant.GroupMemberQuitStatusNo).
 		Group("group_id").
 		Scan(&items).

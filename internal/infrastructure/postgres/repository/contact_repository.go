@@ -39,7 +39,7 @@ func (c *ContactRepository) IsFriend(ctx context.Context, uid int, friendId int,
 	if cache && c.RelationCacheRepo.IsContactRelation(ctx, uid, friendId) == nil {
 		return true
 	}
-	count, err := c.Repo.QueryCount(ctx, "((user_id = ? AND friend_id = ?) or (user_id = ? AND friend_id = ?)) AND status = ?", uid, friendId, friendId, uid, constant.ContactStatusNormal)
+	count, err := c.Repo.QueryCount(ctx, "((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)) AND status = ?", uid, friendId, friendId, uid, constant.ContactStatusNormal)
 	if err != nil {
 		return false
 	}

@@ -6,10 +6,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 	"strconv"
-	"strings"
 	"time"
 	authPb "voo.su/api/grpc/pb"
 	"voo.su/internal/config"
@@ -20,6 +18,7 @@ import (
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/jwt"
+	"voo.su/pkg/utils"
 )
 
 type AuthHandler struct {
@@ -70,23 +69,6 @@ func (a *AuthHandler) Login(ctx context.Context, in *authPb.AuthLoginRequest) (*
 	}, nil
 }
 
-func getClientIP(ctx context.Context) string {
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		// Попробуем извлечь IP из метаданных
-		if ipList := md["x-forwarded-for"]; len(ipList) > 0 {
-			return ipList[0]
-		}
-	}
-
-	if p, ok := peer.FromContext(ctx); ok {
-		addr := p.Addr.String()
-		// Извлекаем только IP-адрес
-		return strings.Split(addr, ":")[0]
-	}
-
-	return ""
-}
-
 func (a *AuthHandler) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authPb.AuthVerifyResponse, error) {
 	if !a.AuthUseCase.Verify(ctx, constant.LoginChannel, in.Token, in.Code) {
 		return nil, status.Error(codes.Unauthenticated, "Неверный код")
@@ -101,7 +83,7 @@ func (a *AuthHandler) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) 
 		return nil, status.Error(codes.Unauthenticated, "Неверный токен")
 	}
 
-	ip := getClientIP(ctx)
+	ip := utils.GetGrpcClientIp(ctx)
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

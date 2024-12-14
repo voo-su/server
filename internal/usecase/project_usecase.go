@@ -190,15 +190,14 @@ func (p *ProjectUseCase) Invite(ctx context.Context, opt *ProjectInviteOpt) erro
 		return errors.New("все приглашённые контакты уже являются участниками проекта")
 	}
 
-	err = db.Transaction(func(tx *gorm.DB) error {
+	if err = db.Transaction(func(tx *gorm.DB) error {
 		tx.Delete(&postgresModel.ProjectMember{}, "project_id = ? AND user_id in ?", opt.ProjectId, opt.MemberIds)
 		if err = tx.Create(&addMembers).Error; err != nil {
 			return err
 		}
 
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 

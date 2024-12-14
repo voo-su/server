@@ -3,8 +3,10 @@ package v1
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
+	"voo.su/internal/constant"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
@@ -83,12 +85,12 @@ func (s *Sticker) Upload(ctx *core.Context) error {
 		return ctx.InvalidParams("Поле 'sticker' обязательно для загрузки!")
 	}
 
-	if !sliceutil.Include(strutil.FileSuffix(file.Filename), []string{"png", "jpg", "jpeg", "gif"}) {
-		return ctx.InvalidParams("Неверный формат загружаемого файла, поддерживаются только файлы в формате png, jpg, jpeg и gif")
+	if !sliceutil.Include(strutil.FileSuffix(file.Filename), constant.StickerFormats) {
+		return ctx.InvalidParams(fmt.Sprintf("Неверный формат загружаемого файла, поддерживаются только файлы в формате %s\n", strings.Join(constant.StickerFormats, ", ")))
 	}
 
-	if file.Size > 5<<20 {
-		return ctx.InvalidParams("Размер загружаемого файла не может превышать 5 МБ")
+	if file.Size > constant.StickerFileSize<<20 {
+		return ctx.InvalidParams(fmt.Sprintf("Размер загружаемого файла не может превышать %v МБ", constant.StickerFileSize))
 	}
 
 	stream, err := minio.ReadMultipartStream(file)

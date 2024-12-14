@@ -148,8 +148,8 @@ func (m *MessageUseCase) GetDialogRecords(ctx context.Context, opt *QueryDialogR
 		}
 	)
 	query := m.Source.Db().WithContext(ctx).Table("messages")
-	query.Joins("LEFT JOIN users on messages.user_id = users.id")
-	query.Joins("LEFT JOIN message_delete on messages.id = message_delete.record_id AND message_delete.user_id = ?", opt.UserId)
+	query.Joins("LEFT JOIN users ON messages.user_id = users.id")
+	query.Joins("LEFT JOIN message_delete ON messages.id = message_delete.record_id AND message_delete.user_id = ?", opt.UserId)
 	if opt.RecordId > 0 {
 		query.Where("messages.sequence < ?", opt.RecordId)
 	}
@@ -748,7 +748,7 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsVa
 		"vote.answer_num",
 		"vote.status as vote_status",
 	})
-	query.Joins("LEFT JOIN message_votes as vote on vote.record_id = messages.id")
+	query.Joins("LEFT JOIN message_votes as vote ON vote.record_id = messages.id")
 	query.Where("messages.id = ?", msgId)
 
 	var vote entity.QueryVoteModel
@@ -871,7 +871,10 @@ func (m *MessageUseCase) loadReply(_ context.Context, data *postgresModel.Messag
 	}
 
 	var user postgresModel.User
-	if err := m.Source.Db().Table("users").Select("username").Find(&user, "id = ?", record.UserId).Error; err != nil {
+	if err := m.Source.Db().
+		Table("users").
+		Select("username").
+		Find(&user, "id = ?", record.UserId).Error; err != nil {
 		return
 	}
 

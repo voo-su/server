@@ -32,7 +32,7 @@ func (g *GroupChatRepository) SearchOvertList(ctx context.Context, opt *SearchOv
 				Where("user_id = ? AND is_quit= ?", opt.UserId, 0).
 				Table("group_chat_members"),
 			).
-			Where("is_dismiss = 0").
+			Where("is_dismiss = ?", 0).
 			Order("created_at desc").
 			Offset((opt.Page - 1) * opt.Size).
 			Limit(opt.Size)

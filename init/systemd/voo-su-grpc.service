@@ -1,0 +1,11 @@
+[Unit]
+Description=Voo.su grpc
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5s
+ExecStart=/usr/bin/voo-su grpc
+
+[Install]
+WantedBy=multi-user.target

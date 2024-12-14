@@ -155,14 +155,13 @@ func (p *ProjectUseCase) InviteCoexecutor(ctx context.Context, taskId int64, mem
 		return errors.New("все приглашённые контакты стали соисполнителями задачи")
 	}
 
-	err = db.Transaction(func(tx *gorm.DB) error {
+	if err = db.Transaction(func(tx *gorm.DB) error {
 		if err = tx.Create(&addCoexecutors).Error; err != nil {
 			return err
 		}
 
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 
@@ -213,14 +212,13 @@ func (p *ProjectUseCase) InviteWatcher(ctx context.Context, taskId int64, member
 		return errors.New("все приглашённые контакты стали наблюдателями задачи")
 	}
 
-	err = db.Transaction(func(tx *gorm.DB) error {
+	if err = db.Transaction(func(tx *gorm.DB) error {
 		if err = tx.Create(&addWatchers).Error; err != nil {
 			return err
 		}
 
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 

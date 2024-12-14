@@ -8,16 +8,16 @@ import (
 	"gorm.io/gorm"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
-	redis2 "voo.su/internal/infrastructure"
-	model2 "voo.su/internal/infrastructure/postgres/model"
+	"voo.su/internal/infrastructure"
+	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	"voo.su/pkg/jsonutil"
 )
 
 type ContactRequestUseCase struct {
-	*redis2.Source
+	*infrastructure.Source
 }
 
-func NewContactRequestUseCase(source *redis2.Source) *ContactRequestUseCase {
+func NewContactRequestUseCase(source *infrastructure.Source) *ContactRequestUseCase {
 	return &ContactRequestUseCase{Source: source}
 }
 
@@ -27,7 +27,7 @@ type ContactApplyCreateOpt struct {
 }
 
 func (c *ContactRequestUseCase) Create(ctx context.Context, opt *ContactApplyCreateOpt) error {
-	apply := &model2.ContactRequest{
+	apply := &postgresModel.ContactRequest{
 		UserId:   opt.UserId,
 		FriendId: opt.FriendId,
 	}
@@ -59,21 +59,21 @@ type ContactApplyAcceptOpt struct {
 	ApplyId int
 }
 
-func (c *ContactRequestUseCase) Accept(ctx context.Context, opt *ContactApplyAcceptOpt) (*model2.ContactRequest, error) {
+func (c *ContactRequestUseCase) Accept(ctx context.Context, opt *ContactApplyAcceptOpt) (*postgresModel.ContactRequest, error) {
 	db := c.Source.Db().WithContext(ctx)
-	var applyInfo model2.ContactRequest
+	var applyInfo postgresModel.ContactRequest
 	if err := db.First(&applyInfo, "id = ? AND friend_id = ?", opt.ApplyId, opt.UserId).Error; err != nil {
 		return nil, err
 	}
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 		addFriendFunc := func(uid, fid int) error {
-			var contact model2.Contact
+			var contact postgresModel.Contact
 			err := tx.Where("user_id = ? AND friend_id = ?", uid, fid).First(&contact).Error
 			if err == nil {
-				return tx.Model(&model2.Contact{}).
+				return tx.Model(&postgresModel.Contact{}).
 					Where("id = ?", contact.Id).
-					Updates(&model2.Contact{
+					Updates(&postgresModel.Contact{
 						Remark: "",
 						Status: 1,
 					}).Error
@@ -82,14 +82,14 @@ func (c *ContactRequestUseCase) Accept(ctx context.Context, opt *ContactApplyAcc
 				return err
 			}
 
-			return tx.Create(&model2.Contact{
+			return tx.Create(&postgresModel.Contact{
 				UserId:   uid,
 				FriendId: fid,
 				Remark:   "",
 				Status:   1,
 			}).Error
 		}
-		var user model2.User
+		var user postgresModel.User
 		if err := tx.Select("id", "username").First(&user, applyInfo.FriendId).Error; err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func (c *ContactRequestUseCase) Accept(ctx context.Context, opt *ContactApplyAcc
 		if err := addFriendFunc(applyInfo.FriendId, applyInfo.UserId); err != nil {
 			return err
 		}
-		return tx.Delete(&model2.ContactRequest{}, "user_id = ? AND friend_id = ?", applyInfo.UserId, applyInfo.FriendId).Error
+		return tx.Delete(&postgresModel.ContactRequest{}, "user_id = ? AND friend_id = ?", applyInfo.UserId, applyInfo.FriendId).Error
 	})
 	return &applyInfo, err
 }
@@ -114,7 +114,7 @@ type ContactApplyDeclineOpt struct {
 func (c *ContactRequestUseCase) Decline(ctx context.Context, opt *ContactApplyDeclineOpt) error {
 	if err := c.Source.Db().
 		WithContext(ctx).
-		Delete(&model2.ContactRequest{}, "id = ? AND friend_id = ?", opt.ApplyId, opt.UserId).
+		Delete(&postgresModel.ContactRequest{}, "id = ? AND friend_id = ?", opt.ApplyId, opt.UserId).
 		Error; err != nil {
 		return err
 	}
