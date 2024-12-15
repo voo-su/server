@@ -107,6 +107,14 @@ message LoginMessageRequest{
     string address = 3;
 }
 
+message LocationMessageRequest{
+    MessageReceiver receiver = 1;
+    string type = 2;
+    string longitude = 3 [(tagger.tags) = "binding:\"required\""];
+    string latitude = 4 [(tagger.tags) = "binding:\"required\""];
+    string description = 5 [(tagger.tags) = "binding:\"required\""];
+}
+
 message KeyboardMessage{
     message Data{
         int32 sender_id = 1;

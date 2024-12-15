@@ -22,6 +22,7 @@ func (h *Handler) onPublish(ctx context.Context, client socket.IClient, data []b
 		publishMapping["file"] = h.onFileMessage
 		publishMapping["sticker"] = h.onStickerMessage
 		publishMapping["code"] = h.onCodeMessage
+		publishMapping["location"] = h.onLocationMessage
 	}
 	val, err := sonic.Get(data, "content.type")
 	if err == nil {
@@ -64,7 +65,10 @@ func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data
 	if len(in.AckId) == 0 {
 		return
 	}
-	if err = client.Write(&socket.ClientResponse{Sid: in.AckId, Event: "ack"}); err != nil {
+	if err = client.Write(&socket.ClientResponse{
+		Sid:   in.AckId,
+		Event: "ack",
+	}); err != nil {
 		log.Printf("Ошибка подтверждения в чате при получении текстового сообщения: %s", err.Error())
 	}
 }
@@ -145,15 +149,14 @@ func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data
 		return
 	}
 
-	err := h.MessageUseCase.SendCode(ctx, client.Uid(), &v1Pb.CodeMessageRequest{
+	if err := h.MessageUseCase.SendCode(ctx, client.Uid(), &v1Pb.CodeMessageRequest{
 		Lang: m.Content.Lang,
 		Code: m.Content.Code,
 		Receiver: &v1Pb.MessageReceiver{
 			DialogType: m.Content.Receiver.DialogType,
 			ReceiverId: m.Content.Receiver.ReceiverId,
 		},
-	})
-	if err != nil {
+	}); err != nil {
 		log.Printf("Ошибка в чате при получении текстового сообщения: %s", err.Error())
 		return
 	}
@@ -161,7 +164,26 @@ func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data
 	if len(m.AckId) == 0 {
 		return
 	}
-	if err = client.Write(&socket.ClientResponse{Sid: m.AckId, Event: "ack"}); err != nil {
+	if err := client.Write(&socket.ClientResponse{
+		Sid:   m.AckId,
+		Event: "ack",
+	}); err != nil {
 		log.Printf("Ошибка подтверждения в чате при получении текстового сообщения: %s", err.Error())
 	}
+}
+
+type LocationMessage struct {
+	MsgId   string                      `json:"msg_id"`
+	Event   string                      `json:"event"`
+	Content v1Pb.LocationMessageRequest `json:"content"`
+}
+
+func (h *Handler) onLocationMessage(_ context.Context, _ socket.IClient, data []byte) {
+	var m LocationMessage
+	if err := json.Unmarshal(data, &m); err != nil {
+		log.Println("Ошибка в чате при обработке сообщения с местоположением: ", err)
+		return
+	}
+
+	fmt.Println("[onLocationMessage] Новое сообщение ", string(data))
 }

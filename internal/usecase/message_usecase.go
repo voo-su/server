@@ -52,6 +52,7 @@ type IMessageUseCase interface {
 	GetDialogRecords(ctx context.Context, opt *QueryDialogRecordsOpt) ([]*DialogRecordsItem, error)
 	GetDialogRecord(ctx context.Context, recordId int64) (*DialogRecordsItem, error)
 	GetMessageByRecordId(ctx context.Context, recordId int) (*postgresModel.Message, error)
+	SendLocation(ctx context.Context, uid int, req *v1Pb.LocationMessageRequest) error
 }
 
 var _ IMessageUseCase = (*MessageUseCase)(nil)
@@ -1070,4 +1071,19 @@ func (m *MessageUseCase) GetMessageByRecordId(ctx context.Context, recordId int)
 	}
 
 	return record, nil
+}
+
+func (m *MessageUseCase) SendLocation(ctx context.Context, uid int, req *v1Pb.LocationMessageRequest) error {
+	data := &postgresModel.Message{
+		DialogType: int(req.Receiver.DialogType),
+		MsgType:    constant.ChatMsgTypeLocation,
+		UserId:     uid,
+		ReceiverId: int(req.Receiver.ReceiverId),
+		Extra: jsonutil.Encode(&entity.DialogRecordExtraLocation{
+			Longitude:   req.Longitude,
+			Latitude:    req.Latitude,
+			Description: req.Description,
+		}),
+	}
+	return m.save(ctx, data)
 }
