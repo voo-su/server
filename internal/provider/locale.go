@@ -5,5 +5,8 @@ import (
 )
 
 func NewLocale() locale.ILocale {
-	return locale.NewLocale()
+	return locale.NewLocale([]string{
+		"internal/locale/ru.json",
+		"internal/locale/en.json",
+	})
 }

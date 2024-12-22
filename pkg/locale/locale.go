@@ -14,23 +14,25 @@ type ILocale interface {
 var _ ILocale = (*Locale)(nil)
 
 type Locale struct {
-	bundle *i18n.Bundle
+	Bundle *i18n.Bundle
 }
 
-func NewLocale() *Locale {
+func NewLocale(paths []string) *Locale {
 	bundle := i18n.NewBundle(language.Russian)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
-	_, err := bundle.LoadMessageFile("internal/locale/ru.json")
-	if err != nil {
-		log.Fatal(err)
+	for _, path := range paths {
+		_, err := bundle.LoadMessageFile(path)
+		if err != nil {
+			break
+		}
 	}
 
-	return &Locale{bundle: bundle}
+	return &Locale{Bundle: bundle}
 }
 
 func (l *Locale) Localize(key string) string {
-	local := i18n.NewLocalizer(l.bundle, "ru")
+	local := i18n.NewLocalizer(l.Bundle, "ru")
 	message, err := local.Localize(&i18n.LocalizeConfig{
 		MessageID: key,
 	})
