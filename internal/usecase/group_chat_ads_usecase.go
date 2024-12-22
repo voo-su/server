@@ -6,19 +6,23 @@ import (
 	"voo.su/internal/infrastructure"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/timeutil"
 )
 
 type GroupChatAdsUseCase struct {
-	*infrastructure.Source
+	Locale           locale.ILocale
+	Source           *infrastructure.Source
 	GroupChatAdsRepo *postgresRepo.GroupChatAdsRepository
 }
 
 func NewGroupChatAdsUseCase(
+	locale locale.ILocale,
 	source *infrastructure.Source,
 	groupChatAdsRepo *postgresRepo.GroupChatAdsRepository,
 ) *GroupChatAdsUseCase {
 	return &GroupChatAdsUseCase{
+		Locale:           locale,
 		Source:           source,
 		GroupChatAdsRepo: groupChatAdsRepo,
 	}

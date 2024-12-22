@@ -2,7 +2,7 @@ package socket
 
 import "github.com/bwmarrin/snowflake"
 
-type IdGenerator interface {
+type IIdGenerator interface {
 	IdGen() int64
 }
 
@@ -10,7 +10,7 @@ type SnowflakeGenerator struct {
 	Snowflake *snowflake.Node
 }
 
-var defaultIdGenerator IdGenerator
+var defaultIdGenerator IIdGenerator
 
 func init() {
 	node, err := snowflake.NewNode(1)

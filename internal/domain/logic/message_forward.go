@@ -3,25 +3,31 @@ package logic
 import (
 	"context"
 	"errors"
-	"gorm.io/gorm"
 	"strings"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
+	"voo.su/internal/infrastructure"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/strutil"
 )
 
-type MessageForwardLogic struct {
-	DB           *gorm.DB
+type MessageForward struct {
+	Locale       locale.ILocale
+	Source       *infrastructure.Source
 	SequenceRepo *postgresRepo.SequenceRepository
 }
 
-func NewMessageForwardLogic(db *gorm.DB, sequence *postgresRepo.SequenceRepository) *MessageForwardLogic {
-	return &MessageForwardLogic{
-		DB:           db,
+func NewMessageForward(
+	locale locale.ILocale,
+	source *infrastructure.Source,
+	sequence *postgresRepo.SequenceRepository) *MessageForward {
+	return &MessageForward{
+		Locale:       locale,
+		Source:       source,
 		SequenceRepo: sequence,
 	}
 }
@@ -32,18 +38,19 @@ type ForwardRecord struct {
 	DialogType int
 }
 
-func (m *MessageForwardLogic) Verify(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error {
-	query := m.DB.WithContext(ctx).Model(&postgresModel.Message{})
-	query.Where("id in ?", req.MessageIds)
+func (m *MessageForward) Verify(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error {
+	query := m.Source.Postgres().WithContext(ctx).
+		Model(&postgresModel.Message{}).
+		Where("id in ?", req.MessageIds)
 	if req.Receiver.DialogType == constant.ChatPrivateMode {
-		subWhere := m.DB.Where("user_id = ? AND receiver_id = ?", uid, req.Receiver.ReceiverId)
+		subWhere := m.Source.Postgres().Where("user_id = ? AND receiver_id = ?", uid, req.Receiver.ReceiverId)
 		subWhere.Or("user_id = ? AND receiver_id = ?", req.Receiver.ReceiverId, uid)
 		query.Where(subWhere)
 	}
 
-	query.Where("dialog_type = ?", req.Receiver.DialogType)
-	query.Where("msg_type in ?", []int{1, 2, 3, 4, 5, 6, 7, 8, constant.ChatMsgTypeForward})
-	query.Where("is_revoke = ?", 0)
+	query.Where("dialog_type = ?", req.Receiver.DialogType).
+		Where("msg_type in ?", []int{1, 2, 3, 4, 5, 6, 7, 8, constant.ChatMsgTypeForward}).
+		Where("is_revoke = ?", 0)
 
 	var count int64
 	if err := query.Count(&count).Error; err != nil {
@@ -56,13 +63,19 @@ func (m *MessageForwardLogic) Verify(ctx context.Context, uid int, req *v1Pb.For
 	return nil
 }
 
-func (m *MessageForwardLogic) MultiMergeForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) ([]*ForwardRecord, error) {
+func (m *MessageForward) MultiMergeForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) ([]*ForwardRecord, error) {
 	receives := make([]map[string]int, 0)
 	for _, userId := range req.Uids {
-		receives = append(receives, map[string]int{"receiver_id": int(userId), "dialog_type": 1})
+		receives = append(receives, map[string]int{
+			"receiver_id": int(userId),
+			"dialog_type": 1,
+		})
 	}
 	for _, gid := range req.Gids {
-		receives = append(receives, map[string]int{"receiver_id": int(gid), "dialog_type": 2})
+		receives = append(receives, map[string]int{
+			"receiver_id": int(gid),
+			"dialog_type": 2,
+		})
 	}
 
 	tmpRecords, err := m.aggregation(ctx, req)
@@ -97,7 +110,7 @@ func (m *MessageForwardLogic) MultiMergeForward(ctx context.Context, uid int, re
 		}
 		records = append(records, data)
 	}
-	if err := m.DB.WithContext(ctx).Create(records).Error; err != nil {
+	if err := m.Source.Postgres().WithContext(ctx).Create(records).Error; err != nil {
 		return nil, err
 	}
 
@@ -113,11 +126,11 @@ func (m *MessageForwardLogic) MultiMergeForward(ctx context.Context, uid int, re
 	return list, nil
 }
 
-func (m *MessageForwardLogic) MultiSplitForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) ([]*ForwardRecord, error) {
+func (m *MessageForward) MultiSplitForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) ([]*ForwardRecord, error) {
 	var (
 		receives = make([]map[string]int, 0)
 		records  = make([]*postgresModel.Message, 0)
-		db       = m.DB.WithContext(ctx)
+		db       = m.Source.Postgres().WithContext(ctx)
 	)
 	for _, userId := range req.Uids {
 		receives = append(receives, map[string]int{
@@ -181,16 +194,17 @@ type forwardItem struct {
 	Username string `json:"username"`
 }
 
-func (m *MessageForwardLogic) aggregation(ctx context.Context, req *v1Pb.ForwardMessageRequest) ([]map[string]any, error) {
-	rows := make([]*forwardItem, 0, 3)
-	query := m.DB.WithContext(ctx).Table("messages")
-	query.Joins("LEFT JOIN users on users.id = messages.user_id")
+func (m *MessageForward) aggregation(ctx context.Context, req *v1Pb.ForwardMessageRequest) ([]map[string]any, error) {
 	ids := req.MessageIds
 	if len(ids) > 3 {
 		ids = ids[:3]
 	}
 
-	query.Where("messages.id in ?", ids)
+	query := m.Source.Postgres().WithContext(ctx).
+		Table("messages").
+		Joins("LEFT JOIN users ON users.id = messages.user_id").
+		Where("messages.id IN ?", ids)
+	rows := make([]*forwardItem, 0, 3)
 	if err := query.Limit(3).Scan(&rows).Error; err != nil {
 		return nil, err
 	}
@@ -204,17 +218,17 @@ func (m *MessageForwardLogic) aggregation(ctx context.Context, req *v1Pb.Forward
 		case constant.ChatMsgTypeText:
 			item["text"] = strutil.MtSubstr(strings.TrimSpace(row.Content), 0, 30)
 		case constant.ChatMsgTypeCode:
-			item["text"] = "Сообщение с кодом"
+			item["text"] = m.Locale.Localize("message_with_code")
 		case constant.ChatMsgTypeImage:
-			item["text"] = "Фотография"
+			item["text"] = m.Locale.Localize("photo")
 		case constant.ChatMsgTypeAudio:
-			item["text"] = "Аудиозапись"
+			item["text"] = m.Locale.Localize("audio_recording")
 		case constant.ChatMsgTypeVideo:
-			item["text"] = "Видео"
+			item["text"] = m.Locale.Localize("video")
 		case constant.ChatMsgTypeFile:
-			item["text"] = "Файл"
+			item["text"] = m.Locale.Localize("file")
 		case constant.ChatMsgTypeLocation:
-			item["text"] = "Сообщение с местоположением"
+			item["text"] = m.Locale.Localize("location_message")
 		}
 		data = append(data, item)
 	}

@@ -17,7 +17,8 @@ func NewProjectTaskCoexecutorRepository(db *gorm.DB) *ProjectTaskCoexecutorRepos
 
 func (p *ProjectTaskCoexecutorRepository) GetCoexecutorIds(ctx context.Context, taskId int64) []int {
 	var ids []int
-	_ = p.Repo.Model(ctx).Select("member_id").
+	_ = p.Repo.Model(ctx).
+		Select("member_id").
 		Where("task_id = ?", taskId).
 		Scan(&ids)
 

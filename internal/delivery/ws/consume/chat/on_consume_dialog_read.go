@@ -18,7 +18,7 @@ type ConsumeDialogRead struct {
 func (h *Handler) onConsumeDialogRead(ctx context.Context, body []byte) {
 	var in ConsumeDialogRead
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeContactApply Ошибка при декодировании: %s", err.Error())
+		logger.Errorf("onConsumeContactApply json decode err: %s", err.Error())
 		return
 	}
 

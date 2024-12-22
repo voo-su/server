@@ -15,7 +15,9 @@ type MessageCacheRepository struct {
 }
 
 func NewMessageCacheRepository(rds *redis.Client) *MessageCacheRepository {
-	return &MessageCacheRepository{rds}
+	return &MessageCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (m *MessageCacheRepository) Set(ctx context.Context, dialogType int, sender int, receive int, message *model.LastCacheMessage) error {

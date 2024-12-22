@@ -11,7 +11,7 @@ func LoggingServerInterceptor(ctx context.Context, req interface{}, info *grpc.U
 	start := time.Now()
 	h, err := handler(ctx, req)
 
-	grpclog.Infof("Запрос - Метод: %s \t Длительность:%s \t Ошибка:%v \n", info.FullMethod, time.Since(start), err)
+	grpclog.Infof("Request - Method: %s \t Duration: %s \t Error: %v \n", info.FullMethod, time.Since(start), err)
 
 	return h, err
 }

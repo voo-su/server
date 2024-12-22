@@ -10,12 +10,14 @@ import (
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/timeutil"
 )
 
 type GroupChat struct {
+	Locale                 locale.ILocale
 	GroupChatUseCase       *usecase.GroupChatUseCase
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
 	ChatUseCase            *usecase.ChatUseCase
@@ -38,7 +40,7 @@ func (g *GroupChat) Create(ctx *core.Context) error {
 		MemberIds: sliceutil.ParseIds(params.GetIds()),
 	})
 	if err != nil {
-		return ctx.ErrorBusiness("Не удалось создать групповой чат, попробуйте позже" + err.Error())
+		return ctx.ErrorBusiness(g.Locale.Localize("chat_creation_failed"))
 	}
 
 	return ctx.Success(&v1Pb.GroupChatCreateResponse{GroupId: int32(gid)})
@@ -52,27 +54,27 @@ func (g *GroupChat) Invite(ctx *core.Context) error {
 
 	key := fmt.Sprintf("group-join:%d", params.GroupId)
 	if !g.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 20) {
-		return ctx.ErrorBusiness("Ошибка сети, повторите попытку позже")
+		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
 	}
 
 	defer g.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка сети, повторите попытку позже")
+		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
 	}
 
 	if group != nil && group.IsDismiss == 1 {
-		return ctx.ErrorBusiness("Эта группа была расформирована")
+		return ctx.ErrorBusiness(g.Locale.Localize("group_dissolved"))
 	}
 
 	uid := ctx.UserId()
 	uids := sliceutil.Unique(sliceutil.ParseIds(params.Ids))
 	if len(uids) == 0 {
-		return ctx.ErrorBusiness("Список приглашенных друзей не может быть пустым")
+		return ctx.ErrorBusiness(g.Locale.Localize("invited_friends_empty"))
 	}
 
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), uid, true) {
-		return ctx.ErrorBusiness("Вы не являетесь участником группы и не имеете права приглашать друзей")
+		return ctx.ErrorBusiness(g.Locale.Localize("not_group_member_invite"))
 	}
 
 	if err := g.GroupChatUseCase.Invite(ctx.Ctx(), &usecase.GroupInviteOpt{
@@ -80,7 +82,7 @@ func (g *GroupChat) Invite(ctx *core.Context) error {
 		GroupId:   int(params.GroupId),
 		MemberIds: uids,
 	}); err != nil {
-		return ctx.ErrorBusiness("Не удалось пригласить друзей в групповой чат" + err.Error())
+		return ctx.ErrorBusiness(g.Locale.Localize("invite_friends_failed") + err.Error())
 	}
 
 	return ctx.Success(&v1Pb.GroupChatInviteResponse{})
@@ -111,16 +113,16 @@ func (g *GroupChat) Setting(ctx *core.Context) error {
 
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка сети, повторите попытку позже")
+		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
 	}
 
 	if group != nil && group.IsDismiss == 1 {
-		return ctx.ErrorBusiness("Эта группа была расформирована")
+		return ctx.ErrorBusiness(g.Locale.Localize("group_dissolved"))
 	}
 
 	uid := ctx.UserId()
 	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
+		return ctx.ErrorBusiness(g.Locale.Localize("no_permission_for_action"))
 	}
 
 	if err := g.GroupChatUseCase.Update(ctx.Ctx(), &usecase.GroupUpdateOpt{
@@ -133,7 +135,7 @@ func (g *GroupChat) Setting(ctx *core.Context) error {
 	}
 
 	//_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
-	//	Content: "Владелец группы или администратор изменили информацию о группе",
+	//	Content: g.Locale.Localize("group_info_changed_by_owner_or_admin"),
 	//	Receiver: &v1Pb.MessageReceiver{
 	//		DialogType: constant.ChatPrivateMode,
 	//		ReceiverId: params.GroupId,
@@ -156,7 +158,7 @@ func (g *GroupChat) Get(ctx *core.Context) error {
 	}
 
 	if groupInfo.Id == 0 {
-		return ctx.ErrorBusiness("Данные не существуют")
+		return ctx.ErrorBusiness(g.Locale.Localize("data_not_found"))
 	}
 
 	resp := &v1Pb.GroupChatDetailResponse{
@@ -241,7 +243,7 @@ func (g *GroupChat) Members(ctx *core.Context) error {
 
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка сети, попробуйте позже")
+		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
 	}
 
 	if group != nil && group.IsDismiss == 1 {
@@ -249,7 +251,7 @@ func (g *GroupChat) Members(ctx *core.Context) error {
 	}
 
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), ctx.UserId(), false) {
-		return ctx.ErrorBusiness("Не являетесь членом группы и не имеете права просматривать список участников")
+		return ctx.ErrorBusiness(g.Locale.Localize("not_member_cannot_view_participants"))
 	}
 
 	list := g.GroupChatMemberUseCase.MemberRepo.GetMembers(ctx.Ctx(), int(params.GroupId))
@@ -278,7 +280,7 @@ func (g *GroupChat) RemoveMembers(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
+		return ctx.ErrorBusiness(g.Locale.Localize("no_permission_for_action"))
 	}
 
 	err := g.GroupChatUseCase.RemoveMember(ctx.Ctx(), &usecase.GroupRemoveMembersOpt{
@@ -302,7 +304,7 @@ func (g *GroupChat) AssignAdmin(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness("Отсутствуют права доступа")
+		return ctx.ErrorBusiness(g.Locale.Localize("access_rights_missing"))
 	}
 
 	leader := 0
@@ -311,8 +313,8 @@ func (g *GroupChat) AssignAdmin(ctx *core.Context) error {
 	}
 
 	if err := g.GroupChatMemberUseCase.SetLeaderStatus(ctx.Ctx(), int(params.GroupId), int(params.UserId), leader); err != nil {
-		logger.Errorf("Не удалось установить информацию администратора:%s", err.Error())
-		return ctx.ErrorBusiness("Не удалось установить информацию администратора!")
+		logger.Errorf("%s:%s", g.Locale.Localize("failed_to_set_admin_info"), err.Error())
+		return ctx.ErrorBusiness(g.Locale.Localize("failed_to_set_admin_info"))
 	}
 
 	return ctx.Success(nil)
@@ -326,14 +328,14 @@ func (g *GroupChat) Dismiss(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness("У вас нет прав на расформирование группы")
+		return ctx.ErrorBusiness(g.Locale.Localize("no_permission_to_dissolve_group"))
 	}
 	if err := g.GroupChatUseCase.Dismiss(ctx.Ctx(), int(params.GroupId), ctx.UserId()); err != nil {
-		return ctx.ErrorBusiness("Не удалось расформировать группу")
+		return ctx.ErrorBusiness(g.Locale.Localize("group_dissolution_failed"))
 	}
 
 	_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
-		Content: "Группа была расформирована владельцем группы",
+		Content: g.Locale.Localize("group_dissolved_by_owner"),
 		Receiver: &v1Pb.MessageReceiver{
 			DialogType: constant.ChatGroupMode,
 			ReceiverId: params.GroupId,
@@ -352,14 +354,14 @@ func (g *GroupChat) Mute(ctx *core.Context) error {
 	uid := ctx.UserId()
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка сети. Пожалуйста, попробуйте еще раз")
+		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
 	}
 
 	if group.IsDismiss == 1 {
-		return ctx.ErrorBusiness("Эта группа была расформирована")
+		return ctx.ErrorBusiness(g.Locale.Localize("group_dissolved"))
 	}
 	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness("У вас нет прав доступа")
+		return ctx.ErrorBusiness(g.Locale.Localize("access_rights_missing"))
 	}
 
 	data := make(map[string]any)
@@ -371,7 +373,7 @@ func (g *GroupChat) Mute(ctx *core.Context) error {
 
 	affected, err := g.GroupChatUseCase.GroupChatRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.GroupId)
 	if err != nil {
-		return ctx.Error("Серверная ошибка. Пожалуйста, попробуйте еще раз")
+		return ctx.Error(g.Locale.Localize("network_error"))
 	}
 	if affected == 0 {
 		return ctx.Success(v1Pb.GroupChatMuteResponse{})
@@ -420,15 +422,15 @@ func (g *GroupChat) Overt(ctx *core.Context) error {
 	uid := ctx.UserId()
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка сети. Пожалуйста, попробуйте еще раз")
+		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
 	}
 
 	if group.IsDismiss == 1 {
-		return ctx.ErrorBusiness("Эта группа была расформирована")
+		return ctx.ErrorBusiness(g.Locale.Localize("group_dissolved"))
 	}
 
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness("У вас нет прав доступа")
+		return ctx.ErrorBusiness(g.Locale.Localize("access_rights_missing"))
 	}
 
 	data := make(map[string]any)
@@ -440,7 +442,7 @@ func (g *GroupChat) Overt(ctx *core.Context) error {
 
 	_, err = g.GroupChatUseCase.GroupChatRepo.UpdateWhere(ctx.Ctx(), data, "id = ?", params.GroupId)
 	if err != nil {
-		return ctx.Error("Серверная ошибка. Пожалуйста, попробуйте еще раз")
+		return ctx.Error(g.Locale.Localize("network_error"))
 	}
 
 	return ctx.Success(v1Pb.GroupChatOvertResponse{})

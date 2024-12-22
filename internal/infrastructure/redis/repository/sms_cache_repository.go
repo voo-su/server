@@ -12,8 +12,10 @@ type SmsCacheRepository struct {
 	Rds *redis.Client
 }
 
-func NewSmsCacheRepository(redis *redis.Client) *SmsCacheRepository {
-	return &SmsCacheRepository{redis}
+func NewSmsCacheRepository(rds *redis.Client) *SmsCacheRepository {
+	return &SmsCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (s *SmsCacheRepository) Set(ctx context.Context, channel string, token string, code string, exp time.Duration) error {

@@ -7,18 +7,22 @@ import (
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
+	"voo.su/pkg/locale"
 )
 
 type ContactUseCase struct {
-	*infrastructure.Source
+	Locale      locale.ILocale
+	Source      *infrastructure.Source
 	ContactRepo *postgresRepo.ContactRepository
 }
 
 func NewContactUseCase(
+	locale locale.ILocale,
 	source *infrastructure.Source,
 	contactRepo *postgresRepo.ContactRepository,
 ) *ContactUseCase {
 	return &ContactUseCase{
+		Locale:      locale,
 		Source:      source,
 		ContactRepo: contactRepo,
 	}
@@ -61,7 +65,7 @@ func (c *ContactUseCase) Delete(ctx context.Context, uid, friendId int) error {
 		return err
 	}
 
-	return c.Source.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	return c.Source.Postgres().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if find.FolderId > 0 {
 			if err := tx.Table("contact_folders").
 				Where("id = ? AND user_id = ?", find.FolderId, uid).

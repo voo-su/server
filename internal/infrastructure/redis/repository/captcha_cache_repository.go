@@ -11,8 +11,10 @@ type CaptchaCacheRepository struct {
 	Rds *redis.Client
 }
 
-func NewCaptchaCacheRepository(redis *redis.Client) *CaptchaCacheRepository {
-	return &CaptchaCacheRepository{Rds: redis}
+func NewCaptchaCacheRepository(rds *redis.Client) *CaptchaCacheRepository {
+	return &CaptchaCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (c *CaptchaCacheRepository) Set(id string, value string) error {

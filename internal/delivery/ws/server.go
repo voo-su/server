@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/socket"
 
 	"github.com/gin-gonic/gin"
@@ -23,10 +24,11 @@ import (
 	"voo.su/pkg/email"
 )
 
-var ErrServerClosed = errors.New("закрытие сервера")
+var ErrServerClosed = errors.New("server shutdown")
 
 type AppProvider struct {
 	Conf      *config.Config
+	Locale    locale.ILocale
 	Engine    *gin.Engine
 	Coroutine *process.Server
 	Handler   *handler.Handler
@@ -45,8 +47,8 @@ func Run(ctx *cli.Context, app *AppProvider) error {
 		if app.Conf.App.Env == "prod" {
 			_ = emailClient.SendMail(&email.Option{
 				To:      app.Conf.Email.Report,
-				Subject: fmt.Sprintf("%s Проблема с демоном", app.Conf.App.Env),
-				Body:    fmt.Sprintf("Проблема с демоном %s", name),
+				Subject: fmt.Sprintf(app.Locale.Localize("service_start"), app.Conf.App.Env),
+				Body:    fmt.Sprintf(app.Locale.Localize("service_start"), name),
 			})
 		}
 	})
@@ -58,8 +60,8 @@ func Run(ctx *cli.Context, app *AppProvider) error {
 		app.Coroutine.Start(eg, groupCtx)
 	})
 
-	log.Printf("ID сервера: %s", app.Conf.ServerId())
-	log.Printf("PID сервера: %d", os.Getpid())
+	log.Printf("ID server: %s", app.Conf.ServerId())
+	log.Printf("PID server: %d", os.Getpid())
 	log.Printf("Websocket: %s", app.Conf.Server.Websocket.GetWebsocket())
 	log.Printf("TCP: %s", app.Conf.Server.Tcp.GetTcp())
 
@@ -82,11 +84,11 @@ func start(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppPr
 	})
 	eg.Go(func() (err error) {
 		defer func() {
-			log.Println("Выключение сервера...")
+			log.Println("Shutting down server...")
 			timeCtx, timeCancel := context.WithTimeout(context.TODO(), 3*time.Second)
 			defer timeCancel()
 			if err := server.Shutdown(timeCtx); err != nil {
-				log.Printf("Ошибка остановки Websocket-сервера: %s \n", err)
+				log.Printf("Error stopping Websocket server: %s \n", err)
 			}
 			err = ErrServerClosed
 		}()
@@ -100,10 +102,8 @@ func start(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppPr
 	})
 
 	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) && !errors.Is(err, ErrServerClosed) {
-		log.Fatalf("Принудительное завершение сервера: %s", err)
+		log.Fatalf("Forced server shutdown: %s", err)
 	}
-
-	log.Println("Выход из сервера")
 
 	return nil
 }
@@ -121,7 +121,7 @@ func NewTcpServer(app *AppProvider) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Println("Ошибка при принятии соединения:", err)
+			log.Printf("Error accepting connection: %s", err)
 			continue
 		}
 

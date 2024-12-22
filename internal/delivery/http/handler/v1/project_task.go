@@ -4,11 +4,13 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/timeutil"
 )
 
 type ProjectTask struct {
+	Locale         locale.ILocale
 	ProjectUseCase *usecase.ProjectUseCase
 }
 
@@ -26,7 +28,7 @@ func (p *ProjectTask) Create(ctx *core.Context) error {
 		CreatedBy:   ctx.UserId(),
 	})
 	if err != nil {
-		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже" + err.Error())
+		return ctx.ErrorBusiness(p.Locale.Localize("creation_failed_try_later"))
 	}
 
 	return ctx.Success(&v1Pb.ProjectTaskCreateResponse{
@@ -107,7 +109,7 @@ func (p *ProjectTask) Executor(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if !p.ProjectUseCase.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
-		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать")
+		return ctx.ErrorBusiness(p.Locale.Localize("not_project_member_cannot_invite"))
 	}
 
 	if err := p.ProjectUseCase.TaskExecutor(
@@ -165,16 +167,16 @@ func (p *ProjectTask) TaskCoexecutorInvite(ctx *core.Context) error {
 
 	mids := sliceutil.Unique(sliceutil.ParseIds(params.MemberIds))
 	if len(mids) == 0 {
-		return ctx.ErrorBusiness("Список приглашенных не может быть пустым")
+		return ctx.ErrorBusiness(p.Locale.Localize("invited_list_cannot_be_empty"))
 	}
 
 	uid := ctx.UserId()
 	if !p.ProjectUseCase.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
-		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать")
+		return ctx.ErrorBusiness(p.Locale.Localize("not_project_member_cannot_invite"))
 	}
 
 	if err := p.ProjectUseCase.InviteCoexecutor(ctx.Ctx(), params.TaskId, mids, uid); err != nil {
-		return ctx.ErrorBusiness("Не удалось пригласить: " + err.Error())
+		return ctx.ErrorBusiness(p.Locale.Localize("failed_to_invite") + ": " + err.Error())
 	}
 
 	return ctx.Success(v1Pb.ProjectCoexecutorInviteResponse{})
@@ -209,16 +211,16 @@ func (p *ProjectTask) TaskWatcherInvite(ctx *core.Context) error {
 
 	mids := sliceutil.Unique(sliceutil.ParseIds(params.MemberIds))
 	if len(mids) == 0 {
-		return ctx.ErrorBusiness("Список приглашенных не может быть пустым")
+		return ctx.ErrorBusiness(p.Locale.Localize("invited_list_cannot_be_empty"))
 	}
 
 	uid := ctx.UserId()
 	if !p.ProjectUseCase.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
-		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать")
+		return ctx.ErrorBusiness(p.Locale.Localize("not_project_member_cannot_invite"))
 	}
 
 	if err := p.ProjectUseCase.InviteWatcher(ctx.Ctx(), params.TaskId, mids, uid); err != nil {
-		return ctx.ErrorBusiness("Не удалось пригласить: " + err.Error())
+		return ctx.ErrorBusiness(p.Locale.Localize("failed_to_invite") + ": " + err.Error())
 	}
 
 	return ctx.Success(v1Pb.ProjectWatcherInviteResponse{})

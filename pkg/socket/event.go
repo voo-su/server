@@ -7,8 +7,11 @@ import (
 
 type IEvent interface {
 	Open(client IClient)
+
 	Message(client IClient, data []byte)
+
 	Close(client IClient, code int, text string)
+
 	Destroy(client IClient)
 }
 

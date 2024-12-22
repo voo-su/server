@@ -72,29 +72,3 @@ const (
 	ChatMsgSysGroupAds               = 1111
 	ChatMsgSysGroupTransfer          = 1113
 )
-
-var ChatMsgTypeMapping = map[int]string{
-	ChatMsgTypeImage:                 "Фотография",
-	ChatMsgTypeAudio:                 "Аудиозапись",
-	ChatMsgTypeVideo:                 "Видео",
-	ChatMsgTypeFile:                  "Файл",
-	ChatMsgTypeLocation:              "Местоположение",
-	ChatMsgTypeCard:                  "Контактная информация",
-	ChatMsgTypeForward:               "Пересланное сообщение",
-	ChatMsgTypeLogin:                 "Уведомление о входе в систему",
-	ChatMsgTypeVote:                  "Опрос",
-	ChatMsgTypeCode:                  "Код",
-	ChatMsgTypeMixed:                 "Фотографии",
-	ChatMsgSysText:                   "Системное сообщение",
-	ChatMsgSysGroupCreate:            "Создание группы",
-	ChatMsgSysGroupMemberJoin:        "Присоединение к группе",
-	ChatMsgSysGroupMemberQuit:        "Выход из группы",
-	ChatMsgSysGroupMemberKicked:      "Исключение из группы",
-	ChatMsgSysGroupMessageRevoke:     "Отзыв сообщения",
-	ChatMsgSysGroupDismissed:         "Удаление группы",
-	ChatMsgSysGroupMuted:             "Отключение уведомлений в группе",
-	ChatMsgSysGroupCancelMuted:       "Включение уведомлений в группе",
-	ChatMsgSysGroupMemberMuted:       "Отключение уведомлений для участника группы",
-	ChatMsgSysGroupMemberCancelMuted: "Включение уведомлений для участника группы",
-	ChatMsgSysGroupAds:               "Объявление в группе",
-}

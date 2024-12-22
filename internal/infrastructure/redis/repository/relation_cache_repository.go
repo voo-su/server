@@ -11,8 +11,10 @@ type RelationCacheRepository struct {
 	Rds *redis.Client
 }
 
-func NewRelationCacheRepository(redis *redis.Client) *RelationCacheRepository {
-	return &RelationCacheRepository{Rds: redis}
+func NewRelationCacheRepository(rds *redis.Client) *RelationCacheRepository {
+	return &RelationCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (r *RelationCacheRepository) IsContactRelation(ctx context.Context, uid, uid2 int) error {

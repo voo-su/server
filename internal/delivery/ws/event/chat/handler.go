@@ -43,6 +43,6 @@ func (h *Handler) Call(ctx context.Context, client socket.IClient, event string,
 	if call, ok := h.Handlers[event]; ok {
 		call(ctx, client, data)
 	} else {
-		log.Printf("Событие чата: %s не зарегистрировано обратное вызов\n", event)
+		log.Printf("Chat Call: %s no callback registered\n", event)
 	}
 }

@@ -11,6 +11,7 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/pkg/jwt"
+	"voo.su/pkg/locale"
 
 	clickhouseModel "voo.su/internal/infrastructure/clickhouse/model"
 	clickhouseRepo "voo.su/internal/infrastructure/clickhouse/repository"
@@ -25,6 +26,7 @@ import (
 
 type AuthUseCase struct {
 	Conf                *config.Config
+	Locale              locale.ILocale
 	Email               *email.Email
 	SmsCache            *redisRepo.SmsCacheRepository
 	ContactRepo         *postgresRepo.ContactRepository
@@ -32,10 +34,12 @@ type AuthUseCase struct {
 	GroupChatRepo       *postgresRepo.GroupChatRepository
 	UserRepo            *postgresRepo.UserRepository
 	AuthCodeRepo        *clickhouseRepo.AuthCodeRepository
+	JwtTokenCacheRepo   *redisRepo.JwtTokenCacheRepository
 }
 
 func NewAuthUseCase(
 	conf *config.Config,
+	locale locale.ILocale,
 	email *email.Email,
 	smsCache *redisRepo.SmsCacheRepository,
 	contactRepo *postgresRepo.ContactRepository,
@@ -43,9 +47,11 @@ func NewAuthUseCase(
 	groupChat *postgresRepo.GroupChatRepository,
 	repo *postgresRepo.UserRepository,
 	authCodeRepo *clickhouseRepo.AuthCodeRepository,
+	jwtTokenCacheRepository *redisRepo.JwtTokenCacheRepository,
 ) *AuthUseCase {
 	return &AuthUseCase{
 		Conf:                conf,
+		Locale:              locale,
 		Email:               email,
 		SmsCache:            smsCache,
 		ContactRepo:         contactRepo,
@@ -53,6 +59,7 @@ func NewAuthUseCase(
 		GroupChatRepo:       groupChat,
 		UserRepo:            repo,
 		AuthCodeRepo:        authCodeRepo,
+		JwtTokenCacheRepo:   jwtTokenCacheRepository,
 	}
 }
 
@@ -93,7 +100,7 @@ func (a *AuthUseCase) IsAuth(ctx context.Context, opt *AuthOption) error {
 		if a.ContactRepo.IsFriend(ctx, opt.UserId, opt.ReceiverId, false) {
 			return nil
 		}
-		return errors.New("нет прав на отправку сообщений")
+		return errors.New(a.Locale.Localize("no_permission_to_send_messages"))
 	}
 
 	groupInfo, err := a.GroupChatRepo.FindById(ctx, opt.ReceiverId)
@@ -102,27 +109,27 @@ func (a *AuthUseCase) IsAuth(ctx context.Context, opt *AuthOption) error {
 	}
 
 	if groupInfo.IsDismiss == 1 {
-		return errors.New("группа удалена")
+		return errors.New(a.Locale.Localize("group_deleted"))
 	}
 
 	memberInfo, err := a.GroupChatMemberRepo.FindByUserId(ctx, opt.ReceiverId, opt.UserId)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return errors.New("нет прав на отправку сообщений")
+			return errors.New(a.Locale.Localize("no_permission_to_send_messages"))
 		}
-		return errors.New("система занята, пожалуйста, попробуйте позже")
+		return errors.New(a.Locale.Localize("system_busy_try_later"))
 	}
 
 	if memberInfo.IsQuit == constant.GroupMemberQuitStatusYes {
-		return errors.New("у вас нет прав на отправку сообщений")
+		return errors.New(a.Locale.Localize("no_permission_to_send_messages"))
 	}
 
 	if memberInfo.IsMute == constant.GroupMemberMuteStatusYes {
-		return errors.New("отправка сообщений запрещена администратором или владельцем группы")
+		return errors.New(a.Locale.Localize("message_sending_prohibited_by_admin"))
 	}
 
 	if opt.IsVerifyGroupMute && groupInfo.IsMute == 1 && memberInfo.Leader == 0 {
-		return errors.New("в данной группе включено полное отключение возможности отправки сообщений для всех участников")
+		return errors.New(a.Locale.Localize("group_message_sending_disabled"))
 	}
 
 	return nil
@@ -152,8 +159,8 @@ func (a *AuthUseCase) Send(ctx context.Context, channel string, _email string, t
 	}
 
 	if a.Conf.App.Env == "dev" {
-		fmt.Println("Почта: ", _email)
-		fmt.Println("Код: ", code)
+		fmt.Println("Mail: ", _email)
+		fmt.Println("Code: ", code)
 		return &code, nil
 	}
 
@@ -166,7 +173,7 @@ func (a *AuthUseCase) Send(ctx context.Context, channel string, _email string, t
 
 	if err := a.Email.SendMail(&email.Option{
 		To:      _email,
-		Subject: "Добро пожаловать",
+		Subject: a.Locale.Localize("welcome"),
 		Body:    body,
 	}); err != nil {
 		fmt.Println(err)
@@ -194,5 +201,5 @@ func (a *AuthUseCase) Register(ctx context.Context, email string) (*postgresMode
 		}
 	}
 
-	return nil, errors.New("ошибка")
+	return nil, errors.New(a.Locale.Localize("general_error"))
 }

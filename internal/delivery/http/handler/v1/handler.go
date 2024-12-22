@@ -7,7 +7,6 @@ type Handler struct {
 	ContactRequest     *ContactRequest
 	Chat               *Chat
 	Message            *Message
-	MessagePublish     *Publish
 	Upload             *Upload
 	GroupChat          *GroupChat
 	GroupChatRequest   *GroupChatRequest

@@ -32,7 +32,7 @@ func (g *GroupChatMemberRepository) IsMaster(ctx context.Context, gid, uid int) 
 }
 
 func (g *GroupChatMemberRepository) IsLeader(ctx context.Context, gid, uid int) bool {
-	exist, err := g.Repo.QueryExist(ctx, "group_id = ? AND user_id = ? AND leader in (1,2) AND is_quit = ?", gid, uid, constant.GroupMemberQuitStatusNo)
+	exist, err := g.Repo.QueryExist(ctx, "group_id = ? AND user_id = ? AND leader IN (1,2) AND is_quit = ?", gid, uid, constant.GroupMemberQuitStatusNo)
 
 	return err == nil && exist
 }
@@ -89,7 +89,10 @@ func (g *GroupChatMemberRepository) CountMemberTotal(ctx context.Context, gid in
 
 //func (g *GroupChatMemberRepository) GetMemberRemark(ctx context.Context, groupId int, userId int) string {
 //	var remarks string
-//	g.Repo.Model(ctx).Select("user_card").Where("group_id = ? AND user_id = ?", groupId, userId).Scan(&remarks)
+//	g.Repo.Model(ctx).
+//		Select("user_card").
+//		Where("group_id = ? AND user_id = ?", groupId, userId).
+//		Scan(&remarks)
 //
 //	return remarks
 //}
@@ -127,7 +130,7 @@ func (g *GroupChatMemberRepository) CountGroupMemberNum(ids []int) ([]*CountGrou
 	var items []*CountGroupMember
 	if err := g.Repo.Model(context.TODO()).
 		Select("group_id, count(*) as count").
-		Where("group_id in ? AND is_quit = ?", ids, constant.GroupMemberQuitStatusNo).
+		Where("group_id IN ? AND is_quit = ?", ids, constant.GroupMemberQuitStatusNo).
 		Group("group_id").
 		Scan(&items).
 		Error; err != nil {
@@ -141,7 +144,7 @@ func (g *GroupChatMemberRepository) CheckUserGroup(ids []int, userId int) ([]int
 	items := make([]int, 0)
 	err := g.Repo.Model(context.TODO()).
 		Select("group_id").
-		Where("group_id in ? AND user_id = ? AND is_quit = ?", ids, userId, constant.GroupMemberQuitStatusNo).
+		Where("group_id IN ? AND user_id = ? AND is_quit = ?", ids, userId, constant.GroupMemberQuitStatusNo).
 		Scan(&items).
 		Error
 	if err != nil {

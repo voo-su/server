@@ -4,9 +4,11 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 )
 
 type ContactRequest struct {
+	Locale                locale.ILocale
 	ContactRequestUseCase *usecase.ContactRequestUseCase
 	ContactUseCase        *usecase.ContactUseCase
 	MessageUseCase        usecase.IMessageUseCase
@@ -55,13 +57,13 @@ func (c *ContactRequest) Accept(ctx *core.Context) error {
 	}
 
 	//if err := c.MessageUseCase.SendSystemText(ctx.Ctx(), applyInfo.UserId, &v1Pb.TextMessageRequest{
-	//	Content: "Теперь можете начать общаться",
+	//	Content: c.Locale.Localize("can_start_communicating"),
 	//	Receiver: &v1Pb.MessageReceiver{
 	//		DialogType: constant.ChatPrivateMode,
 	//		ReceiverId: int32(applyInfo.FriendId),
 	//	},
 	//}); err != nil {
-	//	fmt.Println("ошибка", err.Error())
+	//	fmt.Println(err)
 	//}
 
 	return ctx.Success(&v1Pb.ContactRequestAcceptResponse{})

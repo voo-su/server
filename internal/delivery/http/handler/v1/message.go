@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"fmt"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"time"
 	v1Pb "voo.su/api/http/pb/v1"
@@ -10,6 +12,7 @@ import (
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
@@ -17,11 +20,237 @@ import (
 
 type Message struct {
 	Conf                   *config.Config
+	Locale                 locale.ILocale
 	ChatUseCase            *usecase.ChatUseCase
 	AuthUseCase            *usecase.AuthUseCase
 	MessageUseCase         usecase.IMessageUseCase
 	Minio                  minio.IMinio
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
+}
+
+var mapping map[string]func(ctx *core.Context) error
+
+func (m *Message) transfer(ctx *core.Context, typeValue string) error {
+	if mapping == nil {
+		mapping = make(map[string]func(ctx *core.Context) error)
+		mapping["text"] = m.onSendText
+		mapping["image"] = m.onSendImage
+		mapping["voice"] = m.onSendAudio
+		mapping["video"] = m.onSendVideo
+		mapping["file"] = m.onSendFile
+		mapping["vote"] = m.onSendVote
+		mapping["forward"] = m.onSendForward
+		mapping["mixed"] = m.onMixedMessage
+		mapping["sticker"] = m.onSendSticker
+		mapping["code"] = m.onSendCode
+	}
+	if call, ok := mapping[typeValue]; ok {
+		return call(ctx)
+	}
+
+	return nil
+}
+
+type PublishBaseMessageRequest struct {
+	Type     string `json:"type" binding:"required"`
+	Receiver struct {
+		DialogType int `json:"dialog_type" binding:"required,gt=0"`
+		ReceiverId int `json:"receiver_id" binding:"required,gt=0"`
+	} `json:"receiver" binding:"required"`
+}
+
+func (m *Message) Send(ctx *core.Context) error {
+	params := &PublishBaseMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := m.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
+		DialogType:        params.Receiver.DialogType,
+		UserId:            ctx.UserId(),
+		ReceiverId:        params.Receiver.ReceiverId,
+		IsVerifyGroupMute: true,
+	}); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return m.transfer(ctx, params.Type)
+}
+
+func (m *Message) onSendText(ctx *core.Context) error {
+	params := &v1Pb.TextMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := m.MessageUseCase.SendText(ctx.Ctx(), ctx.UserId(), &usecase.SendText{
+		Receiver: usecase.MessageReceiver{
+			DialogType: params.Receiver.DialogType,
+			ReceiverId: params.Receiver.ReceiverId,
+		},
+		Content: params.Content,
+		QuoteId: params.QuoteId,
+	}); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (m *Message) onSendImage(ctx *core.Context) error {
+	params := &v1Pb.ImageMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := m.MessageUseCase.SendImage(ctx.Ctx(), ctx.UserId(), &usecase.SendImage{
+		Receiver: usecase.MessageReceiver{
+			DialogType: params.Receiver.DialogType,
+			ReceiverId: params.Receiver.ReceiverId,
+		},
+		Url:     params.Url,
+		Width:   params.Width,
+		Height:  params.Height,
+		QuoteId: params.QuoteId,
+	}); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (m *Message) onSendVideo(ctx *core.Context) error {
+	params := &v1Pb.VideoMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := m.MessageUseCase.SendVideo(ctx.Ctx(), ctx.UserId(), &usecase.SendVideo{
+		Receiver: usecase.MessageReceiver{
+			DialogType: params.Receiver.DialogType,
+			ReceiverId: params.Receiver.ReceiverId,
+		},
+		Url:      params.Url,
+		Duration: params.Duration,
+		Size:     params.Size,
+		Cover:    params.Cover,
+	}); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (m *Message) onSendAudio(ctx *core.Context) error {
+	params := &v1Pb.AudioMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := m.MessageUseCase.SendAudio(ctx.Ctx(), ctx.UserId(), &usecase.SendAudio{
+		Receiver: usecase.MessageReceiver{
+			DialogType: params.Receiver.DialogType,
+			ReceiverId: params.Receiver.ReceiverId,
+		},
+		Url:  params.Url,
+		Size: params.Size,
+	}); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (m *Message) onSendFile(ctx *core.Context) error {
+	params := &v1Pb.FileMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := m.MessageUseCase.SendFile(ctx.Ctx(), ctx.UserId(), &usecase.SendFile{
+		Receiver: usecase.MessageReceiver{
+			DialogType: params.Receiver.DialogType,
+			ReceiverId: params.Receiver.ReceiverId,
+		},
+		UploadId: params.UploadId,
+	}); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (m *Message) onSendForward(ctx *core.Context) error {
+	params := &v1Pb.ForwardMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := m.MessageUseCase.SendForward(ctx.Ctx(), ctx.UserId(), params); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (m *Message) onSendVote(ctx *core.Context) error {
+	params := &v1Pb.VoteMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if len(params.Options) <= 1 {
+		return ctx.InvalidParams(fmt.Sprintf(m.Locale.Localize("options_count_must_be_greater_than_one"), 1))
+	}
+
+	if len(params.Options) > 6 {
+		return ctx.InvalidParams(fmt.Sprintf(m.Locale.Localize("options_count_cannot_exceed_ten"), 6))
+	}
+
+	if err := m.MessageUseCase.SendVote(ctx.Ctx(), ctx.UserId(), params); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (m *Message) onMixedMessage(ctx *core.Context) error {
+	params := &v1Pb.MixedMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := m.MessageUseCase.SendMixedMessage(ctx.Ctx(), ctx.UserId(), params); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (m *Message) onSendSticker(ctx *core.Context) error {
+	params := &v1Pb.StickerMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := m.MessageUseCase.SendSticker(ctx.Ctx(), ctx.UserId(), params); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
+}
+
+func (m *Message) onSendCode(ctx *core.Context) error {
+	params := &v1Pb.CodeMessageRequest{}
+	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	if err := m.MessageUseCase.SendCode(ctx.Ctx(), ctx.UserId(), params); err != nil {
+		return ctx.ErrorBusiness(err.Error())
+	}
+
+	return ctx.Success(nil)
 }
 
 type VoteMessageRequest struct {
@@ -39,11 +268,11 @@ func (m *Message) Vote(ctx *core.Context) error {
 	}
 
 	if len(params.Options) <= 1 {
-		return ctx.InvalidParams("количество вариантов должно быть больше 1")
+		return ctx.InvalidParams(fmt.Sprintf(m.Locale.Localize("options_count_must_be_greater_than_one"), 1))
 	}
 
 	if len(params.Options) > 10 {
-		return ctx.InvalidParams("количество вариантов не может превышать 10")
+		return ctx.InvalidParams(fmt.Sprintf(m.Locale.Localize("options_count_cannot_exceed_ten"), 10))
 	}
 
 	uid := ctx.UserId()
@@ -157,7 +386,7 @@ func (m *Message) GetRecords(ctx *core.Context) error {
 		if err != nil {
 			items := make([]map[string]any, 0)
 			items = append(items, map[string]any{
-				"content":     "Недостаточно прав для просмотра сообщений в группе",
+				"content":     m.Locale.Localize("insufficient_permissions_to_view_messages"),
 				"created_at":  timeutil.DateTime(),
 				"id":          1,
 				"msg_id":      strutil.NewMsgId(),
@@ -217,11 +446,11 @@ func (m *Message) Download(ctx *core.Context) error {
 	if uid != record.UserId {
 		if record.DialogType == constant.ChatPrivateMode {
 			if record.ReceiverId != uid {
-				return ctx.Forbidden("Отсутствует доступ")
+				return ctx.Forbidden(m.Locale.Localize("access_rights_missing"))
 			}
 		} else {
 			if !m.GroupChatMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), record.ReceiverId, uid, false) {
-				return ctx.Forbidden("Отсутствует доступ")
+				return ctx.Forbidden(m.Locale.Localize("access_rights_missing"))
 			}
 		}
 	}

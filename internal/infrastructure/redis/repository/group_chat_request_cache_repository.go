@@ -11,7 +11,9 @@ type GroupChatRequestCacheRepository struct {
 }
 
 func NewGroupChatRequestCacheRepository(rds *redis.Client) *GroupChatRequestCacheRepository {
-	return &GroupChatRequestCacheRepository{rds}
+	return &GroupChatRequestCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (g *GroupChatRequestCacheRepository) Incr(ctx context.Context, uid int) {

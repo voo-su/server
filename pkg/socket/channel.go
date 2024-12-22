@@ -13,10 +13,15 @@ import (
 
 type IChannel interface {
 	Name() string
+
 	Count() int64
+
 	Client(cid int64) (*Client, bool)
+
 	Write(data *SenderContent)
+
 	addClient(client *Client)
+
 	delClient(client *Client)
 }
 
@@ -49,7 +54,7 @@ func (c *Channel) Write(data *SenderContent) {
 	select {
 	case c.outChan <- data:
 	case <-timer.C:
-		log.Printf("%s Таймаут записи в канал OutChan, длина канала: %d \n", c.name, len(c.outChan))
+		log.Printf("Channel timeout %s, channel length: %d \n", c.name, len(c.outChan))
 	}
 }
 
@@ -59,19 +64,19 @@ func (c *Channel) Start(ctx context.Context) error {
 		timer  = time.NewTicker(15 * time.Second)
 	)
 
-	defer log.Println(fmt.Errorf("выход из канала: %s", c.Name()))
+	defer log.Println(fmt.Errorf("exit channel: %s", c.Name()))
 
 	defer timer.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("выход из канала: %s", c.Name())
+			return fmt.Errorf("exit channel: %s", c.Name())
 		case <-timer.C:
-			fmt.Printf("Канал пустой name:%s unix:%d len:%d\n", c.name, time.Now().Unix(), len(c.outChan))
+			fmt.Printf("Channel name:%s unix:%d len:%d \n", c.name, time.Now().Unix(), len(c.outChan))
 		case val, ok := <-c.outChan:
 			if !ok {
-				return fmt.Errorf("закрытие outchan: %s", c.Name())
+				return fmt.Errorf("outchan closing: %s", c.Name())
 			}
 
 			c.consume(worker, val, func(data *SenderContent, value *Client) {

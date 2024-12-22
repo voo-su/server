@@ -6,9 +6,11 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 )
 
 type Bot struct {
+	Locale         locale.ILocale
 	BotUseCase     *usecase.BotUseCase
 	MessageUseCase usecase.IMessageUseCase
 }
@@ -21,7 +23,7 @@ func (b *Bot) Create(ctx *core.Context) error {
 
 	re := regexp.MustCompile(`(_bot|bot)$`)
 	if !re.MatchString(params.Username) {
-		return ctx.ErrorBusiness(fmt.Sprintf("Имя пользователя '%s' не заканчивается на '_bot' или 'bot'", params.Username))
+		return ctx.ErrorBusiness(fmt.Sprintf(b.Locale.Localize("username_does_not_end_with_bot"), params.Username))
 	}
 
 	token, err := b.BotUseCase.Create(ctx.Ctx(), &usecase.BotCreateOpt{

@@ -3,7 +3,6 @@ package process
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 	"voo.su/internal/config"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
@@ -26,14 +25,13 @@ func NewHealthSubscribe(
 }
 
 func (s *HealthSubscribe) Setup(ctx context.Context) error {
-	log.Println("Запуск подписки на состояние здоровья")
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
 		case <-time.After(10 * time.Second):
 			if err := s.ServerCacheRepo.Set(ctx, s.Conf.ServerId(), time.Now().Unix()); err != nil {
-				logger.Std().Error(fmt.Sprintf("Ошибка отчета о подписке на состояние WebSocket %s", err.Error()))
+				logger.Std().Error(fmt.Sprintf("WebSocket state subscription report error: %s", err.Error()))
 			}
 		}
 	}

@@ -18,7 +18,9 @@ type ServerCacheRepository struct {
 }
 
 func NewServerCacheRepository(rds *redis.Client) *ServerCacheRepository {
-	return &ServerCacheRepository{Rds: rds}
+	return &ServerCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (s *ServerCacheRepository) Set(ctx context.Context, server string, time int64) error {

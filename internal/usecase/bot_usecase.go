@@ -10,29 +10,33 @@ import (
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	"voo.su/pkg/encrypt"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/utils"
 )
 
 type BotUseCase struct {
-	*infrastructure.Source
 	Conf     *config.Config
+	Locale   locale.ILocale
+	Source   *infrastructure.Source
 	BotRepo  *postgresRepo.BotRepository
 	UserRepo *postgresRepo.UserRepository
 	Minio    minio.IMinio
 }
 
 func NewBotUseCase(
-	source *infrastructure.Source,
 	conf *config.Config,
+	locale locale.ILocale,
+	source *infrastructure.Source,
 	botRepo *postgresRepo.BotRepository,
 	userRepo *postgresRepo.UserRepository,
 	minio minio.IMinio,
 ) *BotUseCase {
 	return &BotUseCase{
-		Source:   source,
 		Conf:     conf,
+		Locale:   locale,
+		Source:   source,
 		BotRepo:  botRepo,
 		UserRepo: userRepo,
 		Minio:    minio,
@@ -74,13 +78,14 @@ func (b *BotUseCase) GetBotByToken(ctx context.Context, token string) (*postgres
 }
 
 func (b *BotUseCase) List(ctx context.Context, uid int) ([]*postgresModel.Bot, error) {
-	tx := b.BotRepo.Model(ctx)
-	tx.Select([]string{
+	fields := []string{
 		"bots.id",
 		"bots.name",
 		"bots.token",
-	})
-	tx.Where("bots.creator_id = ?", uid)
+	}
+	tx := b.BotRepo.Model(ctx).
+		Select(fields).
+		Where("bots.creator_id = ?", uid)
 
 	var items []*postgresModel.Bot
 	if err := tx.Scan(&items).Error; err != nil {
@@ -103,9 +108,8 @@ func (b *BotUseCase) Chats(ctx context.Context, botId int) ([]*entity.SearchChat
 		"g.avatar as group_avatar",
 	}
 
-	query := b.Source.Db().WithContext(ctx).Table("chats c")
-	//query.Joins("LEFT JOIN users AS u ON c.receiver_id = u.id AND c.dialog_type = 1")
-	query.Joins("LEFT JOIN group_chats AS g ON c.receiver_id = g.id").
+	query := b.Source.Postgres().WithContext(ctx).Table("chats c").
+		Joins("LEFT JOIN group_chats AS g ON c.receiver_id = g.id").
 		Where("c.user_id = ? AND c.dialog_type = ? AND c.is_delete = ?", botId, 2, 0).
 		Order("c.updated_at DESC")
 

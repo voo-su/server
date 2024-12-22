@@ -9,12 +9,14 @@ import (
 	"voo.su/internal/config"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/timeutil"
 )
 
-type ChatHandler struct {
+type Chat struct {
 	chatPb.UnimplementedChatServiceServer
 	Conf             *config.Config
+	Locale           locale.ILocale
 	ContactUseCase   *usecase.ContactUseCase
 	ChatUseCase      *usecase.ChatUseCase
 	MessageUseCase   usecase.IMessageUseCase
@@ -24,13 +26,15 @@ type ChatHandler struct {
 
 func NewChatHandler(
 	conf *config.Config,
+	locale locale.ILocale,
 	contactUseCase *usecase.ContactUseCase,
 	chatUseCase *usecase.ChatUseCase,
 	messageCache *redisRepo.MessageCacheRepository,
 	unreadCache *redisRepo.UnreadCacheRepository,
-) *ChatHandler {
-	return &ChatHandler{
+) *Chat {
+	return &Chat{
 		Conf:             conf,
+		Locale:           locale,
 		ContactUseCase:   contactUseCase,
 		ChatUseCase:      chatUseCase,
 		MessageCacheRepo: messageCache,
@@ -38,7 +42,7 @@ func NewChatHandler(
 	}
 }
 
-func (c *ChatHandler) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb.GetChatListResponse, error) {
+func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb.GetChatListResponse, error) {
 
 	// TODO
 	uid := 1

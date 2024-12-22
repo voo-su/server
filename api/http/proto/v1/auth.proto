@@ -27,10 +27,10 @@ message AuthVerifyResponse{
     int32 expiresIn = 3;
 }
 
-//message AuthRefreshRequest{}
-//
-//message AuthRefreshResponse{
-//  string type = 1;
-//  string accessToken = 2;
-//  int32 expiresIn = 3;
-//}
+message AuthRefreshRequest{}
+
+message AuthRefreshResponse{
+  string type = 1;
+  string accessToken = 2;
+  int32 expiresIn = 3;
+}

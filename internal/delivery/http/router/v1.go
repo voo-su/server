@@ -17,7 +17,7 @@ func NewV1(router *gin.Engine, conf *config.Config, handler *handler.Handler, se
 		{
 			auth.POST("/login", core.HandlerFunc(handler.V1.Auth.Login))
 			auth.POST("/verify", core.HandlerFunc(handler.V1.Auth.Verify))
-			//auth.POST("/refresh", authorize, core.HandlerFunc(handler.V1.Auth.Refresh))
+			auth.POST("/refresh", authorize, core.HandlerFunc(handler.V1.Auth.Refresh))
 			auth.POST("/logout", authorize, core.HandlerFunc(handler.V1.Auth.Logout))
 		}
 		account := v1.Group("/account").Use(authorize)
@@ -84,7 +84,7 @@ func NewV1(router *gin.Engine, conf *config.Config, handler *handler.Handler, se
 		message := v1.Group("/messages").Use(authorize)
 		{
 			message.GET("", core.HandlerFunc(handler.V1.Message.GetRecords))
-			message.POST("/send", core.HandlerFunc(handler.V1.MessagePublish.Publish))
+			message.POST("/send", core.HandlerFunc(handler.V1.Message.Send))
 			message.GET("/file/download", core.HandlerFunc(handler.V1.Message.Download))
 			message.POST("/delete", core.HandlerFunc(handler.V1.Message.Delete))
 			message.POST("/revoke", core.HandlerFunc(handler.V1.Message.Revoke))

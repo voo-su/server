@@ -18,12 +18,12 @@ type ConsumeDialogRevoke struct {
 func (h *Handler) onConsumeDialogRevoke(ctx context.Context, body []byte) {
 	var in ConsumeDialogRevoke
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeDialogRevoke Ошибка при декодировании: %s", err.Error())
+		logger.Errorf("onConsumeDialogRevoke json decode err: %s", err.Error())
 		return
 	}
 
 	var record postgresModel.Message
-	if err := h.Source.Db().First(&record, "msg_id = ?", in.MsgId).Error; err != nil {
+	if err := h.Source.Postgres().First(&record, "msg_id = ?", in.MsgId).Error; err != nil {
 		return
 	}
 
@@ -53,7 +53,7 @@ func (h *Handler) onConsumeDialogRevoke(ctx context.Context, body []byte) {
 		"sender_id":   record.UserId,
 		"receiver_id": record.ReceiverId,
 		"msg_id":      record.MsgId,
-		"text":        "Данное сообщение удалено",
+		"text":        h.Locale.Localize("message_deleted"),
 	})
 	socket.Session.Chat.Write(c)
 }

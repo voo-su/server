@@ -10,6 +10,7 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/utils"
@@ -17,6 +18,7 @@ import (
 
 type Upload struct {
 	Conf             *config.Config
+	Locale           locale.ILocale
 	Minio            minio.IMinio
 	FileSplitUseCase *usecase.FileSplitUseCase
 }
@@ -24,13 +26,13 @@ type Upload struct {
 func (u *Upload) Avatar(ctx *core.Context) error {
 	file, err := ctx.Context.FormFile("file")
 	if err != nil {
-		return ctx.InvalidParams("Ошибка загрузки файла")
+		return ctx.InvalidParams(u.Locale.Localize("image_upload_error"))
 	}
 
 	stream, _ := minio.ReadMultipartStream(file)
 	object := strutil.GenMediaObjectName("png", 200, 200)
 	if err := u.Minio.Write(u.Conf.Minio.GetBucket(), object, stream); err != nil {
-		return ctx.ErrorBusiness("Ошибка загрузки файла")
+		return ctx.ErrorBusiness(u.Locale.Localize("image_upload_error"))
 	}
 
 	return ctx.Success(v1Pb.UploadAvatarResponse{
@@ -41,7 +43,7 @@ func (u *Upload) Avatar(ctx *core.Context) error {
 func (u *Upload) Upload(ctx *core.Context) error {
 	file, err := ctx.Context.FormFile("file")
 	if err != nil {
-		return ctx.InvalidParams("Не удалось загрузить файл!")
+		return ctx.InvalidParams(u.Locale.Localize("file_upload_error"))
 	}
 
 	var (
@@ -59,7 +61,7 @@ func (u *Upload) Upload(ctx *core.Context) error {
 
 	object := strutil.GenMediaObjectName(ext, width, height)
 	if err := u.Minio.Write(u.Conf.Minio.GetBucket(), object, stream); err != nil {
-		return ctx.ErrorBusiness("Не удалось загрузить файл")
+		return ctx.ErrorBusiness(u.Locale.Localize("file_upload_error"))
 	}
 
 	return ctx.Success(v1Pb.UploadImageResponse{
@@ -97,7 +99,7 @@ func (u *Upload) MultipartUpload(ctx *core.Context) error {
 
 	file, err := ctx.Context.FormFile("file")
 	if err != nil {
-		return ctx.InvalidParams("Ошибка загрузки файла")
+		return ctx.InvalidParams(u.Locale.Localize("file_upload_failure"))
 	}
 
 	if err = u.FileSplitUseCase.MultipartUpload(ctx.Ctx(), &usecase.MultipartUploadOpt{

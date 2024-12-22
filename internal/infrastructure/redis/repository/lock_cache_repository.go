@@ -12,7 +12,9 @@ type RedisLockCacheRepository struct {
 }
 
 func NewRedisLockCacheRepository(rds *redis.Client) *RedisLockCacheRepository {
-	return &RedisLockCacheRepository{rds}
+	return &RedisLockCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (r *RedisLockCacheRepository) Lock(ctx context.Context, name string, expire int) bool {

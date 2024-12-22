@@ -33,12 +33,12 @@ var saltFunc = func() ([]byte, error) {
 	return salt, nil
 }
 
-type HTTPClient interface {
+type IHTTPClient interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
 type Options struct {
-	HTTPClient      HTTPClient
+	HTTPClient      IHTTPClient
 	RecordSize      uint32    // Ограничение размера записи
 	Subscriber      string    // Указывается в VAPID JWT токене
 	Topic           string    // Устанавливает заголовок Topic для группировки сообщений (опционально)
@@ -225,7 +225,7 @@ func SendNotificationWithContext(ctx context.Context, message []byte, s *Subscri
 
 	req.Header.Set("Authorization", vapidAuthHeader)
 
-	var client HTTPClient
+	var client IHTTPClient
 	if options.HTTPClient != nil {
 		client = options.HTTPClient
 	} else {

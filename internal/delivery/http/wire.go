@@ -17,9 +17,9 @@ type AppProvider struct {
 
 var ProviderSet = wire.NewSet(
 	wire.Struct(new(AppProvider), "*"),
-	wire.Struct(new(handler.Handler), "*"),
-
 	router.NewRouter,
+
+	wire.Struct(new(handler.Handler), "*"),
 
 	// v1
 	wire.Struct(new(v1.Handler), "*"),
@@ -30,7 +30,6 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(v1.ContactRequest), "*"),
 	wire.Struct(new(v1.Chat), "*"),
 	wire.Struct(new(v1.Message), "*"),
-	wire.Struct(new(v1.Publish), "*"),
 	wire.Struct(new(v1.GroupChat), "*"),
 	wire.Struct(new(v1.GroupChatRequest), "*"),
 	wire.Struct(new(v1.Sticker), "*"),

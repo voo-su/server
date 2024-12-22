@@ -8,10 +8,12 @@ import (
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/timeutil"
 )
 
 type GroupChatAds struct {
+	Locale              locale.ILocale
 	GroupMemberUseCase  *usecase.GroupChatMemberUseCase
 	GroupChatAdsUseCase *usecase.GroupChatAdsUseCase
 	MessageUseCase      usecase.IMessageUseCase
@@ -25,7 +27,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if !g.GroupMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness("У вас нет прав для выполнения этой операции")
+		return ctx.ErrorBusiness(g.Locale.Localize("no_permission_for_action"))
 	}
 
 	var (
@@ -42,7 +44,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 			IsTop:     int(params.IsTop),
 			IsConfirm: int(params.IsConfirm),
 		})
-		msg = "Успешно добавлено объявление в группу"
+		msg = g.Locale.Localize("announcement_added_successfully")
 	} else {
 		err = g.GroupChatAdsUseCase.Update(ctx.Ctx(), &usecase.GroupChatAdsEditOpt{
 			GroupId:   int(params.GroupId),
@@ -52,7 +54,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 			IsTop:     int(params.IsTop),
 			IsConfirm: int(params.IsConfirm),
 		})
-		msg = "Успешно обновлено объявление группы"
+		msg = g.Locale.Localize("announcement_updated_successfully")
 	}
 	if err != nil {
 		return ctx.ErrorBusiness(err.Error())
@@ -83,7 +85,7 @@ func (g *GroupChatAds) Delete(ctx *core.Context) error {
 	if err := g.GroupChatAdsUseCase.Delete(ctx.Ctx(), int(params.GroupId), int(params.AdsId)); err != nil {
 		return ctx.ErrorBusiness(err.Error())
 	}
-	return ctx.Success(nil, "Успешно удалено объявление группы")
+	return ctx.Success(nil, g.Locale.Localize("announcement_deleted_successfully"))
 }
 
 func (g *GroupChatAds) List(ctx *core.Context) error {
@@ -93,7 +95,7 @@ func (g *GroupChatAds) List(ctx *core.Context) error {
 	}
 
 	if !g.GroupMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), ctx.UserId(), true) {
-		return ctx.ErrorBusiness("У вас нет прав на получение данных")
+		return ctx.ErrorBusiness(g.Locale.Localize("no_permission_for_action"))
 	}
 
 	all, err := g.GroupChatAdsUseCase.GroupChatAdsRepo.GetListAll(ctx.Ctx(), int(params.GroupId))

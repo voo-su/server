@@ -2,4 +2,4 @@ package logic
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewMessageForwardLogic)
+var ProviderSet = wire.NewSet(NewMessageForward)

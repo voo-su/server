@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -50,10 +51,10 @@ func (r *RequestClient) Get(url string, params *url.Values) ([]byte, error) {
 	}
 
 	if r.Debug {
-		fmt.Printf("\n[GET] HTTP Запрос\n")
-		fmt.Printf("URL запроса: %s\n", url)
-		fmt.Printf("Статусный код ответа: %d\n", resp.StatusCode)
-		fmt.Printf("Данные ответа: %s\n\n", string(res))
+		log.Printf("\n[GET] HTTP Запрос\n")
+		log.Printf("URL запроса: %s\n", url)
+		log.Printf("Статусный код ответа: %d\n", resp.StatusCode)
+		log.Printf("Данные ответа: %s\n\n", string(res))
 	}
 
 	return res, nil
@@ -73,11 +74,11 @@ func (r *RequestClient) Post(url string, params *url.Values) ([]byte, error) {
 	}
 
 	if r.Debug {
-		fmt.Printf("\n[POST] HTTP Запрос\n")
-		fmt.Printf("URL запроса: %s\n", url)
-		fmt.Printf("Данные запроса: %s\n", params.Encode())
-		fmt.Printf("Статусный код ответа: %d\n", resp.StatusCode)
-		fmt.Printf("Данные ответа: %s\n\n", string(res))
+		log.Printf("\n[POST] HTTP Запрос\n")
+		log.Printf("URL запроса: %s\n", url)
+		log.Printf("Данные запроса: %s\n", params.Encode())
+		log.Printf("Статусный код ответа: %d\n", resp.StatusCode)
+		log.Printf("Данные ответа: %s\n\n", string(res))
 	}
 
 	return res, nil
@@ -101,11 +102,11 @@ func (r *RequestClient) PostJson(url string, params any) ([]byte, error) {
 	}
 
 	if r.Debug {
-		fmt.Printf("\n[POST] HTTP Запрос\n")
-		fmt.Printf("URL запроса: %s\n", url)
-		fmt.Printf("Данные запроса: %s\n", string(text))
-		fmt.Printf("Статусный код ответа: %d\n", resp.StatusCode)
-		fmt.Printf("Данные ответа: %s\n\n", string(res))
+		log.Printf("\n[POST] HTTP Запрос\n")
+		log.Printf("URL запроса: %s\n", url)
+		log.Printf("Данные запроса: %s\n", string(text))
+		log.Printf("Статусный код ответа: %d\n", resp.StatusCode)
+		log.Printf("Данные ответа: %s\n\n", string(res))
 	}
 
 	return res, nil

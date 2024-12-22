@@ -20,7 +20,7 @@ type ConsumeContactStatus struct {
 func (h *Handler) onConsumeContactStatus(ctx context.Context, body []byte) {
 	var in ConsumeContactStatus
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeContactStatus Ошибка при декодировании: %s", err)
+		logger.Errorf("onConsumeContactStatus json decode err: %s", err)
 		return
 	}
 	contactIds := h.ContactUseCase.GetContactIds(ctx, in.UserId)
@@ -50,12 +50,12 @@ type ConsumeContactApply struct {
 func (h *Handler) onConsumeContactApply(ctx context.Context, body []byte) {
 	var in ConsumeContactApply
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeContactApply Ошибка при декодировании: %s", err.Error())
+		logger.Errorf("onConsumeContactApply json decode err: %s", err.Error())
 		return
 	}
 
 	var apply model.ContactRequest
-	if err := h.ContactUseCase.Db().First(&apply, in.ApplyId).Error; err != nil {
+	if err := h.ContactUseCase.Source.Postgres().First(&apply, in.ApplyId).Error; err != nil {
 		return
 	}
 
@@ -65,7 +65,7 @@ func (h *Handler) onConsumeContactApply(ctx context.Context, body []byte) {
 	}
 
 	var user model.User
-	if err := h.ContactUseCase.Db().First(&user, apply.FriendId).Error; err != nil {
+	if err := h.ContactUseCase.Source.Postgres().First(&user, apply.FriendId).Error; err != nil {
 		return
 	}
 

@@ -17,7 +17,7 @@ type ChatChannel struct {
 func (c *ChatChannel) Conn(ctx *core.Context) error {
 	conn, err := adapter.NewWsAdapter(ctx.Context.Writer, ctx.Context.Request)
 	if err != nil {
-		log.Printf("ошибка подключения к веб-сокету: %s", err.Error())
+		log.Printf("WS Conn error: %s", err.Error())
 		return err
 	}
 

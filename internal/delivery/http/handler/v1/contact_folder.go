@@ -6,9 +6,11 @@ import (
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 )
 
 type ContactFolder struct {
+	Locale               locale.ILocale
 	ContactFolderUseCase *usecase.ContactFolderUseCase
 }
 
@@ -82,7 +84,7 @@ func (c *ContactFolder) Save(ctx *core.Context) error {
 		}
 	}
 
-	err = c.ContactFolderUseCase.Db().Transaction(func(tx *gorm.DB) error {
+	err = c.ContactFolderUseCase.Source.Postgres().Transaction(func(tx *gorm.DB) error {
 		if len(insertItems) > 0 {
 			if err := tx.Create(insertItems).Error; err != nil {
 				return err
@@ -99,13 +101,12 @@ func (c *ContactFolder) Save(ctx *core.Context) error {
 		}
 
 		for _, item := range updateItems {
-			err = tx.Table("contact_folders").
+			if err = tx.Table("contact_folders").
 				Where("id = ? AND user_id = ?", item.Id, uid).
 				Updates(map[string]any{
 					"name": item.Name,
 					"sort": item.Sort,
-				}).Error
-			if err != nil {
+				}).Error; err != nil {
 				return err
 			}
 		}

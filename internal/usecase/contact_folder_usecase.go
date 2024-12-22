@@ -7,20 +7,24 @@ import (
 	"voo.su/internal/infrastructure"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
+	"voo.su/pkg/locale"
 )
 
 type ContactFolderUseCase struct {
-	*infrastructure.Source
+	Locale            locale.ILocale
+	Source            *infrastructure.Source
 	ContactRepo       *postgresRepo.ContactRepository
 	ContactFolderRepo *postgresRepo.ContactFolderRepository
 }
 
 func NewContactFolderUseCase(
+	locale locale.ILocale,
 	source *infrastructure.Source,
 	contactRepo *postgresRepo.ContactRepository,
 	contactFolderRepo *postgresRepo.ContactFolderRepository,
 ) *ContactFolderUseCase {
 	return &ContactFolderUseCase{
+		Locale:            locale,
 		Source:            source,
 		ContactRepo:       contactRepo,
 		ContactFolderRepo: contactFolderRepo,
@@ -35,7 +39,7 @@ func (c *ContactFolderUseCase) Delete(ctx context.Context, id int, uid int) erro
 		}
 
 		if res.RowsAffected == 0 {
-			return errors.New("данные не существуют")
+			return errors.New(c.Locale.Localize("data_not_found"))
 		}
 
 		return tx.Table("contacts").
@@ -47,7 +51,7 @@ func (c *ContactFolderUseCase) Delete(ctx context.Context, id int, uid int) erro
 
 func (c *ContactFolderUseCase) GetUserGroup(ctx context.Context, uid int) ([]*postgresModel.ContactFolder, error) {
 	var items []*postgresModel.ContactFolder
-	if err := c.Source.Db().WithContext(ctx).
+	if err := c.Source.Postgres().WithContext(ctx).
 		Table("contact_folders").
 		Where("user_id = ?", uid).
 		Order("sort ASC").
@@ -65,7 +69,7 @@ func (c *ContactFolderUseCase) MoveGroup(ctx context.Context, uid int, friendId 
 		return err
 	}
 
-	return c.Source.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	return c.Source.Postgres().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if contact.FolderId > 0 {
 			if err := tx.Table("contact_folders").
 				Where("id = ? AND user_id = ?", contact.FolderId, uid).

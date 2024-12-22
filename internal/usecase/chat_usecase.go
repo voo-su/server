@@ -13,26 +13,30 @@ import (
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
 
 type ChatUseCase struct {
-	*infrastructure.Source
+	Locale              locale.ILocale
+	Source              *infrastructure.Source
 	ChatRepo            *postgresRepo.ChatRepository
 	GroupChatMemberRepo *postgresRepo.GroupChatMemberRepository
 }
 
 func NewChatUseCase(
+	locale locale.ILocale,
 	source *infrastructure.Source,
 	chatRepo *postgresRepo.ChatRepository,
 	groupChatMemberRepo *postgresRepo.GroupChatMemberRepository,
 ) *ChatUseCase {
 	return &ChatUseCase{
-		source,
-		chatRepo,
-		groupChatMemberRepo,
+		Locale:              locale,
+		Source:              source,
+		ChatRepo:            chatRepo,
+		GroupChatMemberRepo: groupChatMemberRepo,
 	}
 }
 
@@ -53,14 +57,16 @@ func (c *ChatUseCase) List(ctx context.Context, uid int) ([]*entity.SearchChat, 
 		"u.surname",
 	}
 
-	query := c.Source.Db().WithContext(ctx).Table("chats c").
+	query := c.Source.Postgres().WithContext(ctx).
+		Select(fields).
+		Table("chats c").
 		Joins("LEFT JOIN users AS u ON c.receiver_id = u.id AND c.dialog_type = 1").
 		Joins("LEFT JOIN group_chats AS g ON c.receiver_id = g.id AND c.dialog_type = 2").
 		Where("c.user_id = ? AND c.is_delete = 0", uid).
 		Order("c.updated_at DESC")
 
 	var items []*entity.SearchChat
-	if err := query.Select(fields).Scan(&items).Error; err != nil {
+	if err := query.Scan(&items).Error; err != nil {
 		return nil, err
 	}
 
@@ -89,7 +95,7 @@ func (c *ChatUseCase) Create(ctx context.Context, opt *CreateChatOpt) (*postgres
 		if opt.IsBoot {
 			result.IsBot = 1
 		}
-		c.Source.Db().WithContext(ctx).Create(result)
+		c.Source.Postgres().WithContext(ctx).Create(result)
 	} else {
 		result.IsTop = 0
 		result.IsDelete = 0
@@ -97,7 +103,7 @@ func (c *ChatUseCase) Create(ctx context.Context, opt *CreateChatOpt) (*postgres
 		if opt.IsBoot {
 			result.IsBot = 1
 		}
-		c.Source.Db().WithContext(ctx).Save(result)
+		c.Source.Postgres().WithContext(ctx).Save(result)
 	}
 
 	return result, nil
@@ -120,7 +126,7 @@ type RemoveRecordListOpt struct {
 
 func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordListOpt) error {
 	var (
-		db      = c.Source.Db().WithContext(ctx)
+		db      = c.Source.Postgres().WithContext(ctx)
 		findIds []int64
 		ids     = sliceutil.Unique(sliceutil.ParseIds(opt.RecordIds))
 	)
@@ -142,7 +148,7 @@ func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordLis
 			Pluck("id", &findIds)
 	}
 	if len(ids) != len(findIds) {
-		return errors.New("ошибка удаления")
+		return errors.New(c.Locale.Localize("deletion_error"))
 	}
 
 	items := make([]*postgresModel.MessageDelete, 0, len(ids))
@@ -203,21 +209,21 @@ func (c *ChatUseCase) BatchAddList(ctx context.Context, uid int, values map[stri
 		return
 	}
 
-	c.Source.Db().WithContext(ctx).Exec(fmt.Sprintf("INSERT INTO chats (dialog_type, user_id, receiver_id, created_at, updated_at) VALUES %s ON DUPLICATE KEY UPDATE is_delete = 0, updated_at = '%s'", strings.Join(data, ","), ctime))
+	c.Source.Postgres().WithContext(ctx).Exec(fmt.Sprintf("INSERT INTO chats (dialog_type, user_id, receiver_id, created_at, updated_at) VALUES %s ON DUPLICATE KEY UPDATE is_delete = 0, updated_at = '%s'", strings.Join(data, ","), ctime))
 }
 
 func (c *ChatUseCase) Collect(ctx context.Context, uid int, recordId int) error {
 	var record postgresModel.Message
-	if err := c.Source.Db().First(&record, recordId).Error; err != nil {
+	if err := c.Source.Postgres().First(&record, recordId).Error; err != nil {
 		return err
 	}
 
 	if record.MsgType != constant.ChatMsgTypeImage {
-		return errors.New("это сообщение нельзя добавить в избранное")
+		return errors.New(c.Locale.Localize("cannot_favorite_message"))
 	}
 
 	if record.IsRevoke == 1 {
-		return errors.New("это сообщение нельзя добавить в избранное")
+		return errors.New(c.Locale.Localize("cannot_favorite_message"))
 	}
 
 	if record.DialogType == constant.ChatPrivateMode {
@@ -235,7 +241,7 @@ func (c *ChatUseCase) Collect(ctx context.Context, uid int, recordId int) error 
 		return err
 	}
 
-	return c.Source.Db().Create(&postgresModel.StickerItem{
+	return c.Source.Postgres().Create(&postgresModel.StickerItem{
 		UserId:     uid,
 		Url:        file.Url,
 		FileSuffix: file.Suffix,

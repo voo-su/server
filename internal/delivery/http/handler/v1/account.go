@@ -9,11 +9,13 @@ import (
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/timeutil"
 )
 
 type Account struct {
+	Locale      locale.ILocale
 	UserUseCase *usecase.UserUseCase
 }
 
@@ -44,7 +46,7 @@ func (a *Account) ChangeDetail(ctx *core.Context) error {
 
 	if params.Birthday != "" {
 		if !timeutil.IsDateFormat(params.Birthday) {
-			return ctx.InvalidParams("Неверный формат даты рождения")
+			return ctx.InvalidParams(a.Locale.Localize("invalid_birth_date_format"))
 		}
 	}
 
@@ -58,10 +60,10 @@ func (a *Account) ChangeDetail(ctx *core.Context) error {
 		"birthday": params.Birthday,
 	})
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка при изменении личной информации")
+		return ctx.ErrorBusiness(a.Locale.Localize("personal_info_update_error"))
 	}
 
-	return ctx.Success(nil, "Личная информация успешно изменена")
+	return ctx.Success(nil, a.Locale.Localize("personal_info_updated_success"))
 }
 
 func (a *Account) ChangeUsername(ctx *core.Context) error {
@@ -71,24 +73,24 @@ func (a *Account) ChangeUsername(ctx *core.Context) error {
 	}
 
 	if match, _ := regexp.MatchString("^[a-zA-Z0-9_-]+$", params.Username); !match {
-		return ctx.ErrorBusiness("Имя пользователя содержит недопустимые символы")
+		return ctx.ErrorBusiness(a.Locale.Localize("invalid_username_symbols"))
 	}
 
 	uid := ctx.UserId()
 	var user model.User
 	result := a.UserUseCase.UserRepo.Db.Where("username = ?", params.Username).First(&user)
 	if result.Error != gorm.ErrRecordNotFound && user.Id != uid {
-		return ctx.ErrorBusiness("Имя пользователя уже существует")
+		return ctx.ErrorBusiness(a.Locale.Localize("username_already_exists"))
 	}
 
 	_, err := a.UserUseCase.UserRepo.UpdateById(ctx.Ctx(), ctx.UserId(), map[string]interface{}{
 		"username": params.Username,
 	})
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка")
+		return ctx.ErrorBusiness(a.Locale.Localize("general_error"))
 	}
 
-	return ctx.Success("Успешно")
+	return ctx.Success(a.Locale.Localize("success"))
 }
 
 func (a *Account) Push(ctx *core.Context) error {
@@ -101,11 +103,11 @@ func (a *Account) Push(ctx *core.Context) error {
 
 	var in entity.WebPush
 	if err := json.Unmarshal([]byte(params.Subscription), &in); err != nil {
-		logger.Errorf("Ошибка при декодировании: %s", err)
-		return ctx.ErrorBusiness("Ошибка")
+		logger.Errorf("%s: %s", a.Locale.Localize("decode_error"), err)
+		return ctx.ErrorBusiness(a.Locale.Localize("general_error"))
 	}
 
 	a.UserUseCase.WebPushInit(ctx.Ctx(), int64(uid), in)
 
-	return ctx.Success("Успешно")
+	return ctx.Success(a.Locale.Localize("success"))
 }

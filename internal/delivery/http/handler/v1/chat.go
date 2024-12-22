@@ -10,11 +10,13 @@ import (
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/encrypt"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
 
 type Chat struct {
+	Locale                 locale.ILocale
 	ChatUseCase            *usecase.ChatUseCase
 	ContactUseCase         *usecase.ContactUseCase
 	GroupChatUseCase       *usecase.GroupChatUseCase
@@ -42,12 +44,12 @@ func (c *Chat) Create(ctx *core.Context) error {
 	}
 
 	if params.DialogType == constant.ChatPrivateMode && int(params.ReceiverId) == ctx.UserId() {
-		return ctx.ErrorBusiness("Ошибка создания")
+		return ctx.ErrorBusiness(c.Locale.Localize("creation_error"))
 	}
 
 	key := fmt.Sprintf("dialog:list:%d-%d-%d-%s", uid, params.ReceiverId, params.DialogType, agent)
 	if !c.RedisLockRepo.Lock(ctx.Ctx(), key, 10) {
-		return ctx.ErrorBusiness("Ошибка создания")
+		return ctx.ErrorBusiness(c.Locale.Localize("creation_error"))
 	}
 
 	if c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
@@ -55,7 +57,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 		UserId:     uid,
 		ReceiverId: int(params.ReceiverId),
 	}) != nil {
-		return ctx.ErrorBusiness("Недостаточно прав")
+		return ctx.ErrorBusiness(c.Locale.Localize("insufficient_permissions"))
 	}
 
 	result, err := c.ChatUseCase.Create(ctx.Ctx(), &usecase.CreateChatOpt{

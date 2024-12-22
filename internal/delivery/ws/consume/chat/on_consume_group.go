@@ -25,7 +25,7 @@ type ConsumeGroupApply struct {
 func (h *Handler) onConsumeGroupJoin(ctx context.Context, body []byte) {
 	var in ConsumeGroupJoin
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeGroupJoin Ошибка при декодировании: %s", err.Error())
+		logger.Errorf("onConsumeGroupJoin json decode err: %s", err.Error())
 		return
 	}
 
@@ -54,22 +54,22 @@ func (h *Handler) onConsumeGroupJoin(ctx context.Context, body []byte) {
 func (h *Handler) onConsumeGroupApply(ctx context.Context, body []byte) {
 	var in ConsumeGroupApply
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("[ChatSubscribe] onConsumeGroupApply Unmarshal ошибка: %s", err.Error())
+		logger.Errorf("onConsumeGroupApply json decode err: %s", err.Error())
 		return
 	}
 
 	var groupMember model.GroupChatMember
-	if err := h.Source.Db().First(&groupMember, "group_id = ? AND leader = ?", in.GroupId, 2).Error; err != nil {
+	if err := h.Source.Postgres().First(&groupMember, "group_id = ? AND leader = ?", in.GroupId, 2).Error; err != nil {
 		return
 	}
 
 	var groupDetail model.GroupChat
-	if err := h.Source.Db().First(&groupDetail, in.GroupId).Error; err != nil {
+	if err := h.Source.Postgres().First(&groupDetail, in.GroupId).Error; err != nil {
 		return
 	}
 
 	var user model.User
-	if err := h.Source.Db().First(&user, in.UserId).Error; err != nil {
+	if err := h.Source.Postgres().First(&user, in.UserId).Error; err != nil {
 		return
 	}
 

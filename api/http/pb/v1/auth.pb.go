@@ -241,6 +241,103 @@ func (x *AuthVerifyResponse) GetExpiresIn() int32 {
 	return 0
 }
 
+type AuthRefreshRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *AuthRefreshRequest) Reset() {
+	*x = AuthRefreshRequest{}
+	mi := &file_v1_auth_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthRefreshRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthRefreshRequest) ProtoMessage() {}
+
+func (x *AuthRefreshRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_auth_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthRefreshRequest.ProtoReflect.Descriptor instead.
+func (*AuthRefreshRequest) Descriptor() ([]byte, []int) {
+	return file_v1_auth_proto_rawDescGZIP(), []int{4}
+}
+
+type AuthRefreshResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Type        string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	AccessToken string `protobuf:"bytes,2,opt,name=accessToken,proto3" json:"accessToken,omitempty"`
+	ExpiresIn   int32  `protobuf:"varint,3,opt,name=expiresIn,proto3" json:"expiresIn,omitempty"`
+}
+
+func (x *AuthRefreshResponse) Reset() {
+	*x = AuthRefreshResponse{}
+	mi := &file_v1_auth_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthRefreshResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthRefreshResponse) ProtoMessage() {}
+
+func (x *AuthRefreshResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_auth_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthRefreshResponse.ProtoReflect.Descriptor instead.
+func (*AuthRefreshResponse) Descriptor() ([]byte, []int) {
+	return file_v1_auth_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *AuthRefreshResponse) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *AuthRefreshResponse) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+func (x *AuthRefreshResponse) GetExpiresIn() int32 {
+	if x != nil {
+		return x.ExpiresIn
+	}
+	return 0
+}
+
 var File_v1_auth_proto protoreflect.FileDescriptor
 
 var file_v1_auth_proto_rawDesc = []byte{
@@ -275,8 +372,16 @@ var file_v1_auth_proto_rawDesc = []byte{
 	0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x61, 0x63, 0x63, 0x65,
 	0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1c, 0x0a, 0x09, 0x65, 0x78, 0x70, 0x69, 0x72,
 	0x65, 0x73, 0x49, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x65, 0x78, 0x70, 0x69,
-	0x72, 0x65, 0x73, 0x49, 0x6e, 0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x2f, 0x76, 0x31, 0x3b, 0x76, 0x31,
-	0x5f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x72, 0x65, 0x73, 0x49, 0x6e, 0x22, 0x14, 0x0a, 0x12, 0x41, 0x75, 0x74, 0x68, 0x52, 0x65, 0x66,
+	0x72, 0x65, 0x73, 0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x69, 0x0a, 0x13, 0x41,
+	0x75, 0x74, 0x68, 0x52, 0x65, 0x66, 0x72, 0x65, 0x73, 0x68, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73,
+	0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x61, 0x63, 0x63,
+	0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1c, 0x0a, 0x09, 0x65, 0x78, 0x70, 0x69,
+	0x72, 0x65, 0x73, 0x49, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x65, 0x78, 0x70,
+	0x69, 0x72, 0x65, 0x73, 0x49, 0x6e, 0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x2f, 0x76, 0x31, 0x3b, 0x76,
+	0x31, 0x5f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -291,12 +396,14 @@ func file_v1_auth_proto_rawDescGZIP() []byte {
 	return file_v1_auth_proto_rawDescData
 }
 
-var file_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_v1_auth_proto_goTypes = []any{
-	(*AuthLoginRequest)(nil),   // 0: v1.AuthLoginRequest
-	(*AuthLoginResponse)(nil),  // 1: v1.AuthLoginResponse
-	(*AuthVerifyRequest)(nil),  // 2: v1.AuthVerifyRequest
-	(*AuthVerifyResponse)(nil), // 3: v1.AuthVerifyResponse
+	(*AuthLoginRequest)(nil),    // 0: v1.AuthLoginRequest
+	(*AuthLoginResponse)(nil),   // 1: v1.AuthLoginResponse
+	(*AuthVerifyRequest)(nil),   // 2: v1.AuthVerifyRequest
+	(*AuthVerifyResponse)(nil),  // 3: v1.AuthVerifyResponse
+	(*AuthRefreshRequest)(nil),  // 4: v1.AuthRefreshRequest
+	(*AuthRefreshResponse)(nil), // 5: v1.AuthRefreshResponse
 }
 var file_v1_auth_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -317,7 +424,7 @@ func file_v1_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_v1_auth_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

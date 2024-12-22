@@ -13,13 +13,15 @@ import (
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
 
 type GroupChatUseCase struct {
-	*infrastructure.Source
+	Locale        locale.ILocale
+	Source        *infrastructure.Source
 	GroupChatRepo *postgresRepo.GroupChatRepository
 	MemberRepo    *postgresRepo.GroupChatMemberRepository
 	SequenceRepo  *postgresRepo.SequenceRepository
@@ -27,6 +29,7 @@ type GroupChatUseCase struct {
 }
 
 func NewGroupChatUseCase(
+	locale locale.ILocale,
 	source *infrastructure.Source,
 	groupChatRepo *postgresRepo.GroupChatRepository,
 	memberRepo *postgresRepo.GroupChatMemberRepository,
@@ -34,6 +37,7 @@ func NewGroupChatUseCase(
 	relationCache *redisRepo.RelationCacheRepository,
 ) *GroupChatUseCase {
 	return &GroupChatUseCase{
+		Locale:        locale,
 		Source:        source,
 		GroupChatRepo: groupChatRepo,
 		MemberRepo:    memberRepo,
@@ -65,7 +69,7 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 		MaxNum:      constant.GroupMemberMaxNum,
 	}
 	joinTime := time.Now()
-	err = g.Source.Db().Transaction(func(tx *gorm.DB) error {
+	err = g.Source.Postgres().Transaction(func(tx *gorm.DB) error {
 		if err = tx.Create(group).Error; err != nil {
 			return err
 		}
@@ -158,14 +162,14 @@ func (g *GroupChatUseCase) Update(ctx context.Context, opt *GroupUpdateOpt) erro
 }
 
 func (g *GroupChatUseCase) Dismiss(ctx context.Context, groupId int, uid int) error {
-	err := g.Source.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	err := g.Source.Postgres().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(&postgresModel.GroupChat{Id: groupId, CreatorId: uid}).Updates(&postgresModel.GroupChat{
 			IsDismiss: 1,
 		}).Error; err != nil {
 			return err
 		}
 
-		if err := g.Source.Db().
+		if err := g.Source.Postgres().
 			Model(&postgresModel.GroupChatMember{}).
 			Where("group_id = ?", groupId).
 			Updates(&postgresModel.GroupChatMember{
@@ -181,21 +185,21 @@ func (g *GroupChatUseCase) Dismiss(ctx context.Context, groupId int, uid int) er
 
 func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) error {
 	var info postgresModel.GroupChatMember
-	if err := g.Source.Db().
+	if err := g.Source.Postgres().
 		Where("group_id = ? AND user_id = ? AND is_quit = 0", groupId, uid).
 		First(&info).
 		Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("данных не существует")
+			return errors.New(g.Locale.Localize("data_not_found"))
 		}
 		return err
 	}
 	if info.Leader == 2 {
-		return errors.New("владелец группы не может покинуть группу")
+		return errors.New(g.Locale.Localize("group_owner_cannot_leave"))
 	}
 
 	var user postgresModel.User
-	if err := g.Source.Db().
+	if err := g.Source.Postgres().
 		Table("users").
 		Select("id, username").
 		Where("id = ?", uid).
@@ -215,7 +219,7 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 			OwnerName: user.Username,
 		}),
 	}
-	err := g.Source.Db().Transaction(func(tx *gorm.DB) error {
+	err := g.Source.Postgres().Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&postgresModel.GroupChatMember{}).
 			Where("group_id = ? AND user_id = ?", groupId, uid).
 			Updates(&postgresModel.GroupChatMember{
@@ -271,7 +275,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		addDialogList    []*postgresModel.Chat
 		updateDialogList []int
 		dialogList       []*postgresModel.Chat
-		db               = g.Source.Db().WithContext(ctx)
+		db               = g.Source.Postgres().WithContext(ctx)
 	)
 	m := make(map[int]struct{})
 	for _, value := range g.MemberRepo.GetMemberIds(ctx, opt.GroupId) {
@@ -280,7 +284,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 
 	listHash := make(map[int]*postgresModel.Chat)
 	db.Select("id", "user_id", "is_delete").
-		Where("user_id in ? AND receiver_id = ? AND dialog_type = 2", opt.MemberIds, opt.GroupId).
+		Where("user_id IN ? AND receiver_id = ? AND dialog_type = ?", opt.MemberIds, opt.GroupId, 2).
 		Find(&dialogList)
 	for _, item := range dialogList {
 		listHash[item.UserId] = item
@@ -330,7 +334,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		}
 	}
 	if len(addMembers) == 0 {
-		return errors.New("все приглашённые контакты уже являются участниками группы")
+		return errors.New(g.Locale.Localize("all_invited_contacts_are_group_members"))
 	}
 
 	record := &postgresModel.Message{
@@ -404,7 +408,7 @@ type GroupRemoveMembersOpt struct {
 
 func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMembersOpt) error {
 	var num int64
-	if err := g.Source.Db().
+	if err := g.Source.Postgres().
 		Model(&postgresModel.GroupChatMember{}).
 		Where("group_id = ? AND user_id in ? AND is_quit = 0", opt.GroupId, opt.MemberIds).
 		Count(&num).
@@ -412,7 +416,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 		return err
 	}
 	if int(num) != len(opt.MemberIds) {
-		return errors.New("не удалось удалить")
+		return errors.New(g.Locale.Localize("delete_failed"))
 	}
 
 	mids := make([]int, 0)
@@ -420,7 +424,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 	mids = append(mids, opt.UserId)
 	memberItems := make([]*postgresModel.User, 0)
 
-	if err := g.Source.Db().
+	if err := g.Source.Postgres().
 		Table("users").
 		Select("id, username").
 		Where("id IN ?", mids).
@@ -454,7 +458,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 			Members:   members,
 		}),
 	}
-	err := g.Source.Db().Transaction(func(tx *gorm.DB) error {
+	err := g.Source.Postgres().Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&postgresModel.GroupChatMember{}).
 			Where("group_id = ? AND user_id in ? AND is_quit = 0", opt.GroupId, opt.MemberIds).
 			Updates(map[string]any{
@@ -504,7 +508,8 @@ type session struct {
 }
 
 func (g *GroupChatUseCase) List(userId int) ([]*entity.GroupItem, error) {
-	tx := g.Source.Db().Table("group_chat_members").
+	tx := g.Source.Postgres().
+		Table("group_chat_members").
 		Select("gc.id AS id, gc.group_name AS group_name, gc.avatar AS avatar, gc.description AS description, group_chat_members.leader AS leader, gc.creator_id AS creator_id").
 		Joins("LEFT JOIN group_chats gc on gc.id = group_chat_members.group_id").
 		Where("group_chat_members.user_id = ? AND group_chat_members.is_quit = ?", userId, 0).
@@ -525,9 +530,10 @@ func (g *GroupChatUseCase) List(userId int) ([]*entity.GroupItem, error) {
 		ids = append(ids, items[i].Id)
 	}
 
-	query := g.Source.Db().Table("chats")
-	query.Select("receiver_id,is_disturb")
-	query.Where("dialog_type = ? AND receiver_id in ?", 2, ids)
+	query := g.Source.Postgres().
+		Table("chats").
+		Select("receiver_id,is_disturb").
+		Where("dialog_type = ? AND receiver_id in ?", 2, ids)
 	list := make([]*session, 0)
 	if err := query.Find(&list).Error; err != nil {
 		return nil, err

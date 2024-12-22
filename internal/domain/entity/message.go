@@ -14,7 +14,7 @@ type Reply struct {
 }
 
 type DialogRecordExtraCode struct {
-	Lang string `json:"lang"`
+	Lang string `json:"translations"`
 	Code string `json:"code"`
 }
 

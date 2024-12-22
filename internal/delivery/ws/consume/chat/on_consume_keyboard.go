@@ -17,7 +17,7 @@ type ConsumeDialogKeyboard struct {
 func (h *Handler) onConsumeDialogKeyboard(ctx context.Context, body []byte) {
 	var in ConsumeDialogKeyboard
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeDialogKeyboard Ошибка при декодировании: %s", err.Error())
+		logger.Errorf("onConsumeDialogKeyboard json decode err: %s", err.Error())
 		return
 	}
 

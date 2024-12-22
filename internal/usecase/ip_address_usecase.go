@@ -9,23 +9,27 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/infrastructure"
 	"voo.su/pkg/client"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/sliceutil"
 )
 
 type IpAddressUseCase struct {
-	*infrastructure.Source
-	Config     *config.Config
+	Conf       *config.Config
+	Locale     locale.ILocale
+	Source     *infrastructure.Source
 	HttpClient *client.RequestClient
 }
 
 func NewIpAddressUseCase(
-	source *infrastructure.Source,
 	conf *config.Config,
+	locale locale.ILocale,
+	source *infrastructure.Source,
 	httpClient *client.RequestClient,
 ) *IpAddressUseCase {
 	return &IpAddressUseCase{
+		Conf:       conf,
+		Locale:     locale,
 		Source:     source,
-		Config:     conf,
 		HttpClient: httpClient,
 	}
 }

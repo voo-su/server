@@ -11,6 +11,7 @@ import (
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/strutil"
@@ -19,6 +20,7 @@ import (
 
 type Sticker struct {
 	Conf               *config.Config
+	Locale             locale.ILocale
 	StickerUseCase     *usecase.StickerUseCase
 	Minio              minio.IMinio
 	RedisLockCacheRepo *redisRepo.RedisLockCacheRepository
@@ -82,11 +84,11 @@ func (s *Sticker) DeleteCollect(ctx *core.Context) error {
 func (s *Sticker) Upload(ctx *core.Context) error {
 	file, err := ctx.Context.FormFile("sticker")
 	if err != nil {
-		return ctx.InvalidParams("Поле 'sticker' обязательно для загрузки!")
+		return ctx.InvalidParams(fmt.Sprintf(s.Locale.Localize("field_required_for_upload"), "sticker"))
 	}
 
 	if !sliceutil.Include(strutil.FileSuffix(file.Filename), constant.StickerFormats) {
-		return ctx.InvalidParams(fmt.Sprintf("Неверный формат загружаемого файла, поддерживаются только файлы в формате %s\n", strings.Join(constant.StickerFormats, ", ")))
+		return ctx.InvalidParams(fmt.Sprintf(s.Locale.Localize("invalid_file_format"), strings.Join(constant.StickerFormats, ", ")))
 	}
 
 	if file.Size > constant.StickerFileSize<<20 {
@@ -95,7 +97,7 @@ func (s *Sticker) Upload(ctx *core.Context) error {
 
 	stream, err := minio.ReadMultipartStream(file)
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка загрузки")
+		return ctx.ErrorBusiness(s.Locale.Localize("upload_error"))
 	}
 
 	meta := utils.ReadImageMeta(bytes.NewReader(stream))
@@ -103,18 +105,18 @@ func (s *Sticker) Upload(ctx *core.Context) error {
 
 	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
 	if err = s.Minio.Write(s.Conf.Minio.GetBucket(), src, stream); err != nil {
-		return ctx.ErrorBusiness("Ошибка загрузки")
+		return ctx.ErrorBusiness(s.Locale.Localize("upload_error"))
 	}
 
 	m := &postgresModel.StickerItem{
 		UserId:      ctx.UserId(),
-		Description: "Пользовательский набор",
+		Description: s.Locale.Localize("custom_set"),
 		Url:         s.Minio.PublicUrl(s.Conf.Minio.GetBucket(), src),
 		FileSuffix:  ext,
 		FileSize:    int(file.Size),
 	}
-	if err := s.StickerUseCase.Db().Create(m).Error; err != nil {
-		return ctx.ErrorBusiness("Ошибка загрузки")
+	if err := s.StickerUseCase.Source.Postgres().Create(m).Error; err != nil {
+		return ctx.ErrorBusiness(s.Locale.Localize("upload_error"))
 	}
 
 	return ctx.Success(&v1Pb.StickerUploadResponse{
@@ -155,7 +157,7 @@ func (s *Sticker) SetSystemSticker(ctx *core.Context) error {
 	}
 
 	if !s.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 5) {
-		return ctx.ErrorBusiness("Слишком частые запросы")
+		return ctx.ErrorBusiness(s.Locale.Localize("too_many_requests"))
 	}
 
 	defer s.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)

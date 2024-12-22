@@ -8,21 +8,21 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
-	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
 	"voo.su/pkg/jwt"
+	"voo.su/pkg/locale"
 )
 
 type Auth struct {
-	Conf              *config.Config
-	AuthUseCase       *usecase.AuthUseCase
-	JwtTokenCacheRepo *redisRepo.JwtTokenCacheRepository
-	IpAddressUseCase  *usecase.IpAddressUseCase
-	ChatUseCase       *usecase.ChatUseCase
-	BotUseCase        *usecase.BotUseCase
-	UserUseCase       *usecase.UserUseCase
-	MessageUseCase    usecase.IMessageUseCase
+	Conf             *config.Config
+	Locale           locale.ILocale
+	AuthUseCase      *usecase.AuthUseCase
+	IpAddressUseCase *usecase.IpAddressUseCase
+	ChatUseCase      *usecase.ChatUseCase
+	BotUseCase       *usecase.BotUseCase
+	UserUseCase      *usecase.UserUseCase
+	MessageUseCase   usecase.IMessageUseCase
 }
 
 func (a *Auth) Login(ctx *core.Context) error {
@@ -49,16 +49,16 @@ func (a *Auth) Verify(ctx *core.Context) error {
 	}
 
 	if !a.AuthUseCase.Verify(ctx.Ctx(), constant.LoginChannel, params.Token, params.Code) {
-		return ctx.InvalidParams("Неверный код")
+		return ctx.InvalidParams(a.Locale.Localize("invalid_code"))
 	}
 
 	claims, err := jwt.ParseToken(params.Token, a.Conf.App.Jwt.Secret)
 	if err != nil {
-		return ctx.InvalidParams("Неверный токен")
+		return ctx.InvalidParams(a.Locale.Localize("invalid_code"))
 	}
 
 	if claims.Guard != "auth" || claims.Valid() != nil {
-		return ctx.InvalidParams("Неверный токен")
+		return ctx.InvalidParams(a.Locale.Localize("invalid_code"))
 	}
 
 	user, err := a.AuthUseCase.Register(ctx.Ctx(), claims.ID)
@@ -128,18 +128,32 @@ func (a *Auth) Logout(ctx *core.Context) error {
 	session := ctx.JwtSession()
 	if session != nil {
 		if ex := session.ExpiresAt - time.Now().Unix(); ex > 0 {
-			_ = a.JwtTokenCacheRepo.SetBlackList(ctx.Ctx(), session.Token, time.Duration(ex)*time.Second)
+			_ = a.AuthUseCase.JwtTokenCacheRepo.SetBlackList(ctx.Ctx(), session.Token, time.Duration(ex)*time.Second)
 		}
 	}
 
 	return ctx.Success(nil)
 }
 
-//func (a *Auth) Refresh(ctx *core.Context) error {
-//	a.toBlackList(ctx)
-//	return ctx.Success(&v1Pb.AuthRefreshResponse{
-//		Type:        "Bearer",
-//		AccessToken: c.token(ctx.UserId()),
-//		ExpiresIn:   int32(c.config.Jwt.ExpiresTime),
-//	})
-//}
+func (a *Auth) Refresh(ctx *core.Context) error {
+	session := ctx.JwtSession()
+	if session != nil {
+		if ex := session.ExpiresAt - time.Now().Unix(); ex > 0 {
+			_ = a.AuthUseCase.JwtTokenCacheRepo.SetBlackList(ctx.Ctx(), session.Token, time.Duration(ex)*time.Second)
+		}
+	}
+
+	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
+	token := jwt.GenerateToken("api", a.Conf.App.Jwt.Secret, &jwt.Options{
+		ExpiresAt: jwt.NewNumericDate(expiresAt),
+		ID:        strconv.Itoa(ctx.UserId()),
+		Issuer:    "web",
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	})
+
+	return ctx.Success(&v1Pb.AuthRefreshResponse{
+		Type:        "Bearer",
+		AccessToken: token,
+		ExpiresIn:   int32(a.Conf.App.Jwt.ExpiresTime),
+	})
+}

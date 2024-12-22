@@ -8,28 +8,32 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/delivery/grpc/middleware"
 	"voo.su/internal/usecase"
+	"voo.su/pkg/locale"
 )
 
-type ContactHandler struct {
+type Contact struct {
 	contactPb.UnimplementedContactServiceServer
 	Conf            *config.Config
+	Locale          locale.ILocale
 	TokenMiddleware *middleware.TokenMiddleware
 	ContactUseCase  *usecase.ContactUseCase
 }
 
 func NewContactHandler(
 	conf *config.Config,
+	locale locale.ILocale,
 	tokenMiddleware *middleware.TokenMiddleware,
 	contactUseCase *usecase.ContactUseCase,
-) *ContactHandler {
-	return &ContactHandler{
+) *Contact {
+	return &Contact{
 		Conf:            conf,
+		Locale:          locale,
 		TokenMiddleware: tokenMiddleware,
 		ContactUseCase:  contactUseCase,
 	}
 }
 
-func (c *ContactHandler) List(ctx context.Context, in *contactPb.GetContactListRequest) (*contactPb.GetContactListResponse, error) {
+func (c *Contact) List(ctx context.Context, in *contactPb.GetContactListRequest) (*contactPb.GetContactListResponse, error) {
 
 	// TODO
 	uid := 1

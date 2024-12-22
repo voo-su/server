@@ -10,9 +10,10 @@ import (
 	"os"
 	"time"
 	"voo.su/internal/config"
+	"voo.su/pkg/locale"
 )
 
-func NewPostgresqlClient(conf *config.Config) *gorm.DB {
+func NewPostgresqlClient(conf *config.Config, locale locale.ILocale) *gorm.DB {
 	gormConfig := &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
@@ -35,11 +36,7 @@ func NewPostgresqlClient(conf *config.Config) *gorm.DB {
 		DSN: conf.Postgres.GetDsn(),
 	}), gormConfig)
 	if err != nil {
-		panic(fmt.Errorf("ошибка подключения к postgres: %v", err))
-	}
-
-	if db.Error != nil {
-		panic(fmt.Errorf("ошибка базы данных: %v", err))
+		panic(fmt.Errorf(locale.Localize("connection_error"), "Postgres", err))
 	}
 
 	sqlDB, _ := db.DB()

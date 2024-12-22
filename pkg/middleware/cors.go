@@ -7,9 +7,13 @@ import (
 
 type ICorsOptions interface {
 	GetOrigin() string
+
 	GetHeaders() string
+
 	GetMethods() string
+
 	GetCredentials() string
+
 	GetMaxAge() string
 }
 

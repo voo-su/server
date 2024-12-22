@@ -16,12 +16,12 @@ type ClientCacheRepository struct {
 
 func NewClientCacheRepository(
 	conf *config.Config,
-	redis *redis.Client,
+	rds *redis.Client,
 	serverCacheRepository *ServerCacheRepository,
 ) *ClientCacheRepository {
 	return &ClientCacheRepository{
 		Conf:                  conf,
-		Rds:                   redis,
+		Rds:                   rds,
 		ServerCacheRepository: serverCacheRepository,
 	}
 }

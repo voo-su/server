@@ -36,8 +36,9 @@ func (p *ProjectUseCase) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (i
 }
 
 func (p *ProjectUseCase) TypeTasks(ctx context.Context, projectId int64) ([]*postgresModel.ProjectTaskType, error) {
-	tx := p.Db().WithContext(ctx).Table("project_task_types")
-	tx.Where("project_id = ?", projectId)
+	tx := p.Source.Postgres().WithContext(ctx).
+		Table("project_task_types").
+		Where("project_id = ?", projectId)
 
 	var items []*postgresModel.ProjectTaskType
 	if err := tx.Scan(&items).Error; err != nil {
@@ -48,8 +49,9 @@ func (p *ProjectUseCase) TypeTasks(ctx context.Context, projectId int64) ([]*pos
 }
 
 func (p *ProjectUseCase) Tasks(ctx context.Context, projectId int64, typeId int64) ([]*postgresModel.ProjectTask, error) {
-	tx := p.Db().WithContext(ctx).Table("project_tasks")
-	tx.Where("project_id = ? AND type_id = ?", projectId, typeId)
+	tx := p.Source.Postgres().WithContext(ctx).
+		Table("project_tasks").
+		Where("project_id = ? AND type_id = ?", projectId, typeId)
 
 	var items []*postgresModel.ProjectTask
 	if err := tx.Scan(&items).Error; err != nil {
@@ -68,7 +70,8 @@ func (p *ProjectUseCase) TaskDetail(ctx context.Context, taskId int64) (*postgre
 		"executor_user.username AS executor_username",
 	}
 
-	tx := p.Db().WithContext(ctx).Table("project_tasks").
+	tx := p.Source.Postgres().WithContext(ctx).
+		Table("project_tasks").
 		Joins("LEFT JOIN project_members AS assigner ON assigner.id = project_tasks.assigner_id").
 		Joins("LEFT JOIN users AS assigner_user ON assigner_user.id = assigner.user_id").
 		Joins("LEFT JOIN project_members AS executor_member ON executor_member.id = project_tasks.executor_id").
@@ -117,7 +120,7 @@ func (p *ProjectUseCase) TaskTypeName(ctx context.Context, taskId int64, name st
 }
 
 func (p *ProjectUseCase) IsMemberProjectByTask(ctx context.Context, taskId int64, uid int) bool {
-	tx := p.Db().WithContext(ctx).
+	tx := p.Source.Postgres().WithContext(ctx).
 		Table("project_tasks").
 		Joins("INNER JOIN project_members ON project_members.project_id = project_tasks.project_id").
 		Where("project_tasks.id = ? AND project_members.user_id = ?", taskId, uid)
@@ -134,7 +137,7 @@ func (p *ProjectUseCase) InviteCoexecutor(ctx context.Context, taskId int64, mem
 	var (
 		err            error
 		addCoexecutors []*postgresModel.ProjectTaskCoexecutor
-		db             = p.Source.Db().WithContext(ctx)
+		db             = p.Source.Postgres().WithContext(ctx)
 	)
 	m := make(map[int]struct{})
 	for _, value := range p.ProjectTaskCoexecutorRepo.GetCoexecutorIds(ctx, taskId) {
@@ -152,7 +155,7 @@ func (p *ProjectUseCase) InviteCoexecutor(ctx context.Context, taskId int64, mem
 	}
 
 	if len(addCoexecutors) == 0 {
-		return errors.New("все приглашённые контакты стали соисполнителями задачи")
+		return errors.New(p.Locale.Localize("all_invited_contacts_are_task_coexecutors"))
 	}
 
 	if err = db.Transaction(func(tx *gorm.DB) error {
@@ -174,7 +177,8 @@ func (p *ProjectUseCase) GetCoexecutors(ctx context.Context, taskId int64) ([]*p
 		"project_members.user_id AS user_id",
 		"users.username AS username",
 	}
-	tx := p.Db().WithContext(ctx).Table("project_task_coexecutors").
+	tx := p.Source.Postgres().WithContext(ctx).
+		Table("project_task_coexecutors").
 		Joins("LEFT JOIN project_members ON project_members.id = project_task_coexecutors.member_id").
 		Joins("LEFT JOIN users ON users.id = project_task_coexecutors.member_id").
 		Where("project_task_coexecutors.task_id = ?", taskId)
@@ -191,7 +195,7 @@ func (p *ProjectUseCase) InviteWatcher(ctx context.Context, taskId int64, member
 	var (
 		err         error
 		addWatchers []*postgresModel.ProjectTaskWatcher
-		db          = p.Source.Db().WithContext(ctx)
+		db          = p.Source.Postgres().WithContext(ctx)
 	)
 	m := make(map[int]struct{})
 	for _, value := range p.ProjectTaskWatcherRepo.GetWatcherIds(ctx, taskId) {
@@ -209,7 +213,7 @@ func (p *ProjectUseCase) InviteWatcher(ctx context.Context, taskId int64, member
 	}
 
 	if len(addWatchers) == 0 {
-		return errors.New("все приглашённые контакты стали наблюдателями задачи")
+		return errors.New(p.Locale.Localize("all_invited_contacts_are_task_observers"))
 	}
 
 	if err = db.Transaction(func(tx *gorm.DB) error {
@@ -231,13 +235,49 @@ func (p *ProjectUseCase) GetWatchers(ctx context.Context, taskId int64) ([]*post
 		"project_members.user_id AS user_id",
 		"users.username AS username",
 	}
-	tx := p.Db().WithContext(ctx).Table("project_task_watchers").
+	tx := p.Source.Postgres().WithContext(ctx).
+		Table("project_task_watchers").
 		Joins("LEFT JOIN project_members ON project_members.id = project_task_watchers.member_id").
 		Joins("LEFT JOIN users ON users.id = project_task_watchers.member_id").
 		Where("project_task_watchers.task_id = ?", taskId)
 
 	var items []*postgresModel.ProjectMemberItem
 	if err := tx.Unscoped().Select(fields).Scan(&items).Error; err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+type ProjectCommentOpt struct {
+	TaskId    int64
+	Comment   string
+	CreatedBy int
+}
+
+func (p *ProjectUseCase) CreateComment(ctx context.Context, opt *ProjectCommentOpt) (int64, error) {
+	comment := &postgresModel.ProjectTaskComment{
+		TaskId:    opt.TaskId,
+		Comment:   opt.Comment,
+		CreatedBy: opt.CreatedBy,
+		CreatedAt: time.Now(),
+	}
+
+	err := p.ProjectTaskCommentRepo.Create(ctx, comment)
+	if err != nil {
+		return comment.Id, err
+	}
+
+	return comment.Id, nil
+}
+
+func (p *ProjectUseCase) Comments(ctx context.Context, TaskId int64) ([]*postgresModel.ProjectTaskComment, error) {
+	tx := p.Source.Postgres().WithContext(ctx).
+		Table("project_task_comments").
+		Where("task_id = ?", TaskId)
+
+	var items []*postgresModel.ProjectTaskComment
+	if err := tx.Scan(&items).Error; err != nil {
 		return nil, err
 	}
 

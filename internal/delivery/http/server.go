@@ -26,7 +26,7 @@ func Run(ctx *cli.Context, app *AppProvider) error {
 
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
 
-	log.Printf("HTTP PID сервера: %d", os.Getpid())
+	log.Printf("PID server: %d", os.Getpid())
 	log.Printf("HTTP: %s", app.Conf.Server.Http.GetHttp())
 
 	return run(c, eg, groupCtx, app)
@@ -49,11 +49,11 @@ func run(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppProv
 
 	eg.Go(func() error {
 		defer func() {
-			log.Println("Выключение сервера...")
+			log.Println("Shutting down server...")
 			timeCtx, timeCancel := context.WithTimeout(context.Background(), 3*time.Second)
 			defer timeCancel()
 			if err := server.Shutdown(timeCtx); err != nil {
-				log.Fatalf("Ошибка остановки HTTP-сервера: %s", err)
+				log.Fatalf("Error stopping HTTP server: %s \n", err)
 			}
 		}()
 
@@ -66,10 +66,8 @@ func run(c chan os.Signal, eg *errgroup.Group, ctx context.Context, app *AppProv
 	})
 
 	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
-		log.Fatalf("Принудительное завершение HTTP-сервера: %s", err)
+		log.Fatalf("Forced server shutdown: %s", err)
 	}
-
-	log.Println("Выход из сервера")
 
 	return nil
 }

@@ -18,12 +18,14 @@ import (
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/jwt"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/utils"
 )
 
-type AuthHandler struct {
+type Auth struct {
 	authPb.UnimplementedAuthServiceServer
 	Conf              *config.Config
+	Locale            locale.ILocale
 	TokenMiddleware   *middleware.TokenMiddleware
 	AuthUseCase       *usecase.AuthUseCase
 	JwtTokenCacheRepo *redisRepo.JwtTokenCacheRepository
@@ -36,6 +38,7 @@ type AuthHandler struct {
 
 func NewAuthHandler(
 	conf *config.Config,
+	locale locale.ILocale,
 	tokenMiddleware *middleware.TokenMiddleware,
 	authUseCase *usecase.AuthUseCase,
 	jwtTokenCacheRepo *redisRepo.JwtTokenCacheRepository,
@@ -43,9 +46,10 @@ func NewAuthHandler(
 	chatUseCase *usecase.ChatUseCase,
 	botRepo *postgresRepo.BotRepository,
 	userSession *postgresRepo.UserSessionRepository,
-) *AuthHandler {
-	return &AuthHandler{
+) *Auth {
+	return &Auth{
 		Conf:              conf,
+		Locale:            locale,
 		TokenMiddleware:   tokenMiddleware,
 		AuthUseCase:       authUseCase,
 		JwtTokenCacheRepo: jwtTokenCacheRepo,
@@ -56,11 +60,11 @@ func NewAuthHandler(
 	}
 }
 
-func (a *AuthHandler) Login(ctx context.Context, in *authPb.AuthLoginRequest) (*authPb.AuthLoginResponse, error) {
+func (a *Auth) Login(ctx context.Context, in *authPb.AuthLoginRequest) (*authPb.AuthLoginResponse, error) {
 	token, err := a.AuthUseCase.Login(ctx, "grpc-auth", in.Email)
 	if err != nil {
-		grpclog.Errorf("Ошибка создания токена: %v", err)
-		return nil, status.Error(codes.FailedPrecondition, "ошибка создания токена")
+		grpclog.Errorf("AuthHandler Login: %v", err)
+		return nil, status.Error(codes.FailedPrecondition, a.Locale.Localize("token_creation_error"))
 	}
 
 	return &authPb.AuthLoginResponse{
@@ -69,18 +73,18 @@ func (a *AuthHandler) Login(ctx context.Context, in *authPb.AuthLoginRequest) (*
 	}, nil
 }
 
-func (a *AuthHandler) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authPb.AuthVerifyResponse, error) {
+func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authPb.AuthVerifyResponse, error) {
 	if !a.AuthUseCase.Verify(ctx, constant.LoginChannel, in.Token, in.Code) {
-		return nil, status.Error(codes.Unauthenticated, "Неверный код")
+		return nil, status.Error(codes.Unauthenticated, a.Locale.Localize("invalid_code"))
 	}
 
 	claims, err := jwt.ParseToken(in.Token, a.Conf.App.Jwt.Secret)
 	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, "Неверный токен")
+		return nil, status.Error(codes.Unauthenticated, a.Locale.Localize("invalid_token"))
 	}
 
 	if claims.Guard != "grpc-auth" || claims.Valid() != nil {
-		return nil, status.Error(codes.Unauthenticated, "Неверный токен")
+		return nil, status.Error(codes.Unauthenticated, a.Locale.Localize("invalid_token"))
 	}
 
 	ip := utils.GetGrpcClientIp(ctx)

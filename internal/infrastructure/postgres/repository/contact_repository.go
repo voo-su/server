@@ -59,7 +59,9 @@ func (c *ContactRepository) GetFriendRemark(ctx context.Context, uid int, friend
 	}
 
 	var remark string
-	c.Repo.Model(ctx).Where("user_id = ? AND friend_id = ?", uid, friendId).Pluck("remark", &remark)
+	c.Repo.Model(ctx).
+		Where("user_id = ? AND friend_id = ?", uid, friendId).
+		Pluck("remark", &remark)
 
 	return remark
 }
@@ -70,7 +72,7 @@ func (c *ContactRepository) SetFriendRemark(ctx context.Context, uid int, friend
 
 func (c *ContactRepository) LoadContactCache(ctx context.Context, uid int) error {
 	all, err := c.Repo.FindAll(ctx, func(db *gorm.DB) {
-		db.Select("friend_id,remark").Where("user_id = ? AND status = ?", uid, constant.ContactStatusNormal)
+		db.Select("friend_id, remark").Where("user_id = ? AND status = ?", uid, constant.ContactStatusNormal)
 	})
 	if err != nil {
 		return err

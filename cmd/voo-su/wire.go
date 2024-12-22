@@ -10,51 +10,31 @@ import (
 	"voo.su/internal/delivery/grpc"
 	"voo.su/internal/delivery/http"
 	"voo.su/internal/delivery/ws"
-	"voo.su/internal/domain/logic"
-	"voo.su/internal/infrastructure"
 	"voo.su/internal/provider"
-	"voo.su/internal/usecase"
-)
-
-var providerSet = wire.NewSet(
-	provider.NewPostgresqlClient,
-	provider.NewClickHouseClient,
-	provider.NewRedisClient,
-	provider.NewHttpClient,
-	provider.NewEmailClient,
-	provider.NewMinioClient,
-	provider.NewRequestClient,
-	provider.NewNatsClient,
-
-	wire.Struct(new(provider.Providers), "*"),
-
-	logic.ProviderSet,
-	usecase.ProviderSet,
-	infrastructure.ProviderSet,
 )
 
 func NewHttpInjector(conf *config.Config) *http.AppProvider {
-	panic(wire.Build(providerSet, http.ProviderSet))
+	panic(wire.Build(provider.ProviderSet, http.ProviderSet))
 }
 
 func NewWsInjector(conf *config.Config) *ws.AppProvider {
-	panic(wire.Build(providerSet, ws.ProviderSet))
+	panic(wire.Build(provider.ProviderSet, ws.ProviderSet))
 }
 
 func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
-	panic(wire.Build(providerSet, grpc.ProviderSet))
+	panic(wire.Build(provider.ProviderSet, grpc.ProviderSet))
 }
 
 func NewCronInjector(conf *config.Config) *cli.CronProvider {
-	panic(wire.Build(providerSet, cli.CronProviderSet))
+	panic(wire.Build(provider.ProviderSet, cli.CronProviderSet))
 }
 
 func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
-	panic(wire.Build(providerSet, cli.QueueProviderSet))
+	panic(wire.Build(provider.ProviderSet, cli.QueueProviderSet))
 }
 
 func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
-	panic(wire.Build(providerSet, cli.MigrateProviderSet))
+	panic(wire.Build(provider.ProviderSet, cli.MigrateProviderSet))
 }
 
 func NewGenerateInjector(conf *config.Config) *cli.GenerateProvider {

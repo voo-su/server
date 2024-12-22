@@ -3,7 +3,6 @@ package chat
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/bytedance/sonic"
 	"log"
 	v1Pb "voo.su/api/http/pb/v1"
@@ -32,7 +31,7 @@ func (h *Handler) onPublish(ctx context.Context, client socket.IClient, data []b
 	if call, ok := publishMapping[typeValue]; ok {
 		call(ctx, client, data)
 	} else {
-		log.Printf("Событие чата: onPublish %s неизвестный тип сообщения\n", typeValue)
+		log.Printf("onPublish [%s] unknown message type", typeValue)
 	}
 }
 
@@ -45,31 +44,32 @@ type TextMessage struct {
 func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data []byte) {
 	var in TextMessage
 	if err := json.Unmarshal(data, &in); err != nil {
-		log.Println("Ошибка в чате при получении текстового сообщения: ", err)
+		log.Printf("onTextMessage json decode err: %s", err)
 		return
 	}
 	if in.Content.GetContent() == "" || in.Content.GetReceiver() == nil {
 		return
 	}
-	err := h.MessageUseCase.SendText(ctx, client.Uid(), &usecase.SendText{
+
+	if err := h.MessageUseCase.SendText(ctx, client.Uid(), &usecase.SendText{
 		Content: in.Content.Content,
 		Receiver: usecase.MessageReceiver{
 			DialogType: in.Content.Receiver.DialogType,
 			ReceiverId: in.Content.Receiver.ReceiverId,
 		},
-	})
-	if err != nil {
-		log.Printf("Ошибка в чате при получении текстового сообщения: %s", err.Error())
+	}); err != nil {
+		log.Printf("onTextMessage SendText: %s", err.Error())
 		return
 	}
+
 	if len(in.AckId) == 0 {
 		return
 	}
-	if err = client.Write(&socket.ClientResponse{
+	if err := client.Write(&socket.ClientResponse{
 		Sid:   in.AckId,
 		Event: "ack",
 	}); err != nil {
-		log.Printf("Ошибка подтверждения в чате при получении текстового сообщения: %s", err.Error())
+		log.Printf("onTextMessage: %s", err.Error())
 	}
 }
 
@@ -82,10 +82,9 @@ type StickerMessage struct {
 func (h *Handler) onStickerMessage(_ context.Context, _ socket.IClient, data []byte) {
 	var m StickerMessage
 	if err := json.Unmarshal(data, &m); err != nil {
-		log.Println("Ошибка в чате при обработке сообщения с смайликом: ", err)
+		log.Printf("onStickerMessage json decode err: %s", err)
 		return
 	}
-	fmt.Println("[onStickerMessage] Новое сообщение ", string(data))
 }
 
 type ImageMessage struct {
@@ -97,10 +96,9 @@ type ImageMessage struct {
 func (h *Handler) onImageMessage(_ context.Context, _ socket.IClient, data []byte) {
 	var m ImageMessage
 	if err := json.Unmarshal(data, &m); err != nil {
-		log.Println("Ошибка в чате при обработке сообщения с изображением: ", err)
+		log.Printf("onImageMessage json decode err: %s", err)
 		return
 	}
-	fmt.Println("[onImageMessage] Новое сообщение ", string(data))
 }
 
 type FileMessage struct {
@@ -112,10 +110,9 @@ type FileMessage struct {
 func (h *Handler) onFileMessage(_ context.Context, _ socket.IClient, data []byte) {
 	var m FileMessage
 	if err := json.Unmarshal(data, &m); err != nil {
-		log.Println("Ошибка в чате при обработке файла: ", err)
+		log.Printf("onFileMessage json decode err: %s", err)
 		return
 	}
-	fmt.Println("[onFileMessage] Новое сообщение ", string(data))
 }
 
 type VoteMessage struct {
@@ -127,10 +124,9 @@ type VoteMessage struct {
 func (h *Handler) onVoteMessage(_ context.Context, _ socket.IClient, data []byte) {
 	var m VoteMessage
 	if err := json.Unmarshal(data, &m); err != nil {
-		log.Println("Ошибка в чате при обработке голосового сообщения: ", err)
+		log.Printf("onVoteMessage json decode err: %s", err)
 		return
 	}
-	fmt.Println("[onVoteMessage] Новое сообщение ", string(data))
 }
 
 type CodeMessage struct {
@@ -142,7 +138,7 @@ type CodeMessage struct {
 func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data []byte) {
 	var m CodeMessage
 	if err := json.Unmarshal(data, &m); err != nil {
-		log.Println("Ошибка в чате при получении текстового сообщения: ", err)
+		log.Printf("onCodeMessage json decode err: %s", err)
 		return
 	}
 	if m.Content.GetReceiver() == nil {
@@ -157,7 +153,7 @@ func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data
 			ReceiverId: m.Content.Receiver.ReceiverId,
 		},
 	}); err != nil {
-		log.Printf("Ошибка в чате при получении текстового сообщения: %s", err.Error())
+		log.Printf("onCodeMessage SendCode: %s", err.Error())
 		return
 	}
 
@@ -168,7 +164,7 @@ func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data
 		Sid:   m.AckId,
 		Event: "ack",
 	}); err != nil {
-		log.Printf("Ошибка подтверждения в чате при получении текстового сообщения: %s", err.Error())
+		log.Printf("onCodeMessage: %s", err.Error())
 	}
 }
 
@@ -181,9 +177,7 @@ type LocationMessage struct {
 func (h *Handler) onLocationMessage(_ context.Context, _ socket.IClient, data []byte) {
 	var m LocationMessage
 	if err := json.Unmarshal(data, &m); err != nil {
-		log.Println("Ошибка в чате при обработке сообщения с местоположением: ", err)
+		log.Printf("onLocationMessage json decode err: %s", err)
 		return
 	}
-
-	fmt.Println("[onLocationMessage] Новое сообщение ", string(data))
 }

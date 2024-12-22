@@ -4,10 +4,12 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/timeutil"
 )
 
 type ProjectTaskComment struct {
+	Locale         locale.ILocale
 	ProjectUseCase *usecase.ProjectUseCase
 }
 
@@ -23,7 +25,7 @@ func (p *ProjectTaskComment) Create(ctx *core.Context) error {
 		CreatedBy: ctx.UserId(),
 	})
 	if err != nil {
-		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже: " + err.Error())
+		return ctx.ErrorBusiness(p.Locale.Localize("creation_failed_try_later") + ": " + err.Error())
 	}
 
 	return ctx.Success(&v1Pb.ProjectCreateResponse{Id: commentId})

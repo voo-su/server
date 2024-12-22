@@ -16,8 +16,11 @@ import (
 
 type ICrontab interface {
 	Name() string
+
 	Spec() string
+
 	Enable() bool
+
 	Handle(ctx context.Context) error
 }
 

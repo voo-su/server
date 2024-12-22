@@ -20,7 +20,7 @@ type ConsumeDialog struct {
 func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 	var in ConsumeDialog
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeDialog Ошибка при декодировании: %s", err.Error())
+		logger.Errorf("onConsumeDialog json decode err: %s", err.Error())
 		return
 	}
 

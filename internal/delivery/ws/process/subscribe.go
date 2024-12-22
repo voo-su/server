@@ -36,7 +36,6 @@ type IConsume interface {
 }
 
 func (m *MessageSubscribe) Setup(ctx context.Context) error {
-	log.Println("Старт подписки на сообщение")
 	go m.subscribe(ctx, []string{
 		constant.ImTopicChat,
 		fmt.Sprintf(constant.ImTopicChatPrivate,
@@ -64,12 +63,12 @@ func (m *MessageSubscribe) handle(worker *pool.Pool, data *redis.Message, consum
 	worker.Go(func() {
 		var in SubscribeContent
 		if err := json.Unmarshal([]byte(data.Payload), &in); err != nil {
-			log.Println("Ошибка отмены подписки на контент: ", err.Error())
+			log.Printf("Content unsubscription error: %s", err)
 			return
 		}
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println("Ошибка при подписке на сообщение о вызове: ", utils.PanicTrace(err))
+				log.Printf("Error subscribing to call notification: %s", utils.PanicTrace(err))
 			}
 		}()
 		consume.Call(in.Event, []byte(in.Data))

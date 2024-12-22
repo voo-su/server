@@ -40,7 +40,7 @@ func (c *ChatEvent) OnOpen(client socket.IClient) {
 		})
 	}
 	if err := c.RoomCache.BatchAdd(ctx, rooms); err != nil {
-		log.Println("Ошибка при вступлении в групповой чат", err.Error())
+		log.Printf("Error joining group chat: %v", err.Error())
 	}
 
 	c.Redis.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
@@ -64,7 +64,7 @@ func (c *ChatEvent) OnMessage(client socket.IClient, message []byte) {
 }
 
 func (c *ChatEvent) OnClose(client socket.IClient, code int, text string) {
-	log.Println("Закрытие клиента: ", client.Uid(), client.Cid(), client.Channel().Name(), code, text)
+	log.Printf("Closing a client: %v, %v, %s, %v, %s", client.Uid(), client.Cid(), client.Channel().Name(), code, text)
 	ctx := context.TODO()
 	ids := c.GroupChatMemberRepo.GetUserGroupIds(ctx, client.Uid())
 	rooms := make([]*redisModel.RoomOption, 0, len(ids))
@@ -78,7 +78,7 @@ func (c *ChatEvent) OnClose(client socket.IClient, code int, text string) {
 		})
 	}
 	if err := c.RoomCache.BatchDel(ctx, rooms); err != nil {
-		log.Println("Ошибка при выходе из группового чата", err.Error())
+		log.Printf("Error exiting group chat: %s", err)
 	}
 
 	c.Redis.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{

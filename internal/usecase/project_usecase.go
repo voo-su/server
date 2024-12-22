@@ -9,10 +9,12 @@ import (
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
+	"voo.su/pkg/locale"
 )
 
 type ProjectUseCase struct {
-	*infrastructure.Source
+	Locale                    locale.ILocale
+	Source                    *infrastructure.Source
 	ProjectRepo               *postgresRepo.ProjectRepository
 	ProjectMemberRepo         *postgresRepo.ProjectMemberRepository
 	ProjectTaskTypeRepo       *postgresRepo.ProjectTaskTypeRepository
@@ -25,6 +27,7 @@ type ProjectUseCase struct {
 }
 
 func NewProjectUseCase(
+	locale locale.ILocale,
 	source *infrastructure.Source,
 	projectRepo *postgresRepo.ProjectRepository,
 	projectMemberRepo *postgresRepo.ProjectMemberRepository,
@@ -37,6 +40,7 @@ func NewProjectUseCase(
 	projectTaskWatcherRepo *postgresRepo.ProjectTaskWatcherRepository,
 ) *ProjectUseCase {
 	return &ProjectUseCase{
+		Locale:                    locale,
 		Source:                    source,
 		ProjectRepo:               projectRepo,
 		ProjectMemberRepo:         projectMemberRepo,
@@ -70,7 +74,7 @@ func (p *ProjectUseCase) CreateProject(ctx context.Context, opt *ProjectOpt) (in
 
 	types := [4]string{"Новые", "Выполняются", "Тест", "Сделаны"}
 
-	err = p.Source.Db().Transaction(func(tx *gorm.DB) error {
+	err = p.Source.Postgres().Transaction(func(tx *gorm.DB) error {
 		if err = tx.Create(project).Error; err != nil {
 			return err
 		}
@@ -103,11 +107,12 @@ func (p *ProjectUseCase) CreateProject(ctx context.Context, opt *ProjectOpt) (in
 }
 
 func (p *ProjectUseCase) Projects(userId int) ([]*postgresModel.ProjectItem, error) {
-	tx := p.Source.Db().Table("project_members")
-	tx.Select("p.id AS id, p.name AS name")
-	tx.Joins("LEFT JOIN projects p ON p.id = project_members.project_id")
-	tx.Where("project_members.user_id = ?", userId)
-	tx.Order("project_members.created_at desc")
+	tx := p.Source.Postgres().
+		Table("project_members").
+		Select("p.id AS id, p.name AS name").
+		Joins("LEFT JOIN projects p ON p.id = project_members.project_id").
+		Where("project_members.user_id = ?", userId).
+		Order("project_members.created_at desc")
 
 	items := make([]*postgresModel.ProjectItem, 0)
 	if err := tx.Scan(&items).Error; err != nil {
@@ -133,7 +138,7 @@ func (p *ProjectUseCase) GetMembers(ctx context.Context, projectId int64) []*pos
 		"project_members.user_id AS user_id",
 		"users.username AS username",
 	}
-	tx := p.Db().WithContext(ctx).Table("project_members").
+	tx := p.Source.Postgres().WithContext(ctx).Table("project_members").
 		Joins("LEFT JOIN users ON users.id = project_members.user_id").
 		Where("project_members.project_id = ?", projectId)
 	//.Order("project_members.leader desc")
@@ -170,7 +175,7 @@ func (p *ProjectUseCase) Invite(ctx context.Context, opt *ProjectInviteOpt) erro
 	var (
 		err        error
 		addMembers []*postgresModel.ProjectMember
-		db         = p.Source.Db().WithContext(ctx)
+		db         = p.Source.Postgres().WithContext(ctx)
 	)
 	m := make(map[int]struct{})
 	for _, value := range p.ProjectMemberRepo.GetMemberIds(ctx, opt.ProjectId) {
@@ -187,7 +192,7 @@ func (p *ProjectUseCase) Invite(ctx context.Context, opt *ProjectInviteOpt) erro
 		}
 	}
 	if len(addMembers) == 0 {
-		return errors.New("все приглашённые контакты уже являются участниками проекта")
+		return errors.New(p.Locale.Localize("all_invited_contacts_are_project_members"))
 	}
 
 	if err = db.Transaction(func(tx *gorm.DB) error {

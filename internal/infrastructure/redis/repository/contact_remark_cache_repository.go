@@ -12,8 +12,10 @@ type ContactRemarkCacheRepository struct {
 	Rds *redis.Client
 }
 
-func NewContactRemarkCacheRepository(redis *redis.Client) *ContactRemarkCacheRepository {
-	return &ContactRemarkCacheRepository{Rds: redis}
+func NewContactRemarkCacheRepository(rds *redis.Client) *ContactRemarkCacheRepository {
+	return &ContactRemarkCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (c *ContactRemarkCacheRepository) Get(ctx context.Context, uid int, fid int) string {

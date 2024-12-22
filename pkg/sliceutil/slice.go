@@ -6,15 +6,15 @@ import (
 	"strings"
 )
 
-type IntInterface interface {
+type IInt interface {
 	uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64
 }
 
-type FloatInterface interface {
+type IFloat interface {
 	float32 | float64
 }
 
-func Include[T IntInterface | string](find T, arr []T) bool {
+func Include[T IInt | string](find T, arr []T) bool {
 	for _, value := range arr {
 		if value == find {
 			return true
@@ -24,7 +24,7 @@ func Include[T IntInterface | string](find T, arr []T) bool {
 	return false
 }
 
-func Unique[T IntInterface | string](data []T) []T {
+func Unique[T IInt | string](data []T) []T {
 	list, hash := make([]T, 0), make(map[T]struct{})
 	for _, value := range data {
 		if _, ok := hash[value]; !ok {
@@ -36,7 +36,7 @@ func Unique[T IntInterface | string](data []T) []T {
 	return list
 }
 
-func Sum[T IntInterface | FloatInterface](arr []T) T {
+func Sum[T IInt | IFloat](arr []T) T {
 	var count T
 	for _, v := range arr {
 		count += v
@@ -69,7 +69,7 @@ func ParseIds(str string) []int {
 	return ids
 }
 
-func ToIds[T IntInterface](items []T) string {
+func ToIds[T IInt](items []T) string {
 	tmp := make([]string, 0, len(items))
 	for _, item := range items {
 		tmp = append(tmp, fmt.Sprintf("%d", item))

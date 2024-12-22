@@ -12,8 +12,10 @@ type JwtTokenCacheRepository struct {
 	Rds *redis.Client
 }
 
-func NewJwtTokenCacheRepository(redis *redis.Client) *JwtTokenCacheRepository {
-	return &JwtTokenCacheRepository{redis}
+func NewJwtTokenCacheRepository(rds *redis.Client) *JwtTokenCacheRepository {
+	return &JwtTokenCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (j *JwtTokenCacheRepository) SetBlackList(ctx context.Context, token string, exp time.Duration) error {

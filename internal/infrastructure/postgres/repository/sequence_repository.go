@@ -19,7 +19,10 @@ type SequenceRepository struct {
 	SequenceCacheRepo *redisRepo.SequenceCacheRepository
 }
 
-func NewSequenceRepository(db *gorm.DB, sequenceCacheRepo *redisRepo.SequenceCacheRepository) *SequenceRepository {
+func NewSequenceRepository(
+	db *gorm.DB,
+	sequenceCacheRepo *redisRepo.SequenceCacheRepository,
+) *SequenceRepository {
 	return &SequenceRepository{
 		DB:                db,
 		SequenceCacheRepo: sequenceCacheRepo,

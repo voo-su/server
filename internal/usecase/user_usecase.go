@@ -7,22 +7,26 @@ import (
 	"voo.su/internal/infrastructure"
 	"voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
+	"voo.su/pkg/locale"
 )
 
 type UserUseCase struct {
-	*infrastructure.Source
+	Locale          locale.ILocale
+	Source          *infrastructure.Source
 	UserRepo        *postgresRepo.UserRepository
 	UserSessionRepo *postgresRepo.UserSessionRepository
 	PushTokenRepo   *postgresRepo.PushTokenRepository
 }
 
 func NewUserUseCase(
+	locale locale.ILocale,
 	source *infrastructure.Source,
 	userRepo *postgresRepo.UserRepository,
 	userSessionRepo *postgresRepo.UserSessionRepository,
 	pushTokenRepo *postgresRepo.PushTokenRepository,
 ) *UserUseCase {
 	return &UserUseCase{
+		Locale:          locale,
 		Source:          source,
 		UserRepo:        userRepo,
 		UserSessionRepo: userSessionRepo,

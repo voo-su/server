@@ -7,22 +7,26 @@ import (
 	"voo.su/internal/infrastructure"
 	"voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/sliceutil"
 )
 
 type StickerUseCase struct {
-	*infrastructure.Source
+	Locale      locale.ILocale
+	Source      *infrastructure.Source
 	StickerRepo *postgresRepo.StickerRepository
 	IMinio      minio.IMinio
 }
 
 func NewStickerUseCase(
+	locale locale.ILocale,
 	source *infrastructure.Source,
 	stickerRepo *postgresRepo.StickerRepository,
 	minio minio.IMinio,
 ) *StickerUseCase {
 	return &StickerUseCase{
+		Locale:      locale,
 		Source:      source,
 		StickerRepo: stickerRepo,
 		IMinio:      minio,
@@ -32,7 +36,7 @@ func NewStickerUseCase(
 func (s *StickerUseCase) RemoveUserSysSticker(uid int, stickerId int) error {
 	ids := s.StickerRepo.GetUserInstallIds(uid)
 	if !sliceutil.Include(stickerId, ids) {
-		return fmt.Errorf("данных не существует")
+		return fmt.Errorf(s.Locale.Localize("data_not_found"))
 	}
 
 	items := make([]string, 0, len(ids)-1)
@@ -42,7 +46,7 @@ func (s *StickerUseCase) RemoveUserSysSticker(uid int, stickerId int) error {
 		}
 	}
 
-	return s.Source.Db().
+	return s.Source.Postgres().
 		Table("sticker_users").
 		Where("user_id = ?", uid).
 		Update("sticker_ids", strings.Join(items, ",")).
@@ -56,7 +60,7 @@ func (s *StickerUseCase) AddUserSysSticker(uid int, stickerId int) error {
 	}
 
 	ids = append(ids, stickerId)
-	return s.Source.Db().
+	return s.Source.Postgres().
 		Table("sticker_users").
 		Where("user_id = ?", uid).
 		Update("sticker_ids", sliceutil.ToIds(ids)).
@@ -64,7 +68,7 @@ func (s *StickerUseCase) AddUserSysSticker(uid int, stickerId int) error {
 }
 
 func (s *StickerUseCase) DeleteCollect(uid int, ids []int) error {
-	return s.Source.Db().
+	return s.Source.Postgres().
 		Delete(&model.StickerItem{}, "id IN ? AND sticker_id = ? AND user_id = ?", ids, 0, uid).
 		Error
 }

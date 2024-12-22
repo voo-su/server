@@ -10,10 +10,12 @@ import (
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/strutil"
 )
 
 type Message struct {
+	Locale         locale.ILocale
 	MessageUseCase usecase.IMessageUseCase
 	BotUseCase     *usecase.BotUseCase
 }
@@ -21,16 +23,16 @@ type Message struct {
 func (m *Message) checkBot(ctx *core.Context) (*model.Bot, error) {
 	token := ctx.Context.Param("token")
 	if token == "" {
-		return nil, ctx.ErrorBusiness("Токен не передан или пуст")
+		return nil, ctx.ErrorBusiness(m.Locale.Localize("token_missing_or_empty"))
 	}
 
 	var bot, err = m.BotUseCase.GetBotByToken(ctx.Ctx(), token)
 	if err != nil {
-		return nil, ctx.ErrorBusiness("Ошибка при запросе данных о боте. Попробуйте позже.")
+		return nil, ctx.ErrorBusiness(m.Locale.Localize("bot_data_request_error"))
 	}
 
 	if bot == nil {
-		return nil, ctx.ErrorBusiness("Не удалось найти бота с данным токеном")
+		return nil, ctx.ErrorBusiness(m.Locale.Localize("bot_not_found_with_token"))
 	}
 
 	return bot, nil
@@ -87,24 +89,24 @@ func (m *Message) Message(ctx *core.Context) error {
 func (m *Message) Photo(ctx *core.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
-		return ctx.InvalidParams("Неверный формат chat_id")
+		return ctx.InvalidParams(m.Locale.Localize("invalid_chat_id_format"))
 	}
 
 	file, err := ctx.Context.FormFile("photo")
 	if err != nil {
-		return ctx.InvalidParams("Ошибка загрузки файла изображения")
+		return ctx.InvalidParams(m.Locale.Localize("image_upload_error"))
 	}
 
 	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > constant.BotPhotoFileSize<<20 {
-		return ctx.InvalidParams(fmt.Sprintf("Размер загружаемого изображения не может превышать %v МБ", constant.BotPhotoFileSize))
+		return ctx.InvalidParams(fmt.Sprintf(m.Locale.Localize("image_upload_size_exceeded"), constant.BotPhotoFileSize))
 	}
 
 	filePath, err := m.BotUseCase.FileUpload(ctx.Ctx(), file)
 	if err != nil {
 		fmt.Println(err)
-		return ctx.InvalidParams("Ошибка загрузки изображения")
+		return ctx.InvalidParams(m.Locale.Localize("image_upload_error"))
 	}
 
 	bot, err := m.checkBot(ctx)
@@ -129,24 +131,24 @@ func (m *Message) Photo(ctx *core.Context) error {
 func (m *Message) Video(ctx *core.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
-		return ctx.InvalidParams("Неверный формат chat_id")
+		return ctx.InvalidParams(m.Locale.Localize("invalid_chat_id_format"))
 	}
 
 	file, err := ctx.Context.FormFile("video")
 	if err != nil {
-		return ctx.InvalidParams("Ошибка загрузки видеофайла")
+		return ctx.InvalidParams(m.Locale.Localize("video_upload_error"))
 	}
 
 	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > constant.BotVideoFileSize<<20 {
-		return ctx.InvalidParams(fmt.Sprintf("Размер загружаемого видео не может превышать %v МБ", constant.BotVideoFileSize))
+		return ctx.InvalidParams(fmt.Sprintf(m.Locale.Localize("video_upload_size_exceeded"), constant.BotVideoFileSize))
 	}
 
 	filePath, err := m.BotUseCase.FileUpload(ctx.Ctx(), file)
 	if err != nil {
 		fmt.Println(err)
-		return ctx.InvalidParams("Ошибка загрузки видеофайла")
+		return ctx.InvalidParams(m.Locale.Localize("video_upload_error"))
 	}
 
 	bot, err := m.checkBot(ctx)
@@ -171,24 +173,24 @@ func (m *Message) Video(ctx *core.Context) error {
 func (m *Message) Audio(ctx *core.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
-		return ctx.InvalidParams("Неверный формат chat_id")
+		return ctx.InvalidParams(m.Locale.Localize("invalid_chat_id_format"))
 	}
 
 	file, err := ctx.Context.FormFile("audio")
 	if err != nil {
-		return ctx.InvalidParams("Ошибка загрузки аудиофайла")
+		return ctx.InvalidParams(m.Locale.Localize("audio_upload_error"))
 	}
 
 	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > constant.BotAudioFileSize<<20 {
-		return ctx.InvalidParams(fmt.Sprintf("Размер загружаемого аудиофайла не может превышать %v МБ", constant.BotAudioFileSize))
+		return ctx.InvalidParams(fmt.Sprintf(m.Locale.Localize("audio_upload_size_exceeded"), constant.BotAudioFileSize))
 	}
 
 	filePath, err := m.BotUseCase.FileUpload(ctx.Ctx(), file)
 	if err != nil {
 		fmt.Println(err)
-		return ctx.InvalidParams("Ошибка загрузки аудиофайла")
+		return ctx.InvalidParams(m.Locale.Localize("audio_upload_error"))
 	}
 
 	bot, err := m.checkBot(ctx)
@@ -213,24 +215,24 @@ func (m *Message) Audio(ctx *core.Context) error {
 func (m *Message) Document(ctx *core.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
-		return ctx.InvalidParams("Неверный формат chat_id")
+		return ctx.InvalidParams(m.Locale.Localize("invalid_chat_id_format"))
 	}
 
 	file, err := ctx.Context.FormFile("document")
 	if err != nil {
-		return ctx.InvalidParams("Ошибка загрузки документа")
+		return ctx.InvalidParams(m.Locale.Localize("document_upload_error"))
 	}
 
 	caption := ctx.Context.DefaultPostForm("caption", "")
 
 	if file.Size > constant.BotDocumentFileSize<<20 {
-		return ctx.InvalidParams(fmt.Sprintf("Размер загружаемого документа не может превышать %v МБ", constant.BotDocumentFileSize))
+		return ctx.InvalidParams(fmt.Sprintf(m.Locale.Localize("document_upload_size_exceeded"), constant.BotDocumentFileSize))
 	}
 
 	filePath, err := m.BotUseCase.FileDocumentUpload(ctx.Ctx(), file)
 	if err != nil {
 		fmt.Println(err)
-		return ctx.InvalidParams("Ошибка загрузки документа")
+		return ctx.InvalidParams(m.Locale.Localize("document_upload_error"))
 	}
 
 	bot, err := m.checkBot(ctx)

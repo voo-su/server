@@ -7,7 +7,6 @@
 package main
 
 import (
-	"github.com/google/wire"
 	"voo.su/internal/cli"
 	"voo.su/internal/cli/handler/cron"
 	"voo.su/internal/cli/handler/queue"
@@ -40,35 +39,36 @@ import (
 // Injectors from wire.go:
 
 func NewHttpInjector(conf *config.Config) *http.AppProvider {
+	iLocale := provider.NewLocale()
 	email := provider.NewEmailClient(conf)
-	client := provider.NewRedisClient(conf)
+	client := provider.NewRedisClient(conf, iLocale)
 	smsCacheRepository := repository.NewSmsCacheRepository(client)
-	db := provider.NewPostgresqlClient(conf)
+	db := provider.NewPostgresqlClient(conf, iLocale)
 	contactRemarkCacheRepository := repository.NewContactRemarkCacheRepository(client)
 	relationCacheRepository := repository.NewRelationCacheRepository(client)
 	contactRepository := repository2.NewContactRepository(db, contactRemarkCacheRepository, relationCacheRepository)
 	groupChatMemberRepository := repository2.NewGroupMemberRepository(db, relationCacheRepository)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
 	userRepository := repository2.NewUserRepository(db)
-	conn := provider.NewClickHouseClient(conf)
+	conn := provider.NewClickHouseClient(conf, iLocale)
 	authCodeRepository := repository3.NewAuthCodeRepository(conn)
-	authUseCase := usecase.NewAuthUseCase(conf, email, smsCacheRepository, contactRepository, groupChatMemberRepository, groupChatRepository, userRepository, authCodeRepository)
 	jwtTokenCacheRepository := repository.NewJwtTokenCacheRepository(client)
-	source := infrastructure.NewSource(db, client)
+	authUseCase := usecase.NewAuthUseCase(conf, iLocale, email, smsCacheRepository, contactRepository, groupChatMemberRepository, groupChatRepository, userRepository, authCodeRepository, jwtTokenCacheRepository)
+	source := infrastructure.NewSource(db, conn, client)
 	httpClient := provider.NewHttpClient()
 	requestClient := provider.NewRequestClient(httpClient)
-	ipAddressUseCase := usecase.NewIpAddressUseCase(source, conf, requestClient)
+	ipAddressUseCase := usecase.NewIpAddressUseCase(conf, iLocale, source, requestClient)
 	chatRepository := repository2.NewChatRepository(db)
-	chatUseCase := usecase.NewChatUseCase(source, chatRepository, groupChatMemberRepository)
+	chatUseCase := usecase.NewChatUseCase(iLocale, source, chatRepository, groupChatMemberRepository)
 	botRepository := repository2.NewBotRepository(db)
 	iMinio := provider.NewMinioClient(conf)
-	botUseCase := usecase.NewBotUseCase(source, conf, botRepository, userRepository, iMinio)
+	botUseCase := usecase.NewBotUseCase(conf, iLocale, source, botRepository, userRepository, iMinio)
 	userSessionRepository := repository2.NewUserSessionRepository(db)
 	pushTokenRepository := repository2.NewPushTokenRepository(db)
-	userUseCase := usecase.NewUserUseCase(source, userRepository, userSessionRepository, pushTokenRepository)
+	userUseCase := usecase.NewUserUseCase(iLocale, source, userRepository, userSessionRepository, pushTokenRepository)
 	sequenceCacheRepository := repository.NewSequenceCacheRepository(client)
 	sequenceRepository := repository2.NewSequenceRepository(db, sequenceCacheRepository)
-	messageForwardLogic := logic.NewMessageForwardLogic(db, sequenceRepository)
+	messageForward := logic.NewMessageForward(iLocale, source, sequenceRepository)
 	fileSplitRepository := repository2.NewFileSplitRepository(db)
 	voteCacheRepository := repository.NewVoteCacheRepository(client)
 	messageVoteRepository := repository2.NewMessageVoteRepository(db, voteCacheRepository)
@@ -79,9 +79,10 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	clientCacheRepository := repository.NewClientCacheRepository(conf, client, serverCacheRepository)
 	iNatsClient := provider.NewNatsClient(conf)
 	messageUseCase := &usecase.MessageUseCase{
-		Source:              source,
 		Conf:                conf,
-		MessageForwardLogic: messageForwardLogic,
+		Locale:              iLocale,
+		Source:              source,
+		MessageForward:      messageForward,
 		Minio:               iMinio,
 		GroupChatMemberRepo: groupChatMemberRepository,
 		FileSplitRepo:       fileSplitRepository,
@@ -97,34 +98,38 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Nats:                iNatsClient,
 	}
 	auth := &v1.Auth{
-		Conf:              conf,
-		AuthUseCase:       authUseCase,
-		JwtTokenCacheRepo: jwtTokenCacheRepository,
-		IpAddressUseCase:  ipAddressUseCase,
-		ChatUseCase:       chatUseCase,
-		BotUseCase:        botUseCase,
-		UserUseCase:       userUseCase,
-		MessageUseCase:    messageUseCase,
+		Conf:             conf,
+		Locale:           iLocale,
+		AuthUseCase:      authUseCase,
+		IpAddressUseCase: ipAddressUseCase,
+		ChatUseCase:      chatUseCase,
+		BotUseCase:       botUseCase,
+		UserUseCase:      userUseCase,
+		MessageUseCase:   messageUseCase,
 	}
 	account := &v1.Account{
+		Locale:      iLocale,
 		UserUseCase: userUseCase,
 	}
-	contactUseCase := usecase.NewContactUseCase(source, contactRepository)
+	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	contact := &v1.Contact{
+		Locale:         iLocale,
 		ContactUseCase: contactUseCase,
 		ChatUseCase:    chatUseCase,
 		UserUseCase:    userUseCase,
 		MessageUseCase: messageUseCase,
 	}
-	contactRequestUseCase := usecase.NewContactRequestUseCase(source)
+	contactRequestUseCase := usecase.NewContactRequestUseCase(iLocale, source)
 	contactRequest := &v1.ContactRequest{
+		Locale:                iLocale,
 		ContactRequestUseCase: contactRequestUseCase,
 		ContactUseCase:        contactUseCase,
 		MessageUseCase:        messageUseCase,
 	}
-	groupChatUseCase := usecase.NewGroupChatUseCase(source, groupChatRepository, groupChatMemberRepository, sequenceRepository, relationCacheRepository)
+	groupChatUseCase := usecase.NewGroupChatUseCase(iLocale, source, groupChatRepository, groupChatMemberRepository, sequenceRepository, relationCacheRepository)
 	redisLockCacheRepository := repository.NewRedisLockCacheRepository(client)
 	chat := &v1.Chat{
+		Locale:                 iLocale,
 		ChatUseCase:            chatUseCase,
 		ContactUseCase:         contactUseCase,
 		GroupChatUseCase:       groupChatUseCase,
@@ -136,26 +141,25 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		UnreadCacheRepo:        unreadCacheRepository,
 		ContactRemarkCacheRepo: contactRemarkCacheRepository,
 	}
-	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(source, groupChatMemberRepository)
+	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(iLocale, source, groupChatMemberRepository)
 	message := &v1.Message{
 		Conf:                   conf,
+		Locale:                 iLocale,
 		ChatUseCase:            chatUseCase,
 		AuthUseCase:            authUseCase,
 		MessageUseCase:         messageUseCase,
 		Minio:                  iMinio,
 		GroupChatMemberUseCase: groupChatMemberUseCase,
 	}
-	publish := &v1.Publish{
-		AuthUseCase:    authUseCase,
-		MessageUseCase: messageUseCase,
-	}
-	fileSplitUseCase := usecase.NewFileSplitUseCase(source, conf, fileSplitRepository, iMinio)
+	fileSplitUseCase := usecase.NewFileSplitUseCase(conf, iLocale, source, fileSplitRepository, iMinio)
 	upload := &v1.Upload{
 		Conf:             conf,
+		Locale:           iLocale,
 		Minio:            iMinio,
 		FileSplitUseCase: fileSplitUseCase,
 	}
 	groupChat := &v1.GroupChat{
+		Locale:                 iLocale,
 		GroupChatUseCase:       groupChatUseCase,
 		GroupChatMemberUseCase: groupChatMemberUseCase,
 		ChatUseCase:            chatUseCase,
@@ -166,8 +170,9 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	}
 	groupChatRequestCacheRepository := repository.NewGroupChatRequestCacheRepository(client)
 	groupChatRequestRepository := repository2.NewGroupChatApplyRepository(db)
-	groupChatRequestUseCase := usecase.NewGroupRequestUseCase(source, groupChatRequestRepository)
+	groupChatRequestUseCase := usecase.NewGroupRequestUseCase(iLocale, source, groupChatRequestRepository)
 	groupChatRequest := &v1.GroupChatRequest{
+		Locale:                  iLocale,
 		GroupRequestCacheRepo:   groupChatRequestCacheRepository,
 		GroupChatRequestUseCase: groupChatRequestUseCase,
 		GroupChatMemberUseCase:  groupChatMemberUseCase,
@@ -175,30 +180,35 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Redis:                   client,
 	}
 	stickerRepository := repository2.NewStickerRepository(db)
-	stickerUseCase := usecase.NewStickerUseCase(source, stickerRepository, iMinio)
+	stickerUseCase := usecase.NewStickerUseCase(iLocale, source, stickerRepository, iMinio)
 	sticker := &v1.Sticker{
 		Conf:               conf,
+		Locale:             iLocale,
 		StickerUseCase:     stickerUseCase,
 		Minio:              iMinio,
 		RedisLockCacheRepo: redisLockCacheRepository,
 	}
 	contactFolderRepository := repository2.NewContactFolderRepository(db)
-	contactFolderUseCase := usecase.NewContactFolderUseCase(source, contactRepository, contactFolderRepository)
+	contactFolderUseCase := usecase.NewContactFolderUseCase(iLocale, source, contactRepository, contactFolderRepository)
 	contactFolder := &v1.ContactFolder{
+		Locale:               iLocale,
 		ContactFolderUseCase: contactFolderUseCase,
 	}
 	groupChatAdsRepository := repository2.NewGroupChatAdsRepository(db)
-	groupChatAdsUseCase := usecase.NewGroupChatAdsUseCase(source, groupChatAdsRepository)
+	groupChatAdsUseCase := usecase.NewGroupChatAdsUseCase(iLocale, source, groupChatAdsRepository)
 	groupChatAds := &v1.GroupChatAds{
+		Locale:              iLocale,
 		GroupMemberUseCase:  groupChatMemberUseCase,
 		GroupChatAdsUseCase: groupChatAdsUseCase,
 		MessageUseCase:      messageUseCase,
 	}
 	search := &v1.Search{
+		Locale:           iLocale,
 		UserUseCase:      userUseCase,
 		GroupChatUseCase: groupChatUseCase,
 	}
 	v1Bot := &v1.Bot{
+		Locale:         iLocale,
 		BotUseCase:     botUseCase,
 		MessageUseCase: messageUseCase,
 	}
@@ -209,15 +219,18 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	projectTaskCommentRepository := repository2.NewProjectTaskCommentRepository(db)
 	projectTaskCoexecutorRepository := repository2.NewProjectTaskCoexecutorRepository(db)
 	projectTaskWatcherRepository := repository2.NewProjectTaskWatcherRepository(db)
-	projectUseCase := usecase.NewProjectUseCase(source, projectRepository, projectMemberRepository, projectTaskTypeRepository, projectTaskRepository, projectTaskCommentRepository, userRepository, relationCacheRepository, projectTaskCoexecutorRepository, projectTaskWatcherRepository)
+	projectUseCase := usecase.NewProjectUseCase(iLocale, source, projectRepository, projectMemberRepository, projectTaskTypeRepository, projectTaskRepository, projectTaskCommentRepository, userRepository, relationCacheRepository, projectTaskCoexecutorRepository, projectTaskWatcherRepository)
 	project := &v1.Project{
+		Locale:             iLocale,
 		ProjectUseCase:     projectUseCase,
 		RedisLockCacheRepo: redisLockCacheRepository,
 	}
 	projectTask := &v1.ProjectTask{
+		Locale:         iLocale,
 		ProjectUseCase: projectUseCase,
 	}
 	projectTaskComment := &v1.ProjectTaskComment{
+		Locale:         iLocale,
 		ProjectUseCase: projectUseCase,
 	}
 	v1Handler := &v1.Handler{
@@ -227,7 +240,6 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		ContactRequest:     contactRequest,
 		Chat:               chat,
 		Message:            message,
-		MessagePublish:     publish,
 		Upload:             upload,
 		GroupChat:          groupChat,
 		GroupChatRequest:   groupChatRequest,
@@ -241,6 +253,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		ProjectTaskComment: projectTaskComment,
 	}
 	botMessage := &bot.Message{
+		Locale:         iLocale,
 		MessageUseCase: messageUseCase,
 		BotUseCase:     botUseCase,
 	}
@@ -251,7 +264,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		V1:  v1Handler,
 		Bot: botHandler,
 	}
-	engine := router.NewRouter(conf, handlerHandler, jwtTokenCacheRepository)
+	engine := router.NewRouter(conf, iLocale, handlerHandler, jwtTokenCacheRepository)
 	appProvider := &http.AppProvider{
 		Conf:   conf,
 		Engine: engine,
@@ -260,15 +273,17 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 }
 
 func NewWsInjector(conf *config.Config) *ws.AppProvider {
-	client := provider.NewRedisClient(conf)
+	iLocale := provider.NewLocale()
+	client := provider.NewRedisClient(conf, iLocale)
 	serverCacheRepository := repository.NewServerCacheRepository(client)
 	clientCacheRepository := repository.NewClientCacheRepository(conf, client, serverCacheRepository)
 	roomCacheRepository := repository.NewRoomCacheRepository(client)
-	db := provider.NewPostgresqlClient(conf)
+	db := provider.NewPostgresqlClient(conf, iLocale)
 	relationCacheRepository := repository.NewRelationCacheRepository(client)
 	groupChatMemberRepository := repository2.NewGroupMemberRepository(db, relationCacheRepository)
-	source := infrastructure.NewSource(db, client)
-	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(source, groupChatMemberRepository)
+	conn := provider.NewClickHouseClient(conf, iLocale)
+	source := infrastructure.NewSource(db, conn, client)
+	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(iLocale, source, groupChatMemberRepository)
 	chatHandler := chat.NewHandler(client, groupChatMemberUseCase)
 	chatEvent := &event.ChatEvent{
 		Redis:                  client,
@@ -287,13 +302,13 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 		Conf: conf,
 	}
 	jwtTokenCacheRepository := repository.NewJwtTokenCacheRepository(client)
-	engine := router2.NewRouter(conf, handlerHandler, jwtTokenCacheRepository)
+	engine := router2.NewRouter(conf, iLocale, handlerHandler, jwtTokenCacheRepository)
 	healthSubscribe := process.NewHealthSubscribe(conf, serverCacheRepository)
 	chatRepository := repository2.NewChatRepository(db)
-	chatUseCase := usecase.NewChatUseCase(source, chatRepository, groupChatMemberRepository)
+	chatUseCase := usecase.NewChatUseCase(iLocale, source, chatRepository, groupChatMemberRepository)
 	sequenceCacheRepository := repository.NewSequenceCacheRepository(client)
 	sequenceRepository := repository2.NewSequenceRepository(db, sequenceCacheRepository)
-	messageForwardLogic := logic.NewMessageForwardLogic(db, sequenceRepository)
+	messageForward := logic.NewMessageForward(iLocale, source, sequenceRepository)
 	iMinio := provider.NewMinioClient(conf)
 	fileSplitRepository := repository2.NewFileSplitRepository(db)
 	voteCacheRepository := repository.NewVoteCacheRepository(client)
@@ -304,9 +319,10 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	messageCacheRepository := repository.NewMessageCacheRepository(client)
 	iNatsClient := provider.NewNatsClient(conf)
 	messageUseCase := &usecase.MessageUseCase{
-		Source:              source,
 		Conf:                conf,
-		MessageForwardLogic: messageForwardLogic,
+		Locale:              iLocale,
+		Source:              source,
+		MessageForward:      messageForward,
 		Minio:               iMinio,
 		GroupChatMemberRepo: groupChatMemberRepository,
 		FileSplitRepo:       fileSplitRepository,
@@ -323,10 +339,11 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	}
 	contactRemarkCacheRepository := repository.NewContactRemarkCacheRepository(client)
 	contactRepository := repository2.NewContactRepository(db, contactRemarkCacheRepository, relationCacheRepository)
-	contactUseCase := usecase.NewContactUseCase(source, contactRepository)
+	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	handler3 := &chat2.Handler{
-		Source:         source,
 		Conf:           conf,
+		Locale:         iLocale,
+		Source:         source,
 		ClientCache:    clientCacheRepository,
 		RoomCache:      roomCacheRepository,
 		ChatUseCase:    chatUseCase,
@@ -346,6 +363,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	}
 	appProvider := &ws.AppProvider{
 		Conf:      conf,
+		Locale:    iLocale,
 		Engine:    engine,
 		Coroutine: server,
 		Handler:   handlerHandler,
@@ -355,52 +373,54 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 }
 
 func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
-	tokenMiddleware := middleware.NewTokenMiddleware(conf)
+	iLocale := provider.NewLocale()
+	tokenMiddleware := middleware.NewTokenMiddleware(conf, iLocale)
 	grpcMethodService := middleware.NewGrpMethodsService()
 	email := provider.NewEmailClient(conf)
-	client := provider.NewRedisClient(conf)
+	client := provider.NewRedisClient(conf, iLocale)
 	smsCacheRepository := repository.NewSmsCacheRepository(client)
-	db := provider.NewPostgresqlClient(conf)
+	db := provider.NewPostgresqlClient(conf, iLocale)
 	contactRemarkCacheRepository := repository.NewContactRemarkCacheRepository(client)
 	relationCacheRepository := repository.NewRelationCacheRepository(client)
 	contactRepository := repository2.NewContactRepository(db, contactRemarkCacheRepository, relationCacheRepository)
 	groupChatMemberRepository := repository2.NewGroupMemberRepository(db, relationCacheRepository)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
 	userRepository := repository2.NewUserRepository(db)
-	conn := provider.NewClickHouseClient(conf)
+	conn := provider.NewClickHouseClient(conf, iLocale)
 	authCodeRepository := repository3.NewAuthCodeRepository(conn)
-	authUseCase := usecase.NewAuthUseCase(conf, email, smsCacheRepository, contactRepository, groupChatMemberRepository, groupChatRepository, userRepository, authCodeRepository)
 	jwtTokenCacheRepository := repository.NewJwtTokenCacheRepository(client)
-	source := infrastructure.NewSource(db, client)
+	authUseCase := usecase.NewAuthUseCase(conf, iLocale, email, smsCacheRepository, contactRepository, groupChatMemberRepository, groupChatRepository, userRepository, authCodeRepository, jwtTokenCacheRepository)
+	source := infrastructure.NewSource(db, conn, client)
 	httpClient := provider.NewHttpClient()
 	requestClient := provider.NewRequestClient(httpClient)
-	ipAddressUseCase := usecase.NewIpAddressUseCase(source, conf, requestClient)
+	ipAddressUseCase := usecase.NewIpAddressUseCase(conf, iLocale, source, requestClient)
 	chatRepository := repository2.NewChatRepository(db)
-	chatUseCase := usecase.NewChatUseCase(source, chatRepository, groupChatMemberRepository)
+	chatUseCase := usecase.NewChatUseCase(iLocale, source, chatRepository, groupChatMemberRepository)
 	botRepository := repository2.NewBotRepository(db)
 	userSessionRepository := repository2.NewUserSessionRepository(db)
-	authHandler := handler3.NewAuthHandler(conf, tokenMiddleware, authUseCase, jwtTokenCacheRepository, ipAddressUseCase, chatUseCase, botRepository, userSessionRepository)
-	contactUseCase := usecase.NewContactUseCase(source, contactRepository)
+	auth := handler3.NewAuthHandler(conf, iLocale, tokenMiddleware, authUseCase, jwtTokenCacheRepository, ipAddressUseCase, chatUseCase, botRepository, userSessionRepository)
+	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	messageCacheRepository := repository.NewMessageCacheRepository(client)
 	unreadCacheRepository := repository.NewUnreadCacheRepository(client)
-	chatHandler := handler3.NewChatHandler(conf, contactUseCase, chatUseCase, messageCacheRepository, unreadCacheRepository)
-	contactHandler := handler3.NewContactHandler(conf, tokenMiddleware, contactUseCase)
+	handlerChat := handler3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageCacheRepository, unreadCacheRepository)
+	contact := handler3.NewContactHandler(conf, iLocale, tokenMiddleware, contactUseCase)
 	appProvider := &grpc.AppProvider{
 		Conf:            conf,
 		TokenMiddleware: tokenMiddleware,
 		RoutesServices:  grpcMethodService,
-		AuthHandler:     authHandler,
-		ChatHandler:     chatHandler,
-		ContactHandler:  contactHandler,
+		AuthHandler:     auth,
+		ChatHandler:     handlerChat,
+		ContactHandler:  contact,
 	}
 	return appProvider
 }
 
 func NewCronInjector(conf *config.Config) *cli.CronProvider {
-	client := provider.NewRedisClient(conf)
+	iLocale := provider.NewLocale()
+	client := provider.NewRedisClient(conf, iLocale)
 	serverCacheRepository := repository.NewServerCacheRepository(client)
 	clearWsCache := cron.NewClearWsCache(serverCacheRepository)
-	db := provider.NewPostgresqlClient(conf)
+	db := provider.NewPostgresqlClient(conf, iLocale)
 	iMinio := provider.NewMinioClient(conf)
 	clearTmpFile := cron.NewClearTmpFile(conf, db, iMinio)
 	clearExpireServer := cron.NewClearExpireServer(serverCacheRepository)
@@ -417,8 +437,9 @@ func NewCronInjector(conf *config.Config) *cli.CronProvider {
 }
 
 func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
-	db := provider.NewPostgresqlClient(conf)
-	client := provider.NewRedisClient(conf)
+	iLocale := provider.NewLocale()
+	db := provider.NewPostgresqlClient(conf, iLocale)
+	client := provider.NewRedisClient(conf, iLocale)
 	emailHandle := queue.EmailHandle{
 		Redis: client,
 	}
@@ -440,7 +461,8 @@ func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
 }
 
 func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
-	db := provider.NewPostgresqlClient(conf)
+	iLocale := provider.NewLocale()
+	db := provider.NewPostgresqlClient(conf, iLocale)
 	migrateProvider := &cli.MigrateProvider{
 		Conf: conf,
 		DB:   db,
@@ -452,7 +474,3 @@ func NewGenerateInjector(conf *config.Config) *cli.GenerateProvider {
 	generateProvider := &cli.GenerateProvider{}
 	return generateProvider
 }
-
-// wire.go:
-
-var providerSet = wire.NewSet(provider.NewPostgresqlClient, provider.NewClickHouseClient, provider.NewRedisClient, provider.NewHttpClient, provider.NewEmailClient, provider.NewMinioClient, provider.NewRequestClient, provider.NewNatsClient, wire.Struct(new(provider.Providers), "*"), logic.ProviderSet, usecase.ProviderSet, infrastructure.ProviderSet)

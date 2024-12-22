@@ -26,7 +26,8 @@ func (g *GroupChatRequestRepository) List(ctx context.Context, groupIds []int) (
 		"users.avatar",
 		"users.username",
 	}
-	query := g.Repo.Db.WithContext(ctx).Table("group_chat_requests").
+	query := g.Repo.Db.WithContext(ctx).
+		Table("group_chat_requests").
 		Joins("LEFT JOIN users on users.id = group_chat_requests.user_id").
 		Where("group_chat_requests.status = ?", constant.GroupChatRequestStatusWait).
 		Order("group_chat_requests.updated_at desc, group_chat_requests.id desc")

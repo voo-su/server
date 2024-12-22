@@ -6,35 +6,41 @@ import (
 	"voo.su/internal/infrastructure"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
+	"voo.su/pkg/locale"
 )
 
 type IGroupChatMemberUseCase interface {
 	Handover(ctx context.Context, groupId int, userId int, memberId int) error
+
 	SetLeaderStatus(ctx context.Context, groupId int, userId int, leader int) error
+
 	SetMuteStatus(ctx context.Context, groupId int, userId int, status int) error
 }
 
 var _ IGroupChatMemberUseCase = (*GroupChatMemberUseCase)(nil)
 
 type GroupChatMemberUseCase struct {
-	*infrastructure.Source
+	Locale     locale.ILocale
+	Source     *infrastructure.Source
 	MemberRepo *postgresRepo.GroupChatMemberRepository
 }
 
 func NewGroupMemberUseCase(
+	locale locale.ILocale,
 	source *infrastructure.Source,
 	memberRepo *postgresRepo.GroupChatMemberRepository,
 ) *GroupChatMemberUseCase {
 	return &GroupChatMemberUseCase{
+		Locale:     locale,
 		Source:     source,
 		MemberRepo: memberRepo,
 	}
 }
 
 func (g *GroupChatMemberUseCase) Handover(ctx context.Context, groupId int, userId int, memberId int) error {
-	return g.Source.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	return g.Source.Postgres().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(&postgresModel.GroupChatMember{}).
-			Where("group_id = ? AND user_id = ? AND leader = 2", groupId, userId).
+			Where("group_id = ? AND user_id = ? AND leader = ?", groupId, userId, 2).
 			Update("leader", 0).
 			Error; err != nil {
 			return err

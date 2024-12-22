@@ -9,11 +9,12 @@ import (
 	"voo.su/internal/delivery/ws/handler"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/middleware"
 	"voo.su/pkg/response"
 )
 
-func NewRouter(conf *config.Config, handle *handler.Handler, session *redisRepo.JwtTokenCacheRepository) *gin.Engine {
+func NewRouter(conf *config.Config, locale locale.ILocale, handle *handler.Handler, session *redisRepo.JwtTokenCacheRepository) *gin.Engine {
 	router := gin.New()
 	src, err := os.OpenFile(conf.App.LogPath("ws_access.log"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -27,7 +28,7 @@ func NewRouter(conf *config.Config, handle *handler.Handler, session *redisRepo.
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Response{
 			Code:    http.StatusInternalServerError,
-			Message: "Произошла ошибка системы. Пожалуйста, повторите попытку!",
+			Message: locale.Localize("network_error"),
 		})
 	}))
 
@@ -51,7 +52,7 @@ func NewRouter(conf *config.Config, handle *handler.Handler, session *redisRepo.
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, response.Response{
 			Code:    http.StatusNotFound,
-			Message: "Метод не найден",
+			Message: locale.Localize("method_not_found"),
 		})
 	})
 

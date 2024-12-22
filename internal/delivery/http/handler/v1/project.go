@@ -6,10 +6,12 @@ import (
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/sliceutil"
 )
 
 type Project struct {
+	Locale             locale.ILocale
 	ProjectUseCase     *usecase.ProjectUseCase
 	RedisLockCacheRepo *redisRepo.RedisLockCacheRepository
 }
@@ -25,7 +27,7 @@ func (p *Project) Create(ctx *core.Context) error {
 		Title:  params.Title,
 	})
 	if err != nil {
-		return ctx.ErrorBusiness("Не удалось создать, попробуйте позже: " + err.Error())
+		return ctx.ErrorBusiness(p.Locale.Localize("creation_failed_try_later") + ": " + err.Error())
 	}
 
 	return ctx.Success(&v1Pb.ProjectCreateResponse{Id: projectId})
@@ -75,28 +77,28 @@ func (p *Project) Invite(ctx *core.Context) error {
 
 	key := fmt.Sprintf("project-join:%d", params.ProjectId)
 	if !p.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 20) {
-		return ctx.ErrorBusiness("Ошибка сети, попробуйте повторить попытку позже")
+		return ctx.ErrorBusiness(p.Locale.Localize("network_error"))
 	}
 
 	defer p.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
 
 	project, err := p.ProjectUseCase.ProjectRepo.FindById(ctx.Ctx(), int(params.ProjectId))
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка сети, попробуйте повторить попытку позже")
+		return ctx.ErrorBusiness(p.Locale.Localize("network_error"))
 	}
 
 	if project == nil {
-		return ctx.ErrorBusiness("Проект был расформирован")
+		return ctx.ErrorBusiness(p.Locale.Localize("project_dissolved"))
 	}
 
 	uids := sliceutil.Unique(sliceutil.ParseIds(params.Ids))
 	if len(uids) == 0 {
-		return ctx.ErrorBusiness("Список приглашённых не может быть пустым")
+		return ctx.ErrorBusiness(p.Locale.Localize("invited_list_cannot_be_empty"))
 	}
 
 	uid := ctx.UserId()
 	if !p.ProjectUseCase.IsMember(ctx.Ctx(), int(params.ProjectId), uid, true) {
-		return ctx.ErrorBusiness("Вы не являетесь участником проекта и не имеете права приглашать других")
+		return ctx.ErrorBusiness(p.Locale.Localize("not_project_member_cannot_invite"))
 	}
 
 	if err := p.ProjectUseCase.Invite(ctx.Ctx(), &usecase.ProjectInviteOpt{
@@ -104,7 +106,7 @@ func (p *Project) Invite(ctx *core.Context) error {
 		UserId:    uid,
 		MemberIds: uids,
 	}); err != nil {
-		return ctx.ErrorBusiness("Не удалось отправить приглашения: " + err.Error())
+		return ctx.ErrorBusiness(p.Locale.Localize("failed_to_send_invitations") + ": " + err.Error())
 	}
 
 	return ctx.Success(&v1Pb.ProjectInviteResponse{})

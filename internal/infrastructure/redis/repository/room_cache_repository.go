@@ -13,8 +13,10 @@ type RoomCacheRepository struct {
 	Rds *redis.Client
 }
 
-func NewRoomCacheRepository(redis *redis.Client) *RoomCacheRepository {
-	return &RoomCacheRepository{Rds: redis}
+func NewRoomCacheRepository(rds *redis.Client) *RoomCacheRepository {
+	return &RoomCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (r *RoomCacheRepository) Add(ctx context.Context, opt *model.RoomOption) error {

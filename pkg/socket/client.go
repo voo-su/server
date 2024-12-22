@@ -18,14 +18,19 @@ const (
 
 type IClient interface {
 	Cid() int64
+
 	Uid() int
+
 	Close(code int, text string)
+
 	Write(data *ClientResponse) error
+
 	Channel() IChannel
 }
 
 type IStorage interface {
 	Bind(ctx context.Context, channel string, cid int64, uid int) error
+
 	UnBind(ctx context.Context, channel string, cid int64) error
 }
 
@@ -45,7 +50,7 @@ type ClientOption struct {
 	Uid         int
 	Channel     IChannel
 	Storage     IStorage
-	IdGenerator IdGenerator
+	IdGenerator IIdGenerator
 	Buffer      int
 }
 
@@ -62,7 +67,7 @@ func NewClient(conn IConn, option *ClientOption, event IEvent) error {
 		option.Buffer = 10
 	}
 	if event == nil {
-		panic("событие равно нулю")
+		panic("empty")
 	}
 
 	client := &Client{
@@ -84,7 +89,7 @@ func NewClient(conn IConn, option *ClientOption, event IEvent) error {
 	if client.storage != nil {
 		err := client.storage.Bind(context.TODO(), client.channel.Name(), client.cid, client.uid)
 		if err != nil {
-			log.Println("Ошибка привязки клиента: ", err.Error())
+			log.Printf("Client binding error: %s", err)
 			return err
 		}
 	}
@@ -111,11 +116,11 @@ func (c *Client) Uid() int {
 func (c *Client) Close(code int, message string) {
 	defer func() {
 		if err := c.conn.Close(); err != nil {
-			log.Printf("ошибка закрытия соединения: %s \n", err.Error())
+			log.Printf("error closing connection: %s \n", err.Error())
 		}
 	}()
 	if err := c.hookClose(code, message); err != nil {
-		log.Printf("%s-%d-%d ошибка закрытия клиента: %s \n", c.channel.Name(), c.cid, c.uid, err.Error())
+		log.Printf("%s-%d-%d client close error: %s", c.channel.Name(), c.cid, c.uid, err)
 	}
 }
 
@@ -126,11 +131,11 @@ func (c *Client) Closed() bool {
 func (c *Client) Write(data *ClientResponse) error {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Printf("[%s-%d-%d] ошибка записи в канал: %v \n", c.channel.Name(), c.cid, c.uid, err)
+			log.Printf("%s-%d-%d error writing to pipe: %v", c.channel.Name(), c.cid, c.uid, err)
 		}
 	}()
 	if c.Closed() {
-		return fmt.Errorf("соединение закрыто")
+		return fmt.Errorf("connection closed")
 	}
 
 	if data.IsAck {
@@ -143,7 +148,7 @@ func (c *Client) Write(data *ClientResponse) error {
 }
 
 func (c *Client) loopAccept() {
-	defer c.Close(1000, "прием цикла закрыт")
+	defer c.Close(1000, "cycle reception closed")
 	for {
 		data, err := c.conn.Read()
 		if err != nil {
@@ -161,7 +166,7 @@ func (c *Client) loopWrite() {
 		timer.Reset(15 * time.Second)
 		select {
 		case <-timer.C:
-			fmt.Printf("Клиент пустое сообщение cid:%d uid:%d время:%d \n", c.cid, c.uid, time.Now().Unix())
+			log.Printf("Client cid:%d uid:%d time:%d", c.cid, c.uid, time.Now().Unix())
 		case data, ok := <-c.outChan:
 			if !ok || c.Closed() {
 				return
@@ -169,12 +174,12 @@ func (c *Client) loopWrite() {
 
 			bt, err := sonic.Marshal(data)
 			if err != nil {
-				log.Printf("Ошибка маршалинга json клиента: %v \n", err)
+				log.Printf("loopWrite json decode err: %v \n", err)
 				break
 			}
 
 			if err := c.conn.Write(bt); err != nil {
-				log.Printf("[%s-%d-%d] ошибка записи клиента: %v \n", c.channel.Name(), c.cid, c.uid, err)
+				log.Printf("%s-%d-%d client write error: %v \n", c.channel.Name(), c.cid, c.uid, err)
 				return
 			}
 
@@ -214,7 +219,7 @@ func (c *Client) hookClose(code int, text string) error {
 	if c.storage != nil {
 		err := c.storage.UnBind(context.TODO(), c.channel.Name(), c.cid)
 		if err != nil {
-			log.Println("Ошибка отвязки клиента: ", err.Error())
+			log.Printf("Error unbinding client: %s", err)
 			return err
 		}
 	}
@@ -226,7 +231,7 @@ func (c *Client) hookClose(code int, text string) error {
 func (c *Client) handleMessage(data []byte) {
 	event, err := c.validate(data)
 	if err != nil {
-		log.Printf("Ошибка проверки: %s \n", err.Error())
+		log.Printf("Verification error: %s \n", err.Error())
 
 		return
 	}
@@ -249,7 +254,7 @@ func (c *Client) handleMessage(data []byte) {
 
 func (c *Client) validate(data []byte) (string, error) {
 	if !sonic.Valid(data) {
-		return "", fmt.Errorf("неверный формат json")
+		return "", fmt.Errorf("validate err")
 	}
 
 	value, err := sonic.Get(data, "event")

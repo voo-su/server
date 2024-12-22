@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"voo.su/internal/constant"
-	model2 "voo.su/internal/infrastructure/postgres/model"
+	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/socket"
@@ -21,29 +21,29 @@ type DialogReadMessage struct {
 func (h *Handler) onReadMessage(ctx context.Context, client socket.IClient, data []byte) {
 	var in DialogReadMessage
 	if err := jsonutil.Decode(data, &in); err != nil {
-		log.Println("Чат onReadMessage ошибка: ", err)
+		log.Printf("onReadMessage json decode err: %s", err)
 		return
 	}
 
-	items := make([]model2.MessageRead, 0, len(in.Content.MsgIds))
+	items := make([]model.MessageRead, 0, len(in.Content.MsgIds))
 	for _, msgId := range in.Content.MsgIds {
-		items = append(items, model2.MessageRead{
+		items = append(items, model.MessageRead{
 			MsgId:      msgId,
 			UserId:     client.Uid(),
 			ReceiverId: in.Content.ReceiverId,
 		})
 	}
 
-	if err := h.MemberUseCase.Db().Create(items).Error; err != nil {
-		logger.Error("Не удалось выполнить пакетное создание MessageRead", err.Error())
+	if err := h.MemberUseCase.Source.Postgres().Create(items).Error; err != nil {
+		logger.Errorf("onReadMessage Create err: %s", err)
 		return
 	}
 
-	if err := h.MemberUseCase.Db().
-		Model(&model2.Message{}).
-		Where("msg_id in ? AND receiver_id = ? AND is_read = 0", in.Content.MsgIds, client.Uid()).
+	if err := h.MemberUseCase.Source.Postgres().
+		Model(&model.Message{}).
+		Where("msg_id in ? AND receiver_id = ? AND is_read = ?", in.Content.MsgIds, client.Uid(), 0).
 		Update("is_read", 1).Error; err != nil {
-		log.Println("Чат onReadMessage ошибка: ", err)
+		log.Printf("onReadMessage Update err:  %s", err)
 		return
 	}
 

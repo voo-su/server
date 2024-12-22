@@ -11,13 +11,13 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(AppProvider), "*"),
 
 	wire.Struct(new(pb.UnimplementedAuthServiceServer), "*"),
-	wire.Bind(new(pb.AuthServiceServer), new(*handler.AuthHandler)),
+	wire.Bind(new(pb.AuthServiceServer), new(*handler.Auth)),
 
 	wire.Struct(new(pb.UnimplementedChatServiceServer), "*"),
-	wire.Bind(new(pb.ChatServiceServer), new(*handler.ChatHandler)),
+	wire.Bind(new(pb.ChatServiceServer), new(*handler.Chat)),
 
 	wire.Struct(new(pb.UnimplementedContactServiceServer), "*"),
-	wire.Bind(new(pb.ContactServiceServer), new(*handler.ContactHandler)),
+	wire.Bind(new(pb.ContactServiceServer), new(*handler.Contact)),
 
 	handler.NewAuthHandler,
 	handler.NewChatHandler,

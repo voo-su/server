@@ -8,37 +8,20 @@ import (
 	"voo.su/internal/infrastructure"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
+	"voo.su/pkg/locale"
 )
 
 var handlers map[string]func(ctx context.Context, data []byte)
 
 type Handler struct {
-	Source         *infrastructure.Source
 	Conf           *config.Config
+	Locale         locale.ILocale
+	Source         *infrastructure.Source
 	ClientCache    *redisRepo.ClientCacheRepository
 	RoomCache      *redisRepo.RoomCacheRepository
 	ChatUseCase    *usecase.ChatUseCase
 	MessageUseCase usecase.IMessageUseCase
 	ContactUseCase *usecase.ContactUseCase
-}
-
-func NewHandler(
-	source *infrastructure.Source,
-	conf *config.Config,
-	clientCache *redisRepo.ClientCacheRepository,
-	roomCache *redisRepo.RoomCacheRepository,
-	chatUseCase *usecase.ChatUseCase,
-	contactUseCase *usecase.ContactUseCase,
-
-) *Handler {
-	return &Handler{
-		Source:         source,
-		Conf:           conf,
-		ClientCache:    clientCache,
-		RoomCache:      roomCache,
-		ChatUseCase:    chatUseCase,
-		ContactUseCase: contactUseCase,
-	}
 }
 
 func (h *Handler) init() {

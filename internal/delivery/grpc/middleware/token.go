@@ -9,17 +9,21 @@ import (
 	"time"
 	"voo.su/internal/config"
 	"voo.su/internal/infrastructure/postgres/model"
+	"voo.su/pkg/locale"
 )
 
 type TokenMiddleware struct {
-	Conf *config.Config
+	Conf   *config.Config
+	Locale locale.ILocale
 }
 
 func NewTokenMiddleware(
 	conf *config.Config,
+	locale locale.ILocale,
 ) *TokenMiddleware {
 	return &TokenMiddleware{
-		Conf: conf,
+		Conf:   conf,
+		Locale: locale,
 	}
 }
 
@@ -49,7 +53,7 @@ func (t *TokenMiddleware) CreateToken(user *model.User) (string, error) {
 func (t *TokenMiddleware) ParseToken(tokenString string) (*UserClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("неожиданный метод подписи: %v", token.Header["alg"])
+			return nil, fmt.Errorf(t.Locale.Localize("unexpected_signature_method"), token.Header["alg"])
 		}
 
 		return []byte(t.Conf.App.Jwt.Secret), nil
@@ -69,7 +73,7 @@ func (t *TokenMiddleware) ParseToken(tokenString string) (*UserClaims, error) {
 func (t *TokenMiddleware) ValidateToken(ctx context.Context) (*UserClaims, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, errors.New("Не удалось получить метаданные")
+		return nil, errors.New(t.Locale.Localize("failed_to_fetch_metadata"))
 	}
 
 	token := md.Get("Authorization")

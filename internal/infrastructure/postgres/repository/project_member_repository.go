@@ -17,7 +17,8 @@ func NewProjectMemberRepository(db *gorm.DB) *ProjectMemberRepository {
 
 func (p *ProjectMemberRepository) GetMemberIds(ctx context.Context, projectId int) []int {
 	var ids []int
-	_ = p.Repo.Model(ctx).Select("user_id").
+	_ = p.Repo.Model(ctx).
+		Select("user_id").
 		Where("project_id = ?", projectId).
 		Scan(&ids)
 

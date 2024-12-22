@@ -25,6 +25,7 @@ import (
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/encrypt"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/nats"
@@ -34,33 +35,53 @@ import (
 
 type IMessageUseCase interface {
 	SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error
+
 	SendText(ctx context.Context, uid int, req *SendText) error
+
 	SendImage(ctx context.Context, uid int, req *SendImage) error
+
 	SendVideo(ctx context.Context, uid int, req *SendVideo) error
+
 	SendAudio(ctx context.Context, uid int, req *SendAudio) error
+
 	SendFile(ctx context.Context, uid int, req *SendFile) error
+
 	SendBotFile(ctx context.Context, uid int, req *SendBotFile) error
+
 	SendVote(ctx context.Context, uid int, req *v1Pb.VoteMessageRequest) error
+
 	SendForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error
+
 	SendSysOther(ctx context.Context, data *postgresModel.Message) error
+
 	SendMixedMessage(ctx context.Context, uid int, req *v1Pb.MixedMessageRequest) error
+
 	Revoke(ctx context.Context, uid int, msgId string) error
+
 	Vote(ctx context.Context, uid int, msgId int, optionsValue string) (*postgresRepo.VoteStatistics, error)
+
 	SendLogin(ctx context.Context, uid int, req *SendLogin) error
+
 	SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error
+
 	SendCode(ctx context.Context, uid int, req *v1Pb.CodeMessageRequest) error
+
 	GetDialogRecords(ctx context.Context, opt *QueryDialogRecordsOpt) ([]*DialogRecordsItem, error)
+
 	GetDialogRecord(ctx context.Context, recordId int64) (*DialogRecordsItem, error)
+
 	GetMessageByRecordId(ctx context.Context, recordId int) (*postgresModel.Message, error)
+
 	SendLocation(ctx context.Context, uid int, req *v1Pb.LocationMessageRequest) error
 }
 
 var _ IMessageUseCase = (*MessageUseCase)(nil)
 
 type MessageUseCase struct {
-	*infrastructure.Source
 	Conf                *config.Config
-	MessageForwardLogic *logic.MessageForwardLogic
+	Locale              locale.ILocale
+	Source              *infrastructure.Source
+	MessageForward      *logic.MessageForward
 	Minio               minio.IMinio
 	GroupChatMemberRepo *postgresRepo.GroupChatMemberRepository
 	FileSplitRepo       *postgresRepo.FileSplitRepository
@@ -148,7 +169,7 @@ func (m *MessageUseCase) GetDialogRecords(ctx context.Context, opt *QueryDialogR
 			"users.avatar as avatar",
 		}
 	)
-	query := m.Source.Db().WithContext(ctx).Table("messages")
+	query := m.Source.Postgres().WithContext(ctx).Table("messages")
 	query.Joins("LEFT JOIN users ON messages.user_id = users.id")
 	query.Joins("LEFT JOIN message_delete ON messages.id = message_delete.record_id AND message_delete.user_id = ?", opt.UserId)
 	if opt.RecordId > 0 {
@@ -156,7 +177,7 @@ func (m *MessageUseCase) GetDialogRecords(ctx context.Context, opt *QueryDialogR
 	}
 
 	if opt.DialogType == constant.ChatPrivateMode {
-		subQuery := m.Source.Db().Where("messages.user_id = ? AND messages.receiver_id = ?", opt.UserId, opt.ReceiverId)
+		subQuery := m.Source.Postgres().Where("messages.user_id = ? AND messages.receiver_id = ?", opt.UserId, opt.ReceiverId)
 		subQuery.Or("messages.user_id = ? AND messages.receiver_id = ?", opt.ReceiverId, opt.UserId)
 		query.Where(subQuery)
 	} else {
@@ -200,9 +221,10 @@ func (m *MessageUseCase) GetDialogRecord(ctx context.Context, recordId int64) (*
 			"users.avatar as avatar",
 		}
 	)
-	query := m.Source.Db().Table("messages")
-	query.Joins("LEFT JOIN users on messages.user_id = users.id")
-	query.Where("messages.id = ?", recordId)
+	query := m.Source.Postgres().
+		Table("messages").
+		Joins("LEFT JOIN users on messages.user_id = users.id").
+		Where("messages.id = ?", recordId)
 	if err = query.Select(fields).Take(&item).Error; err != nil {
 		return nil, err
 	}
@@ -255,7 +277,7 @@ func (m *MessageUseCase) GetForwardRecords(ctx context.Context, uid int, recordI
 			"users.avatar AS avatar",
 		}
 	)
-	tx := m.Source.Db().Table("messages").
+	tx := m.Source.Postgres().Table("messages").
 		Select(fields).
 		Joins("LEFT JOIN users ON messages.user_id = users.id").
 		Where("messages.id IN ?", extra.MsgIds).
@@ -281,7 +303,7 @@ func (m *MessageUseCase) HandleDialogRecords(ctx context.Context, items []*Query
 
 	hashVotes := make(map[int]*postgresModel.MessageVote)
 	if len(votes) > 0 {
-		m.Source.Db().Model(&postgresModel.MessageVote{}).Where("record_id in ?", votes).Scan(&voteItems)
+		m.Source.Postgres().Model(&postgresModel.MessageVote{}).Where("record_id in ?", votes).Scan(&voteItems)
 		for i := range voteItems {
 			hashVotes[voteItems[i].RecordId] = voteItems[i]
 		}
@@ -596,7 +618,7 @@ func (m *MessageUseCase) SendVote(ctx context.Context, uid int, req *v1Pb.VoteMe
 	}
 
 	num := m.GroupChatMemberRepo.CountMemberTotal(ctx, int(req.Receiver.ReceiverId))
-	err := m.Db().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	err := m.Source.Postgres().WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(data).Error; err != nil {
 			return err
 		}
@@ -611,14 +633,14 @@ func (m *MessageUseCase) SendVote(ctx context.Context, uid int, req *v1Pb.VoteMe
 		}).Error
 	})
 	if err == nil {
-		m.afterHandle(ctx, data, map[string]string{"text": "Опрос"})
+		m.afterHandle(ctx, data, map[string]string{"text": m.Locale.Localize("vote")})
 	}
 
 	return err
 }
 
 func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error {
-	if err := m.MessageForwardLogic.Verify(ctx, uid, req); err != nil {
+	if err := m.MessageForward.Verify(ctx, uid, req); err != nil {
 		return err
 	}
 
@@ -627,9 +649,9 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 		items []*logic.ForwardRecord
 	)
 	if req.Mode == 1 {
-		items, err = m.MessageForwardLogic.MultiSplitForward(ctx, uid, req)
+		items, err = m.MessageForward.MultiSplitForward(ctx, uid, req)
 	} else {
-		items, err = m.MessageForwardLogic.MultiMergeForward(ctx, uid, req)
+		items, err = m.MessageForward.MultiMergeForward(ctx, uid, req)
 	}
 	if err != nil {
 		return err
@@ -647,7 +669,7 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 		}
 
 		_ = m.MessageCache.Set(ctx, record.DialogType, uid, record.ReceiverId, &redisModel.LastCacheMessage{
-			Content:  "Пересланное сообщение",
+			Content:  m.Locale.Localize("forwarded_message"),
 			Datetime: timeutil.DateTime(),
 		})
 	}
@@ -698,7 +720,7 @@ func (m *MessageUseCase) SendSysOther(ctx context.Context, data *postgresModel.M
 
 func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) error {
 	var record postgresModel.Message
-	if err := m.Source.Db().First(&record, "msg_id = ?", msgId).Error; err != nil {
+	if err := m.Source.Postgres().First(&record, "msg_id = ?", msgId).Error; err != nil {
 		return err
 	}
 
@@ -707,19 +729,19 @@ func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) erro
 	}
 
 	if record.UserId != uid {
-		return errors.New("нет прав на отзыв данного сообщения")
+		return errors.New(m.Locale.Localize("no_permission_to_revoke_message"))
 	}
 
 	if time.Now().Unix() > record.CreatedAt.Add(3*time.Minute).Unix() {
-		return errors.New("превышено допустимое время для отзыва. Отзыв невозможен")
+		return errors.New(m.Locale.Localize("revoke_time_exceeded"))
 	}
 
-	if err := m.Source.Db().Model(&postgresModel.Message{Id: record.Id}).Update("is_revoke", 1).Error; err != nil {
+	if err := m.Source.Postgres().Model(&postgresModel.Message{Id: record.Id}).Update("is_revoke", 1).Error; err != nil {
 		return err
 	}
 
 	_ = m.MessageCache.Set(ctx, record.DialogType, record.UserId, record.ReceiverId, &redisModel.LastCacheMessage{
-		Content:  "Данное сообщение удалено",
+		Content:  m.Locale.Localize("message_deleted"),
 		Datetime: timeutil.DateTime(),
 	})
 
@@ -736,9 +758,8 @@ func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) erro
 }
 
 func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsValue string) (*postgresRepo.VoteStatistics, error) {
-	db := m.Source.Db().WithContext(ctx)
-	query := db.Table("messages")
-	query.Select([]string{
+	db := m.Source.Postgres().WithContext(ctx)
+	fields := []string{
 		"messages.receiver_id",
 		"messages.dialog_type",
 		"messages.msg_type",
@@ -748,9 +769,11 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsVa
 		"vote.answer_option",
 		"vote.answer_num",
 		"vote.status as vote_status",
-	})
-	query.Joins("LEFT JOIN message_votes as vote ON vote.record_id = messages.id")
-	query.Where("messages.id = ?", msgId)
+	}
+	query := db.Select(fields).
+		Table("messages").
+		Joins("LEFT JOIN message_votes as vote ON vote.record_id = messages.id").
+		Where("messages.id = ?", msgId)
 
 	var vote entity.QueryVoteModel
 	if err := query.Take(&vote).Error; err != nil {
@@ -758,21 +781,21 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsVa
 	}
 
 	if vote.MsgType != constant.ChatMsgTypeVote {
-		return nil, fmt.Errorf("текущая запись не относится к информации о голосовании %d", vote.MsgType)
+		return nil, fmt.Errorf(m.Locale.Localize("record_not_related_to_voting_info"), vote.MsgType)
 	}
 
 	if vote.DialogType == constant.ChatGroupMode {
 		var count int64
 		db.Table("group_chat_members").Where("group_id = ? AND user_id = ? AND is_quit = 0", vote.ReceiverId, uid).Count(&count)
 		if count == 0 {
-			return nil, errors.New("нет прав на голосование")
+			return nil, errors.New(m.Locale.Localize("no_permission_to_vote"))
 		}
 	}
 
 	var count int64
 	db.Table("message_vote_answers").Where("vote_id = ? AND user_id = ?", vote.VoteId, uid).Count(&count)
 	if count > 0 {
-		return nil, fmt.Errorf("повторное голосование %d", vote.VoteId)
+		return nil, fmt.Errorf(m.Locale.Localize("duplicate_vote"), vote.VoteId)
 	}
 
 	options := strings.Split(optionsValue, ",")
@@ -784,7 +807,7 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsVa
 
 	for _, option := range options {
 		if _, ok := answerOptions[option]; !ok {
-			return nil, fmt.Errorf("недопустимый вариант голосования %s", option)
+			return nil, fmt.Errorf(m.Locale.Localize("invalid_vote_option"), option)
 		}
 	}
 
@@ -800,7 +823,7 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsVa
 		})
 	}
 
-	err := m.Source.Db().Transaction(func(tx *gorm.DB) error {
+	err := m.Source.Postgres().Transaction(func(tx *gorm.DB) error {
 		if err := tx.Table("message_votes").
 			Where("id = ?", vote.VoteId).
 			Updates(map[string]any{
@@ -830,7 +853,7 @@ func (m *MessageUseCase) save(ctx context.Context, data *postgresModel.Message) 
 	m.loadReply(ctx, data)
 	m.loadSequence(ctx, data)
 
-	if err := m.Source.Db().WithContext(ctx).Create(data).Error; err != nil {
+	if err := m.Source.Postgres().WithContext(ctx).Create(data).Error; err != nil {
 		return err
 	}
 
@@ -839,11 +862,7 @@ func (m *MessageUseCase) save(ctx context.Context, data *postgresModel.Message) 
 	case constant.ChatMsgTypeText:
 		option["text"] = strutil.MtSubstr(strutil.ReplaceImgAll(data.Content), 0, 300)
 	default:
-		if value, ok := constant.ChatMsgTypeMapping[data.MsgType]; ok {
-			option["text"] = value
-		} else {
-			option["text"] = "Неизвестно"
-		}
+		option["text"] = entity.GetChatMsgTypeMapping(m.Locale, data.MsgType)
 	}
 
 	m.afterHandle(ctx, data, option)
@@ -862,17 +881,19 @@ func (m *MessageUseCase) loadReply(_ context.Context, data *postgresModel.Messag
 
 	extra := make(map[string]any)
 	if err := jsonutil.Decode(data.Extra, &extra); err != nil {
-		logger.Errorf("MessageUseCase Json Decode err: %s", err.Error())
+		logger.Errorf("MessageUseCase json decode err: %s", err.Error())
 		return
 	}
 
 	var record postgresModel.Message
-	if err := m.Source.Db().Table("messages").Find(&record, "msg_id = ?", data.QuoteId).Error; err != nil {
+	if err := m.Source.Postgres().
+		Table("messages").
+		Find(&record, "msg_id = ?", data.QuoteId).Error; err != nil {
 		return
 	}
 
 	var user postgresModel.User
-	if err := m.Source.Db().
+	if err := m.Source.Postgres().
 		Table("users").
 		Select("username").
 		Find(&user, "id = ?", record.UserId).Error; err != nil {
@@ -888,10 +909,7 @@ func (m *MessageUseCase) loadReply(_ context.Context, data *postgresModel.Messag
 	}
 
 	if record.MsgType != constant.ChatMsgTypeText {
-		reply.Content = "Неизвестно"
-		if value, ok := constant.ChatMsgTypeMapping[record.MsgType]; ok {
-			reply.Content = value
-		}
+		reply.Content = entity.GetChatMsgTypeMapping(m.Locale, record.MsgType)
 	}
 
 	extra["reply"] = reply
@@ -958,7 +976,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 		}
 	}
 	if err := m.Source.Redis().Publish(ctx, constant.ImTopicChat, content).Err(); err != nil {
-		logger.Errorf("Ошибка отправки уведомления %s", err.Error())
+		logger.Errorf(m.Locale.Localize("notification_sending_error"), err.Error())
 	}
 
 	return
@@ -969,7 +987,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 	uids = append(uids, 1)
 
 	pushTokens := make([]*postgresModel.PushToken, 0)
-	if err := m.Source.Db().
+	if err := m.Source.Postgres().
 		Table("push_tokens").
 		Where("user_id in ?", uids).
 		Scan(&pushTokens).
@@ -989,7 +1007,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 
 		webPushData, err := json.Marshal(webPushContent)
 		if err != nil {
-			log.Fatal("Не удалось сериализовать данные в JSON: ", err)
+			log.Fatal(m.Locale.Localize("json_serialization_error"), err)
 		}
 
 		if err := m.Nats.Publish("web-push", webPushData); err != nil {
@@ -1028,9 +1046,9 @@ func (m *MessageUseCase) SendLogin(ctx context.Context, uid int, req *SendLogin)
 
 func (m *MessageUseCase) SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error {
 	var sticker postgresModel.StickerItem
-	if err := m.Source.Db().First(&sticker, "id = ? AND user_id = ?", req.StickerId, uid).Error; err != nil {
+	if err := m.Source.Postgres().First(&sticker, "id = ? AND user_id = ?", req.StickerId, uid).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("информация о смайлик не существует")
+			return errors.New(m.Locale.Localize("emoji_info_not_found"))
 		}
 		return err
 	}

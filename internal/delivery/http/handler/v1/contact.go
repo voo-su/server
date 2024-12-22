@@ -7,9 +7,11 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 )
 
 type Contact struct {
+	Locale         locale.ILocale
 	ContactUseCase *usecase.ContactUseCase
 	ChatUseCase    *usecase.ChatUseCase
 	UserUseCase    *usecase.UserUseCase
@@ -50,7 +52,7 @@ func (c *Contact) Get(ctx *core.Context) error {
 	user, err := c.UserUseCase.UserRepo.FindById(ctx.Ctx(), int(params.UserId))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ctx.ErrorBusiness("Пользователь не существует")
+			return ctx.ErrorBusiness(c.Locale.Localize("user_not_found"))
 		}
 
 		return ctx.ErrorBusiness(err.Error())
@@ -98,7 +100,7 @@ func (c *Contact) Delete(ctx *core.Context) error {
 	}
 
 	_ = c.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
-		Content: "Контакт удален",
+		Content: c.Locale.Localize("contact_deleted"),
 		Receiver: &v1Pb.MessageReceiver{
 			DialogType: constant.ChatPrivateMode,
 			ReceiverId: params.FriendId,

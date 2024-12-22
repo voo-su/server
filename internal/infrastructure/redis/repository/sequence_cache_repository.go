@@ -12,7 +12,9 @@ type SequenceCacheRepository struct {
 }
 
 func NewSequenceCacheRepository(rds *redis.Client) *SequenceCacheRepository {
-	return &SequenceCacheRepository{Rds: rds}
+	return &SequenceCacheRepository{
+		Rds: rds,
+	}
 }
 
 func (s *SequenceCacheRepository) Redis() *redis.Client {

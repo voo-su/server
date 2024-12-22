@@ -7,10 +7,12 @@ import (
 	"voo.su/internal/infrastructure/postgres/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/timeutil"
 )
 
 type Search struct {
+	Locale           locale.ILocale
 	UserUseCase      *usecase.UserUseCase
 	GroupChatUseCase *usecase.GroupChatUseCase
 }
@@ -25,7 +27,7 @@ func (s *Search) Users(ctx *core.Context) error {
 	list, err := s.UserUseCase.UserRepo.Search(params.Q, uid)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ctx.ErrorBusiness("Ничего не найдено.")
+			return ctx.ErrorBusiness(s.Locale.Localize("nothing_found"))
 		}
 		return ctx.ErrorBusiness(err.Error())
 	}
@@ -59,7 +61,7 @@ func (s *Search) GroupChats(ctx *core.Context) error {
 	})
 
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка запроса")
+		return ctx.ErrorBusiness(s.Locale.Localize("request_error"))
 	}
 	resp := &v1Pb.SearchGroupChatsResponse{}
 	resp.Items = make([]*v1Pb.SearchGroupChatsResponse_Item, 0)
@@ -74,7 +76,7 @@ func (s *Search) GroupChats(ctx *core.Context) error {
 
 	count, err := s.GroupChatUseCase.MemberRepo.CountGroupMemberNum(ids)
 	if err != nil {
-		return ctx.ErrorBusiness("Ошибка запроса")
+		return ctx.ErrorBusiness(s.Locale.Localize("request_error"))
 	}
 
 	countMap := make(map[int]int)
@@ -84,7 +86,7 @@ func (s *Search) GroupChats(ctx *core.Context) error {
 
 	//checks, err := s.groupChatMemberService.Dao().CheckUserGroup(ids, ctx.UserId())
 	//if err != nil {
-	//	return ctx.ErrorBusiness("Ошибка запроса")
+	//	return ctx.ErrorBusiness(s.Locale.Localize("request_error"))
 	//}
 
 	for i, value := range list {

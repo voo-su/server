@@ -29,7 +29,6 @@ func NewApp() *App {
 					Name:        "config",
 					Aliases:     []string{"c"},
 					Value:       "/etc/voo-su/voo-su.yaml",
-					Usage:       "Путь к файлу конфигурации",
 					DefaultText: "/etc/voo-su/voo-su.yaml",
 				},
 			},

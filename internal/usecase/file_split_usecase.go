@@ -16,25 +16,29 @@ import (
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 )
 
 type FileSplitUseCase struct {
-	*infrastructure.Source
 	Conf          *config.Config
+	Locale        locale.ILocale
+	Source        *infrastructure.Source
 	FileSplitRepo *postgresRepo.FileSplitRepository
 	Minio         minio.IMinio
 }
 
 func NewFileSplitUseCase(
-	source *infrastructure.Source,
 	conf *config.Config,
+	locale locale.ILocale,
+	source *infrastructure.Source,
 	fileSplitRepo *postgresRepo.FileSplitRepository,
 	minio minio.IMinio,
 ) *FileSplitUseCase {
 	return &FileSplitUseCase{
-		Source:        source,
 		Conf:          conf,
+		Locale:        locale,
+		Source:        source,
 		FileSplitRepo: fileSplitRepo,
 		Minio:         minio,
 	}
@@ -69,7 +73,7 @@ func (f *FileSplitUseCase) InitiateMultipartUpload(ctx context.Context, params *
 
 	m.UploadId = uploadId
 
-	if err := f.Source.Db().
+	if err := f.Source.Postgres().
 		WithContext(ctx).
 		Create(m).
 		Error; err != nil {
@@ -88,7 +92,7 @@ type MultipartUploadOpt struct {
 }
 
 func (f *FileSplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUploadOpt) error {
-	info, err := f.FileSplitRepo.FindByWhere(ctx, "upload_id = ? AND type = 1", opt.UploadId)
+	info, err := f.FileSplitRepo.FindByWhere(ctx, "upload_id = ? AND type = ?", opt.UploadId, 1)
 	if err != nil {
 		return err
 	}
@@ -132,7 +136,7 @@ func (f *FileSplitUseCase) MultipartUpload(ctx context.Context, opt *MultipartUp
 
 	data.Attr = jsonutil.Encode(objectPart)
 
-	if err = f.Source.Db().Create(data).Error; err != nil {
+	if err = f.Source.Postgres().Create(data).Error; err != nil {
 		return err
 	}
 

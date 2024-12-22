@@ -11,14 +11,22 @@ import (
 	"voo.su/internal/infrastructure"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/locale"
 )
 
 type ContactRequestUseCase struct {
-	*infrastructure.Source
+	Locale locale.ILocale
+	Source *infrastructure.Source
 }
 
-func NewContactRequestUseCase(source *infrastructure.Source) *ContactRequestUseCase {
-	return &ContactRequestUseCase{Source: source}
+func NewContactRequestUseCase(
+	locale locale.ILocale,
+	source *infrastructure.Source,
+) *ContactRequestUseCase {
+	return &ContactRequestUseCase{
+		Locale: locale,
+		Source: source,
+	}
 }
 
 type ContactApplyCreateOpt struct {
@@ -31,7 +39,7 @@ func (c *ContactRequestUseCase) Create(ctx context.Context, opt *ContactApplyCre
 		UserId:   opt.UserId,
 		FriendId: opt.FriendId,
 	}
-	if err := c.Source.Db().WithContext(ctx).Create(apply).Error; err != nil {
+	if err := c.Source.Postgres().WithContext(ctx).Create(apply).Error; err != nil {
 		return err
 	}
 
@@ -60,7 +68,7 @@ type ContactApplyAcceptOpt struct {
 }
 
 func (c *ContactRequestUseCase) Accept(ctx context.Context, opt *ContactApplyAcceptOpt) (*postgresModel.ContactRequest, error) {
-	db := c.Source.Db().WithContext(ctx)
+	db := c.Source.Postgres().WithContext(ctx)
 	var applyInfo postgresModel.ContactRequest
 	if err := db.First(&applyInfo, "id = ? AND friend_id = ?", opt.ApplyId, opt.UserId).Error; err != nil {
 		return nil, err
@@ -112,7 +120,7 @@ type ContactApplyDeclineOpt struct {
 }
 
 func (c *ContactRequestUseCase) Decline(ctx context.Context, opt *ContactApplyDeclineOpt) error {
-	if err := c.Source.Db().
+	if err := c.Source.Postgres().
 		WithContext(ctx).
 		Delete(&postgresModel.ContactRequest{}, "id = ? AND friend_id = ?", opt.ApplyId, opt.UserId).
 		Error; err != nil {
@@ -142,7 +150,8 @@ func (c *ContactRequestUseCase) List(ctx context.Context, uid int) ([]*entity.Ap
 		"contact_requests.friend_id",
 		"contact_requests.created_at",
 	}
-	tx := c.Source.Db().WithContext(ctx).Table("contact_requests").
+	tx := c.Source.Postgres().WithContext(ctx).
+		Table("contact_requests").
 		Joins("LEFT JOIN users AS u ON u.id = contact_requests.user_id").
 		Where("contact_requests.friend_id = ?", uid).
 		Order("contact_requests.id DESC")

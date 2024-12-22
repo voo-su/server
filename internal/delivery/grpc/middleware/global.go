@@ -23,7 +23,7 @@ var (
 func RegisterGlobalService(ctx context.Context, service interface{}) context.Context {
 	serviceType := reflect.TypeOf(service)
 	if _, ok := globalServicesMap[serviceType]; !ok {
-		log.Fatalf("Неизвестный глобальный сервис: %v", serviceType)
+		log.Fatalf("Unknown global service: %v", serviceType)
 	}
 
 	ctx = context.WithValue(ctx, globalServicesMap[serviceType], service)
@@ -34,7 +34,7 @@ func RegisterGlobalService(ctx context.Context, service interface{}) context.Con
 func GetGlobalService(k GlobalServiceKey) interface{} {
 	v := _context.Value(k)
 	if v == nil {
-		log.Fatalf("Значение не найдено: %v", k)
+		log.Fatalf("Value not found: %v", k)
 	}
 	return v
 }
