@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Magomedcoder <info@magomedcoder.ru>
+// Distributed under the GPL v3 License, see https://github.com/voo-su/server/blob/main/LICENSE
+
 package repository
 
 import (
@@ -21,6 +24,7 @@ func (a *AuthCodeRepository) Create(ctx context.Context, code *model.AuthCode) e
 	if err := a.ClickHouse.Exec(
 		ctx,
 		"INSERT INTO auth_codes (email, code, token, error_message) VALUES (?, ?, ?, ?)",
+		code.Email,
 		code.Code,
 		code.Token,
 		code.ErrorMessage,

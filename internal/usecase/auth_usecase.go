@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Magomedcoder <info@magomedcoder.ru>
+// Distributed under the GPL v3 License, see https://github.com/voo-su/server/blob/main/LICENSE
+
 package usecase
 
 import (
@@ -78,6 +81,7 @@ func (a *AuthUseCase) Login(ctx context.Context, guard string, _email string) (*
 	}
 
 	if err := a.AuthCodeRepo.Create(ctx, &clickhouseModel.AuthCode{
+		Email:        _email,
 		Code:         *code,
 		Token:        token,
 		ErrorMessage: "",

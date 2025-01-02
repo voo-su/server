@@ -10,6 +10,7 @@
     "success": "Success",
     "decode_error": "Error during decoding",
     "creation_error": "Creation error",
+    "authorization_required": "Authorization required",
     "insufficient_permissions": "Insufficient permissions",
     "user_not_found": "User does not exist",
     "contact_deleted": "Contact deleted",

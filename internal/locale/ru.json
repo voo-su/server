@@ -10,6 +10,7 @@
     "success": "Успешно",
     "decode_error": "Ошибка при декодировании",
     "creation_error": "Ошибка создания",
+    "authorization_required": "Требуется авторизация",
     "insufficient_permissions": "Недостаточно прав",
     "user_not_found": "Пользователь не существует",
     "contact_deleted": "Контакт удален",
