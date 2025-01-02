@@ -15,7 +15,6 @@ import (
 	authPb "voo.su/api/grpc/gen/go/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
-	"voo.su/internal/delivery/grpc/middleware"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
@@ -29,7 +28,6 @@ type Auth struct {
 	authPb.UnimplementedAuthServiceServer
 	Conf              *config.Config
 	Locale            locale.ILocale
-	TokenMiddleware   *middleware.TokenMiddleware
 	AuthUseCase       *usecase.AuthUseCase
 	JwtTokenCacheRepo *redisRepo.JwtTokenCacheRepository
 	IpAddressUseCase  *usecase.IpAddressUseCase
@@ -42,7 +40,6 @@ type Auth struct {
 func NewAuthHandler(
 	conf *config.Config,
 	locale locale.ILocale,
-	tokenMiddleware *middleware.TokenMiddleware,
 	authUseCase *usecase.AuthUseCase,
 	jwtTokenCacheRepo *redisRepo.JwtTokenCacheRepository,
 	ipAddressUseCase *usecase.IpAddressUseCase,
@@ -53,7 +50,6 @@ func NewAuthHandler(
 	return &Auth{
 		Conf:              conf,
 		Locale:            locale,
-		TokenMiddleware:   tokenMiddleware,
 		AuthUseCase:       authUseCase,
 		JwtTokenCacheRepo: jwtTokenCacheRepo,
 		IpAddressUseCase:  ipAddressUseCase,
@@ -64,7 +60,7 @@ func NewAuthHandler(
 }
 
 func (a *Auth) Login(ctx context.Context, in *authPb.AuthLoginRequest) (*authPb.AuthLoginResponse, error) {
-	token, err := a.AuthUseCase.Login(ctx, "grpc-auth", in.Email)
+	token, err := a.AuthUseCase.Login(ctx, constant.GuardGrpcAuth, in.Email)
 	if err != nil {
 		grpclog.Errorf("AuthHandler Login: %v", err)
 		return nil, status.Error(codes.FailedPrecondition, a.Locale.Localize("token_creation_error"))
@@ -141,7 +137,7 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
-	token := jwt.GenerateToken("grpc-auth", a.Conf.App.Jwt.Secret, &jwt.Options{
+	token := jwt.GenerateToken(constant.GuardGrpcAuth, a.Conf.App.Jwt.Secret, &jwt.Options{
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		ID:        strconv.Itoa(user.Id),
 		Issuer:    "grpc",

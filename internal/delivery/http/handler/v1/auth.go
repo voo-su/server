@@ -104,7 +104,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
-	token := jwt.GenerateToken("api", a.Conf.App.Jwt.Secret, &jwt.Options{
+	token := jwt.GenerateToken(constant.GuardHttpAuth, a.Conf.App.Jwt.Secret, &jwt.Options{
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		ID:        strconv.Itoa(user.Id),
 		Issuer:    "web",
@@ -147,7 +147,7 @@ func (a *Auth) Refresh(ctx *core.Context) error {
 	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
-	token := jwt.GenerateToken("api", a.Conf.App.Jwt.Secret, &jwt.Options{
+	token := jwt.GenerateToken(constant.GuardHttpAuth, a.Conf.App.Jwt.Secret, &jwt.Options{
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		ID:        strconv.Itoa(ctx.UserId()),
 		Issuer:    "web",

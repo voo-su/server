@@ -6,14 +6,16 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"voo.su/internal/config"
+	"voo.su/internal/constant"
 	"voo.su/internal/delivery/http/handler"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/core"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/middleware"
 )
 
-func NewV1(router *gin.Engine, conf *config.Config, handler *handler.Handler, session *redisRepo.JwtTokenCacheRepository) {
-	authorize := middleware.Auth(conf.App.Jwt.Secret, "api", session)
+func NewV1(conf *config.Config, locale locale.ILocale, router *gin.Engine, handler *handler.Handler, session *redisRepo.JwtTokenCacheRepository) {
+	authorize := middleware.Auth(locale, constant.GuardHttpAuth, conf.App.Jwt.Secret, session)
 	v1 := router.Group("/v1")
 	{
 		auth := v1.Group("/auth")

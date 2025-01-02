@@ -7,18 +7,16 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc/metadata"
 	"net/http"
 	"strconv"
 	"strings"
 	"voo.su/pkg/jwt"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/response"
 )
 
 const JWTSessionConst = "__JWT_SESSION__"
-
-var (
-	ErrorNoLogin = errors.New("Пожалуйста, войдите в систему перед выполнением операции")
-)
 
 type IStorage interface {
 	IsBlackList(ctx context.Context, token string) bool
@@ -30,10 +28,10 @@ type JSession struct {
 	ExpiresAt int64  `json:"expires_at"`
 }
 
-func Auth(secret string, guard string, storage IStorage) gin.HandlerFunc {
+func Auth(locale locale.ILocale, guard string, secret string, storage IStorage) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := AuthHeaderToken(c)
-		claims, err := verify(guard, secret, token)
+		token := HttpToken(c)
+		claims, err := verify(locale, guard, secret, token)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response.Response{
 				Code:    http.StatusUnauthorized,
@@ -45,7 +43,7 @@ func Auth(secret string, guard string, storage IStorage) gin.HandlerFunc {
 		if storage.IsBlackList(c.Request.Context(), token) {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response.Response{
 				Code:    http.StatusUnauthorized,
-				Message: "Пожалуйста, войдите в систему и попробуйте снова",
+				Message: locale.Localize("authorization_required"),
 			})
 			return
 		}
@@ -69,7 +67,7 @@ func Auth(secret string, guard string, storage IStorage) gin.HandlerFunc {
 	}
 }
 
-func AuthHeaderToken(c *gin.Context) string {
+func HttpToken(c *gin.Context) string {
 	token := c.GetHeader("Authorization")
 	token = strings.TrimSpace(strings.TrimPrefix(token, "Bearer"))
 	if token == "" {
@@ -79,9 +77,24 @@ func AuthHeaderToken(c *gin.Context) string {
 	return token
 }
 
-func verify(guard string, secret string, token string) (*jwt.AuthClaims, error) {
+func GrpcToken(ctx context.Context, locale locale.ILocale, guard string, secret string) (*jwt.AuthClaims, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, errors.New(locale.Localize("failed_to_fetch_metadata"))
+	}
+
+	token := md.Get("Authorization")
+	userClaims, err := verify(locale, guard, secret, token[len(token)-1])
+	if err != nil {
+		return nil, err
+	}
+
+	return userClaims, nil
+}
+
+func verify(locale locale.ILocale, guard string, secret string, token string) (*jwt.AuthClaims, error) {
 	if token == "" {
-		return nil, ErrorNoLogin
+		return nil, errors.New(locale.Localize("authorization_required"))
 	}
 
 	claims, err := jwt.ParseToken(token, secret)
@@ -90,7 +103,7 @@ func verify(guard string, secret string, token string) (*jwt.AuthClaims, error) 
 	}
 
 	if claims.Guard != guard || claims.Valid() != nil {
-		return nil, ErrorNoLogin
+		return nil, errors.New(locale.Localize("authorization_required"))
 	}
 
 	return claims, nil

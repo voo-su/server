@@ -16,23 +16,20 @@ import (
 
 type Contact struct {
 	contactPb.UnimplementedContactServiceServer
-	Conf            *config.Config
-	Locale          locale.ILocale
-	TokenMiddleware *middleware.TokenMiddleware
-	ContactUseCase  *usecase.ContactUseCase
+	Conf           *config.Config
+	Locale         locale.ILocale
+	ContactUseCase *usecase.ContactUseCase
 }
 
 func NewContactHandler(
 	conf *config.Config,
 	locale locale.ILocale,
-	tokenMiddleware *middleware.TokenMiddleware,
 	contactUseCase *usecase.ContactUseCase,
 ) *Contact {
 	return &Contact{
-		Conf:            conf,
-		Locale:          locale,
-		TokenMiddleware: tokenMiddleware,
-		ContactUseCase:  contactUseCase,
+		Conf:           conf,
+		Locale:         locale,
+		ContactUseCase: contactUseCase,
 	}
 }
 

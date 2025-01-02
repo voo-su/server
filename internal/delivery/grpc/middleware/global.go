@@ -14,11 +14,11 @@ type GlobalServiceKey string
 var (
 	_context context.Context
 
-	AuthServiceKey        = GlobalServiceKey("authService")
+	AuthMiddlewareKey     = GlobalServiceKey("authMiddleware")
 	GrpcMethodsServiceKey = GlobalServiceKey("grpcMethodsService")
 
 	globalServicesMap = map[reflect.Type]GlobalServiceKey{
-		reflect.TypeOf(&TokenMiddleware{}):   AuthServiceKey,
+		reflect.TypeOf(&AuthMiddleware{}):    AuthMiddlewareKey,
 		reflect.TypeOf(&GrpcMethodService{}): GrpcMethodsServiceKey,
 	}
 )

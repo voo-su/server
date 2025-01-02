@@ -374,7 +374,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 
 func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	iLocale := provider.NewLocale()
-	tokenMiddleware := middleware.NewTokenMiddleware(conf, iLocale)
+	authMiddleware := middleware.NewAuthMiddleware(conf, iLocale)
 	grpcMethodService := middleware.NewGrpMethodsService()
 	email := provider.NewEmailClient(conf)
 	client := provider.NewRedisClient(conf, iLocale)
@@ -398,19 +398,19 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	chatUseCase := usecase.NewChatUseCase(iLocale, source, chatRepository, groupChatMemberRepository)
 	botRepository := repository2.NewBotRepository(db)
 	userSessionRepository := repository2.NewUserSessionRepository(db)
-	auth := handler3.NewAuthHandler(conf, iLocale, tokenMiddleware, authUseCase, jwtTokenCacheRepository, ipAddressUseCase, chatUseCase, botRepository, userSessionRepository)
+	auth := handler3.NewAuthHandler(conf, iLocale, authUseCase, jwtTokenCacheRepository, ipAddressUseCase, chatUseCase, botRepository, userSessionRepository)
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	messageCacheRepository := repository.NewMessageCacheRepository(client)
 	unreadCacheRepository := repository.NewUnreadCacheRepository(client)
 	handlerChat := handler3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageCacheRepository, unreadCacheRepository)
-	contact := handler3.NewContactHandler(conf, iLocale, tokenMiddleware, contactUseCase)
+	contact := handler3.NewContactHandler(conf, iLocale, contactUseCase)
 	appProvider := &grpc.AppProvider{
-		Conf:            conf,
-		TokenMiddleware: tokenMiddleware,
-		RoutesServices:  grpcMethodService,
-		AuthHandler:     auth,
-		ChatHandler:     handlerChat,
-		ContactHandler:  contact,
+		Conf:           conf,
+		AuthMiddleware: authMiddleware,
+		RoutesServices: grpcMethodService,
+		AuthHandler:    auth,
+		ChatHandler:    handlerChat,
+		ContactHandler: contact,
 	}
 	return appProvider
 }

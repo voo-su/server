@@ -39,7 +39,7 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handler *handler.Hand
 		})
 	})
 
-	NewV1(router, conf, handler, session)
+	NewV1(conf, locale, router, handler, session)
 
 	NewBot(router, handler)
 

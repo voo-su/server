@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"voo.su/internal/config"
+	"voo.su/internal/constant"
 	"voo.su/internal/delivery/ws/handler"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/core"
@@ -35,7 +36,7 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handle *handler.Handl
 		})
 	}))
 
-	authorize := middleware.Auth(conf.App.Jwt.Secret, "api", session)
+	authorize := middleware.Auth(locale, constant.GuardHttpAuth, conf.App.Jwt.Secret, session)
 
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, response.Response{

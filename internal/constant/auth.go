@@ -4,6 +4,8 @@
 package constant
 
 const (
-	ExpiresTime  = 900
-	LoginChannel = "login"
+	GuardHttpAuth = "web-auth"
+	GuardGrpcAuth = "grpc-auth"
+	ExpiresTime   = 900
+	LoginChannel  = "login"
 )
