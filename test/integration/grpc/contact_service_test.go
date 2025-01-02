@@ -5,7 +5,7 @@ package grpc
 
 import (
 	"testing"
-	contactPb "voo.su/api/grpc/pb"
+	contactPb "voo.su/api/grpc/gen/go/pb"
 )
 
 func TestContactListService(t *testing.T) {

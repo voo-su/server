@@ -22,11 +22,6 @@ proto:
 		./api/http/proto/v1/*.proto \
 		./api/http/proto/bot/*.proto
 
-	protoc --proto_path=./api/grpc/proto \
-	   --go_out=paths=source_relative:./api/grpc/pb \
-	   --go-grpc_out=paths=source_relative:./api/grpc/pb \
-	   ./api/grpc/proto/*.proto
-
 .PHONY: test
 test:
 	go test -v ./...
