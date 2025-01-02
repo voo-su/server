@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 	"strconv"
 	"time"
-	authPb "voo.su/api/grpc/pb"
+	authPb "voo.su/api/grpc/gen/go/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/delivery/grpc/middleware"

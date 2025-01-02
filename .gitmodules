@@ -1,3 +1,0 @@
-[submodule "api/grpc/proto"]
-	path = api/grpc/proto
-	url = https://github.com/voo-su/proto.git

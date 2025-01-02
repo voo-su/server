@@ -14,18 +14,18 @@ import (
 	"log"
 	"net"
 	"os"
-	"voo.su/api/grpc/pb"
+	"voo.su/api/grpc/gen/go/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/delivery/grpc/middleware"
 )
 
 type AppProvider struct {
-	Conf            *config.Config
-	TokenMiddleware *middleware.TokenMiddleware
-	RoutesServices  *middleware.GrpcMethodService
-	AuthHandler     pb.AuthServiceServer
-	ChatHandler     pb.ChatServiceServer
-	ContactHandler  pb.ContactServiceServer
+	Conf           *config.Config
+	AuthMiddleware *middleware.AuthMiddleware
+	RoutesServices *middleware.GrpcMethodService
+	AuthHandler    pb.AuthServiceServer
+	ChatHandler    pb.ChatServiceServer
+	ContactHandler pb.ContactServiceServer
 }
 
 func serve(app *AppProvider) error {
@@ -60,7 +60,7 @@ func serve(app *AppProvider) error {
 func Run(ctx2 *cliV2.Context, app *AppProvider) error {
 	ctx := context.Background()
 
-	ctx = middleware.RegisterGlobalService(ctx, app.TokenMiddleware)
+	ctx = middleware.RegisterGlobalService(ctx, app.AuthMiddleware)
 	ctx = middleware.RegisterGlobalService(ctx, app.RoutesServices)
 
 	ctx, cancel := context.WithCancel(ctx)

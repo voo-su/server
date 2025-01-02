@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	chatPb "voo.su/api/grpc/pb"
+	chatPb "voo.su/api/grpc/gen/go/pb"
 	"voo.su/internal/config"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
