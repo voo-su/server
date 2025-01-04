@@ -52,7 +52,7 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(a.Locale.Localize("invalid_code"))
 	}
 
-	claims, err := jwt.ParseToken(params.Token, a.Conf.App.Jwt.Secret)
+	claims, err := jwtutil.ParseToken(params.Token, a.Conf.App.Jwt.Secret)
 	if err != nil {
 		return ctx.InvalidParams(a.Locale.Localize("invalid_code"))
 	}
@@ -101,11 +101,11 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
-	token := jwt.GenerateToken(constant.GuardHttpAuth, a.Conf.App.Jwt.Secret, &jwt.Options{
-		ExpiresAt: jwt.NewNumericDate(expiresAt),
+	token := jwtutil.GenerateToken(constant.GuardHttpAuth, a.Conf.App.Jwt.Secret, &jwtutil.Options{
+		ExpiresAt: jwtutil.NewNumericDate(expiresAt),
 		ID:        strconv.Itoa(user.Id),
 		Issuer:    "web",
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		IssuedAt:  jwtutil.NewNumericDate(time.Now()),
 	})
 
 	if err := a.UserUseCase.UserSessionRepo.Create(ctx.Ctx(), &postgresModel.UserSession{
@@ -144,11 +144,11 @@ func (a *Auth) Refresh(ctx *ginutil.Context) error {
 	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
-	token := jwt.GenerateToken(constant.GuardHttpAuth, a.Conf.App.Jwt.Secret, &jwt.Options{
-		ExpiresAt: jwt.NewNumericDate(expiresAt),
+	token := jwtutil.GenerateToken(constant.GuardHttpAuth, a.Conf.App.Jwt.Secret, &jwtutil.Options{
+		ExpiresAt: jwtutil.NewNumericDate(expiresAt),
 		ID:        strconv.Itoa(ctx.UserId()),
 		Issuer:    "web",
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		IssuedAt:  jwtutil.NewNumericDate(time.Now()),
 	})
 
 	return ctx.Success(&v1Pb.AuthRefreshResponse{

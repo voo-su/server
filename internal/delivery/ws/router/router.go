@@ -8,11 +8,10 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/delivery/ws/handler"
+	"voo.su/internal/delivery/ws/middleware"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
-	"voo.su/pkg/middleware"
-	"voo.su/pkg/response"
 )
 
 func NewRouter(conf *config.Config, locale locale.ILocale, handle *handler.Handler, session *redisRepo.JwtTokenCacheRepository) *gin.Engine {

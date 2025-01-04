@@ -66,10 +66,10 @@ func NewAuthUseCase(
 func (a *AuthUseCase) Login(ctx context.Context, guard string, _email string) (*string, error) {
 	expiresAt := time.Now().Add(time.Second * time.Duration(constant.ExpiresTime))
 
-	token := jwt.GenerateToken(guard, a.Conf.App.Jwt.Secret, &jwt.Options{
-		ExpiresAt: jwt.NewNumericDate(expiresAt),
+	token := jwtutil.GenerateToken(guard, a.Conf.App.Jwt.Secret, &jwtutil.Options{
+		ExpiresAt: jwtutil.NewNumericDate(expiresAt),
 		ID:        _email,
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		IssuedAt:  jwtutil.NewNumericDate(time.Now()),
 	})
 
 	code, err := a.Send(ctx, constant.LoginChannel, _email, token)

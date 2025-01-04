@@ -1,10 +1,25 @@
-package jwt
+package jwtutil
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
+	"voo.su/pkg/locale"
 )
+
+const JWTSession = "__JWT_SESSION__"
+
+type IStorage interface {
+	IsBlackList(ctx context.Context, token string) bool
+}
+
+type JSession struct {
+	Uid       int    `json:"uid"`
+	Token     string `json:"token"`
+	ExpiresAt int64  `json:"expires_at"`
+}
 
 type Options jwt.RegisteredClaims
 
@@ -49,4 +64,21 @@ func ParseToken(token string, secret string) (*AuthClaims, error) {
 	}
 
 	return nil, err
+}
+
+func Verify(locale locale.ILocale, guard string, secret string, token string) (*AuthClaims, error) {
+	if token == "" {
+		return nil, errors.New(locale.Localize("authorization_required"))
+	}
+
+	claims, err := ParseToken(token, secret)
+	if err != nil {
+		return nil, err
+	}
+
+	if claims.Guard != guard || claims.Valid() != nil {
+		return nil, errors.New(locale.Localize("authorization_required"))
+	}
+
+	return claims, nil
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"strconv"
 	"time"
@@ -16,9 +15,9 @@ import (
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/jwt"
+	"voo.su/pkg/grpcutil"
+	"voo.su/pkg/jwtutil"
 	"voo.su/pkg/locale"
-	"voo.su/pkg/utils"
 )
 
 type Auth struct {
@@ -74,26 +73,18 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 		return nil, status.Error(codes.Unauthenticated, a.Locale.Localize("invalid_code"))
 	}
 
-	claims, err := jwt.ParseToken(in.Token, a.Conf.App.Jwt.Secret)
+	claims, err := jwtutil.ParseToken(in.Token, a.Conf.App.Jwt.Secret)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, a.Locale.Localize("invalid_token"))
 	}
 
-	if claims.Guard != "grpc-auth" || claims.Valid() != nil {
+	if claims.Guard != "auth" || claims.Valid() != nil {
 		return nil, status.Error(codes.Unauthenticated, a.Locale.Localize("invalid_token"))
 	}
 
-	ip := utils.GetGrpcClientIp(ctx)
+	ip := grpcutil.ClientIp(ctx)
 
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-
-	}
-
-	userAgent := md.Get("user-agent")
-	if len(userAgent) == 0 {
-		userAgent[0] = "unknown"
-	}
+	userAgent := grpcutil.UserAgent(ctx)
 
 	user, err := a.AuthUseCase.Register(ctx, claims.ID)
 	if err != nil {
@@ -126,7 +117,7 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 
 		if err := a.MessageUseCase.SendLogin(ctx, user.Id, &usecase.SendLogin{
 			Ip:      ip,
-			Agent:   userAgent[0],
+			Agent:   userAgent,
 			Address: address,
 		}); err != nil {
 			fmt.Println(err)
@@ -134,18 +125,18 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 	}
 
 	expiresAt := time.Now().Add(time.Second * time.Duration(a.Conf.App.Jwt.ExpiresTime))
-	token := jwt.GenerateToken(constant.GuardGrpcAuth, a.Conf.App.Jwt.Secret, &jwt.Options{
-		ExpiresAt: jwt.NewNumericDate(expiresAt),
+	token := jwtutil.GenerateToken(constant.GuardGrpcAuth, a.Conf.App.Jwt.Secret, &jwtutil.Options{
+		ExpiresAt: jwtutil.NewNumericDate(expiresAt),
 		ID:        strconv.Itoa(user.Id),
 		Issuer:    "grpc",
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		IssuedAt:  jwtutil.NewNumericDate(time.Now()),
 	})
 
 	if err := a.UserSession.Create(ctx, &postgresModel.UserSession{
 		UserId:      user.Id,
 		AccessToken: token,
 		UserIp:      ip,
-		UserAgent:   userAgent[0],
+		UserAgent:   userAgent,
 	}); err != nil {
 		fmt.Println(err)
 	}

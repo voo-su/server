@@ -9,7 +9,7 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/pkg/jsonutil"
-	"voo.su/pkg/jwt"
+	"voo.su/pkg/jwtutil"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/socket/adapter"
 )
@@ -83,7 +83,7 @@ func (h *Handler) auth(connect net.Conn, data chan *AuthConn) {
 		return
 	}
 
-	claims, err := jwt.ParseToken(detail.Token, h.Conf.App.Jwt.Secret)
+	claims, err := jwtutil.ParseToken(detail.Token, h.Conf.App.Jwt.Secret)
 	if err != nil || claims.Valid() != nil {
 		return
 	}

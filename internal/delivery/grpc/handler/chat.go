@@ -9,6 +9,7 @@ import (
 	"voo.su/internal/config"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
+	"voo.su/pkg/grpcutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/timeutil"
 )
@@ -43,9 +44,7 @@ func NewChatHandler(
 }
 
 func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb.GetChatListResponse, error) {
-
-	// TODO
-	uid := 1
+	uid := grpcutil.UserId(ctx)
 
 	unReads := c.UnreadCacheRepo.All(ctx, uid)
 	if len(unReads) > 0 {

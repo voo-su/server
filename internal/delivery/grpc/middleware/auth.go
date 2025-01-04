@@ -6,10 +6,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"strconv"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
+	"voo.su/pkg/grpcutil"
+	"voo.su/pkg/jwtutil"
 	"voo.su/pkg/locale"
-	"voo.su/pkg/middleware"
 )
 
 type AuthMiddleware struct {
@@ -67,26 +69,23 @@ func AuthorizationServerInterceptor(ctx context.Context, req interface{}, info *
 
 	authService := GetGlobalService(AuthMiddlewareKey).(*AuthMiddleware)
 
-	claims, err := middleware.GrpcToken(ctx, authService.Locale, constant.GuardGrpcAuth, authService.Conf.App.Jwt.Secret)
+	claims, token, err := grpcutil.GrpcToken(ctx, authService.Locale, constant.GuardGrpcAuth, authService.Conf.App.Jwt.Secret)
 	if err != nil {
 		fmt.Println(err)
 		return nil, status.Errorf(codes.Unauthenticated, "unauthorized")
 	}
 
-	//uid, err := strconv.Atoi(claims.ID)
-	//if err != nil {
-	//	fmt.Println(err)
-	//
-	//	return nil, status.Errorf(codes.Unauthenticated, "unauthorized")
-	//}
+	uid, err := strconv.Atoi(claims.ID)
+	if err != nil {
+		fmt.Println(err)
+		return nil, status.Errorf(codes.Unauthenticated, "unauthorized")
+	}
 
-	ctx = context.WithValue(ctx, "user", claims)
-
-	//ctx = context.WithValue(ctx, middleware.JWTSessionConst, middleware.JSession{
-	//	Uid:       uid,
-	//	Token:     "token", // TODO
-	//	ExpiresAt: claims.ExpiresAt.Unix(),
-	//})
+	ctx = context.WithValue(ctx, jwtutil.JWTSession, &jwtutil.JSession{
+		Uid:       uid,
+		Token:     *token,
+		ExpiresAt: claims.ExpiresAt.Unix(),
+	})
 
 	return handler(ctx, req)
 }

@@ -6,8 +6,8 @@ import (
 	"google.golang.org/grpc/status"
 	contactPb "voo.su/api/grpc/gen/go/pb"
 	"voo.su/internal/config"
-	"voo.su/internal/delivery/grpc/middleware"
 	"voo.su/internal/usecase"
+	"voo.su/pkg/grpcutil"
 	"voo.su/pkg/locale"
 )
 
@@ -31,9 +31,7 @@ func NewContactHandler(
 }
 
 func (c *Contact) List(ctx context.Context, in *contactPb.GetContactListRequest) (*contactPb.GetContactListResponse, error) {
-
-	// TODO
-	uid := 1
+	uid := grpcutil.UserId(ctx)
 
 	list, err := c.ContactUseCase.List(ctx, uid)
 	if err != nil {

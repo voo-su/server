@@ -5,6 +5,7 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/delivery/http/handler"
+	"voo.su/internal/delivery/http/middleware"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
