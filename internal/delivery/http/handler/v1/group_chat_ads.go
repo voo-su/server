@@ -6,7 +6,7 @@ import (
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/timeutil"
@@ -19,7 +19,7 @@ type GroupChatAds struct {
 	MessageUseCase      usecase.IMessageUseCase
 }
 
-func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
+func (g *GroupChatAds) CreateAndUpdate(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatAdsEditRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -27,7 +27,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if !g.GroupMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness(g.Locale.Localize("no_permission_for_action"))
+		return ctx.Error(g.Locale.Localize("no_permission_for_action"))
 	}
 
 	var (
@@ -57,7 +57,7 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 		msg = g.Locale.Localize("announcement_updated_successfully")
 	}
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	_ = g.MessageUseCase.SendSysOther(ctx.Ctx(), &model.Message{
@@ -76,31 +76,31 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *core.Context) error {
 	return ctx.Success(nil, msg)
 }
 
-func (g *GroupChatAds) Delete(ctx *core.Context) error {
+func (g *GroupChatAds) Delete(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatAdsDeleteRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := g.GroupChatAdsUseCase.Delete(ctx.Ctx(), int(params.GroupId), int(params.AdsId)); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 	return ctx.Success(nil, g.Locale.Localize("announcement_deleted_successfully"))
 }
 
-func (g *GroupChatAds) List(ctx *core.Context) error {
+func (g *GroupChatAds) List(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatAdsListRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if !g.GroupMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), ctx.UserId(), true) {
-		return ctx.ErrorBusiness(g.Locale.Localize("no_permission_for_action"))
+		return ctx.Error(g.Locale.Localize("no_permission_for_action"))
 	}
 
 	all, err := g.GroupChatAdsUseCase.GroupChatAdsRepo.GetListAll(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	items := make([]*v1Pb.GroupChatAdsListResponse_Item, 0)

@@ -6,7 +6,7 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 )
 
@@ -18,10 +18,10 @@ type Contact struct {
 	MessageUseCase usecase.IMessageUseCase
 }
 
-func (c *Contact) List(ctx *core.Context) error {
+func (c *Contact) List(ctx *ginutil.Context) error {
 	list, err := c.ContactUseCase.List(ctx.Ctx(), ctx.UserId())
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	items := make([]*v1Pb.ContactListResponse_Item, 0, len(list))
@@ -42,7 +42,7 @@ func (c *Contact) List(ctx *core.Context) error {
 	return ctx.Success(&v1Pb.ContactListResponse{Items: items})
 }
 
-func (c *Contact) Get(ctx *core.Context) error {
+func (c *Contact) Get(ctx *ginutil.Context) error {
 	params := &v1Pb.ContactDetailRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -52,10 +52,10 @@ func (c *Contact) Get(ctx *core.Context) error {
 	user, err := c.UserUseCase.UserRepo.FindById(ctx.Ctx(), int(params.UserId))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ctx.ErrorBusiness(c.Locale.Localize("user_not_found"))
+			return ctx.Error(c.Locale.Localize("user_not_found"))
 		}
 
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	data := v1Pb.ContactDetailResponse{
@@ -88,7 +88,7 @@ func (c *Contact) Get(ctx *core.Context) error {
 	return ctx.Success(&data)
 }
 
-func (c *Contact) Delete(ctx *core.Context) error {
+func (c *Contact) Delete(ctx *ginutil.Context) error {
 	params := &v1Pb.ContactDeleteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -96,7 +96,7 @@ func (c *Contact) Delete(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if err := c.ContactUseCase.Delete(ctx.Ctx(), uid, int(params.FriendId)); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	_ = c.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
@@ -109,20 +109,20 @@ func (c *Contact) Delete(ctx *core.Context) error {
 
 	sid := c.ChatUseCase.ChatRepo.FindBySessionId(uid, int(params.FriendId), constant.ChatPrivateMode)
 	if err := c.ChatUseCase.Delete(ctx.Ctx(), ctx.UserId(), sid); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&v1Pb.ContactDeleteResponse{})
 }
 
-func (c *Contact) EditRemark(ctx *core.Context) error {
+func (c *Contact) EditRemark(ctx *ginutil.Context) error {
 	params := &v1Pb.ContactRemarkEditRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := c.ContactUseCase.UpdateRemark(ctx.Ctx(), ctx.UserId(), int(params.FriendId), params.Remark); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&v1Pb.ContactRemarkEditResponse{})

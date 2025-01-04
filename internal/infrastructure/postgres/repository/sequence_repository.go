@@ -10,8 +10,8 @@ import (
 	"voo.su/internal/constant"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
+	"voo.su/pkg"
 	"voo.su/pkg/logger"
-	"voo.su/pkg/utils"
 )
 
 type SequenceRepository struct {
@@ -69,7 +69,7 @@ func (s *SequenceRepository) try(ctx context.Context, userId int, receiverId int
 }
 
 func (s *SequenceRepository) Get(ctx context.Context, userId int, receiverId int) int64 {
-	if err := utils.Retry(5, 100*time.Millisecond, func() error {
+	if err := pkg.Retry(5, 100*time.Millisecond, func() error {
 		return s.try(ctx, userId, receiverId)
 	}); err != nil {
 		log.Println("Ошибка получения последовательности: ", err.Error())
@@ -79,7 +79,7 @@ func (s *SequenceRepository) Get(ctx context.Context, userId int, receiverId int
 }
 
 func (s *SequenceRepository) BatchGet(ctx context.Context, userId int, receiverId int, num int64) []int64 {
-	if err := utils.Retry(5, 100*time.Millisecond, func() error {
+	if err := pkg.Retry(5, 100*time.Millisecond, func() error {
 		return s.try(ctx, userId, receiverId)
 	}); err != nil {
 		log.Println("Ошибка пакетного получения последовательности: ", err.Error())

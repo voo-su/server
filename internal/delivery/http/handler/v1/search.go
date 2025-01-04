@@ -6,7 +6,7 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/infrastructure/postgres/repository"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/timeutil"
 )
@@ -17,7 +17,7 @@ type Search struct {
 	GroupChatUseCase *usecase.GroupChatUseCase
 }
 
-func (s *Search) Users(ctx *core.Context) error {
+func (s *Search) Users(ctx *ginutil.Context) error {
 	params := &v1Pb.SearchUsersRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -27,9 +27,9 @@ func (s *Search) Users(ctx *core.Context) error {
 	list, err := s.UserUseCase.UserRepo.Search(params.Q, uid)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ctx.ErrorBusiness(s.Locale.Localize("nothing_found"))
+			return ctx.Error(s.Locale.Localize("nothing_found"))
 		}
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	items := make([]*v1Pb.SearchUserResponse_Item, 0)
@@ -46,7 +46,7 @@ func (s *Search) Users(ctx *core.Context) error {
 	return ctx.Success(&v1Pb.SearchUserResponse{Items: items})
 }
 
-func (s *Search) GroupChats(ctx *core.Context) error {
+func (s *Search) GroupChats(ctx *ginutil.Context) error {
 	params := &v1Pb.SearchGroupChatsRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -61,7 +61,7 @@ func (s *Search) GroupChats(ctx *core.Context) error {
 	})
 
 	if err != nil {
-		return ctx.ErrorBusiness(s.Locale.Localize("request_error"))
+		return ctx.Error(s.Locale.Localize("request_error"))
 	}
 	resp := &v1Pb.SearchGroupChatsResponse{}
 	resp.Items = make([]*v1Pb.SearchGroupChatsResponse_Item, 0)
@@ -76,7 +76,7 @@ func (s *Search) GroupChats(ctx *core.Context) error {
 
 	count, err := s.GroupChatUseCase.MemberRepo.CountGroupMemberNum(ids)
 	if err != nil {
-		return ctx.ErrorBusiness(s.Locale.Localize("request_error"))
+		return ctx.Error(s.Locale.Localize("request_error"))
 	}
 
 	countMap := make(map[int]int)
@@ -86,7 +86,7 @@ func (s *Search) GroupChats(ctx *core.Context) error {
 
 	//checks, err := s.groupChatMemberService.Dao().CheckUserGroup(ids, ctx.UserId())
 	//if err != nil {
-	//	return ctx.ErrorBusiness(s.Locale.Localize("request_error"))
+	//	return ctx.Error(s.Locale.Localize("request_error"))
 	//}
 
 	for i, value := range list {

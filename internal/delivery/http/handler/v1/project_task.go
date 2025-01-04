@@ -3,7 +3,7 @@ package v1
 import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/timeutil"
@@ -14,7 +14,7 @@ type ProjectTask struct {
 	ProjectUseCase *usecase.ProjectUseCase
 }
 
-func (p *ProjectTask) Create(ctx *core.Context) error {
+func (p *ProjectTask) Create(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectTaskCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -28,7 +28,7 @@ func (p *ProjectTask) Create(ctx *core.Context) error {
 		CreatedBy:   ctx.UserId(),
 	})
 	if err != nil {
-		return ctx.ErrorBusiness(p.Locale.Localize("creation_failed_try_later"))
+		return ctx.Error(p.Locale.Localize("creation_failed_try_later"))
 	}
 
 	return ctx.Success(&v1Pb.ProjectTaskCreateResponse{
@@ -36,7 +36,7 @@ func (p *ProjectTask) Create(ctx *core.Context) error {
 	})
 }
 
-func (p *ProjectTask) Tasks(ctx *core.Context) error {
+func (p *ProjectTask) Tasks(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectTaskRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -44,7 +44,7 @@ func (p *ProjectTask) Tasks(ctx *core.Context) error {
 
 	data, err := p.ProjectUseCase.TypeTasks(ctx.Ctx(), params.ProjectId)
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	categories := make([]*v1Pb.ProjectTaskResponse_Categories, 0)
@@ -52,7 +52,7 @@ func (p *ProjectTask) Tasks(ctx *core.Context) error {
 
 		tasks, _err := p.ProjectUseCase.Tasks(ctx.Ctx(), params.ProjectId, item.Id)
 		if _err != nil {
-			return ctx.ErrorBusiness(_err.Error())
+			return ctx.Error(_err.Error())
 		}
 
 		taskItems := make([]*v1Pb.ProjectTaskResponse_Tasks, 0)
@@ -75,7 +75,7 @@ func (p *ProjectTask) Tasks(ctx *core.Context) error {
 	})
 }
 
-func (p *ProjectTask) TaskDetail(ctx *core.Context) error {
+func (p *ProjectTask) TaskDetail(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectTaskDetailRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -83,7 +83,7 @@ func (p *ProjectTask) TaskDetail(ctx *core.Context) error {
 
 	task, err := p.ProjectUseCase.TaskDetail(ctx.Ctx(), params.TaskId)
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(v1Pb.ProjectTaskDetailResponse{
@@ -101,7 +101,7 @@ func (p *ProjectTask) TaskDetail(ctx *core.Context) error {
 	})
 }
 
-func (p *ProjectTask) Executor(ctx *core.Context) error {
+func (p *ProjectTask) Executor(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectExecutorRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -109,7 +109,7 @@ func (p *ProjectTask) Executor(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if !p.ProjectUseCase.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
-		return ctx.ErrorBusiness(p.Locale.Localize("not_project_member_cannot_invite"))
+		return ctx.Error(p.Locale.Localize("not_project_member_cannot_invite"))
 	}
 
 	if err := p.ProjectUseCase.TaskExecutor(
@@ -117,13 +117,13 @@ func (p *ProjectTask) Executor(ctx *core.Context) error {
 		params.TaskId,
 		params.MemberId,
 	); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(v1Pb.ProjectExecutorResponse{})
 }
 
-func (p *ProjectTask) TaskMove(ctx *core.Context) error {
+func (p *ProjectTask) TaskMove(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectTaskMoveRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -136,13 +136,13 @@ func (p *ProjectTask) TaskMove(ctx *core.Context) error {
 		params.FromId,
 		params.ToId,
 	); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(v1Pb.ProjectTaskMoveResponse{})
 }
 
-func (p *ProjectTask) TaskTypeName(ctx *core.Context) error {
+func (p *ProjectTask) TaskTypeName(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectTaskTypeNameRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -153,13 +153,13 @@ func (p *ProjectTask) TaskTypeName(ctx *core.Context) error {
 		params.TaskId,
 		params.Name,
 	); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(v1Pb.ProjectTaskTypeNameResponse{})
 }
 
-func (p *ProjectTask) TaskCoexecutorInvite(ctx *core.Context) error {
+func (p *ProjectTask) TaskCoexecutorInvite(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectCoexecutorInviteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -167,22 +167,22 @@ func (p *ProjectTask) TaskCoexecutorInvite(ctx *core.Context) error {
 
 	mids := sliceutil.Unique(sliceutil.ParseIds(params.MemberIds))
 	if len(mids) == 0 {
-		return ctx.ErrorBusiness(p.Locale.Localize("invited_list_cannot_be_empty"))
+		return ctx.Error(p.Locale.Localize("invited_list_cannot_be_empty"))
 	}
 
 	uid := ctx.UserId()
 	if !p.ProjectUseCase.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
-		return ctx.ErrorBusiness(p.Locale.Localize("not_project_member_cannot_invite"))
+		return ctx.Error(p.Locale.Localize("not_project_member_cannot_invite"))
 	}
 
 	if err := p.ProjectUseCase.InviteCoexecutor(ctx.Ctx(), params.TaskId, mids, uid); err != nil {
-		return ctx.ErrorBusiness(p.Locale.Localize("failed_to_invite") + ": " + err.Error())
+		return ctx.Error(p.Locale.Localize("failed_to_invite") + ": " + err.Error())
 	}
 
 	return ctx.Success(v1Pb.ProjectCoexecutorInviteResponse{})
 }
 
-func (p *ProjectTask) TaskCoexecutors(ctx *core.Context) error {
+func (p *ProjectTask) TaskCoexecutors(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectCoexecutorsRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -203,7 +203,7 @@ func (p *ProjectTask) TaskCoexecutors(ctx *core.Context) error {
 	})
 }
 
-func (p *ProjectTask) TaskWatcherInvite(ctx *core.Context) error {
+func (p *ProjectTask) TaskWatcherInvite(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectWatcherInviteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -211,22 +211,22 @@ func (p *ProjectTask) TaskWatcherInvite(ctx *core.Context) error {
 
 	mids := sliceutil.Unique(sliceutil.ParseIds(params.MemberIds))
 	if len(mids) == 0 {
-		return ctx.ErrorBusiness(p.Locale.Localize("invited_list_cannot_be_empty"))
+		return ctx.Error(p.Locale.Localize("invited_list_cannot_be_empty"))
 	}
 
 	uid := ctx.UserId()
 	if !p.ProjectUseCase.IsMemberProjectByTask(ctx.Ctx(), params.TaskId, uid) {
-		return ctx.ErrorBusiness(p.Locale.Localize("not_project_member_cannot_invite"))
+		return ctx.Error(p.Locale.Localize("not_project_member_cannot_invite"))
 	}
 
 	if err := p.ProjectUseCase.InviteWatcher(ctx.Ctx(), params.TaskId, mids, uid); err != nil {
-		return ctx.ErrorBusiness(p.Locale.Localize("failed_to_invite") + ": " + err.Error())
+		return ctx.Error(p.Locale.Localize("failed_to_invite") + ": " + err.Error())
 	}
 
 	return ctx.Success(v1Pb.ProjectWatcherInviteResponse{})
 }
 
-func (p *ProjectTask) TaskWatchers(ctx *core.Context) error {
+func (p *ProjectTask) TaskWatchers(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectWatchersRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)

@@ -5,12 +5,12 @@ import (
 	"gorm.io/gorm"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
+	"voo.su/pkg/gormutil"
 	"voo.su/pkg/jsonutil"
-	"voo.su/pkg/repo"
 )
 
 type MessageVoteRepository struct {
-	repo.Repo[postgresModel.MessageVote]
+	gormutil.Repo[postgresModel.MessageVote]
 	VoteCacheRepo *redisRepo.VoteCacheRepository
 }
 
@@ -24,7 +24,7 @@ func NewMessageVoteRepository(
 	voteCacheRepo *redisRepo.VoteCacheRepository,
 ) *MessageVoteRepository {
 	return &MessageVoteRepository{
-		Repo:          repo.NewRepo[postgresModel.MessageVote](db),
+		Repo:          gormutil.NewRepo[postgresModel.MessageVote](db),
 		VoteCacheRepo: voteCacheRepo,
 	}
 }

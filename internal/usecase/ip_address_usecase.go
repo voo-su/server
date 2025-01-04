@@ -17,14 +17,14 @@ type IpAddressUseCase struct {
 	Conf       *config.Config
 	Locale     locale.ILocale
 	Source     *infrastructure.Source
-	HttpClient *client.RequestClient
+	HttpClient *client.HttpClient
 }
 
 func NewIpAddressUseCase(
 	conf *config.Config,
 	locale locale.ILocale,
 	source *infrastructure.Source,
-	httpClient *client.RequestClient,
+	httpClient *client.HttpClient,
 ) *IpAddressUseCase {
 	return &IpAddressUseCase{
 		Conf:       conf,

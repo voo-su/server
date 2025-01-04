@@ -5,13 +5,13 @@ import (
 	"errors"
 	"log"
 	"time"
-	"voo.su/pkg/timewheel"
+	"voo.su/pkg/timeutil"
 )
 
 var ack *AckBuffer
 
 type AckBuffer struct {
-	TimeWheel *timewheel.SimpleTimeWheel[*AckBufferContent]
+	TimeWheel *timeutil.SimpleTimeWheel[*AckBufferContent]
 }
 
 type AckBufferContent struct {
@@ -23,7 +23,7 @@ type AckBufferContent struct {
 
 func InitAck() {
 	ack = &AckBuffer{}
-	ack.TimeWheel = timewheel.NewSimpleTimeWheel[*AckBufferContent](1*time.Second, 30, ack.handle)
+	ack.TimeWheel = timeutil.NewSimpleTimeWheel[*AckBufferContent](1*time.Second, 30, ack.handle)
 }
 
 func (a *AckBuffer) Start(ctx context.Context) error {
@@ -41,7 +41,7 @@ func (a *AckBuffer) delete(ackKey string) {
 	a.TimeWheel.Remove(ackKey)
 }
 
-func (a *AckBuffer) handle(_ *timewheel.SimpleTimeWheel[*AckBufferContent], _ string, bufferContent *AckBufferContent) {
+func (a *AckBuffer) handle(_ *timeutil.SimpleTimeWheel[*AckBufferContent], _ string, bufferContent *AckBufferContent) {
 	ch, ok := Session.Channel(bufferContent.Channel)
 	if !ok {
 		return

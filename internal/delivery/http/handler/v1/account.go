@@ -8,7 +8,7 @@ import (
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/logger"
 	"voo.su/pkg/timeutil"
@@ -19,10 +19,10 @@ type Account struct {
 	UserUseCase *usecase.UserUseCase
 }
 
-func (a *Account) Get(ctx *core.Context) error {
+func (a *Account) Get(ctx *ginutil.Context) error {
 	user, err := a.UserUseCase.UserRepo.FindById(ctx.Ctx(), ctx.UserId())
 	if err != nil {
-		return ctx.Error(err.Error())
+		return ctx.Error(err)
 	}
 
 	return ctx.Success(&v1Pb.AccountResponse{
@@ -38,7 +38,7 @@ func (a *Account) Get(ctx *core.Context) error {
 	})
 }
 
-func (a *Account) ChangeDetail(ctx *core.Context) error {
+func (a *Account) ChangeDetail(ctx *ginutil.Context) error {
 	params := &v1Pb.AccountDetailUpdateRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -60,40 +60,40 @@ func (a *Account) ChangeDetail(ctx *core.Context) error {
 		"birthday": params.Birthday,
 	})
 	if err != nil {
-		return ctx.ErrorBusiness(a.Locale.Localize("personal_info_update_error"))
+		return ctx.Error(a.Locale.Localize("personal_info_update_error"))
 	}
 
 	return ctx.Success(nil, a.Locale.Localize("personal_info_updated_success"))
 }
 
-func (a *Account) ChangeUsername(ctx *core.Context) error {
+func (a *Account) ChangeUsername(ctx *ginutil.Context) error {
 	params := &v1Pb.AccountUsernameUpdateRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if match, _ := regexp.MatchString("^[a-zA-Z0-9_-]+$", params.Username); !match {
-		return ctx.ErrorBusiness(a.Locale.Localize("invalid_username_symbols"))
+		return ctx.Error(a.Locale.Localize("invalid_username_symbols"))
 	}
 
 	uid := ctx.UserId()
 	var user model.User
 	result := a.UserUseCase.UserRepo.Db.Where("username = ?", params.Username).First(&user)
 	if result.Error != gorm.ErrRecordNotFound && user.Id != uid {
-		return ctx.ErrorBusiness(a.Locale.Localize("username_already_exists"))
+		return ctx.Error(a.Locale.Localize("username_already_exists"))
 	}
 
 	_, err := a.UserUseCase.UserRepo.UpdateById(ctx.Ctx(), ctx.UserId(), map[string]interface{}{
 		"username": params.Username,
 	})
 	if err != nil {
-		return ctx.ErrorBusiness(a.Locale.Localize("general_error"))
+		return ctx.Error(a.Locale.Localize("general_error"))
 	}
 
 	return ctx.Success(a.Locale.Localize("success"))
 }
 
-func (a *Account) Push(ctx *core.Context) error {
+func (a *Account) Push(ctx *ginutil.Context) error {
 	params := &v1Pb.AccountPushRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -104,7 +104,7 @@ func (a *Account) Push(ctx *core.Context) error {
 	var in entity.WebPush
 	if err := json.Unmarshal([]byte(params.Subscription), &in); err != nil {
 		logger.Errorf("%s: %s", a.Locale.Localize("decode_error"), err)
-		return ctx.ErrorBusiness(a.Locale.Localize("general_error"))
+		return ctx.Error(a.Locale.Localize("general_error"))
 	}
 
 	a.UserUseCase.WebPushInit(ctx.Ctx(), int64(uid), in)

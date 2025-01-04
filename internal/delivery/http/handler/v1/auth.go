@@ -9,8 +9,8 @@ import (
 	"voo.su/internal/constant"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
-	"voo.su/pkg/jwt"
+	"voo.su/pkg/ginutil"
+	"voo.su/pkg/jwtutil"
 	"voo.su/pkg/locale"
 )
 
@@ -25,7 +25,7 @@ type Auth struct {
 	MessageUseCase   usecase.IMessageUseCase
 }
 
-func (a *Auth) Login(ctx *core.Context) error {
+func (a *Auth) Login(ctx *ginutil.Context) error {
 	params := &v1Pb.AuthLoginRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -33,7 +33,7 @@ func (a *Auth) Login(ctx *core.Context) error {
 
 	token, err := a.AuthUseCase.Login(ctx.Ctx(), "auth", params.Email)
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&v1Pb.AuthLoginResponse{
@@ -42,7 +42,7 @@ func (a *Auth) Login(ctx *core.Context) error {
 	})
 }
 
-func (a *Auth) Verify(ctx *core.Context) error {
+func (a *Auth) Verify(ctx *ginutil.Context) error {
 	params := &v1Pb.AuthVerifyRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -63,7 +63,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 
 	user, err := a.AuthUseCase.Register(ctx.Ctx(), claims.ID)
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	if err := a.AuthUseCase.Delete(ctx.Ctx(), constant.LoginChannel, params.Token); err != nil {
@@ -124,7 +124,7 @@ func (a *Auth) Verify(ctx *core.Context) error {
 	})
 }
 
-func (a *Auth) Logout(ctx *core.Context) error {
+func (a *Auth) Logout(ctx *ginutil.Context) error {
 	session := ctx.JwtSession()
 	if session != nil {
 		if ex := session.ExpiresAt - time.Now().Unix(); ex > 0 {
@@ -135,7 +135,7 @@ func (a *Auth) Logout(ctx *core.Context) error {
 	return ctx.Success(nil)
 }
 
-func (a *Auth) Refresh(ctx *core.Context) error {
+func (a *Auth) Refresh(ctx *ginutil.Context) error {
 	session := ctx.JwtSession()
 	if session != nil {
 		if ex := session.ExpiresAt - time.Now().Unix(); ex > 0 {

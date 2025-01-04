@@ -3,13 +3,13 @@ package repository
 import (
 	"gorm.io/gorm"
 	"voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type PushTokenRepository struct {
-	repo.Repo[model.PushToken]
+	gormutil.Repo[model.PushToken]
 }
 
 func NewPushTokenRepository(db *gorm.DB) *PushTokenRepository {
-	return &PushTokenRepository{Repo: repo.NewRepo[model.PushToken](db)}
+	return &PushTokenRepository{Repo: gormutil.NewRepo[model.PushToken](db)}
 }

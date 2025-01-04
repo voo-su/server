@@ -1,4 +1,4 @@
-package timewheel
+package timeutil
 
 import (
 	"errors"

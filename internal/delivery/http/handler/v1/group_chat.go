@@ -8,7 +8,7 @@ import (
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/logger"
@@ -27,7 +27,7 @@ type GroupChat struct {
 	RedisLockCacheRepo     *redisRepo.RedisLockCacheRepository
 }
 
-func (g *GroupChat) Create(ctx *core.Context) error {
+func (g *GroupChat) Create(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -40,13 +40,13 @@ func (g *GroupChat) Create(ctx *core.Context) error {
 		MemberIds: sliceutil.ParseIds(params.GetIds()),
 	})
 	if err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("chat_creation_failed"))
+		return ctx.Error(g.Locale.Localize("chat_creation_failed"))
 	}
 
 	return ctx.Success(&v1Pb.GroupChatCreateResponse{GroupId: int32(gid)})
 }
 
-func (g *GroupChat) Invite(ctx *core.Context) error {
+func (g *GroupChat) Invite(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatInviteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -54,27 +54,27 @@ func (g *GroupChat) Invite(ctx *core.Context) error {
 
 	key := fmt.Sprintf("group-join:%d", params.GroupId)
 	if !g.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 20) {
-		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
+		return ctx.Error(g.Locale.Localize("network_error"))
 	}
 
 	defer g.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
+		return ctx.Error(g.Locale.Localize("network_error"))
 	}
 
 	if group != nil && group.IsDismiss == 1 {
-		return ctx.ErrorBusiness(g.Locale.Localize("group_dissolved"))
+		return ctx.Error(g.Locale.Localize("group_dissolved"))
 	}
 
 	uid := ctx.UserId()
 	uids := sliceutil.Unique(sliceutil.ParseIds(params.Ids))
 	if len(uids) == 0 {
-		return ctx.ErrorBusiness(g.Locale.Localize("invited_friends_empty"))
+		return ctx.Error(g.Locale.Localize("invited_friends_empty"))
 	}
 
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), uid, true) {
-		return ctx.ErrorBusiness(g.Locale.Localize("not_group_member_invite"))
+		return ctx.Error(g.Locale.Localize("not_group_member_invite"))
 	}
 
 	if err := g.GroupChatUseCase.Invite(ctx.Ctx(), &usecase.GroupInviteOpt{
@@ -82,13 +82,13 @@ func (g *GroupChat) Invite(ctx *core.Context) error {
 		GroupId:   int(params.GroupId),
 		MemberIds: uids,
 	}); err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("invite_friends_failed") + err.Error())
+		return ctx.Error(g.Locale.Localize("invite_friends_failed") + err.Error())
 	}
 
 	return ctx.Success(&v1Pb.GroupChatInviteResponse{})
 }
 
-func (g *GroupChat) SignOut(ctx *core.Context) error {
+func (g *GroupChat) SignOut(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatSecedeRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -96,7 +96,7 @@ func (g *GroupChat) SignOut(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if err := g.GroupChatUseCase.Secede(ctx.Ctx(), int(params.GroupId), uid); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	sid := g.ChatUseCase.ChatRepo.FindBySessionId(uid, int(params.GroupId), constant.ChatGroupMode)
@@ -105,7 +105,7 @@ func (g *GroupChat) SignOut(ctx *core.Context) error {
 	return ctx.Success(nil)
 }
 
-func (g *GroupChat) Setting(ctx *core.Context) error {
+func (g *GroupChat) Setting(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupSettingRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -113,16 +113,16 @@ func (g *GroupChat) Setting(ctx *core.Context) error {
 
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
+		return ctx.Error(g.Locale.Localize("network_error"))
 	}
 
 	if group != nil && group.IsDismiss == 1 {
-		return ctx.ErrorBusiness(g.Locale.Localize("group_dissolved"))
+		return ctx.Error(g.Locale.Localize("group_dissolved"))
 	}
 
 	uid := ctx.UserId()
 	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness(g.Locale.Localize("no_permission_for_action"))
+		return ctx.Error(g.Locale.Localize("no_permission_for_action"))
 	}
 
 	if err := g.GroupChatUseCase.Update(ctx.Ctx(), &usecase.GroupUpdateOpt{
@@ -131,7 +131,7 @@ func (g *GroupChat) Setting(ctx *core.Context) error {
 		Avatar:      params.Avatar,
 		Description: params.Description,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	//_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
@@ -145,7 +145,7 @@ func (g *GroupChat) Setting(ctx *core.Context) error {
 	return ctx.Success(&v1Pb.GroupChatSettingResponse{})
 }
 
-func (g *GroupChat) Get(ctx *core.Context) error {
+func (g *GroupChat) Get(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatDetailRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -154,11 +154,11 @@ func (g *GroupChat) Get(ctx *core.Context) error {
 	uid := ctx.UserId()
 	groupInfo, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	if groupInfo.Id == 0 {
-		return ctx.ErrorBusiness(g.Locale.Localize("data_not_found"))
+		return ctx.Error(g.Locale.Localize("data_not_found"))
 	}
 
 	resp := &v1Pb.GroupChatDetailResponse{
@@ -181,7 +181,7 @@ func (g *GroupChat) Get(ctx *core.Context) error {
 	return ctx.Success(resp)
 }
 
-func (g *GroupChat) GetInviteFriends(ctx *core.Context) error {
+func (g *GroupChat) GetInviteFriends(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatGetInviteFriendsRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -189,7 +189,7 @@ func (g *GroupChat) GetInviteFriends(ctx *core.Context) error {
 
 	items, err := g.ContactUseCase.List(ctx.Ctx(), ctx.UserId())
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	if params.GroupId <= 0 {
@@ -211,10 +211,10 @@ func (g *GroupChat) GetInviteFriends(ctx *core.Context) error {
 	return ctx.Success(data)
 }
 
-func (g *GroupChat) GroupList(ctx *core.Context) error {
+func (g *GroupChat) GroupList(ctx *ginutil.Context) error {
 	items, err := g.GroupChatUseCase.List(ctx.UserId())
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	resp := &v1Pb.GroupChatListResponse{
@@ -235,7 +235,7 @@ func (g *GroupChat) GroupList(ctx *core.Context) error {
 	return ctx.Success(resp)
 }
 
-func (g *GroupChat) Members(ctx *core.Context) error {
+func (g *GroupChat) Members(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatMemberListRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -243,7 +243,7 @@ func (g *GroupChat) Members(ctx *core.Context) error {
 
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
+		return ctx.Error(g.Locale.Localize("network_error"))
 	}
 
 	if group != nil && group.IsDismiss == 1 {
@@ -251,7 +251,7 @@ func (g *GroupChat) Members(ctx *core.Context) error {
 	}
 
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), int(params.GroupId), ctx.UserId(), false) {
-		return ctx.ErrorBusiness(g.Locale.Localize("not_member_cannot_view_participants"))
+		return ctx.Error(g.Locale.Localize("not_member_cannot_view_participants"))
 	}
 
 	list := g.GroupChatMemberUseCase.MemberRepo.GetMembers(ctx.Ctx(), int(params.GroupId))
@@ -272,7 +272,7 @@ func (g *GroupChat) Members(ctx *core.Context) error {
 	return ctx.Success(&v1Pb.GroupChatMemberListResponse{Items: items})
 }
 
-func (g *GroupChat) RemoveMembers(ctx *core.Context) error {
+func (g *GroupChat) RemoveMembers(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatRemoveMemberRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -280,7 +280,7 @@ func (g *GroupChat) RemoveMembers(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness(g.Locale.Localize("no_permission_for_action"))
+		return ctx.Error(g.Locale.Localize("no_permission_for_action"))
 	}
 
 	err := g.GroupChatUseCase.RemoveMember(ctx.Ctx(), &usecase.GroupRemoveMembersOpt{
@@ -290,13 +290,13 @@ func (g *GroupChat) RemoveMembers(ctx *core.Context) error {
 	})
 
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&v1Pb.GroupChatRemoveMemberResponse{})
 }
 
-func (g *GroupChat) AssignAdmin(ctx *core.Context) error {
+func (g *GroupChat) AssignAdmin(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatAssignAdminRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -304,7 +304,7 @@ func (g *GroupChat) AssignAdmin(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness(g.Locale.Localize("access_rights_missing"))
+		return ctx.Error(g.Locale.Localize("access_rights_missing"))
 	}
 
 	leader := 0
@@ -314,13 +314,13 @@ func (g *GroupChat) AssignAdmin(ctx *core.Context) error {
 
 	if err := g.GroupChatMemberUseCase.SetLeaderStatus(ctx.Ctx(), int(params.GroupId), int(params.UserId), leader); err != nil {
 		logger.Errorf("%s:%s", g.Locale.Localize("failed_to_set_admin_info"), err.Error())
-		return ctx.ErrorBusiness(g.Locale.Localize("failed_to_set_admin_info"))
+		return ctx.Error(g.Locale.Localize("failed_to_set_admin_info"))
 	}
 
 	return ctx.Success(nil)
 }
 
-func (g *GroupChat) Dismiss(ctx *core.Context) error {
+func (g *GroupChat) Dismiss(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatDismissRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -328,10 +328,10 @@ func (g *GroupChat) Dismiss(ctx *core.Context) error {
 
 	uid := ctx.UserId()
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness(g.Locale.Localize("no_permission_to_dissolve_group"))
+		return ctx.Error(g.Locale.Localize("no_permission_to_dissolve_group"))
 	}
 	if err := g.GroupChatUseCase.Dismiss(ctx.Ctx(), int(params.GroupId), ctx.UserId()); err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("group_dissolution_failed"))
+		return ctx.Error(g.Locale.Localize("group_dissolution_failed"))
 	}
 
 	_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
@@ -345,7 +345,7 @@ func (g *GroupChat) Dismiss(ctx *core.Context) error {
 	return ctx.Success(nil)
 }
 
-func (g *GroupChat) Mute(ctx *core.Context) error {
+func (g *GroupChat) Mute(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatMuteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -354,14 +354,14 @@ func (g *GroupChat) Mute(ctx *core.Context) error {
 	uid := ctx.UserId()
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
+		return ctx.Error(g.Locale.Localize("network_error"))
 	}
 
 	if group.IsDismiss == 1 {
-		return ctx.ErrorBusiness(g.Locale.Localize("group_dissolved"))
+		return ctx.Error(g.Locale.Localize("group_dissolved"))
 	}
 	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness(g.Locale.Localize("access_rights_missing"))
+		return ctx.Error(g.Locale.Localize("access_rights_missing"))
 	}
 
 	data := make(map[string]any)
@@ -413,7 +413,7 @@ func (g *GroupChat) Mute(ctx *core.Context) error {
 	return ctx.Success(v1Pb.GroupChatMuteResponse{})
 }
 
-func (g *GroupChat) Overt(ctx *core.Context) error {
+func (g *GroupChat) Overt(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatOvertRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -422,15 +422,15 @@ func (g *GroupChat) Overt(ctx *core.Context) error {
 	uid := ctx.UserId()
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
+		return ctx.Error(g.Locale.Localize("network_error"))
 	}
 
 	if group.IsDismiss == 1 {
-		return ctx.ErrorBusiness(g.Locale.Localize("group_dissolved"))
+		return ctx.Error(g.Locale.Localize("group_dissolved"))
 	}
 
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMaster(ctx.Ctx(), int(params.GroupId), uid) {
-		return ctx.ErrorBusiness(g.Locale.Localize("access_rights_missing"))
+		return ctx.Error(g.Locale.Localize("access_rights_missing"))
 	}
 
 	data := make(map[string]any)

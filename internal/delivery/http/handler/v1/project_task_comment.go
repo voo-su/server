@@ -3,7 +3,7 @@ package v1
 import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/timeutil"
 )
@@ -13,7 +13,7 @@ type ProjectTaskComment struct {
 	ProjectUseCase *usecase.ProjectUseCase
 }
 
-func (p *ProjectTaskComment) Create(ctx *core.Context) error {
+func (p *ProjectTaskComment) Create(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectCommentCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -25,13 +25,13 @@ func (p *ProjectTaskComment) Create(ctx *core.Context) error {
 		CreatedBy: ctx.UserId(),
 	})
 	if err != nil {
-		return ctx.ErrorBusiness(p.Locale.Localize("creation_failed_try_later") + ": " + err.Error())
+		return ctx.Error(p.Locale.Localize("creation_failed_try_later") + ": " + err.Error())
 	}
 
 	return ctx.Success(&v1Pb.ProjectCreateResponse{Id: commentId})
 }
 
-func (p *ProjectTaskComment) Comments(ctx *core.Context) error {
+func (p *ProjectTaskComment) Comments(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectCommentRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -39,14 +39,14 @@ func (p *ProjectTaskComment) Comments(ctx *core.Context) error {
 
 	data, err := p.ProjectUseCase.Comments(ctx.Ctx(), params.TaskId)
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	items := make([]*v1Pb.ProjectCommentResponse_Item, 0)
 	for _, item := range data {
 		user, err := p.ProjectUseCase.UserRepo.FindById(ctx.Ctx(), item.CreatedBy)
 		if err != nil {
-			return ctx.ErrorBusiness(err.Error())
+			return ctx.Error(err.Error())
 		}
 
 		items = append(items, &v1Pb.ProjectCommentResponse_Item{

@@ -4,7 +4,7 @@ import (
 	"log"
 	"voo.su/internal/delivery/ws/event"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/socket"
 	"voo.su/pkg/socket/adapter"
 )
@@ -14,7 +14,7 @@ type ChatChannel struct {
 	Event           *event.ChatEvent
 }
 
-func (c *ChatChannel) Conn(ctx *core.Context) error {
+func (c *ChatChannel) Conn(ctx *ginutil.Context) error {
 	conn, err := adapter.NewWsAdapter(ctx.Context.Writer, ctx.Context.Request)
 	if err != nil {
 		log.Printf("WS Conn error: %s", err.Error())

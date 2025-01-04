@@ -10,12 +10,12 @@ import (
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/strutil"
-	"voo.su/pkg/utils"
 )
 
 type Sticker struct {
@@ -26,7 +26,7 @@ type Sticker struct {
 	RedisLockCacheRepo *redisRepo.RedisLockCacheRepository
 }
 
-func (s *Sticker) CollectList(ctx *core.Context) error {
+func (s *Sticker) CollectList(ctx *ginutil.Context) error {
 	var (
 		uid  = ctx.UserId()
 		resp = &v1Pb.StickerListResponse{
@@ -68,20 +68,20 @@ func (s *Sticker) CollectList(ctx *core.Context) error {
 	return ctx.Success(resp)
 }
 
-func (s *Sticker) DeleteCollect(ctx *core.Context) error {
+func (s *Sticker) DeleteCollect(ctx *ginutil.Context) error {
 	params := &v1Pb.StickerDeleteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := s.StickerUseCase.DeleteCollect(ctx.UserId(), sliceutil.ParseIds(params.Ids)); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (s *Sticker) Upload(ctx *core.Context) error {
+func (s *Sticker) Upload(ctx *ginutil.Context) error {
 	file, err := ctx.Context.FormFile("sticker")
 	if err != nil {
 		return ctx.InvalidParams(fmt.Sprintf(s.Locale.Localize("field_required_for_upload"), "sticker"))
@@ -97,15 +97,15 @@ func (s *Sticker) Upload(ctx *core.Context) error {
 
 	stream, err := minio.ReadMultipartStream(file)
 	if err != nil {
-		return ctx.ErrorBusiness(s.Locale.Localize("upload_error"))
+		return ctx.Error(s.Locale.Localize("upload_error"))
 	}
 
-	meta := utils.ReadImageMeta(bytes.NewReader(stream))
+	meta := pkg.ReadImageMeta(bytes.NewReader(stream))
 	ext := strutil.FileSuffix(file.Filename)
 
 	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
 	if err = s.Minio.Write(s.Conf.Minio.GetBucket(), src, stream); err != nil {
-		return ctx.ErrorBusiness(s.Locale.Localize("upload_error"))
+		return ctx.Error(s.Locale.Localize("upload_error"))
 	}
 
 	m := &postgresModel.StickerItem{
@@ -116,7 +116,7 @@ func (s *Sticker) Upload(ctx *core.Context) error {
 		FileSize:    int(file.Size),
 	}
 	if err := s.StickerUseCase.Source.Postgres().Create(m).Error; err != nil {
-		return ctx.ErrorBusiness(s.Locale.Localize("upload_error"))
+		return ctx.Error(s.Locale.Localize("upload_error"))
 	}
 
 	return ctx.Success(&v1Pb.StickerUploadResponse{
@@ -125,10 +125,10 @@ func (s *Sticker) Upload(ctx *core.Context) error {
 	})
 }
 
-func (s *Sticker) SystemList(ctx *core.Context) error {
+func (s *Sticker) SystemList(ctx *ginutil.Context) error {
 	items, err := s.StickerUseCase.StickerRepo.GetSystemStickerList(ctx.Ctx())
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	ids := s.StickerUseCase.StickerRepo.GetUserInstallIds(ctx.UserId())
@@ -145,7 +145,7 @@ func (s *Sticker) SystemList(ctx *core.Context) error {
 	return ctx.Success(data)
 }
 
-func (s *Sticker) SetSystemSticker(ctx *core.Context) error {
+func (s *Sticker) SetSystemSticker(ctx *ginutil.Context) error {
 	var (
 		err    error
 		params = &v1Pb.StickerSetSystemRequest{}
@@ -157,13 +157,13 @@ func (s *Sticker) SetSystemSticker(ctx *core.Context) error {
 	}
 
 	if !s.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 5) {
-		return ctx.ErrorBusiness(s.Locale.Localize("too_many_requests"))
+		return ctx.Error(s.Locale.Localize("too_many_requests"))
 	}
 
 	defer s.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
 	if params.Type == 2 {
 		if err = s.StickerUseCase.RemoveUserSysSticker(uid, int(params.StickerId)); err != nil {
-			return ctx.ErrorBusiness(err.Error())
+			return ctx.Error(err.Error())
 		}
 
 		return ctx.Success(nil)
@@ -171,10 +171,10 @@ func (s *Sticker) SetSystemSticker(ctx *core.Context) error {
 
 	info, err := s.StickerUseCase.StickerRepo.FindById(ctx.Ctx(), int(params.StickerId))
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 	if err := s.StickerUseCase.AddUserSysSticker(uid, int(params.StickerId)); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	items := make([]*v1Pb.StickerListItem, 0)

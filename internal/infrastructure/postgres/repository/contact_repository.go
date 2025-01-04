@@ -7,11 +7,11 @@ import (
 	"voo.su/internal/constant"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type ContactRepository struct {
-	repo.Repo[postgresModel.Contact]
+	gormutil.Repo[postgresModel.Contact]
 	ContactRemarkCacheRepo *redisRepo.ContactRemarkCacheRepository
 	RelationCacheRepo      *redisRepo.RelationCacheRepository
 }
@@ -22,7 +22,7 @@ func NewContactRepository(
 	relationCacheRepo *redisRepo.RelationCacheRepository,
 ) *ContactRepository {
 	return &ContactRepository{
-		Repo:                   repo.NewRepo[postgresModel.Contact](db),
+		Repo:                   gormutil.NewRepo[postgresModel.Contact](db),
 		ContactRemarkCacheRepo: contactRemarkCacheRepo,
 		RelationCacheRepo:      relationCacheRepo,
 	}

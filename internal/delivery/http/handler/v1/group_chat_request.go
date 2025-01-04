@@ -8,7 +8,7 @@ import (
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/sliceutil"
@@ -24,7 +24,7 @@ type GroupChatRequest struct {
 	Redis                   *redis.Client
 }
 
-func (g *GroupChatRequest) Create(ctx *core.Context) error {
+func (g *GroupChatRequest) Create(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatRequestCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -32,7 +32,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 
 	apply, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.FindByWhere(ctx.Ctx(), "group_id = ? AND status = ?", params.GroupId, constant.GroupChatRequestStatusWait)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return ctx.Error(err.Error())
+		return ctx.Error(err)
 	}
 
 	uid := ctx.UserId()
@@ -50,7 +50,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 	}
 
 	if err != nil {
-		return ctx.Error(err.Error())
+		return ctx.Error(err)
 	}
 
 	find, err := g.GroupChatMemberUseCase.MemberRepo.FindByWhere(ctx.Ctx(), "group_id = ? AND leader = ?", params.GroupId, 2)
@@ -69,7 +69,7 @@ func (g *GroupChatRequest) Create(ctx *core.Context) error {
 	return ctx.Success(nil)
 }
 
-func (g *GroupChatRequest) Agree(ctx *core.Context) error {
+func (g *GroupChatRequest) Agree(ctx *ginutil.Context) error {
 	uid := ctx.UserId()
 
 	params := &v1Pb.GroupChatRequestAgreeRequest{}
@@ -79,11 +79,11 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 
 	apply, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.FindById(ctx.Ctx(), int(params.ApplyId))
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return ctx.Error(err.Error())
+		return ctx.Error(err)
 	}
 
 	if err == gorm.ErrRecordNotFound {
-		return ctx.ErrorBusiness(g.Locale.Localize("data_not_found"))
+		return ctx.Error(g.Locale.Localize("data_not_found"))
 	}
 
 	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), apply.GroupId, uid) {
@@ -91,7 +91,7 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 	}
 
 	if apply.Status != constant.GroupChatRequestStatusWait {
-		return ctx.ErrorBusiness(g.Locale.Localize("request_already_processed"))
+		return ctx.Error(g.Locale.Localize("request_already_processed"))
 	}
 
 	if !g.GroupChatMemberUseCase.MemberRepo.IsMember(ctx.Ctx(), apply.GroupId, apply.UserId, false) {
@@ -102,7 +102,7 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 		})
 
 		if err != nil {
-			return ctx.ErrorBusiness(err.Error())
+			return ctx.Error(err.Error())
 		}
 	}
 
@@ -111,13 +111,13 @@ func (g *GroupChatRequest) Agree(ctx *core.Context) error {
 		"updated_at": timeutil.DateTime(),
 	}, "id = ?", params.ApplyId)
 	if err != nil {
-		return ctx.Error(err.Error())
+		return ctx.Error(err)
 	}
 
 	return ctx.Success(nil)
 }
 
-func (g *GroupChatRequest) Decline(ctx *core.Context) error {
+func (g *GroupChatRequest) Decline(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupChatRequestDeclineRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -127,11 +127,11 @@ func (g *GroupChatRequest) Decline(ctx *core.Context) error {
 
 	apply, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.FindById(ctx.Ctx(), int(params.ApplyId))
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return ctx.Error(err.Error())
+		return ctx.Error(err)
 	}
 
 	if err == gorm.ErrRecordNotFound {
-		return ctx.ErrorBusiness(g.Locale.Localize("data_not_found"))
+		return ctx.Error(g.Locale.Localize("data_not_found"))
 	}
 
 	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), apply.GroupId, uid) {
@@ -139,7 +139,7 @@ func (g *GroupChatRequest) Decline(ctx *core.Context) error {
 	}
 
 	if apply.Status != constant.GroupChatRequestStatusWait {
-		return ctx.ErrorBusiness(g.Locale.Localize("request_already_processed"))
+		return ctx.Error(g.Locale.Localize("request_already_processed"))
 	}
 
 	_, err = g.GroupChatRequestUseCase.GroupChatRequestRepo.UpdateWhere(ctx.Ctx(), map[string]interface{}{
@@ -147,13 +147,13 @@ func (g *GroupChatRequest) Decline(ctx *core.Context) error {
 		"updated_at": timeutil.DateTime(),
 	}, "id = ?", params.ApplyId)
 	if err != nil {
-		return ctx.Error(err.Error())
+		return ctx.Error(err)
 	}
 
 	return ctx.Success(&v1Pb.GroupChatRequestDeclineResponse{})
 }
 
-func (g *GroupChatRequest) List(ctx *core.Context) error {
+func (g *GroupChatRequest) List(ctx *ginutil.Context) error {
 	params := &v1Pb.GroupRequestListRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -165,7 +165,7 @@ func (g *GroupChatRequest) List(ctx *core.Context) error {
 
 	list, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.List(ctx.Ctx(), []int{int(params.GroupId)})
 	if err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("chat_creation_error"))
+		return ctx.Error(g.Locale.Localize("chat_creation_error"))
 	}
 
 	items := make([]*v1Pb.GroupChatRequestListResponse_Item, 0)
@@ -183,7 +183,7 @@ func (g *GroupChatRequest) List(ctx *core.Context) error {
 	return ctx.Success(&v1Pb.GroupChatRequestListResponse{Items: items})
 }
 
-func (g *GroupChatRequest) All(ctx *core.Context) error {
+func (g *GroupChatRequest) All(ctx *ginutil.Context) error {
 	uid := ctx.UserId()
 	all, err := g.GroupChatMemberUseCase.MemberRepo.FindAll(ctx.Ctx(), func(db *gorm.DB) {
 		db.Select("group_id").
@@ -193,7 +193,7 @@ func (g *GroupChatRequest) All(ctx *core.Context) error {
 	})
 
 	if err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("network_error"))
+		return ctx.Error(g.Locale.Localize("network_error"))
 	}
 
 	groupIds := make([]int, 0, len(all))
@@ -208,7 +208,7 @@ func (g *GroupChatRequest) All(ctx *core.Context) error {
 
 	list, err := g.GroupChatRequestUseCase.GroupChatRequestRepo.List(ctx.Ctx(), groupIds)
 	if err != nil {
-		return ctx.ErrorBusiness(g.Locale.Localize("chat_creation_error"))
+		return ctx.Error(g.Locale.Localize("chat_creation_error"))
 	}
 
 	groups, err := g.GroupChatUseCase.GroupChatRepo.FindAll(ctx.Ctx(), func(db *gorm.DB) {
@@ -240,7 +240,7 @@ func (g *GroupChatRequest) All(ctx *core.Context) error {
 	return ctx.Success(resp)
 }
 
-func (g *GroupChatRequest) RequestUnreadNum(ctx *core.Context) error {
+func (g *GroupChatRequest) RequestUnreadNum(ctx *ginutil.Context) error {
 	return ctx.Success(map[string]any{
 		"unread_num": g.GroupRequestCacheRepo.Get(ctx.Ctx(), ctx.UserId()),
 	})

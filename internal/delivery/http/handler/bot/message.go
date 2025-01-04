@@ -9,7 +9,7 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/strutil"
 )
@@ -20,25 +20,25 @@ type Message struct {
 	BotUseCase     *usecase.BotUseCase
 }
 
-func (m *Message) checkBot(ctx *core.Context) (*model.Bot, error) {
+func (m *Message) checkBot(ctx *ginutil.Context) (*model.Bot, error) {
 	token := ctx.Context.Param("token")
 	if token == "" {
-		return nil, ctx.ErrorBusiness(m.Locale.Localize("token_missing_or_empty"))
+		return nil, ctx.Error(m.Locale.Localize("token_missing_or_empty"))
 	}
 
 	var bot, err = m.BotUseCase.GetBotByToken(ctx.Ctx(), token)
 	if err != nil {
-		return nil, ctx.ErrorBusiness(m.Locale.Localize("bot_data_request_error"))
+		return nil, ctx.Error(m.Locale.Localize("bot_data_request_error"))
 	}
 
 	if bot == nil {
-		return nil, ctx.ErrorBusiness(m.Locale.Localize("bot_not_found_with_token"))
+		return nil, ctx.Error(m.Locale.Localize("bot_not_found_with_token"))
 	}
 
 	return bot, nil
 }
 
-func (m *Message) GroupChats(ctx *core.Context) error {
+func (m *Message) GroupChats(ctx *ginutil.Context) error {
 	bot, err := m.checkBot(ctx)
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func (m *Message) GroupChats(ctx *core.Context) error {
 
 	list, err := m.BotUseCase.Chats(ctx.Ctx(), bot.CreatorId)
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	items := make([]*botPb.MessageChatsResponse_Item, 0, len(list))
@@ -62,7 +62,7 @@ func (m *Message) GroupChats(ctx *core.Context) error {
 	})
 }
 
-func (m *Message) Message(ctx *core.Context) error {
+func (m *Message) Message(ctx *ginutil.Context) error {
 	params := &botPb.MessageSendRequest{}
 	if err := ctx.Context.Bind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -80,13 +80,13 @@ func (m *Message) Message(ctx *core.Context) error {
 		},
 		Content: params.Text,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&botPb.MessageSendResponse{})
 }
 
-func (m *Message) Photo(ctx *core.Context) error {
+func (m *Message) Photo(ctx *ginutil.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
 		return ctx.InvalidParams(m.Locale.Localize("invalid_chat_id_format"))
@@ -122,13 +122,13 @@ func (m *Message) Photo(ctx *core.Context) error {
 		Url:     *filePath,
 		Content: strutil.EscapeHtml(caption),
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) Video(ctx *core.Context) error {
+func (m *Message) Video(ctx *ginutil.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
 		return ctx.InvalidParams(m.Locale.Localize("invalid_chat_id_format"))
@@ -164,13 +164,13 @@ func (m *Message) Video(ctx *core.Context) error {
 		Url:     *filePath,
 		Content: strutil.EscapeHtml(caption),
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) Audio(ctx *core.Context) error {
+func (m *Message) Audio(ctx *ginutil.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
 		return ctx.InvalidParams(m.Locale.Localize("invalid_chat_id_format"))
@@ -206,13 +206,13 @@ func (m *Message) Audio(ctx *core.Context) error {
 		Url:     *filePath,
 		Content: strutil.EscapeHtml(caption),
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) Document(ctx *core.Context) error {
+func (m *Message) Document(ctx *ginutil.Context) error {
 	chatId, err := strconv.Atoi(ctx.Context.PostForm("chat_id"))
 	if err != nil {
 		return ctx.InvalidParams(m.Locale.Localize("invalid_chat_id_format"))
@@ -252,7 +252,7 @@ func (m *Message) Document(ctx *core.Context) error {
 		FilePath:     *filePath,
 		Content:      strutil.EscapeHtml(caption),
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&botPb.MessageSendResponse{})

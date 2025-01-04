@@ -3,13 +3,13 @@ package repository
 import (
 	"gorm.io/gorm"
 	"voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type ProjectTaskCommentRepository struct {
-	repo.Repo[model.ProjectTaskComment]
+	gormutil.Repo[model.ProjectTaskComment]
 }
 
 func NewProjectTaskCommentRepository(db *gorm.DB) *ProjectTaskCommentRepository {
-	return &ProjectTaskCommentRepository{Repo: repo.NewRepo[model.ProjectTaskComment](db)}
+	return &ProjectTaskCommentRepository{Repo: gormutil.NewRepo[model.ProjectTaskComment](db)}
 }

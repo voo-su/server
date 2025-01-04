@@ -4,15 +4,15 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type ChatRepository struct {
-	repo.Repo[model.Chat]
+	gormutil.Repo[model.Chat]
 }
 
 func NewChatRepository(db *gorm.DB) *ChatRepository {
-	return &ChatRepository{Repo: repo.NewRepo[model.Chat](db)}
+	return &ChatRepository{Repo: gormutil.NewRepo[model.Chat](db)}
 }
 
 func (c *ChatRepository) IsDisturb(uid int, receiverId int, chatType int) bool {

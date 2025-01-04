@@ -1,4 +1,4 @@
-package core
+package ginutil
 
 import (
 	"context"
@@ -8,9 +8,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"net/http"
-	"runtime"
-	"voo.su/pkg/middleware"
-	"voo.su/pkg/response"
+	"voo.su/pkg/jwtutil"
 	"voo.su/pkg/validator"
 )
 
@@ -28,7 +26,7 @@ func New(ctx *gin.Context) *Context {
 }
 
 func (c *Context) Unauthorized(message string) error {
-	c.Context.AbortWithStatusJSON(http.StatusUnauthorized, &response.Response{
+	c.Context.AbortWithStatusJSON(http.StatusUnauthorized, &Response{
 		Code:    http.StatusUnauthorized,
 		Message: message,
 	})
@@ -37,7 +35,7 @@ func (c *Context) Unauthorized(message string) error {
 }
 
 func (c *Context) Forbidden(message string) error {
-	c.Context.AbortWithStatusJSON(http.StatusForbidden, &response.Response{
+	c.Context.AbortWithStatusJSON(http.StatusForbidden, &Response{
 		Code:    http.StatusForbidden,
 		Message: message,
 	})
@@ -46,9 +44,9 @@ func (c *Context) Forbidden(message string) error {
 }
 
 func (c *Context) InvalidParams(message any) error {
-	resp := &response.Response{
+	resp := &Response{
 		Code:    305,
-		Message: "неверные параметры",
+		Message: "Invalid parameters",
 	}
 	switch msg := message.(type) {
 	case error:
@@ -64,10 +62,10 @@ func (c *Context) InvalidParams(message any) error {
 	return nil
 }
 
-func (c *Context) ErrorBusiness(message any) error {
-	resp := &response.Response{
+func (c *Context) Error(message any) error {
+	resp := &Response{
 		Code:    400,
-		Message: "ошибка",
+		Message: "error",
 	}
 	switch msg := message.(type) {
 	case error:
@@ -78,24 +76,13 @@ func (c *Context) ErrorBusiness(message any) error {
 		resp.Message = fmt.Sprintf("%v", msg)
 	}
 
-	//resp.Meta = initMeta()
 	c.Context.AbortWithStatusJSON(http.StatusBadRequest, resp)
 
 	return nil
 }
 
-func (c *Context) Error(error string) error {
-	c.Context.AbortWithStatusJSON(http.StatusInternalServerError, &response.Response{
-		Code:    500,
-		Message: error,
-		//Meta:    initMeta(),
-	})
-
-	return nil
-}
-
 func (c *Context) Success(data any, message ...string) error {
-	resp := &response.Response{
+	resp := &Response{
 		Code:    200,
 		Message: "success",
 		Data:    data,
@@ -131,29 +118,15 @@ func (c *Context) UserId() int {
 	return 0
 }
 
-func (c *Context) JwtSession() *middleware.JSession {
-	data, isOk := c.Context.Get(middleware.JWTSessionConst)
+func (c *Context) JwtSession() *jwtutil.JSession {
+	data, isOk := c.Context.Get(jwtutil.JWTSession)
 	if !isOk {
 		return nil
 	}
 
-	return data.(*middleware.JSession)
-}
-
-func (c *Context) IsGuest() bool {
-	return c.UserId() == 0
+	return data.(*jwtutil.JSession)
 }
 
 func (c *Context) Ctx() context.Context {
 	return c.Context.Request.Context()
-}
-
-func initMeta() map[string]any {
-	meta := make(map[string]any)
-	_, _, line, ok := runtime.Caller(2)
-	if ok {
-		meta["error_line"] = line
-	}
-
-	return meta
 }

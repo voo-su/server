@@ -9,11 +9,11 @@ import (
 	"voo.su/internal/infrastructure"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
+	"voo.su/pkg"
 	"voo.su/pkg/encrypt"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/strutil"
-	"voo.su/pkg/utils"
 )
 
 type BotUseCase struct {
@@ -127,7 +127,7 @@ func (b *BotUseCase) FileUpload(ctx context.Context, file *multipart.FileHeader)
 		return nil, err
 	}
 
-	meta := utils.ReadImageMeta(bytes.NewReader(stream))
+	meta := pkg.ReadImageMeta(bytes.NewReader(stream))
 	ext := strutil.FileSuffix(file.Filename)
 
 	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
@@ -146,7 +146,7 @@ func (b *BotUseCase) FileDocumentUpload(ctx context.Context, file *multipart.Fil
 		return nil, err
 	}
 
-	meta := utils.ReadImageMeta(bytes.NewReader(stream))
+	meta := pkg.ReadImageMeta(bytes.NewReader(stream))
 	ext := strutil.FileSuffix(file.Filename)
 
 	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)

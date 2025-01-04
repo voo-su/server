@@ -10,7 +10,7 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/delivery/ws/consume"
-	"voo.su/pkg/utils"
+	"voo.su/pkg"
 )
 
 type MessageSubscribe struct {
@@ -68,7 +68,7 @@ func (m *MessageSubscribe) handle(worker *pool.Pool, data *redis.Message, consum
 		}
 		defer func() {
 			if err := recover(); err != nil {
-				log.Printf("Error subscribing to call notification: %s", utils.PanicTrace(err))
+				log.Printf("Error subscribing to call notification: %s", pkg.PanicTrace(err))
 			}
 		}()
 		consume.Call(in.Event, []byte(in.Data))

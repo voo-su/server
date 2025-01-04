@@ -7,11 +7,11 @@ import (
 	"voo.su/internal/domain/entity"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type GroupChatMemberRepository struct {
-	repo.Repo[postgresModel.GroupChatMember]
+	gormutil.Repo[postgresModel.GroupChatMember]
 	RelationCacheRepo *redisRepo.RelationCacheRepository
 }
 
@@ -20,7 +20,7 @@ func NewGroupMemberRepository(
 	relationCacheRepo *redisRepo.RelationCacheRepository,
 ) *GroupChatMemberRepository {
 	return &GroupChatMemberRepository{
-		Repo:              repo.NewRepo[postgresModel.GroupChatMember](db),
+		Repo:              gormutil.NewRepo[postgresModel.GroupChatMember](db),
 		RelationCacheRepo: relationCacheRepo,
 	}
 }

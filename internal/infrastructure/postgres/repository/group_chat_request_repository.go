@@ -6,15 +6,15 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type GroupChatRequestRepository struct {
-	repo.Repo[model.GroupChatRequest]
+	gormutil.Repo[model.GroupChatRequest]
 }
 
 func NewGroupChatApplyRepository(db *gorm.DB) *GroupChatRequestRepository {
-	return &GroupChatRequestRepository{Repo: repo.NewRepo[model.GroupChatRequest](db)}
+	return &GroupChatRequestRepository{Repo: gormutil.NewRepo[model.GroupChatRequest](db)}
 }
 
 func (g *GroupChatRequestRepository) List(ctx context.Context, groupIds []int) ([]*entity.GroupApplyList, error) {

@@ -1,4 +1,4 @@
-package timewheel
+package timeutil
 
 import (
 	cmap "github.com/orcaman/concurrent-map/v2"

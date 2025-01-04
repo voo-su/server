@@ -3,13 +3,13 @@ package repository
 import (
 	"gorm.io/gorm"
 	"voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type UserSessionRepository struct {
-	repo.Repo[model.UserSession]
+	gormutil.Repo[model.UserSession]
 }
 
 func NewUserSessionRepository(db *gorm.DB) *UserSessionRepository {
-	return &UserSessionRepository{Repo: repo.NewRepo[model.UserSession](db)}
+	return &UserSessionRepository{Repo: gormutil.NewRepo[model.UserSession](db)}
 }

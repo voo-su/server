@@ -5,15 +5,15 @@ import (
 	"gorm.io/gorm"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type GroupChatAdsRepository struct {
-	repo.Repo[model.GroupChatAds]
+	gormutil.Repo[model.GroupChatAds]
 }
 
 func NewGroupChatAdsRepository(db *gorm.DB) *GroupChatAdsRepository {
-	return &GroupChatAdsRepository{Repo: repo.NewRepo[model.GroupChatAds](db)}
+	return &GroupChatAdsRepository{Repo: gormutil.NewRepo[model.GroupChatAds](db)}
 }
 
 func (g *GroupChatAdsRepository) GetListAll(ctx context.Context, groupId int) ([]*entity.SearchAdsItem, error) {

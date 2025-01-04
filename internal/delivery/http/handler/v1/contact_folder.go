@@ -5,7 +5,7 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 )
 
@@ -14,12 +14,12 @@ type ContactFolder struct {
 	ContactFolderUseCase *usecase.ContactFolderUseCase
 }
 
-func (c *ContactFolder) List(ctx *core.Context) error {
+func (c *ContactFolder) List(ctx *ginutil.Context) error {
 	uid := ctx.UserId()
 	items := make([]*v1Pb.ContactFolderListResponse_Item, 0)
 	count, err := c.ContactFolderUseCase.ContactRepo.QueryCount(ctx.Ctx(), "user_id = ? AND status = 1", uid)
 	if err != nil {
-		return ctx.Error(err.Error())
+		return ctx.Error(err)
 	}
 
 	items = append(items, &v1Pb.ContactFolderListResponse_Item{
@@ -29,7 +29,7 @@ func (c *ContactFolder) List(ctx *core.Context) error {
 
 	group, err := c.ContactFolderUseCase.GetUserGroup(ctx.Ctx(), uid)
 	if err != nil {
-		return ctx.Error(err.Error())
+		return ctx.Error(err)
 	}
 
 	for _, v := range group {
@@ -44,7 +44,7 @@ func (c *ContactFolder) List(ctx *core.Context) error {
 	return ctx.Success(&v1Pb.ContactFolderListResponse{Items: items})
 }
 
-func (c *ContactFolder) Save(ctx *core.Context) error {
+func (c *ContactFolder) Save(ctx *ginutil.Context) error {
 	params := &v1Pb.ContactFolderSaveRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -75,7 +75,7 @@ func (c *ContactFolder) Save(ctx *core.Context) error {
 
 	all, err := c.ContactFolderUseCase.ContactFolderRepo.FindAll(ctx.Ctx())
 	if err != nil {
-		return ctx.ErrorBusiness(err)
+		return ctx.Error(err)
 	}
 
 	for _, m := range all {
@@ -114,20 +114,20 @@ func (c *ContactFolder) Save(ctx *core.Context) error {
 		return nil
 	})
 	if err != nil {
-		return ctx.Error(err.Error())
+		return ctx.Error(err)
 	}
 
 	return ctx.Success(&v1Pb.ContactFolderSaveResponse{})
 }
 
-func (c *ContactFolder) Move(ctx *core.Context) error {
+func (c *ContactFolder) Move(ctx *ginutil.Context) error {
 	params := &v1Pb.ContactChangeGroupRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := c.ContactFolderUseCase.MoveGroup(ctx.Ctx(), ctx.UserId(), int(params.UserId), int(params.FolderId)); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&v1Pb.ContactChangeGroupResponse{})

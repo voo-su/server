@@ -3,13 +3,13 @@ package repository
 import (
 	"gorm.io/gorm"
 	"voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type ContactFolderRepository struct {
-	repo.Repo[model.ContactFolder]
+	gormutil.Repo[model.ContactFolder]
 }
 
 func NewContactFolderRepository(db *gorm.DB) *ContactFolderRepository {
-	return &ContactFolderRepository{Repo: repo.NewRepo[model.ContactFolder](db)}
+	return &ContactFolderRepository{Repo: gormutil.NewRepo[model.ContactFolder](db)}
 }

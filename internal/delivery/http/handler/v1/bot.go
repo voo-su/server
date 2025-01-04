@@ -5,7 +5,7 @@ import (
 	"regexp"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 )
 
@@ -15,7 +15,7 @@ type Bot struct {
 	MessageUseCase usecase.IMessageUseCase
 }
 
-func (b *Bot) Create(ctx *core.Context) error {
+func (b *Bot) Create(ctx *ginutil.Context) error {
 	params := &v1Pb.BotCreateRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -23,7 +23,7 @@ func (b *Bot) Create(ctx *core.Context) error {
 
 	re := regexp.MustCompile(`(_bot|bot)$`)
 	if !re.MatchString(params.Username) {
-		return ctx.ErrorBusiness(fmt.Sprintf(b.Locale.Localize("username_does_not_end_with_bot"), params.Username))
+		return ctx.Error(fmt.Sprintf(b.Locale.Localize("username_does_not_end_with_bot"), params.Username))
 	}
 
 	token, err := b.BotUseCase.Create(ctx.Ctx(), &usecase.BotCreateOpt{
@@ -39,10 +39,10 @@ func (b *Bot) Create(ctx *core.Context) error {
 	})
 }
 
-func (b *Bot) List(ctx *core.Context) error {
+func (b *Bot) List(ctx *ginutil.Context) error {
 	list, err := b.BotUseCase.List(ctx.Ctx(), ctx.UserId())
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	items := make([]*v1Pb.BotListResponse_Item, 0, len(list))

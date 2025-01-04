@@ -9,11 +9,11 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/strutil"
-	"voo.su/pkg/utils"
 )
 
 type Upload struct {
@@ -23,7 +23,7 @@ type Upload struct {
 	FileSplitUseCase *usecase.FileSplitUseCase
 }
 
-func (u *Upload) Avatar(ctx *core.Context) error {
+func (u *Upload) Avatar(ctx *ginutil.Context) error {
 	file, err := ctx.Context.FormFile("file")
 	if err != nil {
 		return ctx.InvalidParams(u.Locale.Localize("image_upload_error"))
@@ -32,7 +32,7 @@ func (u *Upload) Avatar(ctx *core.Context) error {
 	stream, _ := minio.ReadMultipartStream(file)
 	object := strutil.GenMediaObjectName("png", 200, 200)
 	if err := u.Minio.Write(u.Conf.Minio.GetBucket(), object, stream); err != nil {
-		return ctx.ErrorBusiness(u.Locale.Localize("image_upload_error"))
+		return ctx.Error(u.Locale.Localize("image_upload_error"))
 	}
 
 	return ctx.Success(v1Pb.UploadAvatarResponse{
@@ -40,7 +40,7 @@ func (u *Upload) Avatar(ctx *core.Context) error {
 	})
 }
 
-func (u *Upload) Upload(ctx *core.Context) error {
+func (u *Upload) Upload(ctx *ginutil.Context) error {
 	file, err := ctx.Context.FormFile("file")
 	if err != nil {
 		return ctx.InvalidParams(u.Locale.Localize("file_upload_error"))
@@ -54,14 +54,14 @@ func (u *Upload) Upload(ctx *core.Context) error {
 
 	stream, _ := minio.ReadMultipartStream(file)
 	if width == 0 || height == 0 {
-		meta := utils.ReadImageMeta(bytes.NewReader(stream))
+		meta := pkg.ReadImageMeta(bytes.NewReader(stream))
 		width = meta.Width
 		height = meta.Height
 	}
 
 	object := strutil.GenMediaObjectName(ext, width, height)
 	if err := u.Minio.Write(u.Conf.Minio.GetBucket(), object, stream); err != nil {
-		return ctx.ErrorBusiness(u.Locale.Localize("file_upload_error"))
+		return ctx.Error(u.Locale.Localize("file_upload_error"))
 	}
 
 	return ctx.Success(v1Pb.UploadImageResponse{
@@ -69,7 +69,7 @@ func (u *Upload) Upload(ctx *core.Context) error {
 	})
 }
 
-func (u *Upload) InitiateMultipart(ctx *core.Context) error {
+func (u *Upload) InitiateMultipart(ctx *ginutil.Context) error {
 	params := &v1Pb.UploadInitiateMultipartRequest{}
 	if err := ctx.Context.ShouldBindJSON(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -81,7 +81,7 @@ func (u *Upload) InitiateMultipart(ctx *core.Context) error {
 		UserId: ctx.UserId(),
 	})
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&v1Pb.UploadInitiateMultipartResponse{
@@ -91,7 +91,7 @@ func (u *Upload) InitiateMultipart(ctx *core.Context) error {
 	})
 }
 
-func (u *Upload) MultipartUpload(ctx *core.Context) error {
+func (u *Upload) MultipartUpload(ctx *ginutil.Context) error {
 	params := &v1Pb.UploadMultipartRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -109,7 +109,7 @@ func (u *Upload) MultipartUpload(ctx *core.Context) error {
 		SplitNum:   int(params.SplitNum),
 		File:       file,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	if params.SplitIndex != params.SplitNum-1 {

@@ -19,7 +19,6 @@ var ProviderSet = wire.NewSet(
 	NewHttpClient,
 	NewEmailClient,
 	NewMinioClient,
-	NewRequestClient,
 	NewNatsClient,
 	NewLocale,
 

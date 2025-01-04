@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 	"time"
-	"voo.su/pkg/timewheel"
+	"voo.su/pkg/timeutil"
 )
 
 const (
@@ -16,12 +16,12 @@ const (
 var health *heartbeat
 
 type heartbeat struct {
-	TimeWheel *timewheel.SimpleTimeWheel[*Client]
+	TimeWheel *timeutil.SimpleTimeWheel[*Client]
 }
 
 func init() {
 	health = &heartbeat{}
-	health.TimeWheel = timewheel.NewSimpleTimeWheel[*Client](1*time.Second, 100, health.handle)
+	health.TimeWheel = timeutil.NewSimpleTimeWheel[*Client](1*time.Second, 100, health.handle)
 }
 
 func (h *heartbeat) Start(ctx context.Context) error {
@@ -40,7 +40,7 @@ func (h *heartbeat) delete(c *Client) {
 	h.TimeWheel.Remove(strconv.FormatInt(c.cid, 10))
 }
 
-func (h *heartbeat) handle(timeWheel *timewheel.SimpleTimeWheel[*Client], key string, c *Client) {
+func (h *heartbeat) handle(timeWheel *timeutil.SimpleTimeWheel[*Client], key string, c *Client) {
 	if c.Closed() {
 		return
 	}

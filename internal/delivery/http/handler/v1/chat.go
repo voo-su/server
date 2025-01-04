@@ -8,8 +8,8 @@ import (
 	"voo.su/internal/constant"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
 	"voo.su/pkg/encrypt"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
@@ -29,7 +29,7 @@ type Chat struct {
 	ContactRemarkCacheRepo *redisRepo.ContactRemarkCacheRepository
 }
 
-func (c *Chat) Create(ctx *core.Context) error {
+func (c *Chat) Create(ctx *ginutil.Context) error {
 	var (
 		params = &v1Pb.ChatCreateRequest{}
 		uid    = ctx.UserId()
@@ -44,12 +44,12 @@ func (c *Chat) Create(ctx *core.Context) error {
 	}
 
 	if params.DialogType == constant.ChatPrivateMode && int(params.ReceiverId) == ctx.UserId() {
-		return ctx.ErrorBusiness(c.Locale.Localize("creation_error"))
+		return ctx.Error(c.Locale.Localize("creation_error"))
 	}
 
 	key := fmt.Sprintf("dialog:list:%d-%d-%d-%s", uid, params.ReceiverId, params.DialogType, agent)
 	if !c.RedisLockRepo.Lock(ctx.Ctx(), key, 10) {
-		return ctx.ErrorBusiness(c.Locale.Localize("creation_error"))
+		return ctx.Error(c.Locale.Localize("creation_error"))
 	}
 
 	if c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
@@ -57,7 +57,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 		UserId:     uid,
 		ReceiverId: int(params.ReceiverId),
 	}) != nil {
-		return ctx.ErrorBusiness(c.Locale.Localize("insufficient_permissions"))
+		return ctx.Error(c.Locale.Localize("insufficient_permissions"))
 	}
 
 	result, err := c.ChatUseCase.Create(ctx.Ctx(), &usecase.CreateChatOpt{
@@ -66,7 +66,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 		ReceiverId: int(params.ReceiverId),
 	})
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	item := &v1Pb.ChatItem{
@@ -115,7 +115,7 @@ func (c *Chat) Create(ctx *core.Context) error {
 	})
 }
 
-func (c *Chat) List(ctx *core.Context) error {
+func (c *Chat) List(ctx *ginutil.Context) error {
 	uid := ctx.UserId()
 	unReads := c.UnreadCacheRepo.All(ctx.Ctx(), uid)
 	if len(unReads) > 0 {
@@ -124,7 +124,7 @@ func (c *Chat) List(ctx *core.Context) error {
 
 	data, err := c.ChatUseCase.List(ctx.Ctx(), uid)
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 	friends := make([]int, 0)
 	for _, item := range data {
@@ -182,20 +182,20 @@ func (c *Chat) List(ctx *core.Context) error {
 	return ctx.Success(&v1Pb.ChatListResponse{Items: items})
 }
 
-func (c *Chat) Delete(ctx *core.Context) error {
+func (c *Chat) Delete(ctx *ginutil.Context) error {
 	params := &v1Pb.ChatDeleteRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := c.ChatUseCase.Delete(ctx.Ctx(), ctx.UserId(), int(params.ListId)); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&v1Pb.ChatDeleteResponse{})
 }
 
-func (c *Chat) ClearUnreadMessage(ctx *core.Context) error {
+func (c *Chat) ClearUnreadMessage(ctx *ginutil.Context) error {
 	params := &v1Pb.ChatClearUnreadNumRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -206,7 +206,7 @@ func (c *Chat) ClearUnreadMessage(ctx *core.Context) error {
 	return ctx.Success(&v1Pb.ChatClearUnreadNumResponse{})
 }
 
-func (c *Chat) Top(ctx *core.Context) error {
+func (c *Chat) Top(ctx *ginutil.Context) error {
 	params := &v1Pb.ChatTopRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -217,13 +217,13 @@ func (c *Chat) Top(ctx *core.Context) error {
 		Id:     int(params.ListId),
 		Type:   int(params.Type),
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&v1Pb.ChatTopResponse{})
 }
 
-func (c *Chat) Disturb(ctx *core.Context) error {
+func (c *Chat) Disturb(ctx *ginutil.Context) error {
 	params := &v1Pb.ChatDisturbRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -235,7 +235,7 @@ func (c *Chat) Disturb(ctx *core.Context) error {
 		ReceiverId: int(params.ReceiverId),
 		IsDisturb:  int(params.IsDisturb),
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(&v1Pb.ChatDisturbResponse{})

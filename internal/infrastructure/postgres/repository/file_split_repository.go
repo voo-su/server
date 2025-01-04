@@ -4,15 +4,15 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type FileSplitRepository struct {
-	repo.Repo[model.FileSplit]
+	gormutil.Repo[model.FileSplit]
 }
 
 func NewFileSplitRepository(db *gorm.DB) *FileSplitRepository {
-	return &FileSplitRepository{Repo: repo.NewRepo[model.FileSplit](db)}
+	return &FileSplitRepository{Repo: gormutil.NewRepo[model.FileSplit](db)}
 }
 
 func (s *FileSplitRepository) GetSplitList(ctx context.Context, uploadId string) ([]*model.FileSplit, error) {

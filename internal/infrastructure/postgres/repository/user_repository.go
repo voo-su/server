@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/repo"
+	"voo.su/pkg/gormutil"
 )
 
 type UserRepository struct {
-	repo.Repo[model.User]
+	gormutil.Repo[model.User]
 }
 
 func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{Repo: repo.NewRepo[model.User](db)}
+	return &UserRepository{Repo: gormutil.NewRepo[model.User](db)}
 }
 
 func (u *UserRepository) Create(user *model.User) (*model.User, error) {

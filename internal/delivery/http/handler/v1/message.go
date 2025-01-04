@@ -10,7 +10,7 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/usecase"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
@@ -28,11 +28,11 @@ type Message struct {
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
 }
 
-var mapping map[string]func(ctx *core.Context) error
+var mapping map[string]func(ctx *ginutil.Context) error
 
-func (m *Message) transfer(ctx *core.Context, typeValue string) error {
+func (m *Message) transfer(ctx *ginutil.Context, typeValue string) error {
 	if mapping == nil {
-		mapping = make(map[string]func(ctx *core.Context) error)
+		mapping = make(map[string]func(ctx *ginutil.Context) error)
 		mapping["text"] = m.onSendText
 		mapping["image"] = m.onSendImage
 		mapping["voice"] = m.onSendAudio
@@ -59,7 +59,7 @@ type PublishBaseMessageRequest struct {
 	} `json:"receiver" binding:"required"`
 }
 
-func (m *Message) Send(ctx *core.Context) error {
+func (m *Message) Send(ctx *ginutil.Context) error {
 	params := &PublishBaseMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
@@ -71,13 +71,13 @@ func (m *Message) Send(ctx *core.Context) error {
 		ReceiverId:        params.Receiver.ReceiverId,
 		IsVerifyGroupMute: true,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return m.transfer(ctx, params.Type)
 }
 
-func (m *Message) onSendText(ctx *core.Context) error {
+func (m *Message) onSendText(ctx *ginutil.Context) error {
 	params := &v1Pb.TextMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
@@ -91,13 +91,13 @@ func (m *Message) onSendText(ctx *core.Context) error {
 		Content: params.Content,
 		QuoteId: params.QuoteId,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) onSendImage(ctx *core.Context) error {
+func (m *Message) onSendImage(ctx *ginutil.Context) error {
 	params := &v1Pb.ImageMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
@@ -113,13 +113,13 @@ func (m *Message) onSendImage(ctx *core.Context) error {
 		Height:  params.Height,
 		QuoteId: params.QuoteId,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) onSendVideo(ctx *core.Context) error {
+func (m *Message) onSendVideo(ctx *ginutil.Context) error {
 	params := &v1Pb.VideoMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
@@ -135,13 +135,13 @@ func (m *Message) onSendVideo(ctx *core.Context) error {
 		Size:     params.Size,
 		Cover:    params.Cover,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) onSendAudio(ctx *core.Context) error {
+func (m *Message) onSendAudio(ctx *ginutil.Context) error {
 	params := &v1Pb.AudioMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
@@ -155,13 +155,13 @@ func (m *Message) onSendAudio(ctx *core.Context) error {
 		Url:  params.Url,
 		Size: params.Size,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) onSendFile(ctx *core.Context) error {
+func (m *Message) onSendFile(ctx *ginutil.Context) error {
 	params := &v1Pb.FileMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
@@ -174,26 +174,26 @@ func (m *Message) onSendFile(ctx *core.Context) error {
 		},
 		UploadId: params.UploadId,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) onSendForward(ctx *core.Context) error {
+func (m *Message) onSendForward(ctx *ginutil.Context) error {
 	params := &v1Pb.ForwardMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := m.MessageUseCase.SendForward(ctx.Ctx(), ctx.UserId(), params); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) onSendVote(ctx *core.Context) error {
+func (m *Message) onSendVote(ctx *ginutil.Context) error {
 	params := &v1Pb.VoteMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
@@ -208,46 +208,46 @@ func (m *Message) onSendVote(ctx *core.Context) error {
 	}
 
 	if err := m.MessageUseCase.SendVote(ctx.Ctx(), ctx.UserId(), params); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) onMixedMessage(ctx *core.Context) error {
+func (m *Message) onMixedMessage(ctx *ginutil.Context) error {
 	params := &v1Pb.MixedMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := m.MessageUseCase.SendMixedMessage(ctx.Ctx(), ctx.UserId(), params); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) onSendSticker(ctx *core.Context) error {
+func (m *Message) onSendSticker(ctx *ginutil.Context) error {
 	params := &v1Pb.StickerMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := m.MessageUseCase.SendSticker(ctx.Ctx(), ctx.UserId(), params); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
 }
 
-func (m *Message) onSendCode(ctx *core.Context) error {
+func (m *Message) onSendCode(ctx *ginutil.Context) error {
 	params := &v1Pb.CodeMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := m.MessageUseCase.SendCode(ctx.Ctx(), ctx.UserId(), params); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
@@ -261,7 +261,7 @@ type VoteMessageRequest struct {
 	Options    []string `form:"options" json:"options"`
 }
 
-func (m *Message) Vote(ctx *core.Context) error {
+func (m *Message) Vote(ctx *ginutil.Context) error {
 	params := &VoteMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -282,7 +282,7 @@ func (m *Message) Vote(ctx *core.Context) error {
 		ReceiverId:        params.ReceiverId,
 		IsVerifyGroupMute: true,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	if err := m.MessageUseCase.SendVote(ctx.Ctx(), uid, &v1Pb.VoteMessageRequest{
@@ -295,7 +295,7 @@ func (m *Message) Vote(ctx *core.Context) error {
 			ReceiverId: int32(params.ReceiverId),
 		},
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
@@ -305,14 +305,14 @@ type RevokeMessageRequest struct {
 	MsgId string `form:"msg_id" json:"msg_id" binding:"required" label:"msg_id"`
 }
 
-func (m *Message) Revoke(ctx *core.Context) error {
+func (m *Message) Revoke(ctx *ginutil.Context) error {
 	params := &RevokeMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := m.MessageUseCase.Revoke(ctx.Ctx(), ctx.UserId(), params.MsgId); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
@@ -324,7 +324,7 @@ type DeleteMessageRequest struct {
 	RecordIds  string `form:"record_id" json:"record_id" binding:"required,ids" label:"record_id"`
 }
 
-func (m *Message) Delete(ctx *core.Context) error {
+func (m *Message) Delete(ctx *ginutil.Context) error {
 	params := &DeleteMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -336,7 +336,7 @@ func (m *Message) Delete(ctx *core.Context) error {
 		ReceiverId: params.ReceiverId,
 		RecordIds:  params.RecordIds,
 	}); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)
@@ -347,7 +347,7 @@ type VoteMessageHandleRequest struct {
 	Options  string `form:"options" json:"options" binding:"required"`
 }
 
-func (m *Message) HandleVote(ctx *core.Context) error {
+func (m *Message) HandleVote(ctx *ginutil.Context) error {
 	params := &VoteMessageHandleRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -355,7 +355,7 @@ func (m *Message) HandleVote(ctx *core.Context) error {
 
 	data, err := m.MessageUseCase.Vote(ctx.Ctx(), ctx.UserId(), params.RecordId, params.Options)
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(data)
@@ -369,7 +369,7 @@ type GetDialogRecordsRequest struct {
 	Limit      int `form:"limit" json:"limit" binding:"required,numeric,max=100"`
 }
 
-func (m *Message) GetRecords(ctx *core.Context) error {
+func (m *Message) GetRecords(ctx *ginutil.Context) error {
 	params := &GetDialogRecordsRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -412,7 +412,7 @@ func (m *Message) GetRecords(ctx *core.Context) error {
 		Limit:      params.Limit,
 	})
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	rid := 0
@@ -431,7 +431,7 @@ type DownloadChatFileRequest struct {
 	RecordId int `form:"cr_id" json:"cr_id" binding:"required,min=1"`
 }
 
-func (m *Message) Download(ctx *core.Context) error {
+func (m *Message) Download(ctx *ginutil.Context) error {
 	params := &DownloadChatFileRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
@@ -439,7 +439,7 @@ func (m *Message) Download(ctx *core.Context) error {
 
 	record, err := m.MessageUseCase.GetMessageByRecordId(ctx.Ctx(), params.RecordId)
 	if err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	uid := ctx.UserId()
@@ -457,7 +457,7 @@ func (m *Message) Download(ctx *core.Context) error {
 
 	var fileInfo entity.DialogRecordExtraFile
 	if err := jsonutil.Decode(record.Extra, &fileInfo); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	ctx.Context.Redirect(
@@ -472,14 +472,14 @@ type CollectMessageRequest struct {
 	RecordId int `form:"record_id" json:"record_id" binding:"required,numeric,gt=0" label:"record_id"`
 }
 
-func (m *Message) Collect(ctx *core.Context) error {
+func (m *Message) Collect(ctx *ginutil.Context) error {
 	params := &CollectMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := m.ChatUseCase.Collect(ctx.Ctx(), ctx.UserId(), params.RecordId); err != nil {
-		return ctx.ErrorBusiness(err.Error())
+		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(nil)

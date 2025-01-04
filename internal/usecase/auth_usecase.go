@@ -10,7 +10,8 @@ import (
 	"time"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
-	"voo.su/pkg/jwt"
+	"voo.su/pkg"
+	"voo.su/pkg/jwtutil"
 	"voo.su/pkg/locale"
 
 	clickhouseModel "voo.su/internal/infrastructure/clickhouse/model"
@@ -20,7 +21,6 @@ import (
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/email"
 	"voo.su/pkg/strutil"
-	"voo.su/pkg/utils"
 	"voo.su/resource"
 )
 
@@ -142,7 +142,7 @@ func (a *AuthUseCase) CodeTemplate(data map[string]string) (string, error) {
 		return "", err
 	}
 
-	return utils.RenderTemplate(fileContent, data)
+	return pkg.RenderTemplate(fileContent, data)
 }
 
 func (a *AuthUseCase) Verify(ctx context.Context, channel string, token string, code string) bool {

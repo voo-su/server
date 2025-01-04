@@ -2,7 +2,7 @@ package socket
 
 import (
 	"log"
-	"voo.su/pkg/utils"
+	"voo.su/pkg"
 )
 
 type IEvent interface {
@@ -46,7 +46,7 @@ func (e *Event) Open(client IClient) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println("Исключение обратного вызова события 'open': ", client.Uid(), client.Cid(), client.Channel().Name(), utils.PanicTrace(err))
+			log.Println("Исключение обратного вызова события 'open': ", client.Uid(), client.Cid(), client.Channel().Name(), pkg.PanicTrace(err))
 		}
 	}()
 
@@ -59,7 +59,7 @@ func (e *Event) Message(client IClient, data []byte) {
 	}
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println("Исключение обратного вызова события 'message': ", client.Uid(), client.Cid(), client.Channel().Name(), utils.PanicTrace(err))
+			log.Println("Исключение обратного вызова события 'message': ", client.Uid(), client.Cid(), client.Channel().Name(), pkg.PanicTrace(err))
 		}
 	}()
 
@@ -73,7 +73,7 @@ func (e *Event) Close(client IClient, code int, text string) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println("Исключение обратного вызова события 'close': ", client.Uid(), client.Cid(), client.Channel().Name(), utils.PanicTrace(err))
+			log.Println("Исключение обратного вызова события 'close': ", client.Uid(), client.Cid(), client.Channel().Name(), pkg.PanicTrace(err))
 		}
 	}()
 
@@ -87,7 +87,7 @@ func (e *Event) Destroy(client IClient) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println("Исключение обратного вызова события 'destroy': ", client.Uid(), client.Cid(), client.Channel().Name(), utils.PanicTrace(err))
+			log.Println("Исключение обратного вызова события 'destroy': ", client.Uid(), client.Cid(), client.Channel().Name(), pkg.PanicTrace(err))
 		}
 	}()
 

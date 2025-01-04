@@ -9,7 +9,7 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/delivery/ws/handler"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
-	"voo.su/pkg/core"
+	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/middleware"
 	"voo.su/pkg/response"
@@ -22,12 +22,12 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handle *handler.Handl
 		panic(err)
 	}
 
-	router.Use(middleware.AccessLog(src))
+	router.Use(ginutil.AccessLog(src))
 
 	router.Use(gin.RecoveryWithWriter(gin.DefaultWriter, func(c *gin.Context, err any) {
 		log.Println(err)
 
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Response{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, ginutil.Response{
 			Code:    http.StatusInternalServerError,
 			Message: locale.Localize("network_error"),
 		})
@@ -36,22 +36,16 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handle *handler.Handl
 	authorize := middleware.Auth(locale, constant.GuardHttpAuth, conf.App.Jwt.Secret, session)
 
 	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, response.Response{
+		c.JSON(http.StatusOK, ginutil.Response{
 			Code:    http.StatusOK,
 			Message: "success",
 		})
 	})
 
-	router.GET("/ws", authorize, core.HandlerFunc(handle.Chat.Conn))
-
-	//router.GET("/ws/detail", func(ctx *gin.Context) {
-	//	ctx.JSON(http.StatusOK, map[string]any{
-	//		"chat": socket.Session.Chat.Count(),
-	//	})
-	//})
+	router.GET("/ws", authorize, ginutil.HandlerFunc(handle.Chat.Conn))
 
 	router.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, response.Response{
+		c.JSON(http.StatusNotFound, ginutil.Response{
 			Code:    http.StatusNotFound,
 			Message: locale.Localize("method_not_found"),
 		})
