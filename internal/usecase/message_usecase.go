@@ -1,6 +1,3 @@
-// Copyright (c) 2025 Magomedcoder <info@magomedcoder.ru>
-// Distributed under the GPL v3 License, see https://github.com/voo-su/server/blob/main/LICENSE
-
 package usecase
 
 import (
@@ -1108,17 +1105,3 @@ func (m *MessageUseCase) SendLocation(ctx context.Context, uid int, req *v1Pb.Lo
 	}
 	return m.save(ctx, data)
 }
-
-//func (m *MessageService) SendBusinessCard(ctx context.Context, uid int, req *api_v1.CardMessageRequest) error {
-//	data := &model.Message{
-//		DialogType: int(req.Receiver.DialogType),
-//		MsgType:    entity.ChatMsgTypeCard,
-//		UserId:     uid,
-//		ReceiverId: int(req.Receiver.ReceiverId),
-//		Extra: jsonutil.Encode(&model.DialogRecordExtraCard{
-//			UserId: int(req.UserId),
-//		}),
-//	}
-//
-//	return m.save(ctx, data)
-//}

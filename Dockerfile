@@ -1,6 +1,3 @@
-# Copyright (c) 2025 Magomedcoder <info@magomedcoder.ru>
-# Distributed under the GPL v3 License, see https://github.com/voo-su/server/blob/main/LICENSE
-
 FROM alpine:3.20 AS builder
 
 ARG GOLANG_VERSION=1.23.2
