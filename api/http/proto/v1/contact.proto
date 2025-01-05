@@ -6,117 +6,121 @@ import "tagger/tagger.proto";
 
 option go_package = "./v1;v1_pb";
 
-message ContactListRequest{}
+message ContactListRequest {}
 
-message ContactListResponse{
-    message Item{
-        int32 id = 1;
-        string username = 2;
-        string avatar = 3;
-        string name = 4;
-        string surname = 5;
-        int32 gender = 6;
-        string about = 7;
-        int32 is_online = 8;
-        int32 folder_id = 9;
-        string remark = 10;
+message ContactListResponse {
+    message Item {
+        int32 id = 1 [(tagger.tags) = "json:\"id\""];
+        string username = 2 [(tagger.tags) = "json:\"username\""];
+        string avatar = 3 [(tagger.tags) = "json:\"avatar\""];
+        string name = 4 [(tagger.tags) = "json:\"name\""];
+        string surname = 5 [(tagger.tags) = "json:\"surname\""];
+        int32 gender = 6 [(tagger.tags) = "json:\"gender\""];
+        string about = 7 [(tagger.tags) = "json:\"about\""];
+        int32 is_online = 8 [(tagger.tags) = "json:\"is_online\""];
+        int32 folder_id = 9 [(tagger.tags) = "json:\"folder_id\""];
+        string remark = 10 [(tagger.tags) = "json:\"remark\""];
     }
 
-    repeated Item items = 1;
+    repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
 }
 
-message ContactDetailRequest{
+message ContactDetailRequest {
     int32 user_id = 1 [(tagger.tags) = "form:\"user_id\" binding:\"required\""];
 }
 
-message ContactDetailResponse{
-    int32 id = 1;
-    string username = 2;
-    string avatar = 3;
-    string name = 4;
-    string surname = 5;
-    int32 gender = 6;
-    string about = 7;
-    int32 friend_status = 8;
-    int32 folder_id = 9;
-    int32 is_bot = 10;
-    string remark = 11;
+message ContactDetailResponse {
+    int32 id = 1 [(tagger.tags) = "json:\"id\""];
+    string username = 2 [(tagger.tags) = "json:\"username\""];
+    string avatar = 3 [(tagger.tags) = "json:\"avatar\""];
+    string name = 4 [(tagger.tags) = "json:\"name\""];
+    string surname = 5 [(tagger.tags) = "json:\"surname\""];
+    int32 gender = 6 [(tagger.tags) = "json:\"gender\""];
+    string about = 7 [(tagger.tags) = "json:\"about\""];
+    int32 friend_status = 8 [(tagger.tags) = "json:\"friend_status\""];
+    int32 folder_id = 9 [(tagger.tags) = "json:\"folder_id\""];
+    int32 is_bot = 10 [(tagger.tags) = "json:\"is_bot\""];
+    string remark = 11 [(tagger.tags) = "json:\"remark\""];
 }
 
-message ContactDeleteRequest{
+message ContactDeleteRequest {
     int32 friend_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ContactDeleteResponse{}
+message ContactDeleteResponse {}
 
-message ContactChangeGroupRequest{
+message ContactChangeGroupRequest {
     int32 user_id = 1 [(tagger.tags) = "form:\"user_id\" binding:\"required\""];
     int32 folder_id = 2 [(tagger.tags) = "form:\"folder_id\""];
 }
 
-message ContactChangeGroupResponse{}
+message ContactChangeGroupResponse {}
 
-message ContactRequestCreateRequest{
+message ContactRequestCreateRequest {
     int32 friend_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ContactRequestCreateResponse{}
+message ContactApplyUnreadNumResponse {
+    int64 unread_num = 1 [(tagger.tags) = "json:\"unread_num\""];
+}
 
-message ContactRequestAcceptRequest{
+message ContactRequestCreateResponse {}
+
+message ContactRequestAcceptRequest {
     int32 apply_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ContactRequestAcceptResponse{}
+message ContactRequestAcceptResponse {}
 
-message ContactRequestDeclineRequest{
+message ContactRequestDeclineRequest {
     int32 apply_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ContactRequestDeclineResponse{}
+message ContactRequestDeclineResponse {}
 
-message ContactRequestListResponse{
-    message Item{
-        int32 id = 1;
-        int32 user_id = 2;
-        int32 friend_id = 3;
-        string username = 4;
-        string avatar = 5;
-        string name = 6;
-        string surname = 7;
+message ContactRequestListResponse {
+    message Item {
+        int32 id = 1 [(tagger.tags) = "json:\"id\""];
+        int32 user_id = 2 [(tagger.tags) = "json:\"user_id\""];
+        int32 friend_id = 3 [(tagger.tags) = "json:\"friend_id\""];
+        string username = 4 [(tagger.tags) = "json:\"username\""];
+        string avatar = 5 [(tagger.tags) = "json:\"avatar\""];
+        string name = 6 [(tagger.tags) = "json:\"name\""];
+        string surname = 7 [(tagger.tags) = "json:\"surname\""];
     }
 
-    repeated Item items = 1;
+    repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
 }
 
-message ContactFolderCreateRequest{
+message ContactFolderCreateRequest {
     string name = 1 [(tagger.tags) = "binding:\"required\""];
     int32 sort = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
 message ContactFolderCreateResponse{
-    int32 id = 1;
+    int32 id = 1 [(tagger.tags) = "json:\"id\""];
 }
 
-message ContactFolderUpdateRequest{
+message ContactFolderUpdateRequest {
     int32 id = 1 [(tagger.tags) = "binding:\"required\""];
     string name = 2 [(tagger.tags) = "binding:\"required\""];
     int32 sort = 3 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ContactFolderUpdateResponse{
-    int32 id = 1;
+message ContactFolderUpdateResponse {
+    int32 id = 1 [(tagger.tags) = "json:\"id\""];
 }
 
-message ContactFolderDeleteRequest{
+message ContactFolderDeleteRequest {
     int32 id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ContactFolderDeleteResponse{
-    int32 id = 1;
+message ContactFolderDeleteResponse {
+    int32 id = 1 [(tagger.tags) = "json:\"id\""];
 }
 
-message ContactFolderSortRequest{
-    message Item{
+message ContactFolderSortRequest {
+    message Item {
         int32 id = 1 [(tagger.tags) = "binding:\"required\""];
         int32 sort = 2 [(tagger.tags) = "binding:\"required\""];
     }
@@ -124,23 +128,23 @@ message ContactFolderSortRequest{
     repeated Item items = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ContactFolderSortResponse{}
+message ContactFolderSortResponse {}
 
-message ContactFolderListRequest{}
+message ContactFolderListRequest {}
 
-message ContactFolderListResponse{
-    message Item{
-        int32 id = 1;
-        string name = 2;
-        int32 count = 3;
-        int32 sort = 4;
+message ContactFolderListResponse {
+    message Item {
+        int32 id = 1 [(tagger.tags) = "json:\"id\""];
+        string name = 2 [(tagger.tags) = "json:\"name\""];
+        int32 count = 3 [(tagger.tags) = "json:\"count\""];
+        int32 sort = 4 [(tagger.tags) = "json:\"sort\""];
     }
 
-    repeated Item items = 1;
+    repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
 }
 
-message ContactFolderSaveRequest{
-    message Item{
+message ContactFolderSaveRequest {
+    message Item {
         int32 id = 1 [(tagger.tags) = "binding:\"required\""];
         int32 sort = 2 [(tagger.tags) = "binding:\"required\""];
         string name = 3 [(tagger.tags) = "binding:\"required\""];
@@ -149,11 +153,11 @@ message ContactFolderSaveRequest{
     repeated Item items = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ContactFolderSaveResponse{}
+message ContactFolderSaveResponse {}
 
 message ContactRemarkEditRequest{
     int32 friend_id = 1 [(tagger.tags) = "binding:\"required\""];
     string remark = 2;
 }
 
-message ContactRemarkEditResponse{}
+message ContactRemarkEditResponse {}

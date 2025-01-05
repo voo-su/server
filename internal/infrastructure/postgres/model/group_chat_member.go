@@ -3,17 +3,16 @@ package model
 import "time"
 
 type GroupChatMember struct {
-	Id      int `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
-	GroupId int `gorm:"column:group_id;default:0;NOT NULL" json:"group_id"`
-	UserId  int `gorm:"column:user_id;default:0;NOT NULL" json:"user_id"`
-	Leader  int `gorm:"column:leader;default:0;NOT NULL" json:"leader"`
-	//UserCard    string    `gorm:"column:user_card;NOT NULL" json:"user_card"`
-	IsQuit      int       `gorm:"column:is_quit;default:0;NOT NULL" json:"is_quit"`
-	IsMute      int       `gorm:"column:is_mute;default:0;NOT NULL" json:"is_mute"`
-	MinRecordId int       `gorm:"column:min_record_id;default:0;NOT NULL" json:"min_record_id"`
-	JoinTime    time.Time `gorm:"column:join_time;" json:"join_time"`
-	CreatedAt   time.Time `gorm:"column:created_at;NOT NULL" json:"created_at"`
-	UpdatedAt   time.Time `gorm:"column:updated_at;NOT NULL" json:"updated_at"`
+	Id          int       `gorm:"primaryKey"`
+	GroupId     int       `gorm:"column:group_id;default:0;NOT NULL"`
+	UserId      int       `gorm:"column:user_id;default:0;NOT NULL"`
+	Leader      int       `gorm:"column:leader;default:0;NOT NULL"`
+	IsQuit      int       `gorm:"column:is_quit;default:0;NOT NULL"`
+	IsMute      int       `gorm:"column:is_mute;default:0;NOT NULL"`
+	MinRecordId int       `gorm:"column:min_record_id;default:0;NOT NULL"`
+	JoinTime    time.Time `gorm:"column:join_time;"`
+	CreatedAt   time.Time `gorm:"column:created_at;NOT NULL"`
+	UpdatedAt   time.Time `gorm:"column:updated_at;NOT NULL"`
 }
 
 func (GroupChatMember) TableName() string {

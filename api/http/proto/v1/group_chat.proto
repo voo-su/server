@@ -6,172 +6,175 @@ import "tagger/tagger.proto";
 
 option go_package = "./v1;v1_pb";
 
-message GroupChatCreateRequest{
+message GroupChatCreateRequest {
     string name = 1 [(tagger.tags) = "binding:\"required\""];
     string ids = 2 [(tagger.tags) = "binding:\"required,ids\""];
     string avatar = 3;
 }
 
-message GroupChatCreateResponse{
-    int32 group_id = 1;
+message GroupChatCreateResponse {
+    int32 group_id = 1 [(tagger.tags) = "json:\"group_id\""];
 }
 
-message GroupChatListResponse{
-    message Item{
-        int32 id = 1;
-        string group_name = 2;
-        string avatar = 3;
-        string description = 4;
-        int32 leader = 5;
-        int32 is_disturb = 6;
-        int32 creator_id = 7;
+message GroupChatListResponse {
+    message Item {
+        int32 id = 1 [(tagger.tags) = "json:\"id\""];
+        string group_name = 2 [(tagger.tags) = "json:\"group_name\""];
+        string avatar = 3 [(tagger.tags) = "json:\"avatar\""];
+        string description = 4 [(tagger.tags) = "json:\"description\""];
+        int32 leader = 5 [(tagger.tags) = "json:\"leader\""];
+        int32 is_disturb = 6 [(tagger.tags) = "json:\"is_disturb\""];
+        int32 creator_id = 7 [(tagger.tags) = "json:\"creator_id\""];
     }
 
-    repeated Item items = 1;
+    repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
 }
 
-message GroupChatDetailRequest{
+message GroupChatDetailRequest {
     int32 group_id = 1 [(tagger.tags) = "form:\"group_id\" binding:\"required\""];
 }
 
-message GroupChatDetailResponse{
-    int32 group_id = 1;
-    string group_name = 2;
-    string description = 3;
-    string avatar = 4;
-    string created_at = 5;
-    bool is_manager = 6;
-    int32 is_disturb = 7;
-    int32 is_mute = 8;
-    int32 is_overt = 9;
-    // string visit_card = 10;
+message GroupChatDetailResponse {
+    int32 group_id = 1 [(tagger.tags) = "json:\"group_id\""];
+    string group_name = 2 [(tagger.tags) = "json:\"group_name\""];
+    string description = 3 [(tagger.tags) = "json:\"description\""];
+    string avatar = 4 [(tagger.tags) = "json:\"avatar\""];
+    string created_at = 5 [(tagger.tags) = "json:\"created_at\""];
+    bool is_manager = 6 [(tagger.tags) = "json:\"is_manager\""];
+    int32 is_disturb = 7 [(tagger.tags) = "json:\"is_disturb\""];
+    int32 is_mute = 8 [(tagger.tags) = "json:\"is_mute\""];
+    int32 is_overt = 9 [(tagger.tags) = "json:\"is_overt\""];
 }
 
-message GroupChatMemberListRequest{
+message GroupChatMemberListRequest {
     int32 group_id = 1 [(tagger.tags) = "form:\"group_id\" binding:\"required\""];
 }
 
-message GroupChatMemberListResponse{
-    message Item{
-        int32 user_id = 1;
-        string username = 2;
-        string avatar = 3;
-        int32 gender = 4;
-        int32 leader = 5;
-        int32 is_mute = 6;
+message GroupChatMemberListResponse {
+    message Item {
+        int32 user_id = 1 [(tagger.tags) = "json:\"user_id\""];
+        string username = 2 [(tagger.tags) = "json:\"username\""];
+        string avatar = 3 [(tagger.tags) = "json:\"avatar\""];
+        int32 gender = 4 [(tagger.tags) = "json:\"gender\""];
+        int32 leader = 5 [(tagger.tags) = "json:\"leader\""];
+        int32 is_mute = 6 [(tagger.tags) = "json:\"is_mute\""];
     }
 
-    repeated Item items = 1;
+    repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
 }
 
-message GroupChatDismissRequest{
+message GroupChatDismissRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message GroupDismissResponse{}
+message GroupDismissResponse {}
 
-message GroupChatInviteRequest{
+message GroupChatInviteRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
     string ids = 2 [(tagger.tags) = "binding:\"required,ids\""];
 }
 
-message GroupChatInviteResponse{}
+message GroupChatInviteResponse {}
 
-message GroupChatGetInviteFriendsRequest{
+message GroupChatGetInviteFriendsRequest {
     int32 group_id = 1 [(tagger.tags) = "form:\"group_id\""];
 }
 
-message GroupChatSecedeRequest{
+message GroupChatSecedeRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message GroupSettingRequest{
+message GroupSettingRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
     string group_name = 2 [(tagger.tags) = "binding:\"required\""];
     string avatar = 3;
     string description = 4 [(tagger.tags) = "binding:\"max=255\""];
 }
 
-message GroupChatSettingResponse{}
+message GroupChatSettingResponse {}
 
-message GroupChatRemoveMemberRequest{
+message GroupChatRemoveMemberRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
     string members_ids = 2 [(tagger.tags) = "binding:\"required,ids\""];
 }
 
-message GroupChatRemoveMemberResponse{}
+message GroupChatRemoveMemberResponse {}
 
-message GroupChatAssignAdminRequest{
+message GroupChatAssignAdminRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
     int32 user_id = 2 [(tagger.tags) = "binding:\"required\""];
     int32 mode = 3 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
 }
 
-message GroupChatMuteRequest{
+message GroupChatMuteRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
     int32 mode = 3 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
 }
 
-message GroupChatMuteResponse{}
+message GroupChatMuteResponse {}
 
-message GroupChatOvertRequest{
+message GroupChatOvertRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
     int32 mode = 3 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
 }
 
-message GroupChatOvertResponse{}
+message GroupChatOvertResponse {}
 
-message GroupChatRequestCreateRequest{
+message GroupChatRequestCreateRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message GroupChatRequestAgreeRequest{
+message GroupChatRequestAgreeRequest {
     int32 apply_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message GroupChatRequestDeclineRequest{
+message GroupChatRequestDeclineRequest {
     int32 apply_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message GroupChatRequestDeclineResponse{}
+message GroupChatRequestDeclineResponse {}
 
-message GroupRequestListRequest{
+message GroupRequestListRequest {
     int32 group_id = 1 [(tagger.tags) = "form:\"group_id\" binding:\"required\""];
 }
 
-message GroupChatRequestListResponse{
-    message Item{
-        int32 id = 1;
-        int32 user_id = 2;
-        int32 group_id = 3;
-        string avatar = 4;
-        string username = 5;
-        string created_at = 6;
-    }
-
-    repeated Item items = 1;
+message GroupChatUnreadNumResponse {
+    int64 unread_num = 1;
 }
 
-message GroupChatRequestAllResponse{
-    message Item{
-        int32 id = 1;
-        int32 user_id = 2;
-        int32 group_id = 3;
-        string group_name = 4;
-        string avatar = 5;
-        string username = 6;
-        string created_at = 7;
+message GroupChatRequestListResponse {
+    message Item {
+        int32 id = 1 [(tagger.tags) = "json:\"id\""];
+        int32 user_id = 2 [(tagger.tags) = "json:\"user_id\""];
+        int32 group_id = 3 [(tagger.tags) = "json:\"group_id\""];
+        string avatar = 4 [(tagger.tags) = "json:\"avatar\""];
+        string username = 5 [(tagger.tags) = "json:\"username\""];
+        string created_at = 6 [(tagger.tags) = "json:\"created_at\""];
     }
 
-    repeated Item items = 1;
+    repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
 }
 
-message GroupChatAdsDeleteRequest{
+message GroupChatRequestAllResponse {
+    message Item {
+        int32 id = 1 [(tagger.tags) = "json:\"id\""];
+        int32 user_id = 2 [(tagger.tags) = "json:\"user_id\""];
+        int32 group_id = 3 [(tagger.tags) = "json:\"group_id\""];
+        string group_name = 4 [(tagger.tags) = "json:\"group_name\""];
+        string avatar = 5 [(tagger.tags) = "json:\"avatar\""];
+        string username = 6 [(tagger.tags) = "json:\"username\""];
+        string created_at = 7 [(tagger.tags) = "json:\"created_at\""];
+    }
+
+    repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
+}
+
+message GroupChatAdsDeleteRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
     int32 ads_id = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
-message GroupChatAdsEditRequest{
+message GroupChatAdsEditRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
     int32 ads_id = 2;
     string title = 3 [(tagger.tags) = "binding:\"required\""];
@@ -180,23 +183,34 @@ message GroupChatAdsEditRequest{
     int32 is_confirm = 6 [(tagger.tags) = "binding:\"oneof=0 1\""];
 }
 
-message GroupChatAdsListRequest{
+//message GroupChatHandoverRequest {
+//    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+//    int32 user_id = 2 [(tagger.tags) = "binding:\"required\""];
+//}
+
+//message GroupChatNoSpeakRequest {
+//    int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
+//    int32 user_id = 2 [(tagger.tags) = "binding:\"required\""];
+//    int32 mode = 3 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
+//}
+
+message GroupChatAdsListRequest {
     int32 group_id = 1 [(tagger.tags) = "form:\"group_id\" binding:\"required\""];
 }
 
-message GroupChatAdsListResponse{
-    message Item{
-        int32 id = 1;
-        string title = 2;
-        string content = 3;
-        int32 is_top = 4;
-        int32 is_confirm = 5;
-        string confirm_users = 6;
-        string avatar = 7;
-        int32 creator_id = 8;
-        string created_at = 9;
-        string updated_at = 10;
+message GroupChatAdsListResponse {
+    message Item {
+        int32 id = 1 [(tagger.tags) = "json:\"id\""];
+        string title = 2 [(tagger.tags) = "json:\"title\""];
+        string content = 3 [(tagger.tags) = "json:\"content\""];
+        int32 is_top = 4 [(tagger.tags) = "json:\"is_top\""];
+        int32 is_confirm = 5 [(tagger.tags) = "json:\"is_confirm\""];
+        string confirm_users = 6 [(tagger.tags) = "json:\"confirm_users\""];
+        string avatar = 7 [(tagger.tags) = "json:\"avatar\""];
+        int32 creator_id = 8 [(tagger.tags) = "json:\"creator_id\""];
+        string created_at = 9 [(tagger.tags) = "json:\"created_at\""];
+        string updated_at = 10 [(tagger.tags) = "json:\"updated_at\""];
     }
 
-    repeated Item items = 1;
+    repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
 }

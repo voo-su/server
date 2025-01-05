@@ -212,7 +212,7 @@ func (c *ChatUseCase) BatchAddList(ctx context.Context, uid int, values map[stri
 	c.Source.Postgres().WithContext(ctx).Exec(fmt.Sprintf("INSERT INTO chats (dialog_type, user_id, receiver_id, created_at, updated_at) VALUES %s ON DUPLICATE KEY UPDATE is_delete = 0, updated_at = '%s'", strings.Join(data, ","), ctime))
 }
 
-func (c *ChatUseCase) Collect(ctx context.Context, uid int, recordId int) error {
+func (c *ChatUseCase) Collect(ctx context.Context, uid int, recordId int64) error {
 	var record postgresModel.Message
 	if err := c.Source.Postgres().First(&record, recordId).Error; err != nil {
 		return err

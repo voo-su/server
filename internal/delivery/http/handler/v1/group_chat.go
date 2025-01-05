@@ -265,7 +265,6 @@ func (g *GroupChat) Members(ctx *ginutil.Context) error {
 			Gender:   int32(item.Gender),
 			Leader:   int32(item.Leader),
 			IsMute:   int32(item.IsMute),
-			//Remark:   item.UserCard,
 		})
 	}
 

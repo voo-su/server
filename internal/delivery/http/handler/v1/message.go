@@ -51,24 +51,16 @@ func (m *Message) transfer(ctx *ginutil.Context, typeValue string) error {
 	return nil
 }
 
-type PublishBaseMessageRequest struct {
-	Type     string `json:"type" binding:"required"`
-	Receiver struct {
-		DialogType int `json:"dialog_type" binding:"required,gt=0"`
-		ReceiverId int `json:"receiver_id" binding:"required,gt=0"`
-	} `json:"receiver" binding:"required"`
-}
-
 func (m *Message) Send(ctx *ginutil.Context) error {
-	params := &PublishBaseMessageRequest{}
+	params := &v1Pb.PublishBaseMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := m.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
-		DialogType:        params.Receiver.DialogType,
+		DialogType:        int(params.Receiver.DialogType),
 		UserId:            ctx.UserId(),
-		ReceiverId:        params.Receiver.ReceiverId,
+		ReceiverId:        int(params.Receiver.ReceiverId),
 		IsVerifyGroupMute: true,
 	}); err != nil {
 		return ctx.Error(err.Error())
@@ -253,16 +245,8 @@ func (m *Message) onSendCode(ctx *ginutil.Context) error {
 	return ctx.Success(nil)
 }
 
-type VoteMessageRequest struct {
-	ReceiverId int      `form:"receiver_id" json:"receiver_id" binding:"required,numeric,gt=0" label:"receiver_id"`
-	Mode       int      `form:"mode" json:"mode" binding:"oneof=0 1"`
-	Anonymous  int      `form:"anonymous" json:"anonymous" binding:"oneof=0 1"`
-	Title      string   `form:"title" json:"title" binding:"required"`
-	Options    []string `form:"options" json:"options"`
-}
-
 func (m *Message) Vote(ctx *ginutil.Context) error {
-	params := &VoteMessageRequest{}
+	params := &v1Pb.VoteSendMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -279,17 +263,17 @@ func (m *Message) Vote(ctx *ginutil.Context) error {
 	if err := m.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
 		DialogType:        constant.ChatGroupMode,
 		UserId:            uid,
-		ReceiverId:        params.ReceiverId,
+		ReceiverId:        int(params.ReceiverId),
 		IsVerifyGroupMute: true,
 	}); err != nil {
 		return ctx.Error(err.Error())
 	}
 
 	if err := m.MessageUseCase.SendVote(ctx.Ctx(), uid, &v1Pb.VoteMessageRequest{
-		Mode:      int32(params.Mode),
+		Mode:      params.Mode,
 		Title:     params.Title,
 		Options:   params.Options,
-		Anonymous: int32(params.Anonymous),
+		Anonymous: params.Anonymous,
 		Receiver: &v1Pb.MessageReceiver{
 			DialogType: constant.ChatGroupMode,
 			ReceiverId: int32(params.ReceiverId),
@@ -301,12 +285,8 @@ func (m *Message) Vote(ctx *ginutil.Context) error {
 	return ctx.Success(nil)
 }
 
-type RevokeMessageRequest struct {
-	MsgId string `form:"msg_id" json:"msg_id" binding:"required" label:"msg_id"`
-}
-
 func (m *Message) Revoke(ctx *ginutil.Context) error {
-	params := &RevokeMessageRequest{}
+	params := &v1Pb.RevokeMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -318,22 +298,16 @@ func (m *Message) Revoke(ctx *ginutil.Context) error {
 	return ctx.Success(nil)
 }
 
-type DeleteMessageRequest struct {
-	DialogType int    `form:"dialog_type" json:"dialog_type" binding:"required,oneof=1 2" label:"dialog_type"`
-	ReceiverId int    `form:"receiver_id" json:"receiver_id" binding:"required,numeric,gt=0" label:"receiver_id"`
-	RecordIds  string `form:"record_id" json:"record_id" binding:"required,ids" label:"record_id"`
-}
-
 func (m *Message) Delete(ctx *ginutil.Context) error {
-	params := &DeleteMessageRequest{}
+	params := &v1Pb.DeleteMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	if err := m.ChatUseCase.DeleteRecordList(ctx.Ctx(), &usecase.RemoveRecordListOpt{
 		UserId:     ctx.UserId(),
-		DialogType: params.DialogType,
-		ReceiverId: params.ReceiverId,
+		DialogType: int(params.DialogType),
+		ReceiverId: int(params.ReceiverId),
 		RecordIds:  params.RecordIds,
 	}); err != nil {
 		return ctx.Error(err.Error())
@@ -342,13 +316,8 @@ func (m *Message) Delete(ctx *ginutil.Context) error {
 	return ctx.Success(nil)
 }
 
-type VoteMessageHandleRequest struct {
-	RecordId int    `form:"record_id" json:"record_id" binding:"required,gt=0"`
-	Options  string `form:"options" json:"options" binding:"required"`
-}
-
 func (m *Message) HandleVote(ctx *ginutil.Context) error {
-	params := &VoteMessageHandleRequest{}
+	params := &v1Pb.VoteMessageHandleRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -361,16 +330,8 @@ func (m *Message) HandleVote(ctx *ginutil.Context) error {
 	return ctx.Success(data)
 }
 
-type GetDialogRecordsRequest struct {
-	DialogType int `form:"dialog_type" json:"dialog_type" binding:"required,oneof=1 2"`
-	MsgType    int `form:"msg_type" json:"msg_type" binding:"numeric"`
-	ReceiverId int `form:"receiver_id" json:"receiver_id" binding:"required,numeric,min=1"`
-	RecordId   int `form:"record_id" json:"record_id" binding:"min=0,numeric"`
-	Limit      int `form:"limit" json:"limit" binding:"required,numeric,max=100"`
-}
-
 func (m *Message) GetRecords(ctx *ginutil.Context) error {
-	params := &GetDialogRecordsRequest{}
+	params := &v1Pb.GetDialogRecordsRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -378,9 +339,9 @@ func (m *Message) GetRecords(ctx *ginutil.Context) error {
 	uid := ctx.UserId()
 	if params.DialogType == constant.ChatGroupMode {
 		err := m.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
-			DialogType: params.DialogType,
+			DialogType: int(params.DialogType),
 			UserId:     uid,
-			ReceiverId: params.ReceiverId,
+			ReceiverId: int(params.ReceiverId),
 		})
 
 		if err != nil {
@@ -405,11 +366,11 @@ func (m *Message) GetRecords(ctx *ginutil.Context) error {
 	}
 
 	records, err := m.MessageUseCase.GetDialogRecords(ctx.Ctx(), &usecase.QueryDialogRecordsOpt{
-		DialogType: params.DialogType,
+		DialogType: int(params.DialogType),
 		UserId:     ctx.UserId(),
-		ReceiverId: params.ReceiverId,
-		RecordId:   params.RecordId,
-		Limit:      params.Limit,
+		ReceiverId: int(params.ReceiverId),
+		RecordId:   int(params.RecordId),
+		Limit:      int(params.Limit),
 	})
 	if err != nil {
 		return ctx.Error(err.Error())
@@ -427,12 +388,8 @@ func (m *Message) GetRecords(ctx *ginutil.Context) error {
 	})
 }
 
-type DownloadChatFileRequest struct {
-	RecordId int `form:"cr_id" json:"cr_id" binding:"required,min=1"`
-}
-
 func (m *Message) Download(ctx *ginutil.Context) error {
-	params := &DownloadChatFileRequest{}
+	params := &v1Pb.DownloadChatFileRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -468,12 +425,8 @@ func (m *Message) Download(ctx *ginutil.Context) error {
 	return nil
 }
 
-type CollectMessageRequest struct {
-	RecordId int `form:"record_id" json:"record_id" binding:"required,numeric,gt=0" label:"record_id"`
-}
-
 func (m *Message) Collect(ctx *ginutil.Context) error {
-	params := &CollectMessageRequest{}
+	params := &v1Pb.CollectMessageRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}

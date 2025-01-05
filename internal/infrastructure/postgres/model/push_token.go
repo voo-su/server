@@ -3,7 +3,7 @@ package model
 import "time"
 
 type PushToken struct {
-	Id          int64     `gorm:"column:id;primaryKey;autoIncrement"`
+	Id          int64     `gorm:"primaryKey"`
 	UserId      int64     `gorm:"column:user_id;index;NOT NULL"`
 	Platform    string    `gorm:"column:platform;NOT NULL"`
 	Token       string    `gorm:"column:token"`

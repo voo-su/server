@@ -3,12 +3,12 @@ package model
 import "time"
 
 type GroupChatRequest struct {
-	Id        int       `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
-	GroupId   int       `gorm:"column:group_id;default:0;NOT NULL" json:"group_id"`
-	UserId    int       `gorm:"column:user_id;default:0;NOT NULL" json:"user_id"`
-	Status    int       `gorm:"column:status;default:1;NOT NULL" json:"status"`
-	CreatedAt time.Time `gorm:"column:created_at;NOT NULL" json:"created_at"`
-	UpdatedAt time.Time `gorm:"column:updated_at;NOT NULL" json:"updated_at"`
+	Id        int       `gorm:"primaryKey" json:"id"`
+	GroupId   int       `gorm:"column:group_id;default:0;NOT NULL"`
+	UserId    int       `gorm:"column:user_id;default:0;NOT NULL"`
+	Status    int       `gorm:"column:status;default:1;NOT NULL"`
+	CreatedAt time.Time `gorm:"column:created_at;NOT NULL"`
+	UpdatedAt time.Time `gorm:"column:updated_at;NOT NULL"`
 }
 
 func (GroupChatRequest) TableName() string {

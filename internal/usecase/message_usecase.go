@@ -58,7 +58,7 @@ type IMessageUseCase interface {
 
 	Revoke(ctx context.Context, uid int, msgId string) error
 
-	Vote(ctx context.Context, uid int, msgId int, optionsValue string) (*postgresRepo.VoteStatistics, error)
+	Vote(ctx context.Context, uid int, msgId int64, optionsValue string) (*postgresRepo.VoteStatistics, error)
 
 	SendLogin(ctx context.Context, uid int, req *SendLogin) error
 
@@ -70,7 +70,7 @@ type IMessageUseCase interface {
 
 	GetDialogRecord(ctx context.Context, recordId int64) (*DialogRecordsItem, error)
 
-	GetMessageByRecordId(ctx context.Context, recordId int) (*postgresModel.Message, error)
+	GetMessageByRecordId(ctx context.Context, recordId int64) (*postgresModel.Message, error)
 
 	SendLocation(ctx context.Context, uid int, req *v1Pb.LocationMessageRequest) error
 }
@@ -757,7 +757,7 @@ func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) erro
 	return nil
 }
 
-func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int, optionsValue string) (*postgresRepo.VoteStatistics, error) {
+func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int64, optionsValue string) (*postgresRepo.VoteStatistics, error) {
 	db := m.Source.Postgres().WithContext(ctx)
 	fields := []string{
 		"messages.receiver_id",
@@ -1082,8 +1082,8 @@ func (m *MessageUseCase) SendCode(ctx context.Context, uid int, req *v1Pb.CodeMe
 	return m.save(ctx, data)
 }
 
-func (m *MessageUseCase) GetMessageByRecordId(ctx context.Context, recordId int) (*postgresModel.Message, error) {
-	record, err := m.MessageRepo.FindById(ctx, recordId)
+func (m *MessageUseCase) GetMessageByRecordId(ctx context.Context, recordId int64) (*postgresModel.Message, error) {
+	record, err := m.MessageRepo.FindById(ctx, int(recordId))
 	if err != nil {
 		return nil, err
 	}

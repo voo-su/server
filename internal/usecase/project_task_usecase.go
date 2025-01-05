@@ -5,6 +5,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"time"
+	"voo.su/internal/domain/entity"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 )
 
@@ -61,13 +62,17 @@ func (p *ProjectUseCase) Tasks(ctx context.Context, projectId int64, typeId int6
 	return items, nil
 }
 
-func (p *ProjectUseCase) TaskDetail(ctx context.Context, taskId int64) (*postgresModel.ProjectTaskDetailWithMember, error) {
+func (p *ProjectUseCase) TaskDetail(ctx context.Context, taskId int64) (*entity.ProjectTaskDetailWithMember, error) {
 	fields := []string{
 		"project_tasks.*",
 		"assigner.id AS assigner_id",
 		"assigner_user.username AS assigner_username",
+		"assigner_user.name AS assigner_name",
+		"assigner_user.surname AS assigner_surname",
 		"executor_member.id AS executor_member_id",
 		"executor_user.username AS executor_username",
+		"executor_user.name AS executor_name",
+		"executor_user.surname AS executor_surname",
 	}
 
 	tx := p.Source.Postgres().WithContext(ctx).
@@ -78,7 +83,7 @@ func (p *ProjectUseCase) TaskDetail(ctx context.Context, taskId int64) (*postgre
 		Joins("LEFT JOIN users AS executor_user ON executor_user.id = executor_member.user_id").
 		Where("project_tasks.id = ?", taskId)
 
-	var taskDetail postgresModel.ProjectTaskDetailWithMember
+	var taskDetail entity.ProjectTaskDetailWithMember
 	if err := tx.Select(fields).Scan(&taskDetail).Error; err != nil {
 		return nil, err
 	}
@@ -171,11 +176,13 @@ func (p *ProjectUseCase) InviteCoexecutor(ctx context.Context, taskId int64, mem
 	return nil
 }
 
-func (p *ProjectUseCase) GetCoexecutors(ctx context.Context, taskId int64) ([]*postgresModel.ProjectMemberItem, error) {
+func (p *ProjectUseCase) GetCoexecutors(ctx context.Context, taskId int64) ([]*entity.ProjectMemberItem, error) {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",
 		"users.username AS username",
+		"users.name AS Name",
+		"users.surname AS Surname",
 	}
 	tx := p.Source.Postgres().WithContext(ctx).
 		Table("project_task_coexecutors").
@@ -183,7 +190,7 @@ func (p *ProjectUseCase) GetCoexecutors(ctx context.Context, taskId int64) ([]*p
 		Joins("LEFT JOIN users ON users.id = project_task_coexecutors.member_id").
 		Where("project_task_coexecutors.task_id = ?", taskId)
 
-	var items []*postgresModel.ProjectMemberItem
+	var items []*entity.ProjectMemberItem
 	if err := tx.Unscoped().Select(fields).Scan(&items).Error; err != nil {
 		return nil, err
 	}
@@ -229,11 +236,13 @@ func (p *ProjectUseCase) InviteWatcher(ctx context.Context, taskId int64, member
 	return nil
 }
 
-func (p *ProjectUseCase) GetWatchers(ctx context.Context, taskId int64) ([]*postgresModel.ProjectMemberItem, error) {
+func (p *ProjectUseCase) GetWatchers(ctx context.Context, taskId int64) ([]*entity.ProjectMemberItem, error) {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",
 		"users.username AS username",
+		"users.name AS Name",
+		"users.surname AS Surname",
 	}
 	tx := p.Source.Postgres().WithContext(ctx).
 		Table("project_task_watchers").
@@ -241,7 +250,7 @@ func (p *ProjectUseCase) GetWatchers(ctx context.Context, taskId int64) ([]*post
 		Joins("LEFT JOIN users ON users.id = project_task_watchers.member_id").
 		Where("project_task_watchers.task_id = ?", taskId)
 
-	var items []*postgresModel.ProjectMemberItem
+	var items []*entity.ProjectMemberItem
 	if err := tx.Unscoped().Select(fields).Scan(&items).Error; err != nil {
 		return nil, err
 	}

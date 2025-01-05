@@ -6,26 +6,20 @@ import "tagger/tagger.proto";
 
 option go_package = "./bot;bot_pb";
 
-message MessageSendRequest{
-    int32 chat_id = 1 [(tagger.tags) = "form:\"chat_id\" binding:\"required\""];
-    string text = 2 [(tagger.tags) = "form:\"text\" binding:\"required\""];
+message MessageSendRequest {
+    int32 chat_id = 1 [(tagger.tags) = "form:\"chat_id\" binding:\"required\" label:\"chat_id\""];
+    string text = 2 [(tagger.tags) = "form:\"text\" binding:\"required\" label:\"text\""];
 }
 
-message MessageSendResponse{}
+message MessageSendResponse {}
 
-message MessageChatsRequest{}
+message MessageChatsRequest {}
 
-message MessageChatsResponse{
-    message Item{
-        int32 id = 1;
-        string name = 2;
+message MessageChatsResponse {
+    message Item {
+        int32 id = 1  [(tagger.tags) = "json:\"id\""];
+        string name = 2  [(tagger.tags) = "json:\"name\""];
     }
 
-    repeated Item items = 1;
-}
-
-// TODO DELETE
-message MessageRequest{
-    int32 chatId = 1 [(tagger.tags) = "form:\"chatId\" binding:\"required\""];
-    string content = 2 [(tagger.tags) = "form:\"content\" binding:\"required\""];
+    repeated Item items = 1  [(tagger.tags) = "json:\"items\""];
 }

@@ -87,16 +87,23 @@ func (p *ProjectTask) TaskDetail(ctx *ginutil.Context) error {
 	}
 
 	return ctx.Success(v1Pb.ProjectTaskDetailResponse{
+		Id:          task.Id,
 		Title:       task.Title,
 		Description: task.Description,
 		CreatedAt:   timeutil.FormatDatetime(task.CreatedAt),
 		Assigner: &v1Pb.ProjectTaskDetailResponse_Member{
-			Id:       task.AssignerId,
+			Id: task.AssignerId,
+			//	Avatar: "",
 			Username: task.AssignerUsername,
+			Name:     task.AssignerName,
+			Surname:  task.AssignerSurname,
 		},
 		Executor: &v1Pb.ProjectTaskDetailResponse_Member{
-			Id:       task.ExecutorId,
+			Id: task.ExecutorId,
+			//	Avatar: "",
 			Username: task.ExecutorUsername,
+			Name:     task.ExecutorName,
+			Surname:  task.ExecutorSurname,
 		},
 	})
 }
@@ -193,8 +200,11 @@ func (p *ProjectTask) TaskCoexecutors(ctx *ginutil.Context) error {
 	items := make([]*v1Pb.ProjectCoexecutorsResponse_Item, 0)
 	for _, item := range list {
 		items = append(items, &v1Pb.ProjectCoexecutorsResponse_Item{
-			Id:       item.Id,
+			Id: item.Id,
+			//	Avatar: "",
 			Username: item.Username,
+			Name:     item.Name,
+			Surname:  item.Surname,
 		})
 	}
 
@@ -237,8 +247,11 @@ func (p *ProjectTask) TaskWatchers(ctx *ginutil.Context) error {
 	items := make([]*v1Pb.ProjectWatchersResponse_Item, 0)
 	for _, item := range list {
 		items = append(items, &v1Pb.ProjectWatchersResponse_Item{
-			Id:       item.Id,
+			Id: item.Id,
+			//	Avatar: "",
 			Username: item.Username,
+			Name:     item.Name,
+			Surname:  item.Surname,
 		})
 	}
 

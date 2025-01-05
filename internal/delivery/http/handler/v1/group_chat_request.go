@@ -241,7 +241,7 @@ func (g *GroupChatRequest) All(ctx *ginutil.Context) error {
 }
 
 func (g *GroupChatRequest) RequestUnreadNum(ctx *ginutil.Context) error {
-	return ctx.Success(map[string]any{
-		"unread_num": g.GroupRequestCacheRepo.Get(ctx.Ctx(), ctx.UserId()),
+	return ctx.Success(&v1Pb.GroupChatUnreadNumResponse{
+		UnreadNum: int64(g.GroupRequestCacheRepo.Get(ctx.Ctx(), ctx.UserId())),
 	})
 }

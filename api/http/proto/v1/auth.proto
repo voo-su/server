@@ -6,31 +6,31 @@ import "tagger/tagger.proto";
 
 option go_package = "./v1;v1_pb";
 
-message AuthLoginRequest{
-    string email = 1 [(tagger.tags) = "binding:\"required\""];
-    string platform = 2 [(tagger.tags) = "binding:\"required,oneof=web android ios linux macos windows\""];
+message AuthLoginRequest {
+    string email = 1 [(tagger.tags) = "binding:\"required\" label:\"email\""];
+    string platform = 2 [(tagger.tags) = "binding:\"required,oneof=web android ios linux macos windows\" label:\"platform\""];
 }
 
-message AuthLoginResponse{
-    string token = 1;
-    int32 expiresIn = 2;
+message AuthLoginResponse {
+    string token = 1 [(tagger.tags) = "json:\"token\""];
+    int32 expiresIn = 2 [(tagger.tags) = "json:\"expiresIn\""];
 }
 
-message AuthVerifyRequest{
-    string token = 1 [(tagger.tags) = "binding:\"required\""];
-    string code = 2 [(tagger.tags) = "binding:\"required,len=6\""];
+message AuthVerifyRequest {
+    string token = 1 [(tagger.tags) = "binding:\"required\" label:\"token\""];
+    string code = 2 [(tagger.tags) = "binding:\"required,len=6\" label:\"code\""];
 }
 
-message AuthVerifyResponse{
-    string type = 1;
-    string accessToken = 2;
-    int32 expiresIn = 3;
+message AuthVerifyResponse {
+    string type = 1 [(tagger.tags) = "json:\"type\""];
+    string accessToken = 2 [(tagger.tags) = "json:\"accessToken\""];
+    int32 expiresIn = 3 [(tagger.tags) = "json:\"expiresIn\""];
 }
 
-message AuthRefreshRequest{}
+message AuthRefreshRequest {}
 
-message AuthRefreshResponse{
-  string type = 1;
-  string accessToken = 2;
-  int32 expiresIn = 3;
+message AuthRefreshResponse {
+  string type = 1 [(tagger.tags) = "json:\"type\" label:\"type\""];
+  string accessToken = 2 [(tagger.tags) = "json:\"accessToken\" label:\"accessToken\""];
+  int32 expiresIn = 3 [(tagger.tags) = "json:\"expiresIn\" label:\"expiresIn\""];
 }

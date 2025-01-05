@@ -6,75 +6,75 @@ import "tagger/tagger.proto";
 
 option go_package = "./v1;v1_pb";
 
-message ChatCreateRequest{
+message ChatCreateRequest {
     int32 dialog_type = 1 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
     int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ChatCreateResponse{
-    int32 id = 1;
-    int32 dialog_type = 2;
-    int32 receiver_id = 3;
-    int32 is_top = 4;
-    int32 is_disturb = 5;
-    int32 is_online = 6;
-    int32 is_bot = 7;
-    string username = 8;
-    string name = 9;
-    string surname = 10;
-    string avatar = 11;
-    int32 unread_num = 12;
-    string msg_text = 13;
-    string updated_at = 14;
-    string remark_name = 15;
+message ChatCreateResponse {
+    int32 id = 1 [(tagger.tags) = "json:\"id\""];
+    int32 dialog_type = 2 [(tagger.tags) = "json:\"dialog_type\""];
+    int32 receiver_id = 3 [(tagger.tags) = "json:\"receiver_id\""];
+    int32 is_top = 4 [(tagger.tags) = "json:\"is_top\""];
+    int32 is_disturb = 5 [(tagger.tags) = "json:\"is_disturb\""];
+    int32 is_online = 6 [(tagger.tags) = "json:\"is_online\""];
+    int32 is_bot = 7 [(tagger.tags) = "json:\"is_bot\""];
+    string username = 8 [(tagger.tags) = "json:\"username\""];
+    string name = 9 [(tagger.tags) = "json:\"name\""];
+    string surname = 10 [(tagger.tags) = "json:\"surname\""];
+    string avatar = 11 [(tagger.tags) = "json:\"avatar\""];
+    int32 unread_num = 12 [(tagger.tags) = "json:\"unread_num\""];
+    string msg_text = 13 [(tagger.tags) = "json:\"msg_text\""];
+    string updated_at = 14 [(tagger.tags) = "json:\"updated_at\""];
+    string remark_name = 15 [(tagger.tags) = "json:\"remark_name\""];
 }
 
-message ChatItem{
-    int32 id = 1;
-    int32 dialog_type = 2;
-    int32 receiver_id = 3;
-    string username = 4;
-    string avatar = 5;
-    string name = 6;
-    string surname = 7;
-    int32 unread_num = 8;
-    string msg_text = 9;
-    string updated_at = 10;
-    int32 is_top = 11;
-    int32 is_disturb = 12;
-    int32 is_online = 13;
-    int32 is_bot = 14;
-    string remark = 15;
+message ChatItem {
+    int32 id = 1 [(tagger.tags) = "json:\"id\""];
+    int32 dialog_type = 2 [(tagger.tags) = "json:\"dialog_type\""];
+    int32 receiver_id = 3 [(tagger.tags) = "json:\"receiver_id\""];
+    string username = 4 [(tagger.tags) = "json:\"username\""];
+    string avatar = 5 [(tagger.tags) = "json:\"avatar\""];
+    string name = 6 [(tagger.tags) = "json:\"name\""];
+    string surname = 7 [(tagger.tags) = "json:\"surname\""];
+    int32 unread_num = 8 [(tagger.tags) = "json:\"unread_num\""];
+    string msg_text = 9 [(tagger.tags) = "json:\"msg_text\""];
+    string updated_at = 10 [(tagger.tags) = "json:\"updated_at\""];
+    int32 is_top = 11 [(tagger.tags) = "json:\"is_top\""];
+    int32 is_disturb = 12 [(tagger.tags) = "json:\"is_disturb\""];
+    int32 is_online = 13 [(tagger.tags) = "json:\"is_online\""];
+    int32 is_bot = 14 [(tagger.tags) = "json:\"is_bot\""];
+    string remark = 15 [(tagger.tags) = "json:\"remark\""];
 }
 
-message ChatListResponse{
-    repeated ChatItem items = 1;
+message ChatListResponse {
+    repeated ChatItem items = 1 [(tagger.tags) = "json:\"items\""];
 }
 
-message ChatDeleteRequest{
+message ChatDeleteRequest {
     int32 list_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ChatDeleteResponse{}
+message ChatDeleteResponse {}
 
-message ChatTopRequest{
+message ChatTopRequest {
     int32 list_id = 1 [(tagger.tags) = "binding:\"required\""];
     int32 type = 2 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
 }
 
-message ChatTopResponse{}
+message ChatTopResponse {}
 
-message ChatDisturbRequest{
+message ChatDisturbRequest {
     int32 dialog_type = 1 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
     int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\""];
     int32 is_disturb = 3 [(tagger.tags) = "binding:\"oneof=0 1\""];
 }
 
-message ChatDisturbResponse{}
+message ChatDisturbResponse {}
 
-message ChatClearUnreadNumRequest{
+message ChatClearUnreadNumRequest {
     int32 dialog_type = 1 [(tagger.tags) = "binding:\"required,oneof=1 2\""];
     int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\""];
 }
 
-message ChatClearUnreadNumResponse{}
+message ChatClearUnreadNumResponse {}

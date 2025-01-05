@@ -15,8 +15,8 @@ type ContactRequest struct {
 }
 
 func (c *ContactRequest) ApplyUnreadNum(ctx *ginutil.Context) error {
-	return ctx.Success(map[string]any{
-		"unread_num": c.ContactRequestUseCase.GetApplyUnreadNum(ctx.Ctx(), ctx.UserId()),
+	return ctx.Success(&v1Pb.ContactApplyUnreadNumResponse{
+		UnreadNum: int64(c.ContactRequestUseCase.GetApplyUnreadNum(ctx.Ctx(), ctx.UserId())),
 	})
 }
 

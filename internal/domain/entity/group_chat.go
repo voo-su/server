@@ -13,12 +13,12 @@ type GroupItem struct {
 }
 
 type GroupApplyList struct {
-	Id        int       `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
-	GroupId   int       `gorm:"column:group_id;default:0;NOT NULL" json:"group_id"`
-	UserId    int       `gorm:"column:user_id;default:0;NOT NULL" json:"user_id"`
-	CreatedAt time.Time `gorm:"column:created_at;NOT NULL" json:"created_at"`
-	Username  string    `gorm:"column:username;NOT NULL" json:"username"`
-	Avatar    string    `gorm:"column:avatar;NOT NULL" json:"avatar"`
+	Id        int       `gorm:"column:id"`
+	GroupId   int       `gorm:"column:group_id"`
+	UserId    int       `gorm:"column:user_id"`
+	CreatedAt time.Time `gorm:"column:created_atL"`
+	Username  string    `gorm:"column:username"`
+	Avatar    string    `gorm:"column:avatar"`
 }
 
 type MemberItem struct {
@@ -30,7 +30,6 @@ type MemberItem struct {
 	About    string `json:"about"`
 	Leader   int    `json:"leader"`
 	IsMute   int    `json:"is_mute"`
-	//UserCard string `json:"user_card"`
 }
 
 type SearchAdsItem struct {

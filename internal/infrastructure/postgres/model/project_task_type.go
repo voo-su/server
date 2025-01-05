@@ -3,11 +3,11 @@ package model
 import "time"
 
 type ProjectTaskType struct {
-	Id        int64     `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
-	ProjectId int       `gorm:"column:project_id" json:"project_id"`
-	Title     string    `gorm:"column:title" json:"title"`
-	CreatedBy int       `gorm:"column:created_by" json:"created_by"`
-	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
+	Id        int64     `gorm:"primaryKey"`
+	ProjectId int       `gorm:"column:project_id"`
+	Title     string    `gorm:"column:title"`
+	CreatedBy int       `gorm:"column:created_by"`
+	CreatedAt time.Time `gorm:"column:created_at"`
 }
 
 func (ProjectTaskType) TableName() string {

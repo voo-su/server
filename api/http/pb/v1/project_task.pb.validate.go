@@ -1035,6 +1035,8 @@ func (m *ProjectTaskDetailResponse) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for Id
+
 	// no validation rules for Title
 
 	// no validation rules for Description
@@ -2560,7 +2562,13 @@ func (m *ProjectTaskDetailResponse_Member) validate(all bool) error {
 
 	// no validation rules for Id
 
+	// no validation rules for Avatar
+
 	// no validation rules for Username
+
+	// no validation rules for Name
+
+	// no validation rules for Surname
 
 	if len(errors) > 0 {
 		return ProjectTaskDetailResponse_MemberMultiError(errors)
@@ -2668,7 +2676,13 @@ func (m *ProjectCoexecutorsResponse_Item) validate(all bool) error {
 
 	// no validation rules for Id
 
+	// no validation rules for Avatar
+
 	// no validation rules for Username
+
+	// no validation rules for Name
+
+	// no validation rules for Surname
 
 	if len(errors) > 0 {
 		return ProjectCoexecutorsResponse_ItemMultiError(errors)
@@ -2775,7 +2789,13 @@ func (m *ProjectWatchersResponse_Item) validate(all bool) error {
 
 	// no validation rules for Id
 
+	// no validation rules for Avatar
+
 	// no validation rules for Username
+
+	// no validation rules for Name
+
+	// no validation rules for Surname
 
 	if len(errors) > 0 {
 		return ProjectWatchersResponse_ItemMultiError(errors)

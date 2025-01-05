@@ -2942,6 +2942,110 @@ var _ interface {
 	ErrorName() string
 } = GroupRequestListRequestValidationError{}
 
+// Validate checks the field values on GroupChatUnreadNumResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GroupChatUnreadNumResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GroupChatUnreadNumResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GroupChatUnreadNumResponseMultiError, or nil if none found.
+func (m *GroupChatUnreadNumResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GroupChatUnreadNumResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UnreadNum
+
+	if len(errors) > 0 {
+		return GroupChatUnreadNumResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GroupChatUnreadNumResponseMultiError is an error wrapping multiple
+// validation errors returned by GroupChatUnreadNumResponse.ValidateAll() if
+// the designated constraints aren't met.
+type GroupChatUnreadNumResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GroupChatUnreadNumResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GroupChatUnreadNumResponseMultiError) AllErrors() []error { return m }
+
+// GroupChatUnreadNumResponseValidationError is the validation error returned
+// by GroupChatUnreadNumResponse.Validate if the designated constraints aren't met.
+type GroupChatUnreadNumResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GroupChatUnreadNumResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GroupChatUnreadNumResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GroupChatUnreadNumResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GroupChatUnreadNumResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GroupChatUnreadNumResponseValidationError) ErrorName() string {
+	return "GroupChatUnreadNumResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GroupChatUnreadNumResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGroupChatUnreadNumResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GroupChatUnreadNumResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GroupChatUnreadNumResponseValidationError{}
+
 // Validate checks the field values on GroupChatRequestListResponse with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

@@ -6,34 +6,34 @@ import "tagger/tagger.proto";
 
 option go_package = "./v1;v1_pb";
 
-message UploadAvatarResponse{
-    string avatar = 1;
+message UploadAvatarResponse {
+    string avatar = 1 [(tagger.tags) = "json:\"avatar\""];
 }
 
-message UploadImagerRequest{}
+message UploadImagerRequest {}
 
-message UploadImageResponse{
-    string src = 1;
+message UploadImageResponse {
+    string src = 1 [(tagger.tags) = "json:\"src\""];
 }
 
-message UploadInitiateMultipartRequest{
-    string file_name = 1 [(tagger.tags) = "binding:\"required\""];
-    int64 file_size = 2 [(tagger.tags) = "binding:\"required\""];
+message UploadInitiateMultipartRequest {
+    string file_name = 1 [(tagger.tags) = "binding:\"required\" label:\"file_name\""];
+    int64 file_size = 2 [(tagger.tags) = "binding:\"required\" label:\"file_size\""];
 }
 
-message UploadInitiateMultipartResponse{
-    string upload_id = 1;
-    int32 shard_size = 2;
-    int32 shard_num = 3;
+message UploadInitiateMultipartResponse {
+    string upload_id = 1 [(tagger.tags) = "json:\"upload_id\""];
+    int32 shard_size = 2 [(tagger.tags) = "json:\"shard_size\""];
+    int32 shard_num = 3 [(tagger.tags) = "json:\"shard_num\""];
 }
 
-message UploadMultipartRequest{
-    string upload_id = 1 [(tagger.tags) = "form:\"upload_id\" binding:\"required\""];
-    int32 split_index = 2 [(tagger.tags) = "form:\"split_index\" binding:\"min=0\""];
-    int32 split_num = 3 [(tagger.tags) = "form:\"split_num\" binding:\"required,min=1\""];
+message UploadMultipartRequest {
+    string upload_id = 1 [(tagger.tags) = "form:\"upload_id\" binding:\"required\" label:\"upload_id\""];
+    int32 split_index = 2 [(tagger.tags) = "form:\"split_index\" binding:\"min=0\" label:\"split_index\""];
+    int32 split_num = 3 [(tagger.tags) = "form:\"split_num\" binding:\"required,min=1\" label:\"split_num\""];
 }
 
-message UploadMultipartResponse{
-    string upload_id = 1;
-    bool is_merge = 2;
+message UploadMultipartResponse {
+    string upload_id = 1 [(tagger.tags) = "json:\"upload_id\""];
+    bool is_merge = 2 [(tagger.tags) = "json:\"is_merge\""];
 }

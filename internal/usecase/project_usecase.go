@@ -5,6 +5,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"time"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
@@ -106,7 +107,7 @@ func (p *ProjectUseCase) CreateProject(ctx context.Context, opt *ProjectOpt) (in
 	return int64(project.Id), nil
 }
 
-func (p *ProjectUseCase) Projects(userId int) ([]*postgresModel.ProjectItem, error) {
+func (p *ProjectUseCase) Projects(userId int) ([]*entity.ProjectItem, error) {
 	tx := p.Source.Postgres().
 		Table("project_members").
 		Select("p.id AS id, p.name AS name").
@@ -114,7 +115,7 @@ func (p *ProjectUseCase) Projects(userId int) ([]*postgresModel.ProjectItem, err
 		Where("project_members.user_id = ?", userId).
 		Order("project_members.created_at desc")
 
-	items := make([]*postgresModel.ProjectItem, 0)
+	items := make([]*entity.ProjectItem, 0)
 	if err := tx.Scan(&items).Error; err != nil {
 		return nil, err
 	}
@@ -132,7 +133,7 @@ func (p *ProjectUseCase) Projects(userId int) ([]*postgresModel.ProjectItem, err
 	return items, nil
 }
 
-func (p *ProjectUseCase) GetMembers(ctx context.Context, projectId int64) []*postgresModel.ProjectMemberItem {
+func (p *ProjectUseCase) GetMembers(ctx context.Context, projectId int64) []*entity.ProjectMemberItem {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",
@@ -143,7 +144,7 @@ func (p *ProjectUseCase) GetMembers(ctx context.Context, projectId int64) []*pos
 		Where("project_members.project_id = ?", projectId)
 	//.Order("project_members.leader desc")
 
-	var items []*postgresModel.ProjectMemberItem
+	var items []*entity.ProjectMemberItem
 	tx.Unscoped().Select(fields).Scan(&items)
 
 	return items
