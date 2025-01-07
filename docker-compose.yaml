@@ -4,9 +4,9 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
-    volumes:
-      - ./configs/.env:/usr/src/voo-su/.env
     restart: always
+    volumes:
+      - .env:/usr/src/voo-su/.env
     ports:
       - '80:80'
     networks:
@@ -18,12 +18,12 @@ services:
   http_server:
     container_name: http-server
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: deployments/Dockerfile
     command: /usr/bin/voo-su http
+    restart: always
     volumes:
       - ./configs/voo-su.yaml:/etc/voo-su/voo-su.yaml
-    restart: always
     ports:
       - '8000:8000'
     networks:
@@ -33,16 +33,17 @@ services:
       - redis
       - clickhouse
       - minio
+      - nats
 
   ws_server:
     container_name: ws-server
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: deployments/Dockerfile
     command: /usr/bin/voo-su ws
+    restart: always
     volumes:
       - ./configs/voo-su.yaml:/etc/voo-su/voo-su.yaml
-    restart: always
     ports:
       - '8001:8001'
     networks:
@@ -52,17 +53,18 @@ services:
       - redis
       - clickhouse
       - minio
+      - nats
 
   postgres:
     container_name: postgres
-    image: postgres
+    image: postgres:16
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: voo_su
     volumes:
       - ./storage/db/postgres/:/var/lib/postgresql/data
-    restart: always
     ports:
       - '5432:5432'
     networks:
@@ -70,7 +72,7 @@ services:
 
   redis:
     container_name: redis
-    image: redis:alpine
+    image: redis:7.4
     restart: always
     ports:
       - '6379:6379'
@@ -79,19 +81,21 @@ services:
 
   clickhouse:
     container_name: clickhouse
-    image: yandex/clickhouse-server
+    image: clickhouse/clickhouse-server:24.8
     environment:
       - CLICKHOUSE_USER=clickhouse
       - CLICKHOUSE_PASSWORD=clickhouse
       - CLICKHOUSE_DB=voo_su
-    networks:
-      - network-voo
     volumes:
       - ./storage/db/clickhouse/:/var/lib/clickhouse:cached
+    ports:
+      - "9000:9000"
+    networks:
+      - network-voo
 
   minio:
     container_name: minio
-    image: minio/minio
+    image: minio/minio:RELEASE.2024-12-18T13-15-44Z.fips
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: user_minio
@@ -101,6 +105,15 @@ services:
     ports:
       - "9001:9001"
       - "9002:9002"
+    networks:
+      - network-voo
+
+  nats:
+    image: nats:2.10.24
+    ports:
+      - "4222:4222"
+    networks:
+      - network-voo
 
 networks:
   network-voo:

@@ -19,7 +19,7 @@ RUN mkdir /usr/src/voo-su
 
 WORKDIR /usr/src/voo-su
 
-COPY . ./
+COPY .. ./
 
 RUN make install
 
