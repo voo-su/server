@@ -6,7 +6,7 @@ import (
 	"github.com/bytedance/sonic"
 	"log"
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/usecase"
+	"voo.su/internal/domain/entity"
 	"voo.su/pkg/socket"
 )
 
@@ -51,9 +51,9 @@ func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data
 		return
 	}
 
-	if err := h.MessageUseCase.SendText(ctx, client.Uid(), &usecase.SendText{
+	if err := h.MessageUseCase.SendText(ctx, client.Uid(), &entity.SendText{
 		Content: in.Content.Content,
-		Receiver: usecase.MessageReceiver{
+		Receiver: entity.MessageReceiver{
 			DialogType: in.Content.Receiver.DialogType,
 			ReceiverId: in.Content.Receiver.ReceiverId,
 		},

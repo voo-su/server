@@ -16,11 +16,15 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(pb.UnimplementedChatServiceServer), "*"),
 	wire.Bind(new(pb.ChatServiceServer), new(*handler.Chat)),
 
+	wire.Struct(new(pb.UnimplementedMessageServiceServer), "*"),
+	wire.Bind(new(pb.MessageServiceServer), new(*handler.Message)),
+
 	wire.Struct(new(pb.UnimplementedContactServiceServer), "*"),
 	wire.Bind(new(pb.ContactServiceServer), new(*handler.Contact)),
 
 	handler.NewAuthHandler,
 	handler.NewChatHandler,
+	handler.NewMessageHandler,
 	handler.NewContactHandler,
 
 	middleware.NewAuthMiddleware,

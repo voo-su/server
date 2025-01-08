@@ -7,6 +7,7 @@ import (
 	"strings"
 	botPb "voo.su/api/http/pb/bot"
 	"voo.su/internal/constant"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
@@ -73,8 +74,8 @@ func (m *Message) Message(ctx *ginutil.Context) error {
 		return err
 	}
 
-	if err := m.MessageUseCase.SendText(ctx.Ctx(), bot.UserId, &usecase.SendText{
-		Receiver: usecase.MessageReceiver{
+	if err := m.MessageUseCase.SendText(ctx.Ctx(), bot.UserId, &entity.SendText{
+		Receiver: entity.MessageReceiver{
 			DialogType: 2,
 			ReceiverId: params.ChatId,
 		},
@@ -114,8 +115,8 @@ func (m *Message) Photo(ctx *ginutil.Context) error {
 		return err
 	}
 
-	if err := m.MessageUseCase.SendImage(ctx.Ctx(), bot.UserId, &usecase.SendImage{
-		Receiver: usecase.MessageReceiver{
+	if err := m.MessageUseCase.SendImage(ctx.Ctx(), bot.UserId, &entity.SendImage{
+		Receiver: entity.MessageReceiver{
 			DialogType: 2,
 			ReceiverId: int32(chatId),
 		},
@@ -156,8 +157,8 @@ func (m *Message) Video(ctx *ginutil.Context) error {
 		return err
 	}
 
-	if err := m.MessageUseCase.SendVideo(ctx.Ctx(), bot.UserId, &usecase.SendVideo{
-		Receiver: usecase.MessageReceiver{
+	if err := m.MessageUseCase.SendVideo(ctx.Ctx(), bot.UserId, &entity.SendVideo{
+		Receiver: entity.MessageReceiver{
 			DialogType: 2,
 			ReceiverId: int32(chatId),
 		},
@@ -198,8 +199,8 @@ func (m *Message) Audio(ctx *ginutil.Context) error {
 		return err
 	}
 
-	if err := m.MessageUseCase.SendAudio(ctx.Ctx(), bot.UserId, &usecase.SendAudio{
-		Receiver: usecase.MessageReceiver{
+	if err := m.MessageUseCase.SendAudio(ctx.Ctx(), bot.UserId, &entity.SendAudio{
+		Receiver: entity.MessageReceiver{
 			DialogType: 2,
 			ReceiverId: int32(chatId),
 		},
@@ -240,8 +241,8 @@ func (m *Message) Document(ctx *ginutil.Context) error {
 		return err
 	}
 
-	if err := m.MessageUseCase.SendBotFile(ctx.Ctx(), bot.UserId, &usecase.SendBotFile{
-		Receiver: usecase.MessageReceiver{
+	if err := m.MessageUseCase.SendBotFile(ctx.Ctx(), bot.UserId, &entity.SendBotFile{
+		Receiver: entity.MessageReceiver{
 			DialogType: 2,
 			ReceiverId: int32(chatId),
 		},

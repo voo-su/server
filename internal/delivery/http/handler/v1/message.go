@@ -22,7 +22,6 @@ type Message struct {
 	Conf                   *config.Config
 	Locale                 locale.ILocale
 	ChatUseCase            *usecase.ChatUseCase
-	AuthUseCase            *usecase.AuthUseCase
 	MessageUseCase         usecase.IMessageUseCase
 	Minio                  minio.IMinio
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
@@ -57,7 +56,7 @@ func (m *Message) Send(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := m.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
+	if err := m.MessageUseCase.IsAccess(ctx.Ctx(), &entity.MessageAccess{
 		DialogType:        int(params.Receiver.DialogType),
 		UserId:            ctx.UserId(),
 		ReceiverId:        int(params.Receiver.ReceiverId),
@@ -75,8 +74,8 @@ func (m *Message) onSendText(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := m.MessageUseCase.SendText(ctx.Ctx(), ctx.UserId(), &usecase.SendText{
-		Receiver: usecase.MessageReceiver{
+	if err := m.MessageUseCase.SendText(ctx.Ctx(), ctx.UserId(), &entity.SendText{
+		Receiver: entity.MessageReceiver{
 			DialogType: params.Receiver.DialogType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
@@ -95,8 +94,8 @@ func (m *Message) onSendImage(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := m.MessageUseCase.SendImage(ctx.Ctx(), ctx.UserId(), &usecase.SendImage{
-		Receiver: usecase.MessageReceiver{
+	if err := m.MessageUseCase.SendImage(ctx.Ctx(), ctx.UserId(), &entity.SendImage{
+		Receiver: entity.MessageReceiver{
 			DialogType: params.Receiver.DialogType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
@@ -117,8 +116,8 @@ func (m *Message) onSendVideo(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := m.MessageUseCase.SendVideo(ctx.Ctx(), ctx.UserId(), &usecase.SendVideo{
-		Receiver: usecase.MessageReceiver{
+	if err := m.MessageUseCase.SendVideo(ctx.Ctx(), ctx.UserId(), &entity.SendVideo{
+		Receiver: entity.MessageReceiver{
 			DialogType: params.Receiver.DialogType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
@@ -139,8 +138,8 @@ func (m *Message) onSendAudio(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := m.MessageUseCase.SendAudio(ctx.Ctx(), ctx.UserId(), &usecase.SendAudio{
-		Receiver: usecase.MessageReceiver{
+	if err := m.MessageUseCase.SendAudio(ctx.Ctx(), ctx.UserId(), &entity.SendAudio{
+		Receiver: entity.MessageReceiver{
 			DialogType: params.Receiver.DialogType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
@@ -159,8 +158,8 @@ func (m *Message) onSendFile(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := m.MessageUseCase.SendFile(ctx.Ctx(), ctx.UserId(), &usecase.SendFile{
-		Receiver: usecase.MessageReceiver{
+	if err := m.MessageUseCase.SendFile(ctx.Ctx(), ctx.UserId(), &entity.SendFile{
+		Receiver: entity.MessageReceiver{
 			DialogType: params.Receiver.DialogType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
@@ -260,7 +259,7 @@ func (m *Message) Vote(ctx *ginutil.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if err := m.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
+	if err := m.MessageUseCase.IsAccess(ctx.Ctx(), &entity.MessageAccess{
 		DialogType:        constant.ChatGroupMode,
 		UserId:            uid,
 		ReceiverId:        int(params.ReceiverId),
@@ -330,21 +329,19 @@ func (m *Message) HandleVote(ctx *ginutil.Context) error {
 	return ctx.Success(data)
 }
 
-func (m *Message) GetRecords(ctx *ginutil.Context) error {
-	params := &v1Pb.GetDialogRecordsRequest{}
+func (m *Message) GetHistory(ctx *ginutil.Context) error {
+	params := &v1Pb.GetRecordsRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
 
 	uid := ctx.UserId()
 	if params.DialogType == constant.ChatGroupMode {
-		err := m.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
+		if err := m.MessageUseCase.IsAccess(ctx.Ctx(), &entity.MessageAccess{
 			DialogType: int(params.DialogType),
 			UserId:     uid,
 			ReceiverId: int(params.ReceiverId),
-		})
-
-		if err != nil {
+		}); err != nil {
 			items := make([]map[string]any, 0)
 			items = append(items, map[string]any{
 				"content":     m.Locale.Localize("insufficient_permissions_to_view_messages"),
@@ -365,9 +362,9 @@ func (m *Message) GetRecords(ctx *ginutil.Context) error {
 		}
 	}
 
-	records, err := m.MessageUseCase.GetDialogRecords(ctx.Ctx(), &usecase.QueryDialogRecordsOpt{
+	records, err := m.MessageUseCase.GetHistory(ctx.Ctx(), &entity.QueryGetHistoryOpt{
 		DialogType: int(params.DialogType),
-		UserId:     ctx.UserId(),
+		UserId:     uid,
 		ReceiverId: int(params.ReceiverId),
 		RecordId:   int(params.RecordId),
 		Limit:      int(params.Limit),

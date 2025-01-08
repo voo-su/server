@@ -29,9 +29,7 @@ type AuthUseCase struct {
 	Locale              locale.ILocale
 	Email               *email.Email
 	SmsCache            *redisRepo.SmsCacheRepository
-	ContactRepo         *postgresRepo.ContactRepository
 	GroupChatMemberRepo *postgresRepo.GroupChatMemberRepository
-	GroupChatRepo       *postgresRepo.GroupChatRepository
 	UserRepo            *postgresRepo.UserRepository
 	AuthCodeRepo        *clickhouseRepo.AuthCodeRepository
 	JwtTokenCacheRepo   *redisRepo.JwtTokenCacheRepository
@@ -42,9 +40,7 @@ func NewAuthUseCase(
 	locale locale.ILocale,
 	email *email.Email,
 	smsCache *redisRepo.SmsCacheRepository,
-	contactRepo *postgresRepo.ContactRepository,
 	groupChatMember *postgresRepo.GroupChatMemberRepository,
-	groupChat *postgresRepo.GroupChatRepository,
 	repo *postgresRepo.UserRepository,
 	authCodeRepo *clickhouseRepo.AuthCodeRepository,
 	jwtTokenCacheRepository *redisRepo.JwtTokenCacheRepository,
@@ -54,9 +50,7 @@ func NewAuthUseCase(
 		Locale:              locale,
 		Email:               email,
 		SmsCache:            smsCache,
-		ContactRepo:         contactRepo,
 		GroupChatMemberRepo: groupChatMember,
-		GroupChatRepo:       groupChat,
 		UserRepo:            repo,
 		AuthCodeRepo:        authCodeRepo,
 		JwtTokenCacheRepo:   jwtTokenCacheRepository,
@@ -87,53 +81,6 @@ func (a *AuthUseCase) Login(ctx context.Context, guard string, _email string) (*
 	}
 
 	return &token, nil
-}
-
-type AuthOption struct {
-	DialogType        int
-	UserId            int
-	ReceiverId        int
-	IsVerifyGroupMute bool
-}
-
-func (a *AuthUseCase) IsAuth(ctx context.Context, opt *AuthOption) error {
-	if opt.DialogType == constant.ChatPrivateMode {
-		if a.ContactRepo.IsFriend(ctx, opt.UserId, opt.ReceiverId, false) {
-			return nil
-		}
-		return errors.New(a.Locale.Localize("no_permission_to_send_messages"))
-	}
-
-	groupInfo, err := a.GroupChatRepo.FindById(ctx, opt.ReceiverId)
-	if err != nil {
-		return err
-	}
-
-	if groupInfo.IsDismiss == 1 {
-		return errors.New(a.Locale.Localize("group_deleted"))
-	}
-
-	memberInfo, err := a.GroupChatMemberRepo.FindByUserId(ctx, opt.ReceiverId, opt.UserId)
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return errors.New(a.Locale.Localize("no_permission_to_send_messages"))
-		}
-		return errors.New(a.Locale.Localize("system_busy_try_later"))
-	}
-
-	if memberInfo.IsQuit == constant.GroupMemberQuitStatusYes {
-		return errors.New(a.Locale.Localize("no_permission_to_send_messages"))
-	}
-
-	if memberInfo.IsMute == constant.GroupMemberMuteStatusYes {
-		return errors.New(a.Locale.Localize("message_sending_prohibited_by_admin"))
-	}
-
-	if opt.IsVerifyGroupMute && groupInfo.IsMute == 1 && memberInfo.Leader == 0 {
-		return errors.New(a.Locale.Localize("group_message_sending_disabled"))
-	}
-
-	return nil
 }
 
 func (a *AuthUseCase) CodeTemplate(data map[string]string) (string, error) {

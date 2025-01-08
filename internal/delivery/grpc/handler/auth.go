@@ -78,7 +78,7 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 		return nil, status.Error(codes.Unauthenticated, a.Locale.Localize("invalid_token"))
 	}
 
-	if claims.Guard != "auth" || claims.Valid() != nil {
+	if claims.Guard != constant.GuardGrpcAuth || claims.Valid() != nil {
 		return nil, status.Error(codes.Unauthenticated, a.Locale.Localize("invalid_token"))
 	}
 

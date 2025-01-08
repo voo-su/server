@@ -1,5 +1,57 @@
 package entity
 
+import "time"
+
+type DialogRecordsItem struct {
+	Id         int    `json:"id"`
+	Sequence   int    `json:"sequence"`
+	MsgId      string `json:"msg_id"`
+	DialogType int    `json:"dialog_type"`
+	MsgType    int    `json:"msg_type"`
+	UserId     int    `json:"user_id"`
+	ReceiverId int    `json:"receiver_id"`
+	Username   string `json:"username"`
+	Name       string `json:"name"`
+	Surname    string `json:"surname"`
+	Avatar     string `json:"avatar"`
+	IsRevoke   int    `json:"is_revoke"`
+	IsMark     int    `json:"is_mark"`
+	IsRead     int    `json:"is_read"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"created_at"`
+	Extra      any    `json:"extra"`
+}
+
+type QueryGetHistoryOpt struct {
+	DialogType int
+	UserId     int
+	ReceiverId int
+	MsgType    []int
+	RecordId   int
+	Limit      int
+}
+
+type QueryDialogRecordsItem struct {
+	Id         int       `json:"id"`
+	MsgId      string    `json:"msg_id"`
+	Sequence   int64     `json:"sequence"`
+	DialogType int       `json:"dialog_type"`
+	MsgType    int       `json:"msg_type"`
+	UserId     int       `json:"user_id"`
+	ReceiverId int       `json:"receiver_id"`
+	IsRevoke   int       `json:"is_revoke"`
+	IsMark     int       `json:"is_mark"`
+	IsRead     int       `json:"is_read"`
+	QuoteId    int       `json:"quote_id"`
+	Content    string    `json:"content"`
+	CreatedAt  time.Time `json:"created_at"`
+	Username   string    `json:"username"`
+	Name       string    `json:"name"`
+	Surname    string    `json:"surname"`
+	Avatar     string    `json:"avatar"`
+	Extra      string    `json:"extra"`
+}
+
 type DialogRecordExtraGroupMembers struct {
 	UserId   int    `gorm:"column:user_id;" json:"user_id"`
 	Username string `gorm:"column:username;" json:"username"`
@@ -159,4 +211,68 @@ type DialogRecordExtraMixedItem struct {
 
 type DialogRecordExtraMixed struct {
 	Items []*DialogRecordExtraMixedItem `json:"items"`
+}
+
+type MessageAccess struct {
+	DialogType        int
+	UserId            int
+	ReceiverId        int
+	IsVerifyGroupMute bool
+}
+
+type MessageReceiver struct {
+	DialogType int32
+	ReceiverId int32
+}
+
+type SendText struct {
+	Receiver MessageReceiver
+	Content  string
+	QuoteId  string
+}
+
+type SendImage struct {
+	Receiver MessageReceiver
+	Url      string
+	Width    int32
+	Height   int32
+	QuoteId  string
+	Content  string
+}
+
+type SendVideo struct {
+	Receiver MessageReceiver
+	Url      string
+	Duration int32
+	Size     int32
+	Cover    string
+	Content  string
+}
+
+type SendAudio struct {
+	Receiver MessageReceiver
+	Url      string
+	Size     int32
+	Content  string
+}
+
+type SendFile struct {
+	Receiver MessageReceiver
+	UploadId string
+}
+
+type SendBotFile struct {
+	Receiver     MessageReceiver
+	Drive        int
+	OriginalName string
+	FileExt      string
+	FileSize     int
+	FilePath     string
+	Content      string
+}
+
+type SendLogin struct {
+	Ip      string
+	Agent   string
+	Address string
 }
