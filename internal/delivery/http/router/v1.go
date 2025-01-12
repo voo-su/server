@@ -115,7 +115,9 @@ func NewV1(conf *config.Config, locale locale.ILocale, router *gin.Engine, handl
 		{
 			project.GET("", ginutil.HandlerFunc(handler.V1.Project.Projects))
 			project.POST("/create", ginutil.HandlerFunc(handler.V1.Project.Create))
+			project.GET("/detail", ginutil.HandlerFunc(handler.V1.Project.Detail))
 			project.GET("/members", ginutil.HandlerFunc(handler.V1.Project.Members))
+			project.GET("/members/invites", ginutil.HandlerFunc(handler.V1.Project.GetInviteFriends))
 			project.POST("/invite", ginutil.HandlerFunc(handler.V1.Project.Invite))
 			project.PUT("/task-type-name", ginutil.HandlerFunc(handler.V1.ProjectTask.TaskTypeName))
 			project.GET("/tasks", ginutil.HandlerFunc(handler.V1.ProjectTask.Tasks))

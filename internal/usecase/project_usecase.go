@@ -54,6 +54,7 @@ func NewProjectUseCase(
 		RelationCache:             relationCache,
 		ProjectTaskCoexecutorRepo: projectTaskCoexecutorRepo,
 		ProjectTaskWatcherRepo:    projectTaskWatcherRepo,
+		RedisLockCacheRepo:        redisLockCacheRepo,
 	}
 }
 
@@ -135,6 +136,26 @@ func (p *ProjectUseCase) Projects(userId int) ([]*entity.ProjectItem, error) {
 	return items, nil
 }
 
+func (p *ProjectUseCase) Detail(ctx context.Context, uid int, projectId int64) (*entity.ProjectDetailItem, error) {
+	exist, err := p.ProjectMemberRepo.QueryExist(ctx, "project_id = ? AND user_id = ?", projectId, uid)
+	if err != nil {
+		return nil, errors.New(p.Locale.Localize("not_project_member"))
+	}
+	if !exist {
+		return nil, errors.New(p.Locale.Localize("not_project_member"))
+	}
+
+	project, err := p.ProjectRepo.FindById(ctx, int(projectId))
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.ProjectDetailItem{
+		Id:   int64(project.Id),
+		Name: project.Name,
+	}, nil
+}
+
 func (p *ProjectUseCase) GetMembers(ctx context.Context, projectId int64) []*entity.ProjectMemberItem {
 	fields := []string{
 		"project_members.id AS id",
@@ -157,7 +178,7 @@ func (p *ProjectUseCase) IsMember(ctx context.Context, gid, uid int, cache bool)
 		return true
 	}
 
-	exist, err := p.ProjectMemberRepo.QueryExist(ctx, "project_id = ? and user_id = ?", gid, uid)
+	exist, err := p.ProjectMemberRepo.QueryExist(ctx, "project_id = ? AND user_id = ?", gid, uid)
 	if err != nil {
 		return false
 	}

@@ -56,6 +56,7 @@
     "project_dissolved": "The project has been dissolved",
     "invited_list_cannot_be_empty": "The list of invited participants cannot be empty",
     "not_project_member_cannot_invite": "You are not a member of the project and do not have permission to invite others",
+    "not_project_member": "You are not a member of the project",
     "failed_to_send_invitations": "Failed to send invitations",
     "failed_to_invite": "Failed to invite",
     "nothing_found": "Nothing found",

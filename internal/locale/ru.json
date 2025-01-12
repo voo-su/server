@@ -56,6 +56,7 @@
     "project_dissolved": "Проект был расформирован",
     "invited_list_cannot_be_empty": "Список приглашённых не может быть пустым",
     "not_project_member_cannot_invite": "Вы не являетесь участником проекта и не имеете права приглашать",
+    "not_project_member": "Вы не являетесь участником проекта",
     "failed_to_send_invitations": "Не удалось отправить приглашения",
     "failed_to_invite": "Не удалось пригласить",
     "nothing_found": "Ничего не найдено",

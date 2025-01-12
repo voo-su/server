@@ -59,6 +59,8 @@ func (m *ProjectCreateRequest) validate(all bool) error {
 
 	// no validation rules for Title
 
+	// no validation rules for Ids
+
 	if len(errors) > 0 {
 		return ProjectCreateRequestMultiError(errors)
 	}
@@ -481,6 +483,216 @@ var _ interface {
 	ErrorName() string
 } = ProjectListResponseValidationError{}
 
+// Validate checks the field values on ProjectDetailRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ProjectDetailRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectDetailRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ProjectDetailRequestMultiError, or nil if none found.
+func (m *ProjectDetailRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectDetailRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return ProjectDetailRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectDetailRequestMultiError is an error wrapping multiple validation
+// errors returned by ProjectDetailRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ProjectDetailRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectDetailRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectDetailRequestMultiError) AllErrors() []error { return m }
+
+// ProjectDetailRequestValidationError is the validation error returned by
+// ProjectDetailRequest.Validate if the designated constraints aren't met.
+type ProjectDetailRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectDetailRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectDetailRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectDetailRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectDetailRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectDetailRequestValidationError) ErrorName() string {
+	return "ProjectDetailRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectDetailRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectDetailRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectDetailRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectDetailRequestValidationError{}
+
+// Validate checks the field values on ProjectDetailResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ProjectDetailResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectDetailResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ProjectDetailResponseMultiError, or nil if none found.
+func (m *ProjectDetailResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectDetailResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	if len(errors) > 0 {
+		return ProjectDetailResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectDetailResponseMultiError is an error wrapping multiple validation
+// errors returned by ProjectDetailResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ProjectDetailResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectDetailResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectDetailResponseMultiError) AllErrors() []error { return m }
+
+// ProjectDetailResponseValidationError is the validation error returned by
+// ProjectDetailResponse.Validate if the designated constraints aren't met.
+type ProjectDetailResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectDetailResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectDetailResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectDetailResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectDetailResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectDetailResponseValidationError) ErrorName() string {
+	return "ProjectDetailResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectDetailResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectDetailResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectDetailResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectDetailResponseValidationError{}
+
 // Validate checks the field values on ProjectMembersRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -720,6 +932,248 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ProjectMembersResponseValidationError{}
+
+// Validate checks the field values on ProjectInviteFriendsRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ProjectInviteFriendsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectInviteFriendsRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ProjectInviteFriendsRequestMultiError, or nil if none found.
+func (m *ProjectInviteFriendsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectInviteFriendsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for ProjectId
+
+	if len(errors) > 0 {
+		return ProjectInviteFriendsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectInviteFriendsRequestMultiError is an error wrapping multiple
+// validation errors returned by ProjectInviteFriendsRequest.ValidateAll() if
+// the designated constraints aren't met.
+type ProjectInviteFriendsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectInviteFriendsRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectInviteFriendsRequestMultiError) AllErrors() []error { return m }
+
+// ProjectInviteFriendsRequestValidationError is the validation error returned
+// by ProjectInviteFriendsRequest.Validate if the designated constraints
+// aren't met.
+type ProjectInviteFriendsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectInviteFriendsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectInviteFriendsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectInviteFriendsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectInviteFriendsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectInviteFriendsRequestValidationError) ErrorName() string {
+	return "ProjectInviteFriendsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectInviteFriendsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectInviteFriendsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectInviteFriendsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectInviteFriendsRequestValidationError{}
+
+// Validate checks the field values on ProjectInviteFriendsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ProjectInviteFriendsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectInviteFriendsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ProjectInviteFriendsResponseMultiError, or nil if none found.
+func (m *ProjectInviteFriendsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectInviteFriendsResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ProjectInviteFriendsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ProjectInviteFriendsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ProjectInviteFriendsResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return ProjectInviteFriendsResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectInviteFriendsResponseMultiError is an error wrapping multiple
+// validation errors returned by ProjectInviteFriendsResponse.ValidateAll() if
+// the designated constraints aren't met.
+type ProjectInviteFriendsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectInviteFriendsResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectInviteFriendsResponseMultiError) AllErrors() []error { return m }
+
+// ProjectInviteFriendsResponseValidationError is the validation error returned
+// by ProjectInviteFriendsResponse.Validate if the designated constraints
+// aren't met.
+type ProjectInviteFriendsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectInviteFriendsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectInviteFriendsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectInviteFriendsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectInviteFriendsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectInviteFriendsResponseValidationError) ErrorName() string {
+	return "ProjectInviteFriendsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectInviteFriendsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectInviteFriendsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectInviteFriendsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectInviteFriendsResponseValidationError{}
 
 // Validate checks the field values on ProjectInviteRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -1141,3 +1595,112 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ProjectMembersResponse_ItemValidationError{}
+
+// Validate checks the field values on ProjectInviteFriendsResponse_Item with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *ProjectInviteFriendsResponse_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ProjectInviteFriendsResponse_Item
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// ProjectInviteFriendsResponse_ItemMultiError, or nil if none found.
+func (m *ProjectInviteFriendsResponse_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ProjectInviteFriendsResponse_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Username
+
+	if len(errors) > 0 {
+		return ProjectInviteFriendsResponse_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// ProjectInviteFriendsResponse_ItemMultiError is an error wrapping multiple
+// validation errors returned by
+// ProjectInviteFriendsResponse_Item.ValidateAll() if the designated
+// constraints aren't met.
+type ProjectInviteFriendsResponse_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ProjectInviteFriendsResponse_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ProjectInviteFriendsResponse_ItemMultiError) AllErrors() []error { return m }
+
+// ProjectInviteFriendsResponse_ItemValidationError is the validation error
+// returned by ProjectInviteFriendsResponse_Item.Validate if the designated
+// constraints aren't met.
+type ProjectInviteFriendsResponse_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ProjectInviteFriendsResponse_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ProjectInviteFriendsResponse_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ProjectInviteFriendsResponse_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ProjectInviteFriendsResponse_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ProjectInviteFriendsResponse_ItemValidationError) ErrorName() string {
+	return "ProjectInviteFriendsResponse_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ProjectInviteFriendsResponse_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sProjectInviteFriendsResponse_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ProjectInviteFriendsResponse_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ProjectInviteFriendsResponse_ItemValidationError{}

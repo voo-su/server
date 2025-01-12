@@ -30,6 +30,17 @@ func (p *Project) Create(ctx *ginutil.Context) error {
 		return ctx.Error(p.Locale.Localize("creation_failed_try_later") + ": " + err.Error())
 	}
 
+	uIds := sliceutil.Unique(sliceutil.ParseIds(params.Ids))
+	if len(uIds) != 0 {
+		if err := p.ProjectUseCase.Invite(ctx.Ctx(), &usecase.ProjectInviteOpt{
+			ProjectId: int(projectId),
+			UserId:    uid,
+			MemberIds: uIds,
+		}); err != nil {
+			return ctx.Error(p.Locale.Localize("failed_to_send_invitations") + ": " + err.Error())
+		}
+	}
+
 	return ctx.Success(&v1Pb.ProjectCreateResponse{Id: projectId})
 }
 
@@ -50,6 +61,24 @@ func (p *Project) Projects(ctx *ginutil.Context) error {
 	return ctx.Success(v1Pb.ProjectListResponse{Items: items})
 }
 
+func (p *Project) Detail(ctx *ginutil.Context) error {
+	params := &v1Pb.ProjectDetailRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	uid := ctx.UserId()
+	task, err := p.ProjectUseCase.Detail(ctx.Ctx(), uid, params.Id)
+	if err != nil {
+		return ctx.Error(err.Error())
+	}
+
+	return ctx.Success(v1Pb.ProjectDetailResponse{
+		Id:   task.Id,
+		Name: task.Name,
+	})
+}
+
 func (p *Project) Members(ctx *ginutil.Context) error {
 	params := &v1Pb.ProjectMembersRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
@@ -67,6 +96,41 @@ func (p *Project) Members(ctx *ginutil.Context) error {
 	}
 
 	return ctx.Success(v1Pb.ProjectMembersResponse{Items: items})
+}
+
+func (p *Project) GetInviteFriends(ctx *ginutil.Context) error {
+	params := &v1Pb.ProjectInviteFriendsRequest{}
+	if err := ctx.Context.ShouldBind(params); err != nil {
+		return ctx.InvalidParams(err)
+	}
+
+	items, err := p.ContactUseCase.List(ctx.Ctx(), ctx.UserId())
+	if err != nil {
+		return ctx.Error(err.Error())
+	}
+
+	if params.ProjectId <= 0 {
+		return ctx.Success(items)
+	}
+
+	mIds := p.ProjectUseCase.ProjectMemberRepo.GetMemberIds(ctx.Ctx(), int(params.ProjectId))
+	if len(mIds) == 0 {
+		return ctx.Success(items)
+	}
+
+	list := make([]*v1Pb.ProjectInviteFriendsResponse_Item, 0)
+	for _, item := range items {
+		if !sliceutil.Include(item.Id, mIds) {
+			list = append(list, &v1Pb.ProjectInviteFriendsResponse_Item{
+				Id:       int64(item.Id),
+				Username: item.Username,
+			})
+		}
+	}
+
+	return ctx.Success(&v1Pb.ProjectInviteFriendsResponse{
+		Items: list,
+	})
 }
 
 func (p *Project) Invite(ctx *ginutil.Context) error {

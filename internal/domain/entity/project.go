@@ -7,6 +7,11 @@ type ProjectItem struct {
 	Name string `json:"name"`
 }
 
+type ProjectDetailItem struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
 type ProjectMemberItem struct {
 	Id       int64  `json:"id"`
 	UserId   int64  `json:"user_id"`

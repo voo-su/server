@@ -7,7 +7,8 @@ import "tagger/tagger.proto";
 option go_package = "./v1;v1_pb";
 
 message ProjectCreateRequest {
-    string title = 1 [(tagger.tags) = "form:\"title\" label:\"title\""];
+    string title = 1 [(tagger.tags) = "form:\"title\" json:\"title\" label:\"title\""];
+    string ids = 2 [(tagger.tags) = "form:\"ids\" json:\"ids\" binding:\"ids\" label:\"ids\""];
 }
 
 message ProjectCreateResponse {
@@ -25,11 +26,33 @@ message ProjectListResponse {
     repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
 }
 
+message ProjectDetailRequest {
+    int64 id = 1 [(tagger.tags) = "form:\"id\" binding:\"required\" label:\"id\""];
+}
+
+message ProjectDetailResponse {
+    int64 id = 1 [(tagger.tags) = "json:\"id\""];
+    string name = 2 [(tagger.tags) = "json:\"name\""];
+}
+
 message ProjectMembersRequest {
     int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\" label:\"project_id\""];
 }
 
 message ProjectMembersResponse {
+    message Item {
+        int64 id = 1 [(tagger.tags) = "json:\"id\""];
+        string username = 2 [(tagger.tags) = "json:\"username\""];
+    }
+
+    repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
+}
+
+message ProjectInviteFriendsRequest {
+    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" label:\"project_id\""];
+}
+
+message ProjectInviteFriendsResponse {
     message Item {
         int64 id = 1 [(tagger.tags) = "json:\"id\""];
         string username = 2 [(tagger.tags) = "json:\"username\""];
