@@ -35,6 +35,116 @@ var (
 	_ = sort.Sort
 )
 
+// Validate checks the field values on GetRecordsRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *GetRecordsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetRecordsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetRecordsRequestMultiError, or nil if none found.
+func (m *GetRecordsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetRecordsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for DialogType
+
+	// no validation rules for ReceiverId
+
+	// no validation rules for RecordId
+
+	// no validation rules for Limit
+
+	if len(errors) > 0 {
+		return GetRecordsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetRecordsRequestMultiError is an error wrapping multiple validation errors
+// returned by GetRecordsRequest.ValidateAll() if the designated constraints
+// aren't met.
+type GetRecordsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetRecordsRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetRecordsRequestMultiError) AllErrors() []error { return m }
+
+// GetRecordsRequestValidationError is the validation error returned by
+// GetRecordsRequest.Validate if the designated constraints aren't met.
+type GetRecordsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetRecordsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetRecordsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetRecordsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetRecordsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetRecordsRequestValidationError) ErrorName() string {
+	return "GetRecordsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetRecordsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetRecordsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetRecordsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetRecordsRequestValidationError{}
+
 // Validate checks the field values on MessageReceiver with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
@@ -2298,118 +2408,6 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DownloadChatFileRequestValidationError{}
-
-// Validate checks the field values on GetDialogRecordsRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GetDialogRecordsRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on GetDialogRecordsRequest with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// GetDialogRecordsRequestMultiError, or nil if none found.
-func (m *GetDialogRecordsRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *GetDialogRecordsRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for DialogType
-
-	// no validation rules for MsgType
-
-	// no validation rules for ReceiverId
-
-	// no validation rules for RecordId
-
-	// no validation rules for Limit
-
-	if len(errors) > 0 {
-		return GetDialogRecordsRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// GetDialogRecordsRequestMultiError is an error wrapping multiple validation
-// errors returned by GetDialogRecordsRequest.ValidateAll() if the designated
-// constraints aren't met.
-type GetDialogRecordsRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m GetDialogRecordsRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m GetDialogRecordsRequestMultiError) AllErrors() []error { return m }
-
-// GetDialogRecordsRequestValidationError is the validation error returned by
-// GetDialogRecordsRequest.Validate if the designated constraints aren't met.
-type GetDialogRecordsRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e GetDialogRecordsRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e GetDialogRecordsRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e GetDialogRecordsRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e GetDialogRecordsRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e GetDialogRecordsRequestValidationError) ErrorName() string {
-	return "GetDialogRecordsRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e GetDialogRecordsRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sGetDialogRecordsRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = GetDialogRecordsRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = GetDialogRecordsRequestValidationError{}
 
 // Validate checks the field values on VoteMessageHandleRequest with the rules
 // defined in the proto definition for this message. If any rules are

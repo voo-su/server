@@ -6,24 +6,28 @@ import (
 	"voo.su/internal/infrastructure"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
+	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/locale"
 )
 
 type GroupChatRequestUseCase struct {
-	Locale               locale.ILocale
-	Source               *infrastructure.Source
-	GroupChatRequestRepo *postgresRepo.GroupChatRequestRepository
+	Locale                locale.ILocale
+	Source                *infrastructure.Source
+	GroupChatRequestRepo  *postgresRepo.GroupChatRequestRepository
+	GroupRequestCacheRepo *redisRepo.GroupChatRequestCacheRepository
 }
 
 func NewGroupRequestUseCase(
 	locale locale.ILocale,
 	source *infrastructure.Source,
 	groupChatRequestRepo *postgresRepo.GroupChatRequestRepository,
+	groupRequestCacheRepo *redisRepo.GroupChatRequestCacheRepository,
 ) *GroupChatRequestUseCase {
 	return &GroupChatRequestUseCase{
-		Locale:               locale,
-		Source:               source,
-		GroupChatRequestRepo: groupChatRequestRepo,
+		Locale:                locale,
+		Source:                source,
+		GroupChatRequestRepo:  groupChatRequestRepo,
+		GroupRequestCacheRepo: groupRequestCacheRepo,
 	}
 }
 

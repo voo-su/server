@@ -7,7 +7,6 @@ import (
 	"google.golang.org/grpc/status"
 	chatPb "voo.su/api/grpc/gen/go/pb"
 	"voo.su/internal/config"
-	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/grpcutil"
 	"voo.su/pkg/locale"
@@ -16,13 +15,11 @@ import (
 
 type Chat struct {
 	chatPb.UnimplementedChatServiceServer
-	Conf             *config.Config
-	Locale           locale.ILocale
-	ContactUseCase   *usecase.ContactUseCase
-	ChatUseCase      *usecase.ChatUseCase
-	MessageUseCase   usecase.IMessageUseCase
-	MessageCacheRepo *redisRepo.MessageCacheRepository
-	UnreadCacheRepo  *redisRepo.UnreadCacheRepository
+	Conf           *config.Config
+	Locale         locale.ILocale
+	ContactUseCase *usecase.ContactUseCase
+	ChatUseCase    *usecase.ChatUseCase
+	MessageUseCase usecase.IMessageUseCase
 }
 
 func NewChatHandler(
@@ -30,23 +27,19 @@ func NewChatHandler(
 	locale locale.ILocale,
 	contactUseCase *usecase.ContactUseCase,
 	chatUseCase *usecase.ChatUseCase,
-	messageCache *redisRepo.MessageCacheRepository,
-	unreadCache *redisRepo.UnreadCacheRepository,
 ) *Chat {
 	return &Chat{
-		Conf:             conf,
-		Locale:           locale,
-		ContactUseCase:   contactUseCase,
-		ChatUseCase:      chatUseCase,
-		MessageCacheRepo: messageCache,
-		UnreadCacheRepo:  unreadCache,
+		Conf:           conf,
+		Locale:         locale,
+		ContactUseCase: contactUseCase,
+		ChatUseCase:    chatUseCase,
 	}
 }
 
 func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb.GetChatListResponse, error) {
 	uid := grpcutil.UserId(ctx)
 
-	unReads := c.UnreadCacheRepo.All(ctx, uid)
+	unReads := c.ChatUseCase.UnreadCacheRepo.All(ctx, uid)
 	if len(unReads) > 0 {
 		c.ChatUseCase.BatchAddList(ctx, uid, unReads)
 	}
@@ -80,7 +73,7 @@ func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb
 			value.Avatar = item.GroupAvatar
 		}
 
-		if msg, err := c.MessageCacheRepo.Get(ctx, item.DialogType, uid, item.ReceiverId); err == nil {
+		if msg, err := c.ChatUseCase.MessageCacheRepo.Get(ctx, item.DialogType, uid, item.ReceiverId); err == nil {
 			value.MsgText = msg.Content
 			value.UpdatedAt = msg.Datetime
 		}

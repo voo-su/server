@@ -7,6 +7,7 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
+	"voo.su/internal/domain/entity"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
@@ -54,11 +55,11 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 
 	claims, err := jwtutil.ParseToken(params.Token, a.Conf.App.Jwt.Secret)
 	if err != nil {
-		return ctx.InvalidParams(a.Locale.Localize("invalid_code"))
+		return ctx.InvalidParams(a.Locale.Localize("invalid_token"))
 	}
 
-	if claims.Guard != "auth" || claims.Valid() != nil {
-		return ctx.InvalidParams(a.Locale.Localize("invalid_code"))
+	if claims.Guard != constant.GuardHttpAuth || claims.Valid() != nil {
+		return ctx.InvalidParams(a.Locale.Localize("invalid_token"))
 	}
 
 	user, err := a.AuthUseCase.Register(ctx.Ctx(), claims.ID)
@@ -91,7 +92,7 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 			fmt.Println(err)
 		}
 
-		if err := a.MessageUseCase.SendLogin(ctx.Ctx(), user.Id, &usecase.SendLogin{
+		if err := a.MessageUseCase.SendLogin(ctx.Ctx(), user.Id, &entity.SendLogin{
 			Ip:      ip,
 			Agent:   ctx.Context.GetHeader("user-agent"),
 			Address: address,

@@ -20,12 +20,13 @@ import (
 )
 
 type GroupChatUseCase struct {
-	Locale        locale.ILocale
-	Source        *infrastructure.Source
-	GroupChatRepo *postgresRepo.GroupChatRepository
-	MemberRepo    *postgresRepo.GroupChatMemberRepository
-	SequenceRepo  *postgresRepo.SequenceRepository
-	RelationCache *redisRepo.RelationCacheRepository
+	Locale             locale.ILocale
+	Source             *infrastructure.Source
+	GroupChatRepo      *postgresRepo.GroupChatRepository
+	MemberRepo         *postgresRepo.GroupChatMemberRepository
+	SequenceRepo       *postgresRepo.SequenceRepository
+	RelationCache      *redisRepo.RelationCacheRepository
+	RedisLockCacheRepo *redisRepo.RedisLockCacheRepository
 }
 
 func NewGroupChatUseCase(
@@ -35,14 +36,16 @@ func NewGroupChatUseCase(
 	memberRepo *postgresRepo.GroupChatMemberRepository,
 	sequenceRepo *postgresRepo.SequenceRepository,
 	relationCache *redisRepo.RelationCacheRepository,
+	redisLockCacheRepo *redisRepo.RedisLockCacheRepository,
 ) *GroupChatUseCase {
 	return &GroupChatUseCase{
-		Locale:        locale,
-		Source:        source,
-		GroupChatRepo: groupChatRepo,
-		MemberRepo:    memberRepo,
-		SequenceRepo:  sequenceRepo,
-		RelationCache: relationCache,
+		Locale:             locale,
+		Source:             source,
+		GroupChatRepo:      groupChatRepo,
+		MemberRepo:         memberRepo,
+		SequenceRepo:       sequenceRepo,
+		RelationCache:      relationCache,
+		RedisLockCacheRepo: redisLockCacheRepo,
 	}
 }
 

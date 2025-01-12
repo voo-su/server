@@ -7,31 +7,31 @@ import (
 )
 
 type Source struct {
-	DB         *gorm.DB
-	clickHouse clickHouseDriver.Conn
-	redis      *redis.Client
+	PG  *gorm.DB
+	CH  *clickHouseDriver.Conn
+	Rds *redis.Client
 }
 
 func NewSource(
-	db *gorm.DB,
-	clickHouse clickHouseDriver.Conn,
+	postgres *gorm.DB,
+	clickHouse *clickHouseDriver.Conn,
 	redis *redis.Client,
 ) *Source {
 	return &Source{
-		DB:         db,
-		clickHouse: clickHouse,
-		redis:      redis,
+		PG:  postgres,
+		CH:  clickHouse,
+		Rds: redis,
 	}
 }
 
 func (s *Source) Postgres() *gorm.DB {
-	return s.DB
+	return s.PG
 }
 
 func (s *Source) Redis() *redis.Client {
-	return s.redis
+	return s.Rds
 }
 
-func (s *Source) ClickHouse() clickHouseDriver.Conn {
-	return s.clickHouse
+func (s *Source) ClickHouse() *clickHouseDriver.Conn {
+	return s.CH
 }

@@ -7,16 +7,18 @@ import (
 	"voo.su/internal/infrastructure"
 	"voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
+	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/sliceutil"
 )
 
 type StickerUseCase struct {
-	Locale      locale.ILocale
-	Source      *infrastructure.Source
-	StickerRepo *postgresRepo.StickerRepository
-	IMinio      minio.IMinio
+	Locale             locale.ILocale
+	Source             *infrastructure.Source
+	StickerRepo        *postgresRepo.StickerRepository
+	IMinio             minio.IMinio
+	RedisLockCacheRepo *redisRepo.RedisLockCacheRepository
 }
 
 func NewStickerUseCase(
@@ -24,12 +26,14 @@ func NewStickerUseCase(
 	source *infrastructure.Source,
 	stickerRepo *postgresRepo.StickerRepository,
 	minio minio.IMinio,
+	redisLockCacheRepo *redisRepo.RedisLockCacheRepository,
 ) *StickerUseCase {
 	return &StickerUseCase{
-		Locale:      locale,
-		Source:      source,
-		StickerRepo: stickerRepo,
-		IMinio:      minio,
+		Locale:             locale,
+		Source:             source,
+		StickerRepo:        stickerRepo,
+		IMinio:             minio,
+		RedisLockCacheRepo: redisLockCacheRepo,
 	}
 }
 

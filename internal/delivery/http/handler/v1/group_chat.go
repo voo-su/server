@@ -6,7 +6,6 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
-	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/jsonutil"
@@ -24,7 +23,6 @@ type GroupChat struct {
 	ContactUseCase         *usecase.ContactUseCase
 	MessageUseCase         usecase.IMessageUseCase
 	UserUseCase            *usecase.UserUseCase
-	RedisLockCacheRepo     *redisRepo.RedisLockCacheRepository
 }
 
 func (g *GroupChat) Create(ctx *ginutil.Context) error {
@@ -53,11 +51,11 @@ func (g *GroupChat) Invite(ctx *ginutil.Context) error {
 	}
 
 	key := fmt.Sprintf("group-join:%d", params.GroupId)
-	if !g.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 20) {
+	if !g.GroupChatUseCase.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 20) {
 		return ctx.Error(g.Locale.Localize("network_error"))
 	}
 
-	defer g.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
+	defer g.GroupChatUseCase.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
 		return ctx.Error(g.Locale.Localize("network_error"))

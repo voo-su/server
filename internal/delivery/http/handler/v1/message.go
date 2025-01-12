@@ -13,7 +13,6 @@ import (
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
-	"voo.su/pkg/minio"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
@@ -23,8 +22,8 @@ type Message struct {
 	Locale                 locale.ILocale
 	ChatUseCase            *usecase.ChatUseCase
 	MessageUseCase         usecase.IMessageUseCase
-	Minio                  minio.IMinio
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
+	StorageUseCase         *usecase.StorageUseCase
 }
 
 var mapping map[string]func(ctx *ginutil.Context) error
@@ -416,7 +415,7 @@ func (m *Message) Download(ctx *ginutil.Context) error {
 
 	ctx.Context.Redirect(
 		http.StatusFound,
-		m.Minio.PrivateUrl(m.Conf.Minio.GetBucket(), fileInfo.Path, fileInfo.Name, 60*time.Second),
+		m.StorageUseCase.Minio.PrivateUrl(m.Conf.Minio.GetBucket(), fileInfo.Path, fileInfo.Name, 60*time.Second),
 	)
 
 	return nil

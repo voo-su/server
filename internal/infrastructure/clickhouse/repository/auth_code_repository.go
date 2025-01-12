@@ -5,28 +5,20 @@ import (
 	"fmt"
 	clickHouseDriver "github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 	"voo.su/internal/infrastructure/clickhouse/model"
+	"voo.su/pkg/clickhouseutil"
 )
 
 type AuthCodeRepository struct {
-	ClickHouse clickHouseDriver.Conn
+	clickhouseutil.Repo[model.AuthCode]
 }
 
-func NewAuthCodeRepository(clickHouse clickHouseDriver.Conn) *AuthCodeRepository {
-	return &AuthCodeRepository{
-		ClickHouse: clickHouse,
-	}
+func NewAuthCodeRepository(clickHouse *clickHouseDriver.Conn) *AuthCodeRepository {
+	return &AuthCodeRepository{Repo: clickhouseutil.NewRepo[model.AuthCode](clickHouse)}
 }
 
-func (a *AuthCodeRepository) Create(ctx context.Context, code *model.AuthCode) error {
-	if err := a.ClickHouse.Exec(
-		ctx,
-		"INSERT INTO auth_codes (email, code, token, error_message) VALUES (?, ?, ?, ?)",
-		code.Email,
-		code.Code,
-		code.Token,
-		code.ErrorMessage,
-	); err != nil {
-		return fmt.Errorf("не удалось записать лог код аутентификации: %w", err)
+func (a *AuthCodeRepository) Create(ctx context.Context, authCode *model.AuthCode) error {
+	if err := a.Repo.Create(ctx, authCode); err != nil {
+		return fmt.Errorf("не удалось записать лог код аутентификации: %s", err)
 	}
 
 	return nil

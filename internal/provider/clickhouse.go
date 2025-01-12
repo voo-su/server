@@ -9,7 +9,7 @@ import (
 	"voo.su/pkg/locale"
 )
 
-func NewClickHouseClient(conf *config.Config, locale locale.ILocale) clickHouseDriver.Conn {
+func NewClickHouseClient(conf *config.Config, locale locale.ILocale) *clickHouseDriver.Conn {
 	conn, err := clickhouse.Open(conf.ClickHouse.Options())
 	if err != nil {
 		panic(fmt.Errorf(locale.Localize("connection_error"), "ClickHouse", err))
@@ -25,5 +25,5 @@ func NewClickHouseClient(conf *config.Config, locale locale.ILocale) clickHouseD
 		}
 	}
 
-	return conn
+	return &conn
 }

@@ -25,6 +25,7 @@ type ProjectUseCase struct {
 	RelationCache             *redisRepo.RelationCacheRepository
 	ProjectTaskCoexecutorRepo *postgresRepo.ProjectTaskCoexecutorRepository
 	ProjectTaskWatcherRepo    *postgresRepo.ProjectTaskWatcherRepository
+	RedisLockCacheRepo        *redisRepo.RedisLockCacheRepository
 }
 
 func NewProjectUseCase(
@@ -39,6 +40,7 @@ func NewProjectUseCase(
 	relationCache *redisRepo.RelationCacheRepository,
 	projectTaskCoexecutorRepo *postgresRepo.ProjectTaskCoexecutorRepository,
 	projectTaskWatcherRepo *postgresRepo.ProjectTaskWatcherRepository,
+	redisLockCacheRepo *redisRepo.RedisLockCacheRepository,
 ) *ProjectUseCase {
 	return &ProjectUseCase{
 		Locale:                    locale,

@@ -6,6 +6,13 @@ import "tagger/tagger.proto";
 
 option go_package = "./v1;v1_pb";
 
+message GetRecordsRequest {
+    int64 dialog_type = 1 [(tagger.tags) = "form:\"dialog_type\" json:\"dialog_type\" binding:\"required,oneof=1 2\" label:\"dialog_type\""];
+    int64 receiver_id = 2 [(tagger.tags) = "form:\"receiver_id\" json:\"receiver_id\" binding:\"required,numeric,min=1\" label:\"receiver_id\""];
+    int64 record_id = 3 [(tagger.tags) = "form:\"record_id\" json:\"record_id\" binding:\"min=0,numeric\" label:\"record_id\""];
+    int64 limit = 4 [(tagger.tags) = "form:\"limit\" json:\"limit\" binding:\"required,numeric,max=100\" label:\"limit\""];
+}
+
 message MessageReceiver {
     int32 dialog_type = 1 [(tagger.tags) = "binding:\"required\" label:\"dialog_type\""];
     int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\" label:\"receiver_id\""];
@@ -137,14 +144,6 @@ message CollectMessageRequest {
 
 message DownloadChatFileRequest {
     int64 record_id = 1 [(tagger.tags) = "form:\"cr_id\" json:\"cr_id\" binding:\"required,min=1\" label:\"cr_id\""];
-}
-
-message GetDialogRecordsRequest {
-    int64 dialog_type = 1 [(tagger.tags) = "form:\"dialog_type\" json:\"dialog_type\" binding:\"required,oneof=1 2\" label:\"dialog_type\""];
-    int64 msg_type = 2 [(tagger.tags) = "form:\"msg_type\" json:\"msg_type\" binding:\"numeric\" label:\"msg_type\""];
-    int64 receiver_id = 3 [(tagger.tags) = "form:\"receiver_id\" json:\"receiver_id\" binding:\"required,numeric,min=1\" label:\"receiver_id\""];
-    int64 record_id = 4 [(tagger.tags) = "form:\"record_id\" json:\"record_id\" binding:\"min=0,numeric\" label:\"record_id\""];
-    int64 limit = 5 [(tagger.tags) = "form:\"limit\" json:\"limit\" binding:\"required,numeric,max=100\" label:\"limit\""];
 }
 
 message VoteMessageHandleRequest {

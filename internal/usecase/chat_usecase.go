@@ -12,6 +12,7 @@ import (
 	"voo.su/internal/infrastructure"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
+	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/sliceutil"
@@ -24,6 +25,10 @@ type ChatUseCase struct {
 	Source              *infrastructure.Source
 	ChatRepo            *postgresRepo.ChatRepository
 	GroupChatMemberRepo *postgresRepo.GroupChatMemberRepository
+	RedisLockRepo       *redisRepo.RedisLockCacheRepository
+	ClientCacheRepo     *redisRepo.ClientCacheRepository
+	MessageCacheRepo    *redisRepo.MessageCacheRepository
+	UnreadCacheRepo     *redisRepo.UnreadCacheRepository
 }
 
 func NewChatUseCase(
@@ -31,12 +36,20 @@ func NewChatUseCase(
 	source *infrastructure.Source,
 	chatRepo *postgresRepo.ChatRepository,
 	groupChatMemberRepo *postgresRepo.GroupChatMemberRepository,
+	redisLockRepo *redisRepo.RedisLockCacheRepository,
+	clientCacheRepo *redisRepo.ClientCacheRepository,
+	messageCacheRepo *redisRepo.MessageCacheRepository,
+	unreadCacheRepository *redisRepo.UnreadCacheRepository,
 ) *ChatUseCase {
 	return &ChatUseCase{
 		Locale:              locale,
 		Source:              source,
 		ChatRepo:            chatRepo,
 		GroupChatMemberRepo: groupChatMemberRepo,
+		RedisLockRepo:       redisLockRepo,
+		ClientCacheRepo:     clientCacheRepo,
+		MessageCacheRepo:    messageCacheRepo,
+		UnreadCacheRepo:     unreadCacheRepository,
 	}
 }
 

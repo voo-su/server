@@ -8,7 +8,6 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
-	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg"
 	"voo.su/pkg/ginutil"
@@ -19,11 +18,10 @@ import (
 )
 
 type Sticker struct {
-	Conf               *config.Config
-	Locale             locale.ILocale
-	StickerUseCase     *usecase.StickerUseCase
-	Minio              minio.IMinio
-	RedisLockCacheRepo *redisRepo.RedisLockCacheRepository
+	Conf           *config.Config
+	Locale         locale.ILocale
+	StickerUseCase *usecase.StickerUseCase
+	StorageUseCase *usecase.StorageUseCase
 }
 
 func (s *Sticker) CollectList(ctx *ginutil.Context) error {
@@ -104,14 +102,14 @@ func (s *Sticker) Upload(ctx *ginutil.Context) error {
 	ext := strutil.FileSuffix(file.Filename)
 
 	src := strutil.GenMediaObjectName(ext, meta.Width, meta.Height)
-	if err = s.Minio.Write(s.Conf.Minio.GetBucket(), src, stream); err != nil {
+	if err = s.StorageUseCase.Minio.Write(s.Conf.Minio.GetBucket(), src, stream); err != nil {
 		return ctx.Error(s.Locale.Localize("upload_error"))
 	}
 
 	m := &postgresModel.StickerItem{
 		UserId:      ctx.UserId(),
 		Description: s.Locale.Localize("custom_set"),
-		Url:         s.Minio.PublicUrl(s.Conf.Minio.GetBucket(), src),
+		Url:         s.StorageUseCase.Minio.PublicUrl(s.Conf.Minio.GetBucket(), src),
 		FileSuffix:  ext,
 		FileSize:    int(file.Size),
 	}
@@ -156,11 +154,11 @@ func (s *Sticker) SetSystemSticker(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if !s.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 5) {
+	if !s.StickerUseCase.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 5) {
 		return ctx.Error(s.Locale.Localize("too_many_requests"))
 	}
 
-	defer s.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
+	defer s.StickerUseCase.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
 	if params.Type == 2 {
 		if err = s.StickerUseCase.RemoveUserSysSticker(uid, int(params.StickerId)); err != nil {
 			return ctx.Error(err.Error())

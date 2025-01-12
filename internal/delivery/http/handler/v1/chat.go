@@ -6,7 +6,7 @@ import (
 	"strings"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
-	redisRepo "voo.su/internal/infrastructure/redis/repository"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/encrypt"
 	"voo.su/pkg/ginutil"
@@ -16,17 +16,12 @@ import (
 )
 
 type Chat struct {
-	Locale                 locale.ILocale
-	ChatUseCase            *usecase.ChatUseCase
-	ContactUseCase         *usecase.ContactUseCase
-	GroupChatUseCase       *usecase.GroupChatUseCase
-	AuthUseCase            *usecase.AuthUseCase
-	UserUseCase            *usecase.UserUseCase
-	RedisLockRepo          *redisRepo.RedisLockCacheRepository
-	ClientCacheRepo        *redisRepo.ClientCacheRepository
-	MessageCacheRepo       *redisRepo.MessageCacheRepository
-	UnreadCacheRepo        *redisRepo.UnreadCacheRepository
-	ContactRemarkCacheRepo *redisRepo.ContactRemarkCacheRepository
+	Locale           locale.ILocale
+	ChatUseCase      *usecase.ChatUseCase
+	MessageUseCase   usecase.IMessageUseCase
+	ContactUseCase   *usecase.ContactUseCase
+	GroupChatUseCase *usecase.GroupChatUseCase
+	UserUseCase      *usecase.UserUseCase
 }
 
 func (c *Chat) Create(ctx *ginutil.Context) error {
@@ -48,11 +43,11 @@ func (c *Chat) Create(ctx *ginutil.Context) error {
 	}
 
 	key := fmt.Sprintf("dialog:list:%d-%d-%d-%s", uid, params.ReceiverId, params.DialogType, agent)
-	if !c.RedisLockRepo.Lock(ctx.Ctx(), key, 10) {
+	if !c.ChatUseCase.RedisLockRepo.Lock(ctx.Ctx(), key, 10) {
 		return ctx.Error(c.Locale.Localize("creation_error"))
 	}
 
-	if c.AuthUseCase.IsAuth(ctx.Ctx(), &usecase.AuthOption{
+	if c.MessageUseCase.IsAccess(ctx.Ctx(), &entity.MessageAccess{
 		DialogType: int(params.DialogType),
 		UserId:     uid,
 		ReceiverId: int(params.ReceiverId),
@@ -77,7 +72,7 @@ func (c *Chat) Create(ctx *ginutil.Context) error {
 		UpdatedAt:  timeutil.DateTime(),
 	}
 	if item.DialogType == constant.ChatPrivateMode {
-		item.UnreadNum = int32(c.UnreadCacheRepo.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
+		item.UnreadNum = int32(c.ChatUseCase.UnreadCacheRepo.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
 		item.Remark = c.ContactUseCase.ContactRepo.GetFriendRemark(ctx.Ctx(), uid, int(params.ReceiverId))
 		if user, err := c.UserUseCase.UserRepo.FindById(ctx.Ctx(), result.ReceiverId); err == nil {
 			item.Username = user.Username
@@ -91,7 +86,7 @@ func (c *Chat) Create(ctx *ginutil.Context) error {
 		}
 	}
 
-	if msg, err := c.MessageCacheRepo.Get(ctx.Ctx(), result.DialogType, uid, result.ReceiverId); err == nil {
+	if msg, err := c.ChatUseCase.MessageCacheRepo.Get(ctx.Ctx(), result.DialogType, uid, result.ReceiverId); err == nil {
 		item.MsgText = msg.Content
 		item.UpdatedAt = msg.Datetime
 	}
@@ -117,7 +112,7 @@ func (c *Chat) Create(ctx *ginutil.Context) error {
 
 func (c *Chat) List(ctx *ginutil.Context) error {
 	uid := ctx.UserId()
-	unReads := c.UnreadCacheRepo.All(ctx.Ctx(), uid)
+	unReads := c.ChatUseCase.UnreadCacheRepo.All(ctx.Ctx(), uid)
 	if len(unReads) > 0 {
 		c.ChatUseCase.BatchAddList(ctx.Ctx(), uid, unReads)
 	}
@@ -166,13 +161,13 @@ func (c *Chat) List(ctx *ginutil.Context) error {
 			//}
 			value.Surname = item.Surname
 			value.Remark = remarks[item.ReceiverId]
-			value.IsOnline = int32(strutil.BoolToInt(c.ClientCacheRepo.IsOnline(ctx.Ctx(), constant.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))))
+			value.IsOnline = int32(strutil.BoolToInt(c.ChatUseCase.ClientCacheRepo.IsOnline(ctx.Ctx(), constant.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))))
 		} else {
 			value.Name = item.GroupName
 			value.Avatar = item.GroupAvatar
 		}
 
-		if msg, err := c.MessageCacheRepo.Get(ctx.Ctx(), item.DialogType, uid, item.ReceiverId); err == nil {
+		if msg, err := c.ChatUseCase.MessageCacheRepo.Get(ctx.Ctx(), item.DialogType, uid, item.ReceiverId); err == nil {
 			value.MsgText = msg.Content
 			value.UpdatedAt = msg.Datetime
 		}
@@ -201,7 +196,7 @@ func (c *Chat) ClearUnreadMessage(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	c.UnreadCacheRepo.Reset(ctx.Ctx(), int(params.DialogType), int(params.ReceiverId), ctx.UserId())
+	c.ChatUseCase.UnreadCacheRepo.Reset(ctx.Ctx(), int(params.DialogType), int(params.ReceiverId), ctx.UserId())
 
 	return ctx.Success(&v1Pb.ChatClearUnreadNumResponse{})
 }

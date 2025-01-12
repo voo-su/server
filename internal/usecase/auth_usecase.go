@@ -31,6 +31,7 @@ type AuthUseCase struct {
 	SmsCache            *redisRepo.SmsCacheRepository
 	GroupChatMemberRepo *postgresRepo.GroupChatMemberRepository
 	UserRepo            *postgresRepo.UserRepository
+	UserSessionRepo     *postgresRepo.UserSessionRepository
 	AuthCodeRepo        *clickhouseRepo.AuthCodeRepository
 	JwtTokenCacheRepo   *redisRepo.JwtTokenCacheRepository
 }
@@ -41,7 +42,8 @@ func NewAuthUseCase(
 	email *email.Email,
 	smsCache *redisRepo.SmsCacheRepository,
 	groupChatMember *postgresRepo.GroupChatMemberRepository,
-	repo *postgresRepo.UserRepository,
+	userRepo *postgresRepo.UserRepository,
+	userSessionRepo *postgresRepo.UserSessionRepository,
 	authCodeRepo *clickhouseRepo.AuthCodeRepository,
 	jwtTokenCacheRepository *redisRepo.JwtTokenCacheRepository,
 ) *AuthUseCase {
@@ -51,7 +53,8 @@ func NewAuthUseCase(
 		Email:               email,
 		SmsCache:            smsCache,
 		GroupChatMemberRepo: groupChatMember,
-		UserRepo:            repo,
+		UserRepo:            userRepo,
+		UserSessionRepo:     userSessionRepo,
 		AuthCodeRepo:        authCodeRepo,
 		JwtTokenCacheRepo:   jwtTokenCacheRepository,
 	}

@@ -3,7 +3,6 @@ package v1
 import (
 	"fmt"
 	v1Pb "voo.su/api/http/pb/v1"
-	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
@@ -11,9 +10,9 @@ import (
 )
 
 type Project struct {
-	Locale             locale.ILocale
-	ProjectUseCase     *usecase.ProjectUseCase
-	RedisLockCacheRepo *redisRepo.RedisLockCacheRepository
+	Locale         locale.ILocale
+	ProjectUseCase *usecase.ProjectUseCase
+	ContactUseCase *usecase.ContactUseCase
 }
 
 func (p *Project) Create(ctx *ginutil.Context) error {
@@ -22,8 +21,9 @@ func (p *Project) Create(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
+	uid := ctx.UserId()
 	projectId, err := p.ProjectUseCase.CreateProject(ctx.Ctx(), &usecase.ProjectOpt{
-		UserId: ctx.UserId(),
+		UserId: uid,
 		Title:  params.Title,
 	})
 	if err != nil {
@@ -76,11 +76,11 @@ func (p *Project) Invite(ctx *ginutil.Context) error {
 	}
 
 	key := fmt.Sprintf("project-join:%d", params.ProjectId)
-	if !p.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 20) {
+	if !p.ProjectUseCase.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 20) {
 		return ctx.Error(p.Locale.Localize("network_error"))
 	}
 
-	defer p.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
+	defer p.ProjectUseCase.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
 
 	project, err := p.ProjectUseCase.ProjectRepo.FindById(ctx.Ctx(), int(params.ProjectId))
 	if err != nil {
@@ -91,8 +91,8 @@ func (p *Project) Invite(ctx *ginutil.Context) error {
 		return ctx.Error(p.Locale.Localize("project_dissolved"))
 	}
 
-	uids := sliceutil.Unique(sliceutil.ParseIds(params.Ids))
-	if len(uids) == 0 {
+	uIds := sliceutil.Unique(sliceutil.ParseIds(params.Ids))
+	if len(uIds) == 0 {
 		return ctx.Error(p.Locale.Localize("invited_list_cannot_be_empty"))
 	}
 
@@ -104,7 +104,7 @@ func (p *Project) Invite(ctx *ginutil.Context) error {
 	if err := p.ProjectUseCase.Invite(ctx.Ctx(), &usecase.ProjectInviteOpt{
 		ProjectId: int(params.ProjectId),
 		UserId:    uid,
-		MemberIds: uids,
+		MemberIds: uIds,
 	}); err != nil {
 		return ctx.Error(p.Locale.Localize("failed_to_send_invitations") + ": " + err.Error())
 	}

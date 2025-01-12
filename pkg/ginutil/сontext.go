@@ -65,7 +65,7 @@ func (c *Context) InvalidParams(message any) error {
 func (c *Context) Error(message any) error {
 	resp := &Response{
 		Code:    400,
-		Message: "error",
+		Message: "Error",
 	}
 	switch msg := message.(type) {
 	case error:

@@ -1,12 +1,10 @@
 package v1
 
 import (
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
-	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/jsonutil"
@@ -17,11 +15,9 @@ import (
 
 type GroupChatRequest struct {
 	Locale                  locale.ILocale
-	GroupRequestCacheRepo   *redisRepo.GroupChatRequestCacheRepository
 	GroupChatRequestUseCase *usecase.GroupChatRequestUseCase
 	GroupChatMemberUseCase  *usecase.GroupChatMemberUseCase
 	GroupChatUseCase        *usecase.GroupChatUseCase
-	Redis                   *redis.Client
 }
 
 func (g *GroupChatRequest) Create(ctx *ginutil.Context) error {
@@ -55,10 +51,10 @@ func (g *GroupChatRequest) Create(ctx *ginutil.Context) error {
 
 	find, err := g.GroupChatMemberUseCase.MemberRepo.FindByWhere(ctx.Ctx(), "group_id = ? AND leader = ?", params.GroupId, 2)
 	if err == nil && find != nil {
-		g.GroupRequestCacheRepo.Incr(ctx.Ctx(), find.UserId)
+		g.GroupChatRequestUseCase.GroupRequestCacheRepo.Incr(ctx.Ctx(), find.UserId)
 	}
 
-	g.Redis.Publish(ctx.Ctx(), constant.ImTopicChat, jsonutil.Encode(map[string]interface{}{
+	g.GroupChatRequestUseCase.Source.Redis().Publish(ctx.Ctx(), constant.ImTopicChat, jsonutil.Encode(map[string]interface{}{
 		"event": constant.SubEventGroupChatRequest,
 		"data": jsonutil.Encode(map[string]interface{}{
 			"group_id": params.GroupId,
@@ -235,13 +231,13 @@ func (g *GroupChatRequest) All(ctx *ginutil.Context) error {
 		})
 	}
 
-	g.GroupRequestCacheRepo.Del(ctx.Ctx(), ctx.UserId())
+	g.GroupChatRequestUseCase.GroupRequestCacheRepo.Del(ctx.Ctx(), ctx.UserId())
 
 	return ctx.Success(resp)
 }
 
 func (g *GroupChatRequest) RequestUnreadNum(ctx *ginutil.Context) error {
 	return ctx.Success(&v1Pb.GroupChatUnreadNumResponse{
-		UnreadNum: int64(g.GroupRequestCacheRepo.Get(ctx.Ctx(), ctx.UserId())),
+		UnreadNum: int64(g.GroupChatRequestUseCase.GroupRequestCacheRepo.Get(ctx.Ctx(), ctx.UserId())),
 	})
 }

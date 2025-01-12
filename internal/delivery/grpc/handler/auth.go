@@ -11,9 +11,8 @@ import (
 	authPb "voo.su/api/grpc/gen/go/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
+	"voo.su/internal/domain/entity"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
-	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
-	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/grpcutil"
 	"voo.su/pkg/jwtutil"
@@ -22,36 +21,32 @@ import (
 
 type Auth struct {
 	authPb.UnimplementedAuthServiceServer
-	Conf              *config.Config
-	Locale            locale.ILocale
-	AuthUseCase       *usecase.AuthUseCase
-	JwtTokenCacheRepo *redisRepo.JwtTokenCacheRepository
-	IpAddressUseCase  *usecase.IpAddressUseCase
-	ChatUseCase       *usecase.ChatUseCase
-	BotRepo           *postgresRepo.BotRepository
-	MessageUseCase    usecase.IMessageUseCase
-	UserSession       *postgresRepo.UserSessionRepository
+	Conf             *config.Config
+	Locale           locale.ILocale
+	AuthUseCase      *usecase.AuthUseCase
+	IpAddressUseCase *usecase.IpAddressUseCase
+	ChatUseCase      *usecase.ChatUseCase
+	BotUseCase       *usecase.BotUseCase
+	MessageUseCase   usecase.IMessageUseCase
 }
 
 func NewAuthHandler(
 	conf *config.Config,
 	locale locale.ILocale,
 	authUseCase *usecase.AuthUseCase,
-	jwtTokenCacheRepo *redisRepo.JwtTokenCacheRepository,
 	ipAddressUseCase *usecase.IpAddressUseCase,
 	chatUseCase *usecase.ChatUseCase,
-	botRepo *postgresRepo.BotRepository,
-	userSession *postgresRepo.UserSessionRepository,
+	botUseCase *usecase.BotUseCase,
+	messageUseCase usecase.IMessageUseCase,
 ) *Auth {
 	return &Auth{
-		Conf:              conf,
-		Locale:            locale,
-		AuthUseCase:       authUseCase,
-		JwtTokenCacheRepo: jwtTokenCacheRepo,
-		IpAddressUseCase:  ipAddressUseCase,
-		ChatUseCase:       chatUseCase,
-		BotRepo:           botRepo,
-		UserSession:       userSession,
+		Conf:             conf,
+		Locale:           locale,
+		AuthUseCase:      authUseCase,
+		IpAddressUseCase: ipAddressUseCase,
+		ChatUseCase:      chatUseCase,
+		BotUseCase:       botUseCase,
+		MessageUseCase:   messageUseCase,
 	}
 }
 
@@ -95,16 +90,11 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 		fmt.Println(err)
 	}
 
-	bot, err := a.BotRepo.GetLoginBot(ctx)
+	bot, err := a.BotUseCase.BotRepo.GetLoginBot(ctx)
 	if err != nil {
 		fmt.Println(err)
 	}
 	if bot != nil {
-		address, err := a.IpAddressUseCase.FindAddress(ip)
-		if err != nil {
-			fmt.Println(err)
-		}
-
 		_, err = a.ChatUseCase.Create(ctx, &usecase.CreateChatOpt{
 			UserId:     user.Id,
 			DialogType: constant.ChatPrivateMode,
@@ -115,7 +105,12 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 			fmt.Println(err)
 		}
 
-		if err := a.MessageUseCase.SendLogin(ctx, user.Id, &usecase.SendLogin{
+		address, err := a.IpAddressUseCase.FindAddress(ip)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		if err := a.MessageUseCase.SendLogin(ctx, user.Id, &entity.SendLogin{
 			Ip:      ip,
 			Agent:   userAgent,
 			Address: address,
@@ -132,7 +127,7 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 		IssuedAt:  jwtutil.NewNumericDate(time.Now()),
 	})
 
-	if err := a.UserSession.Create(ctx, &postgresModel.UserSession{
+	if err := a.AuthUseCase.UserSessionRepo.Create(ctx, &postgresModel.UserSession{
 		UserId:      user.Id,
 		AccessToken: token,
 		UserIp:      ip,
