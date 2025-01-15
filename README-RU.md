@@ -13,14 +13,6 @@
 
 ---
 
-### Репозитории
-
-[Репозиторий веб-версии](https://github.com/voo-su/web)
-
-[Репозиторий приложений (Android, iOS, Desktop)](https://github.com/voo-su/app)
-
----
-
 ### Процедура установки
 
 ```bash
@@ -38,3 +30,11 @@ mkdir web/web-client && git clone https://github.com/voo-su/web.git web/web-clie
 ```bash
 docker-compose up -d
 ```
+
+---
+
+### Репозитории
+
+[Репозиторий веб-версии](https://github.com/voo-su/web)
+
+[Репозиторий приложений (Android, iOS, Desktop)](https://github.com/voo-su/app)

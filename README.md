@@ -12,14 +12,6 @@ making it an excellent alternative to commercial messengers for teams and organi
 
 ---
 
-### Repositories
-
-[Web version repository](https://github.com/voo-su/web)
-
-[Apps repository (Android, iOS, Desktop)](https://github.com/voo-su/app)
-
----
-
 ### Installation procedure
 
 ```bash
@@ -35,5 +27,13 @@ mkdir web/web-client && git clone https://github.com/voo-su/web.git web/web-clie
 ```
 
 ```bash
-docker-compose up --build -d
+docker-compose up -d
 ```
+
+---
+
+### Repositories
+
+[Web version repository](https://github.com/voo-su/web)
+
+[Apps repository (Android, iOS, Desktop)](https://github.com/voo-su/app)
