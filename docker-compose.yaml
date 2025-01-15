@@ -1,4 +1,14 @@
 services:
+  nginx:
+    container_name: nginx
+    image: nginx:1.27.3
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./deployments/nginx/nginx.conf:/etc/nginx/nginx.conf
+
   web:
     container_name: web
     build:
@@ -8,7 +18,7 @@ services:
     volumes:
       - .env:/usr/src/voo-su/.env
     ports:
-      - '80:80'
+      - 80:80
     networks:
       - network-voo
     depends_on:
@@ -25,7 +35,7 @@ services:
     volumes:
       - ./configs/voo-su.yaml:/etc/voo-su/voo-su.yaml
     ports:
-      - '8000:8000'
+      - 8000:8000
     networks:
       - network-voo
     depends_on:
@@ -45,7 +55,7 @@ services:
     volumes:
       - ./configs/voo-su.yaml:/etc/voo-su/voo-su.yaml
     ports:
-      - '8001:8001'
+      - 8001:8001
     networks:
       - network-voo
     depends_on:
@@ -66,7 +76,7 @@ services:
     volumes:
       - ./storage/db/postgres/:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - 5432:5432
     networks:
       - network-voo
 
@@ -75,7 +85,7 @@ services:
     image: redis:7.4
     restart: always
     ports:
-      - '6379:6379'
+      - 6379:6379
     networks:
       - network-voo
 
@@ -89,7 +99,7 @@ services:
     volumes:
       - ./storage/db/clickhouse/:/var/lib/clickhouse:cached
     ports:
-      - "9000:9000"
+      - 9000:9000
     networks:
       - network-voo
 
@@ -103,15 +113,15 @@ services:
     volumes:
       - ./storage/db/minio/:/data
     ports:
-      - "9001:9001"
-      - "9002:9002"
+      - 9001:9001
+      - 9002:9002
     networks:
       - network-voo
 
   nats:
     image: nats:2.10.24
     ports:
-      - "4222:4222"
+      - 4222:4222
     networks:
       - network-voo
 

@@ -1,6 +1,6 @@
 # VooSu Web
 
-<img src="./assets/logo.svg" width=150 height=150 style="float: left; padding-right: 10px" alt="VooSu logo">
+<img src="./assets/logo.svg" align="left" width=150 height=150 alt="VooSu logo">
 
 [VooSu](https://voo.su) is an open messaging platform designed for businesses that value transparency and flexibility.
 
@@ -17,3 +17,23 @@ making it an excellent alternative to commercial messengers for teams and organi
 [Web version repository](https://github.com/voo-su/web)
 
 [Apps repository (Android, iOS, Desktop)](https://github.com/voo-su/app)
+
+---
+
+### Installation procedure
+
+```bash
+git clone https://github.com/voo-su/server.git
+```
+
+```bash
+cd server
+```
+
+```bash
+mkdir web/web-client && git clone https://github.com/voo-su/web.git web/web-client
+```
+
+```bash
+docker-compose up --build -d
+```

@@ -85,7 +85,7 @@ func NewV1(conf *config.Config, locale locale.ILocale, router *gin.Engine, handl
 		}
 		message := v1.Group("/messages").Use(authorize)
 		{
-			message.GET("", ginutil.HandlerFunc(handler.V1.Message.GetRecords))
+			message.GET("", ginutil.HandlerFunc(handler.V1.Message.GetHistory))
 			message.POST("/send", ginutil.HandlerFunc(handler.V1.Message.Send))
 			message.GET("/file/download", ginutil.HandlerFunc(handler.V1.Message.Download))
 			message.POST("/delete", ginutil.HandlerFunc(handler.V1.Message.Delete))
