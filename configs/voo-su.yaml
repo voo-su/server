@@ -1,9 +1,9 @@
 app:
   env: dev
   jwt:
-    secret: xxxxxxxxxxxxxxxxxx
-    expires_time: xxxxxxx
-    buffer_time: xxxxxxx
+    secret: voo_su
+    expires_time: 2678400
+    buffer_time: 2678400
   cors:
     origin: "*"
     headers: "Content-Type,Cache-Control,User-Agent,Keep-Alive,DNT,AccessToken,Authorization"
@@ -14,46 +14,46 @@ app:
 server:
   http:
     host: 127.0.0.1
-    port: xxxx
+    port: 8000
   ws:
     host: 127.0.0.1
-    port: xxxx
+    port: 8001
   tcp:
     host: 127.0.0.1
-    port: xxxx
+    port: 8002
   grpc:
     host: 127.0.0.1
-    port: xxxx
+    port: 50051
     protocol: tcp
 
 postgres:
-  host: xxx.xxx.xxx.xxx
+  host: 127.0.0.1
   port: 5432
-  username: xxxxxxxxxx
-  password: xxxxxxxxxx
-  database: xxxxxxxxxx
+  username: postgres
+  password: postgres
+  database: voo_su
 
 clickhouse:
-  host: xxx.xxx.xxx.xxx
+  host: 127.0.0.1
   port: 9000
-  username: xxxxxxxxxx
-  password: xxxxxxxxxx
-  database: xxxxxxxxxx
+  username: clickhouse
+  password: clickhouse
+  database: voo_su
 
 minio:
-  host: xxx.xxx.xxx.xxx
+  host: 127.0.0.1
   ssl: false
-  secret_id: xxxxxxxxxx
-  secret_key: xxxxxxxxxx
-  bucket: xxxxxxxxxx
+  secret_id: minio_user
+  secret_key: minio_password
+  bucket: voo_su
 
 redis:
-  host: xxx.xxx.xxx.xxx:6379
+  host: 127.0.0.1:6379
   auth:
   database: 0
 
 nats:
-  host: xxx.xxx.xxx.xxx
+  host: 127.0.0.1
   port: 4222
 
 email:

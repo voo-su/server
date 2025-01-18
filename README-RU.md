@@ -15,21 +15,9 @@
 
 ### Процедура установки
 
-```bash
-git clone https://github.com/voo-su/server.git
-```
+- [Запуск с использованием Docker](./docs/run-using-docker.md)
 
-```bash
-cd server
-```
-
-```bash
-mkdir web/web-client && git clone https://github.com/voo-su/web.git web/web-client
-```
-
-```bash
-docker-compose up -d
-```
+- [Запуск на Ubuntu 22.04](./docs/run-ubuntu-22.md)
 
 ---
 

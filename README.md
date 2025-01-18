@@ -1,4 +1,4 @@
-# VooSu Web
+# VooSu Server
 
 <img src="./assets/logo.svg" align="left" width=150 height=150 alt="VooSu logo">
 
@@ -14,21 +14,9 @@ making it an excellent alternative to commercial messengers for teams and organi
 
 ### Installation procedure
 
-```bash
-git clone https://github.com/voo-su/server.git
-```
+- [Run using Docker](./docs/run-using-docker.md)
 
-```bash
-cd server
-```
-
-```bash
-mkdir web/web-client && git clone https://github.com/voo-su/web.git web/web-client
-```
-
-```bash
-docker-compose up -d
-```
+- [Running on Ubuntu 22.04](./docs/run-ubuntu-22.md)
 
 ---
 
