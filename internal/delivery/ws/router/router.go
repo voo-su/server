@@ -23,6 +23,13 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handle *handler.Handl
 
 	router.Use(ginutil.AccessLog(src))
 
+	router.Use(func(c *gin.Context) {
+		acceptLang := c.GetHeader("Accept-Language")
+		locale.SetFromHeaderAcceptLanguage(acceptLang)
+
+		c.Next()
+	})
+
 	router.Use(gin.RecoveryWithWriter(gin.DefaultWriter, func(c *gin.Context, err any) {
 		log.Println(err)
 

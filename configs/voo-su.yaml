@@ -1,5 +1,6 @@
 app:
   env: dev
+  default_lang: en
   jwt:
     secret: voo_su
     expires_time: 2678400

@@ -39,7 +39,7 @@ import (
 // Injectors from wire.go:
 
 func NewHttpInjector(conf *config.Config) *http.AppProvider {
-	iLocale := provider.NewLocale()
+	iLocale := provider.NewLocale(conf)
 	email := provider.NewEmailClient(conf)
 	client := provider.NewRedisClient(conf, iLocale)
 	smsCacheRepository := repository.NewSmsCacheRepository(client)
@@ -265,7 +265,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 }
 
 func NewWsInjector(conf *config.Config) *ws.AppProvider {
-	iLocale := provider.NewLocale()
+	iLocale := provider.NewLocale(conf)
 	client := provider.NewRedisClient(conf, iLocale)
 	serverCacheRepository := repository.NewServerCacheRepository(client)
 	clientCacheRepository := repository.NewClientCacheRepository(conf, client, serverCacheRepository)
@@ -369,7 +369,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 }
 
 func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
-	iLocale := provider.NewLocale()
+	iLocale := provider.NewLocale(conf)
 	authMiddleware := middleware.NewAuthMiddleware(conf, iLocale)
 	grpcMethodService := middleware.NewGrpMethodsService()
 	email := provider.NewEmailClient(conf)
@@ -447,7 +447,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 }
 
 func NewCronInjector(conf *config.Config) *cli.CronProvider {
-	iLocale := provider.NewLocale()
+	iLocale := provider.NewLocale(conf)
 	client := provider.NewRedisClient(conf, iLocale)
 	serverCacheRepository := repository.NewServerCacheRepository(client)
 	clearWsCache := cron.NewClearWsCache(serverCacheRepository)
@@ -468,7 +468,7 @@ func NewCronInjector(conf *config.Config) *cli.CronProvider {
 }
 
 func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
-	iLocale := provider.NewLocale()
+	iLocale := provider.NewLocale(conf)
 	db := provider.NewPostgresqlClient(conf, iLocale)
 	client := provider.NewRedisClient(conf, iLocale)
 	emailHandle := queue.EmailHandle{
@@ -492,7 +492,7 @@ func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
 }
 
 func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
-	iLocale := provider.NewLocale()
+	iLocale := provider.NewLocale(conf)
 	db := provider.NewPostgresqlClient(conf, iLocale)
 	migrateProvider := &cli.MigrateProvider{
 		Conf: conf,

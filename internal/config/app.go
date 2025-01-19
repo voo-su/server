@@ -3,9 +3,10 @@ package config
 import "fmt"
 
 type App struct {
-	Env  string `yaml:"env"`
-	Jwt  *Jwt   `yaml:"jwt"`
-	Cors *Cors  `yaml:"cors"`
+	Env         string `yaml:"env"`
+	DefaultLang string `yaml:"default_lang"`
+	Jwt         *Jwt   `yaml:"jwt"`
+	Cors        *Cors  `yaml:"cors"`
 }
 
 func (a App) LogPath(filename string) string {
@@ -13,8 +14,11 @@ func (a App) LogPath(filename string) string {
 	return fmt.Sprintf("/var/log/voo-su/%s", filename)
 }
 
-func (a *App) GetOrigin() string {
+func (a *App) GetEnv() string {
 	return a.Env
+}
+func (a *App) GetDefaultLang() string {
+	return a.DefaultLang
 }
 
 type Cors struct {
