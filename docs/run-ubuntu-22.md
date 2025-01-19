@@ -1,13 +1,13 @@
 ## Installing and Running VooSu Server on Ubuntu 22.04
 
-## Installing Additional Packages
+### Installing Additional Packages
 
 ``` sh
 sudo apt update
 sudo apt install make git curl
 ```
 
-## PostgreSQL
+### PostgreSQL
 
 ``` sh
 sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
@@ -25,7 +25,7 @@ sudo -u postgres psql
 ALTER USER postgres PASSWORD 'postgres';
 ```
 
-## Redis
+### Redis
 
 ``` sh
 add-apt-repository ppa:redislabs/redis
@@ -35,7 +35,7 @@ apt update && apt install redis
 systemctl enable --now redis-server
 ```
 
-## Clickhouse
+### Clickhouse
 
 ``` sh
 apt install apt-transport-https ca-certificates dirmngr
@@ -49,7 +49,7 @@ apt update && apt install clickhouse-server clickhouse-client
 service clickhouse-server start
 ```
 
-## MinIO
+### MinIO
 
 ``` sh
 wget https://dl.min.io/server/minio/release/linux-amd64/minio_20250118003137.0.0_amd64.deb
@@ -77,7 +77,7 @@ systemctl enable minio
 
 ---
 
-## NATS
+### NATS
 
 ``` sh
 wget https://github.com/nats-io/nats-server/releases/download/v2.10.23-RC.4/nats-server-v2.10.23-RC.4-linux-amd64.tar.gz
@@ -124,7 +124,7 @@ systemctl enable nats-server --now
 systemctl status nats-server
 ```
 
-## Go
+### Go
 
 ``` sh
 https://go.dev/dl/go1.23.2.linux-amd64.tar.gz
@@ -135,7 +135,7 @@ rm -rf /usr/local/go && tar -C /usr/local -xzf go1.23.5.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
 ```
 
-## Node.js
+### Node.js
 
 ``` sh
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
@@ -147,21 +147,21 @@ corepack enable yarn
 yarn -v
 ```
 
-## Installation Guide
-
-Clone the repository with submodules:
+## Nginx
 
 ``` sh
-git clone --recursive https://github.com/voo-su/server.git
+apt install nginx
 ```
 
-Navigate to the project directory:
+### Installation Guide
 
 ``` sh
-cd server
+git clone --recursive https://github.com/voo-su/server.git /usr/src/voo-su
 ```
 
-Create the required directory structure and clone the web-client repository:
+``` sh
+cd /usr/src/voo-su
+```
 
 ``` sh
 mkdir -p web/web-client && git clone https://github.com/voo-su/web.git web/web-client
@@ -169,4 +169,84 @@ mkdir -p web/web-client && git clone https://github.com/voo-su/web.git web/web-c
 
 ``` sh
 make install
+```
+
+``` sh
+make build
+```
+
+``` sh
+cd /usr/src/voo-su/web/web-client
+```
+
+``` sh
+npm install --global yarn
+```
+
+``` sh
+yarn install
+```
+
+You need to specify the domains in the file:
+
+* /usr/src/voo-su/web/web-client/.env
+
+``` sh
+yarn build
+```
+
+``` sh
+cd /usr/src/voo-su
+```
+
+```bash
+mkdit /etc/voo-su && ln -sf /usr/src/voo-su/configs/voo-su.yaml /etc/voo-su/voo-su.yaml
+```
+
+You need to configure the connection settings in the file:
+
+* /usr/src/voo-su/configs/voo-su.yaml
+
+```bash
+clickhouse-client --user clickhouse --password clickhouse --database=voo_su < /usr/src/voo-su/migrations/clickhouse/000_migration.up.sql
+```
+
+```bash
+psql -d voo_su -f /usr/src/voo-su/migrations/postgresql/000_migration.up.sql
+```
+
+```bash
+ln -sf /usr/src/voo-su/init/systemd/voo-su-http.service /etc/systemd/system/voo-su-http.service
+
+ln -sf /usr/src/voo-su/init/systemd/voo-su-ws.service /etc/systemd/system/voo-su-ws.service
+
+ln -sf /usr/src/voo-su/init/systemd/voo-su-cli-cron.service /etc/systemd/system/voo-su-cli-cron.service
+
+ln -sf /usr/src/voo-su/init/systemd/voo-su-cli-queue.service /etc/systemd/system/voo-su-cli-queue.service
+
+ln -sf /usr/src/voo-su/init/systemd/voo-su-grpc.service /etc/systemd/system/voo-su-grpc.service
+```
+
+```bash
+systemctl daemon-reload
+```
+
+```bash
+systemctl start voo-su-http.service voo-su-ws.service voo-su-cli-cron.service voo-su-cli-queue.service voo-su-grpc.service
+```
+
+```bash
+systemctl enable voo-su-http.service voo-su-ws.service voo-su-cli-cron.service voo-su-cli-queue.service voo-su-grpc.service
+```
+
+You need to specify your subdomain in the Nginx configuration:
+
+* /usr/src/voo-su/configs/nginx
+
+```bash
+ln -sf /usr/src/voo-su/configs/nginx /etc/nginx/sites-enabled/voo-su
+```
+
+```bash
+systemctl restart nginx
 ```

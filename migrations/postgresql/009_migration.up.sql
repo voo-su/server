@@ -64,4 +64,3 @@ CREATE TABLE project_task_comments
     created_at   TIMESTAMPTZ
 );
 
--- INSERT INTO schema_migrations (version, dirty) VALUES (9, false);

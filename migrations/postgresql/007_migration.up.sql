@@ -35,4 +35,3 @@ CREATE TABLE group_chat_requests
     updated_at timestamp         NOT NULL
 );
 
--- INSERT INTO schema_migrations (version, dirty) VALUES (7, false);

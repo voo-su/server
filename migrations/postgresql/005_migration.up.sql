@@ -17,5 +17,3 @@ CREATE TABLE message_read
     constraint unique_user_receiver_msg
         unique (user_id, receiver_id, msg_id)
 );
-
--- INSERT INTO schema_migrations (version, dirty) VALUES (5, false);

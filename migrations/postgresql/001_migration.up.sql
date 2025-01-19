@@ -89,5 +89,3 @@ CREATE TABLE schema_migrations
     version bigint  NOT NULL primary key,
     dirty   boolean NOT NULL
 );
-
--- INSERT INTO schema_migrations (version, dirty) VALUES (1, false);

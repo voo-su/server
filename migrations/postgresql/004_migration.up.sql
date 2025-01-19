@@ -23,4 +23,3 @@ CREATE TABLE message_vote_answers
     created_at timestamp                  NOT NULL
 );
 
--- INSERT INTO schema_migrations (version, dirty) VALUES (4, false);

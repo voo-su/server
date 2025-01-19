@@ -5,37 +5,38 @@ services:
     restart: always
     ports:
       - 80:80
-      - 443:443
     volumes:
       - ./deployments/nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - network-voo
+    depends_on:
+      - web
+      - http-server
+      - ws-server
 
   web:
     container_name: web
     build:
-      context: ./web
+      context: ./web/web-client
       dockerfile: Dockerfile
     restart: always
     volumes:
       - .env:/usr/src/voo-su/.env
-    ports:
-      - 80:80
     networks:
       - network-voo
     depends_on:
-      - http_server
-      - ws_server
+      - http-server
+      - ws-server
 
-  http_server:
+  http-server:
     container_name: http-server
     build:
       context: ./
-      dockerfile: deployments/Dockerfile
+      dockerfile: deployments/docker/Dockerfile
     command: /usr/bin/voo-su http
     restart: always
     volumes:
       - ./configs/voo-su.yaml:/etc/voo-su/voo-su.yaml
-    ports:
-      - 8000:8000
     networks:
       - network-voo
     depends_on:
@@ -45,17 +46,15 @@ services:
       - minio
       - nats
 
-  ws_server:
+  ws-server:
     container_name: ws-server
     build:
       context: ./
-      dockerfile: deployments/Dockerfile
+      dockerfile: deployments/docker/Dockerfile
     command: /usr/bin/voo-su ws
     restart: always
     volumes:
       - ./configs/voo-su.yaml:/etc/voo-su/voo-su.yaml
-    ports:
-      - 8001:8001
     networks:
       - network-voo
     depends_on:
@@ -75,8 +74,6 @@ services:
       POSTGRES_DB: voo_su
     volumes:
       - ./storage/db/postgres/:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
     networks:
       - network-voo
 
@@ -84,8 +81,6 @@ services:
     container_name: redis
     image: redis:7.4
     restart: always
-    ports:
-      - 6379:6379
     networks:
       - network-voo
 
@@ -98,8 +93,6 @@ services:
       - CLICKHOUSE_DB=voo_su
     volumes:
       - ./storage/db/clickhouse/:/var/lib/clickhouse:cached
-    ports:
-      - 9000:9000
     networks:
       - network-voo
 
@@ -112,16 +105,11 @@ services:
     command: server --address ":9001" --console-address ":9002" /data
     volumes:
       - ./storage/db/minio/:/data
-    ports:
-      - 9001:9001
-      - 9002:9002
     networks:
       - network-voo
 
   nats:
     image: nats:2.10.24
-    ports:
-      - 4222:4222
     networks:
       - network-voo
 

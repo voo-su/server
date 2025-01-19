@@ -27,5 +27,3 @@ CREATE TABLE bots
     avatar      varchar(255) default ''::character varying NOT NULL,
     created_at  timestamp                                  NOT NULL
 );
-
--- INSERT INTO schema_migrations (version, dirty) VALUES (2, false);

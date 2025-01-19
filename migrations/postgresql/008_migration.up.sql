@@ -27,5 +27,3 @@ CREATE TABLE push_tokens
 
 alter table splits alter column file_ext type varchar(255) using file_ext::varchar(255);
 alter table splits rename to file_splits;
-
--- INSERT INTO schema_migrations (version, dirty) VALUES (8, false);

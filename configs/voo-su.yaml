@@ -6,54 +6,54 @@ app:
     buffer_time: 2678400
   cors:
     origin: "*"
-    headers: "Content-Type,Cache-Control,User-Agent,Keep-Alive,DNT,AccessToken,Authorization"
+    headers: "Content-Type,User-Agent,Authorization"
     methods: "OPTIONS,GET,POST,PUT,DELETE"
     credentials: false
     max_age: 600
 
 server:
   http:
-    host: 127.0.0.1
+    host: 0.0.0.0
     port: 8000
   ws:
-    host: 127.0.0.1
+    host: 0.0.0.0
     port: 8001
   tcp:
-    host: 127.0.0.1
+    host: 0.0.0.0
     port: 8002
   grpc:
-    host: 127.0.0.1
+    host: 0.0.0.0
     port: 50051
     protocol: tcp
 
 postgres:
-  host: 127.0.0.1
+  host: postgres
   port: 5432
   username: postgres
   password: postgres
   database: voo_su
 
 clickhouse:
-  host: 127.0.0.1
+  host: clickhouse
   port: 9000
   username: clickhouse
   password: clickhouse
   database: voo_su
 
 minio:
-  host: 127.0.0.1
+  host: minio
   ssl: false
   secret_id: minio_user
   secret_key: minio_password
   bucket: voo_su
 
 redis:
-  host: 127.0.0.1:6379
+  host: redis:6379
   auth:
   database: 0
 
 nats:
-  host: 127.0.0.1
+  host: nats
   port: 4222
 
 email:

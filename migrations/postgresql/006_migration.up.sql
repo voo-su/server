@@ -29,4 +29,3 @@ CREATE TABLE sticker_items
     updated_at  timestamp                                  NOT NULL
 );
 
--- INSERT INTO schema_migrations (version, dirty) VALUES (6, false);
