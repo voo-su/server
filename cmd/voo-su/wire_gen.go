@@ -17,6 +17,7 @@ import (
 	"voo.su/internal/delivery/http"
 	"voo.su/internal/delivery/http/handler"
 	"voo.su/internal/delivery/http/handler/bot"
+	"voo.su/internal/delivery/http/handler/manager"
 	"voo.su/internal/delivery/http/handler/v1"
 	"voo.su/internal/delivery/http/router"
 	"voo.su/internal/delivery/ws"
@@ -252,9 +253,19 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	botHandler := &bot.Handler{
 		Message: botMessage,
 	}
+	dashboard := &manager.Dashboard{
+		Locale:           iLocale,
+		UserUseCase:      userUseCase,
+		MessageUseCase:   messageUseCase,
+		GroupChatUseCase: groupChatUseCase,
+	}
+	managerHandler := &manager.Handler{
+		Dashboard: dashboard,
+	}
 	handlerHandler := &handler.Handler{
-		V1:  v1Handler,
-		Bot: botHandler,
+		V1:      v1Handler,
+		Bot:     botHandler,
+		Manager: managerHandler,
 	}
 	engine := router.NewRouter(conf, iLocale, handlerHandler, jwtTokenCacheRepository)
 	appProvider := &http.AppProvider{
@@ -430,6 +441,9 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 		Nats:                iNatsClient,
 	}
 	auth := handler3.NewAuthHandler(conf, iLocale, authUseCase, ipAddressUseCase, chatUseCase, botUseCase, messageUseCase)
+	pushTokenRepository := repository2.NewPushTokenRepository(db)
+	userUseCase := usecase.NewUserUseCase(iLocale, source, userRepository, userSessionRepository, pushTokenRepository)
+	account := handler3.NewAccountHandler(userUseCase)
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	handlerChat := handler3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase)
 	message := handler3.NewMessageHandler(conf, iLocale, messageUseCase)
@@ -439,6 +453,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 		AuthMiddleware: authMiddleware,
 		RoutesServices: grpcMethodService,
 		AuthHandler:    auth,
+		AccountHandler: account,
 		ChatHandler:    handlerChat,
 		MessageHandler: message,
 		ContactHandler: contact,

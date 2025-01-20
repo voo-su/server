@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package manager;
+
+import "tagger/tagger.proto";
+
+option go_package = "./manager;manager_pb";
+
+message ManagerDashboardRequest {}
+
+message ManagerDashboardResponse {
+    int64 users = 1 [(tagger.tags) = "json:\"users\""];
+    int64 bots = 2 [(tagger.tags) = "json:\"bots\""];
+    int64 total_messages = 3 [(tagger.tags) = "json:\"total_messages\""];
+    int64 group_chats = 4 [(tagger.tags) = "json:\"group_chats\""];
+    int64 group_messages = 5 [(tagger.tags) = "json:\"group_messages\""];
+    int64 private_messages = 6 [(tagger.tags) = "json:\"private_messages\""];
+}

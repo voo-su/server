@@ -46,6 +46,8 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handler *handler.Hand
 
 	NewBot(router, handler)
 
+	NewManager(router, handler)
+
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, ginutil.Response{
 			Code:    http.StatusNotFound,

@@ -6,6 +6,7 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/delivery/http/handler"
 	"voo.su/internal/delivery/http/handler/bot"
+	"voo.su/internal/delivery/http/handler/manager"
 	v1 "voo.su/internal/delivery/http/handler/v1"
 	"voo.su/internal/delivery/http/router"
 )
@@ -44,4 +45,8 @@ var ProviderSet = wire.NewSet(
 	// Bot
 	wire.Struct(new(bot.Handler), "*"),
 	wire.Struct(new(bot.Message), "*"),
+
+	// Manager
+	wire.Struct(new(manager.Handler), "*"),
+	wire.Struct(new(manager.Dashboard), "*"),
 )

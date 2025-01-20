@@ -32,7 +32,7 @@ func (a *Auth) Login(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	token, err := a.AuthUseCase.Login(ctx.Ctx(), "auth", params.Email)
+	token, err := a.AuthUseCase.Login(ctx.Ctx(), constant.GuardHttpAuth, params.Email)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}

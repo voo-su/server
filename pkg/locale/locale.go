@@ -61,7 +61,7 @@ func (l *Locale) Localize(key string) string {
 
 func (l *Locale) SetFromHeaderAcceptLanguage(acceptLang string) {
 	if acceptLang == "" {
-		log.Println("Accept-Language header is empty, using default language:", l.DefaultLang)
+		//log.Println("Accept-Language header is empty, using default language:", l.DefaultLang)
 		l.Local = l.DefaultLang
 		return
 	}
