@@ -24,7 +24,7 @@ type IMinio interface {
 
 	Delete(bucketName string, objectName string) error
 
-	GetObject(bucketName string, objectName string) ([]byte, error)
+	GetObject(bucketName string, objectName string) (*minio.Object, error)
 
 	PublicUrl(bucketName, objectName string) string
 
@@ -120,15 +120,13 @@ func (m Minio) Delete(bucketName string, objectName string) error {
 	return m.Core.Client.RemoveObject(context.Background(), bucketName, objectName, minio.RemoveObjectOptions{})
 }
 
-func (m Minio) GetObject(bucketName string, objectName string) ([]byte, error) {
+func (m Minio) GetObject(bucketName string, objectName string) (*minio.Object, error) {
 	object, err := m.Core.Client.GetObject(context.Background(), bucketName, objectName, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	defer object.Close()
-
-	return io.ReadAll(object)
+	return object, nil
 }
 
 func (m Minio) PublicUrl(bucketName, objectName string) string {

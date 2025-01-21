@@ -3,8 +3,8 @@ package v1
 import (
 	"fmt"
 	"github.com/gin-gonic/gin/binding"
+	"io"
 	"net/http"
-	"time"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
@@ -413,10 +413,39 @@ func (m *Message) Download(ctx *ginutil.Context) error {
 		return ctx.Error(err.Error())
 	}
 
-	ctx.Context.Redirect(
-		http.StatusFound,
-		m.StorageUseCase.Minio.PrivateUrl(m.Conf.Minio.GetBucket(), fileInfo.Path, fileInfo.Name, 60*time.Second),
-	)
+	object, err := m.StorageUseCase.Minio.GetObject(m.Conf.Minio.GetBucket(), fileInfo.Path)
+	if err != nil {
+		ctx.Context.AbortWithStatusJSON(http.StatusNotFound, &ginutil.Response{
+			Code:    http.StatusNotFound,
+			Message: m.Locale.Localize("file_not_found"),
+		})
+
+		return nil
+	}
+
+	defer object.Close()
+
+	stat, err := m.StorageUseCase.Minio.Stat(m.Conf.Minio.GetBucket(), fileInfo.Path)
+	if err != nil {
+		ctx.Context.AbortWithStatusJSON(http.StatusInternalServerError, &ginutil.Response{
+			Code:    http.StatusInternalServerError,
+			Message: m.Locale.Localize("unable_to_get_file_information"),
+		})
+
+		return nil
+	}
+
+	ctx.Context.Header("Content-Type", stat.MimeType)
+	ctx.Context.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileInfo.Name))
+	ctx.Context.Header("Content-Length", fmt.Sprintf("%d", stat.Size))
+
+	_, err = io.Copy(ctx.Context.Writer, object)
+	if err != nil {
+		ctx.Context.AbortWithStatusJSON(http.StatusInternalServerError, &ginutil.Response{
+			Code:    http.StatusInternalServerError,
+			Message: m.Locale.Localize("failed_to_send_file"),
+		})
+	}
 
 	return nil
 }

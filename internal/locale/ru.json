@@ -123,5 +123,8 @@
     "participant_notifications_on": "Включение уведомлений для участника группы",
     "group_announcement": "Объявление в группе",
     "method_not_found": "Метод не найден",
-    "service_start": "Запуск %s сервиса"
+    "service_start": "Запуск %s сервиса",
+    "file_not_found": "Файл не найден",
+    "unable_to_get_file_information": "Не удалось получить информацию о файле",
+    "failed_to_send_file": "Не удалось отправить файл"
 }

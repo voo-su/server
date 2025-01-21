@@ -123,5 +123,8 @@
     "participant_notifications_on": "Participant notifications on",
     "group_announcement": "Group announcement",
     "method_not_found": "Method not found",
-    "service_start": "Service %s start"
+    "service_start": "Service %s start",
+    "file_not_found": "File not found",
+    "unable_to_get_file_information": "Unable to get file information",
+    "failed_to_send_file": "Failed to send file"
 }
