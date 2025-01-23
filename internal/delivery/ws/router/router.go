@@ -21,7 +21,7 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handle *handler.Handl
 		panic(err)
 	}
 
-	router.Use(ginutil.AccessLog(src))
+	router.Use(ginutil.AccessLogMiddleware(src))
 
 	router.Use(func(c *gin.Context) {
 		acceptLang := c.GetHeader("Accept-Language")

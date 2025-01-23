@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func AccessLog(w io.Writer) gin.HandlerFunc {
+func AccessLogMiddleware(w io.Writer) gin.HandlerFunc {
 	log := slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.TimeKey {

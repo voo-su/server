@@ -7,10 +7,13 @@ app:
     buffer_time: 2678400
   cors:
     origin: "*"
-    headers: "Content-Type,User-Agent,Authorization"
-    methods: "OPTIONS,GET,POST,PUT,DELETE"
     credentials: false
     max_age: 600
+
+manager:
+  ips:
+    - 127.0.0.1
+    - 192.168.1.2
 
 server:
   http:

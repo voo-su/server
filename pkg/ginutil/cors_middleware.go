@@ -17,7 +17,7 @@ type ICorsOptions interface {
 	GetMaxAge() string
 }
 
-func Cors(options ICorsOptions) gin.HandlerFunc {
+func CorsMiddleware(options ICorsOptions) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", options.GetOrigin())
 		c.Header("Access-Control-Allow-Headers", options.GetHeaders())

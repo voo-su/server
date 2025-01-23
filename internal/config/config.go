@@ -20,6 +20,7 @@ type Config struct {
 	Nats       *Nats       `yaml:"nats"`
 	Email      *Email      `yaml:"email"`
 	Push       *Push       `yaml:"push"`
+	Manager    *Manager    `yaml:"manager"`
 }
 
 func New(filename string) *Config {

@@ -23,8 +23,6 @@ func (a *App) GetDefaultLang() string {
 
 type Cors struct {
 	Origin      string `yaml:"origin"`
-	Headers     string `yaml:"headers"`
-	Methods     string `yaml:"methods"`
 	Credentials string `yaml:"credentials"`
 	MaxAge      string `yaml:"max_age"`
 }
@@ -34,11 +32,11 @@ func (c *Cors) GetOrigin() string {
 }
 
 func (c *Cors) GetHeaders() string {
-	return c.Headers
+	return "OPTIONS,GET,POST,PUT,DELETE"
 }
 
 func (c *Cors) GetMethods() string {
-	return c.Methods
+	return "Content-Type,User-Agent,Authorization"
 }
 
 func (c *Cors) GetCredentials() string {

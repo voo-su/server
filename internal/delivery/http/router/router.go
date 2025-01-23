@@ -18,8 +18,8 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handler *handler.Hand
 		panic(err)
 	}
 
-	router.Use(ginutil.Cors(conf.App.Cors))
-	router.Use(ginutil.AccessLog(src))
+	router.Use(ginutil.CorsMiddleware(conf.App.Cors))
+	router.Use(ginutil.AccessLogMiddleware(src))
 
 	router.Use(func(c *gin.Context) {
 		acceptLang := c.GetHeader("Accept-Language")
@@ -46,7 +46,7 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handler *handler.Hand
 
 	NewBot(router, handler)
 
-	NewManager(router, handler)
+	NewManager(router, conf, handler)
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, ginutil.Response{
