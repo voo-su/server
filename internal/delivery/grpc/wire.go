@@ -13,6 +13,9 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(pb.UnimplementedAuthServiceServer), "*"),
 	wire.Bind(new(pb.AuthServiceServer), new(*handler.Auth)),
 
+	wire.Struct(new(pb.UnimplementedAccountServiceServer), "*"),
+	wire.Bind(new(pb.AccountServiceServer), new(*handler.Account)),
+
 	wire.Struct(new(pb.UnimplementedChatServiceServer), "*"),
 	wire.Bind(new(pb.ChatServiceServer), new(*handler.Chat)),
 
@@ -26,6 +29,7 @@ var ProviderSet = wire.NewSet(
 	handler.NewChatHandler,
 	handler.NewMessageHandler,
 	handler.NewContactHandler,
+	handler.NewAccountHandler,
 
 	middleware.NewAuthMiddleware,
 	middleware.NewGrpMethodsService,
