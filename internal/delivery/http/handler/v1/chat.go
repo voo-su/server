@@ -73,7 +73,6 @@ func (c *Chat) Create(ctx *ginutil.Context) error {
 	}
 	if item.DialogType == constant.ChatPrivateMode {
 		item.UnreadNum = int32(c.ChatUseCase.UnreadCacheRepo.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
-		item.Remark = c.ContactUseCase.ContactRepo.GetFriendRemark(ctx.Ctx(), uid, int(params.ReceiverId))
 		if user, err := c.UserUseCase.UserRepo.FindById(ctx.Ctx(), result.ReceiverId); err == nil {
 			item.Username = user.Username
 			item.Name = user.Name
@@ -103,7 +102,6 @@ func (c *Chat) Create(ctx *ginutil.Context) error {
 		Name:       item.Name,
 		Surname:    item.Surname,
 		Avatar:     item.Avatar,
-		RemarkName: item.Remark,
 		UnreadNum:  item.UnreadNum,
 		MsgText:    item.MsgText,
 		UpdatedAt:  item.UpdatedAt,
@@ -128,7 +126,6 @@ func (c *Chat) List(ctx *ginutil.Context) error {
 		}
 	}
 
-	remarks, _ := c.ContactUseCase.ContactRepo.Remarks(ctx.Ctx(), uid, friends)
 	items := make([]*v1Pb.ChatItem, 0)
 	for _, item := range data {
 		value := &v1Pb.ChatItem{
@@ -160,7 +157,6 @@ func (c *Chat) List(ctx *ginutil.Context) error {
 			value.Name = item.Name
 			//}
 			value.Surname = item.Surname
-			value.Remark = remarks[item.ReceiverId]
 			value.IsOnline = int32(strutil.BoolToInt(c.ChatUseCase.ClientCacheRepo.IsOnline(ctx.Ctx(), constant.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))))
 		} else {
 			value.Name = item.GroupName

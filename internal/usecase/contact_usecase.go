@@ -38,7 +38,6 @@ func (c *ContactUseCase) List(ctx context.Context, uid int) ([]*entity.ContactLi
 			"u.surname",
 			"u.about",
 			"u.gender",
-			"contacts.remark",
 			"contacts.group_id",
 		}).
 		Joins("INNER JOIN users AS u ON u.id = contacts.friend_id").
@@ -80,15 +79,4 @@ func (c *ContactUseCase) Delete(ctx context.Context, uid, friendId int) error {
 			Where("user_id = ? AND friend_id = ?", uid, friendId).
 			Update("status", constant.ContactStatusDelete).Error
 	})
-}
-
-func (c *ContactUseCase) UpdateRemark(ctx context.Context, uid int, friendId int, remark string) error {
-	_, err := c.ContactRepo.UpdateWhere(ctx, map[string]any{
-		"remark": remark,
-	}, "user_id = ? AND friend_id = ?", uid, friendId)
-	if err == nil {
-		_ = c.ContactRepo.SetFriendRemark(ctx, uid, friendId, remark)
-	}
-
-	return err
 }

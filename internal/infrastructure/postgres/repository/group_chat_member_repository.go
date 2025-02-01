@@ -87,16 +87,6 @@ func (g *GroupChatMemberRepository) CountMemberTotal(ctx context.Context, gid in
 	return count
 }
 
-//func (g *GroupChatMemberRepository) GetMemberRemark(ctx context.Context, groupId int, userId int) string {
-//	var remarks string
-//	g.Repo.Model(ctx).
-//		Select("user_card").
-//		Where("group_id = ? AND user_id = ?", groupId, userId).
-//		Scan(&remarks)
-//
-//	return remarks
-//}
-
 func (g *GroupChatMemberRepository) GetMembers(ctx context.Context, groupId int) []*entity.MemberItem {
 	fields := []string{
 		"group_chat_members.id",

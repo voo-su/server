@@ -26,7 +26,6 @@ message ChatCreateResponse {
     int32 unread_num = 12 [(tagger.tags) = "json:\"unread_num\""];
     string msg_text = 13 [(tagger.tags) = "json:\"msg_text\""];
     string updated_at = 14 [(tagger.tags) = "json:\"updated_at\""];
-    string remark_name = 15 [(tagger.tags) = "json:\"remark_name\""];
 }
 
 message ChatItem {
@@ -44,7 +43,6 @@ message ChatItem {
     int32 is_disturb = 12 [(tagger.tags) = "json:\"is_disturb\""];
     int32 is_online = 13 [(tagger.tags) = "json:\"is_online\""];
     int32 is_bot = 14 [(tagger.tags) = "json:\"is_bot\""];
-    string remark = 15 [(tagger.tags) = "json:\"remark\""];
 }
 
 message ChatListResponse {

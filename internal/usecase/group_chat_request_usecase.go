@@ -48,14 +48,6 @@ func (g *GroupChatRequestUseCase) Auth(ctx context.Context, id, userId int) bool
 	return err == nil && member.Id > 0
 }
 
-func (g *GroupChatRequestUseCase) Insert(ctx context.Context, groupId, userId int /*, remark string*/) error {
-	return g.GroupChatRequestRepo.Create(ctx, &postgresModel.GroupChatRequest{
-		GroupId: groupId,
-		UserId:  userId,
-		//Remark:  remark,
-	})
-}
-
 func (g *GroupChatRequestUseCase) Delete(ctx context.Context, id, userId int) error {
 	if !g.Auth(ctx, id, userId) {
 		return errors.New(g.Locale.Localize("authentication_failed"))

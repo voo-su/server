@@ -191,8 +191,6 @@ func (m *ChatCreateResponse) validate(all bool) error {
 
 	// no validation rules for UpdatedAt
 
-	// no validation rules for RemarkName
-
 	if len(errors) > 0 {
 		return ChatCreateResponseMultiError(errors)
 	}
@@ -322,8 +320,6 @@ func (m *ChatItem) validate(all bool) error {
 	// no validation rules for IsOnline
 
 	// no validation rules for IsBot
-
-	// no validation rules for Remark
 
 	if len(errors) > 0 {
 		return ChatItemMultiError(errors)

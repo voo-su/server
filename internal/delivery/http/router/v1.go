@@ -38,7 +38,6 @@ func NewV1(conf *config.Config, locale locale.ILocale, router *gin.Engine, handl
 		{
 			contact.GET("", ginutil.HandlerFunc(handler.V1.Contact.List))
 			contact.GET("/get", ginutil.HandlerFunc(handler.V1.Contact.Get))
-			contact.PUT("/remark", ginutil.HandlerFunc(handler.V1.Contact.EditRemark))
 			contact.POST("/delete", ginutil.HandlerFunc(handler.V1.Contact.Delete))
 			contact.POST("/requests", ginutil.HandlerFunc(handler.V1.ContactRequest.Create))
 			contact.GET("/requests", ginutil.HandlerFunc(handler.V1.ContactRequest.List))

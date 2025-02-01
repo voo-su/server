@@ -19,7 +19,6 @@ CREATE TABLE contacts
     id         serial primary key,
     user_id    integer     default 0                     NOT NULL,
     friend_id  integer     default 0                     NOT NULL,
-    remark     varchar(20) default ''::character varying NOT NULL,
     status     smallint    default 0                     NOT NULL,
     group_id   integer     default 0                     NOT NULL,
     created_at timestamp   default CURRENT_TIMESTAMP     NOT NULL,
@@ -31,7 +30,6 @@ CREATE TABLE contact_requests
     id         serial primary key,
     user_id    integer     default 0                     NOT NULL,
     friend_id  integer     default 0                     NOT NULL,
-    remark     varchar(50) default ''::character varying NOT NULL,
     created_at timestamp                                 NOT NULL
 );
 

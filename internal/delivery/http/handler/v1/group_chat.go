@@ -169,7 +169,6 @@ func (g *GroupChat) Get(ctx *ginutil.Context) error {
 		IsDisturb:   0,
 		IsMute:      int32(groupInfo.IsMute),
 		IsOvert:     int32(groupInfo.IsOvert),
-		//VisitCard: c.GroupMemberRepo.GetMemberRemark(ctx.Ctx(), int(params.GroupId), uid),
 	}
 
 	if g.ChatUseCase.ChatRepo.IsDisturb(uid, groupInfo.Id, 2) {

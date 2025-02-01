@@ -72,10 +72,8 @@ func (h *Handler) onConsumeContactApply(ctx context.Context, body []byte) {
 	data := map[string]any{}
 	data["sender_id"] = apply.UserId
 	data["receiver_id"] = apply.FriendId
-	data["remark"] = apply.Remark
 	data["friend"] = map[string]any{
 		"username":   user.Username,
-		"remark":     apply.Remark,
 		"created_at": timeutil.FormatDatetime(apply.CreatedAt),
 	}
 	c := socket.NewSenderContent()

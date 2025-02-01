@@ -19,7 +19,6 @@ message ContactListResponse {
         string about = 7 [(tagger.tags) = "json:\"about\""];
         int32 is_online = 8 [(tagger.tags) = "json:\"is_online\""];
         int32 folder_id = 9 [(tagger.tags) = "json:\"folder_id\""];
-        string remark = 10 [(tagger.tags) = "json:\"remark\""];
     }
 
     repeated Item items = 1 [(tagger.tags) = "json:\"items\""];
@@ -40,7 +39,6 @@ message ContactDetailResponse {
     int32 friend_status = 8 [(tagger.tags) = "json:\"friend_status\""];
     int32 folder_id = 9 [(tagger.tags) = "json:\"folder_id\""];
     int32 is_bot = 10 [(tagger.tags) = "json:\"is_bot\""];
-    string remark = 11 [(tagger.tags) = "json:\"remark\""];
 }
 
 message ContactDeleteRequest {
@@ -154,10 +152,3 @@ message ContactFolderSaveRequest {
 }
 
 message ContactFolderSaveResponse {}
-
-message ContactRemarkEditRequest{
-    int32 friend_id = 1 [(tagger.tags) = "binding:\"required\""];
-    string remark = 2;
-}
-
-message ContactRemarkEditResponse {}

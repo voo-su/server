@@ -35,7 +35,6 @@ func (c *Contact) List(ctx *ginutil.Context) error {
 			Gender:   int32(item.Gender),
 			About:    item.About,
 			FolderId: int32(item.FolderId),
-			Remark:   item.Remark,
 		})
 	}
 
@@ -80,7 +79,6 @@ func (c *Contact) Get(ctx *ginutil.Context) error {
 			if c.ContactUseCase.ContactRepo.IsFriend(ctx.Ctx(), uid, user.Id, false) {
 				data.FriendStatus = 2
 				data.FolderId = int32(contact.FolderId)
-				data.Remark = contact.Remark
 			}
 		}
 	}
@@ -113,17 +111,4 @@ func (c *Contact) Delete(ctx *ginutil.Context) error {
 	}
 
 	return ctx.Success(&v1Pb.ContactDeleteResponse{})
-}
-
-func (c *Contact) EditRemark(ctx *ginutil.Context) error {
-	params := &v1Pb.ContactRemarkEditRequest{}
-	if err := ctx.Context.ShouldBind(params); err != nil {
-		return ctx.InvalidParams(err)
-	}
-
-	if err := c.ContactUseCase.UpdateRemark(ctx.Ctx(), ctx.UserId(), int(params.FriendId), params.Remark); err != nil {
-		return ctx.Error(err.Error())
-	}
-
-	return ctx.Success(&v1Pb.ContactRemarkEditResponse{})
 }

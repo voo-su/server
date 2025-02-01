@@ -10,7 +10,6 @@ type ContactListItem struct {
 	Surname  string `grom:"column:surname" json:"surname" `
 	Gender   uint8  `gorm:"column:gender" json:"gender"`
 	About    string `gorm:"column:about" json:"about"`
-	Remark   string `gorm:"column:remark" json:"friend_remark"`
 	IsOnline int    `json:"isOnline"`
 	FolderId int    `gorm:"column:folder_id" json:"folder_id"`
 }

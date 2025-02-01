@@ -8,7 +8,6 @@ import (
 var ProviderSet = wire.NewSet(
 	repository.NewCaptchaCacheRepository,
 	repository.NewClientCacheRepository,
-	repository.NewContactRemarkCacheRepository,
 	repository.NewRedisLockCacheRepository,
 	repository.NewMessageCacheRepository,
 	repository.NewRelationCacheRepository,

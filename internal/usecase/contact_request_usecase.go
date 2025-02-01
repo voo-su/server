@@ -82,7 +82,6 @@ func (c *ContactRequestUseCase) Accept(ctx context.Context, opt *ContactApplyAcc
 				return tx.Model(&postgresModel.Contact{}).
 					Where("id = ?", contact.Id).
 					Updates(&postgresModel.Contact{
-						Remark: "",
 						Status: 1,
 					}).Error
 			}
@@ -93,7 +92,6 @@ func (c *ContactRequestUseCase) Accept(ctx context.Context, opt *ContactApplyAcc
 			return tx.Create(&postgresModel.Contact{
 				UserId:   uid,
 				FriendId: fid,
-				Remark:   "",
 				Status:   1,
 			}).Error
 		}

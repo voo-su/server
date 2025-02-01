@@ -76,8 +76,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	messageVoteRepository := repository2.NewMessageVoteRepository(db, voteCacheRepository)
 	messageRepository := repository2.NewMessageRepository(db)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
-	contactRemarkCacheRepository := repository.NewContactRemarkCacheRepository(client)
-	contactRepository := repository2.NewContactRepository(db, contactRemarkCacheRepository, relationCacheRepository)
+	contactRepository := repository2.NewContactRepository(db, relationCacheRepository)
 	iNatsClient := provider.NewNatsClient(conf)
 	messageUseCase := &usecase.MessageUseCase{
 		Conf:                conf,
@@ -322,8 +321,7 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	messageRepository := repository2.NewMessageRepository(db)
 	botRepository := repository2.NewBotRepository(db)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
-	contactRemarkCacheRepository := repository.NewContactRemarkCacheRepository(client)
-	contactRepository := repository2.NewContactRepository(db, contactRemarkCacheRepository, relationCacheRepository)
+	contactRepository := repository2.NewContactRepository(db, relationCacheRepository)
 	iNatsClient := provider.NewNatsClient(conf)
 	messageUseCase := &usecase.MessageUseCase{
 		Conf:                conf,
@@ -416,8 +414,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	messageVoteRepository := repository2.NewMessageVoteRepository(db, voteCacheRepository)
 	messageRepository := repository2.NewMessageRepository(db)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
-	contactRemarkCacheRepository := repository.NewContactRemarkCacheRepository(client)
-	contactRepository := repository2.NewContactRepository(db, contactRemarkCacheRepository, relationCacheRepository)
+	contactRepository := repository2.NewContactRepository(db, relationCacheRepository)
 	iNatsClient := provider.NewNatsClient(conf)
 	messageUseCase := &usecase.MessageUseCase{
 		Conf:                conf,
