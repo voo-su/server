@@ -10,7 +10,7 @@ import (
 	"voo.su/pkg/socket"
 )
 
-type DialogReadMessage struct {
+type MessageRead struct {
 	Event   string `json:"event"`
 	Content struct {
 		MsgIds     []string `json:"msg_ids"`
@@ -19,7 +19,7 @@ type DialogReadMessage struct {
 }
 
 func (h *Handler) onReadMessage(ctx context.Context, client socket.IClient, data []byte) {
-	var in DialogReadMessage
+	var in MessageRead
 	if err := jsonutil.Decode(data, &in); err != nil {
 		log.Printf("onReadMessage json decode err: %s", err)
 		return

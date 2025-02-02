@@ -59,7 +59,7 @@ func (c *ContactRequest) Accept(ctx *ginutil.Context) error {
 	//if err := c.MessageUseCase.SendSystemText(ctx.Ctx(), applyInfo.UserId, &v1Pb.TextMessageRequest{
 	//	Content: c.Locale.Localize("can_start_communicating"),
 	//	Receiver: &v1Pb.MessageReceiver{
-	//		DialogType: constant.ChatPrivateMode,
+	//		ChatType: constant.ChatPrivateMode,
 	//		ReceiverId: int32(applyInfo.FriendId),
 	//	},
 	//}); err != nil {

@@ -98,7 +98,7 @@ func (b *BotUseCase) List(ctx context.Context, uid int) ([]*postgresModel.Bot, e
 func (b *BotUseCase) Chats(ctx context.Context, botId int) ([]*entity.SearchChat, error) {
 	fields := []string{
 		"g.id",
-		"c.dialog_type",
+		"c.chat_type",
 		"c.receiver_id",
 		"c.updated_at",
 		"c.is_disturb",
@@ -110,7 +110,7 @@ func (b *BotUseCase) Chats(ctx context.Context, botId int) ([]*entity.SearchChat
 
 	query := b.Source.Postgres().WithContext(ctx).Table("chats c").
 		Joins("LEFT JOIN group_chats AS g ON c.receiver_id = g.id").
-		Where("c.user_id = ? AND c.dialog_type = ? AND c.is_delete = ?", botId, 2, 0).
+		Where("c.user_id = ? AND c.chat_type = ? AND c.is_delete = ?", botId, 2, 0).
 		Order("c.updated_at DESC")
 
 	var items []*entity.SearchChat

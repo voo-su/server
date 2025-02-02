@@ -89,7 +89,7 @@ type AccountResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m AccountResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -201,7 +201,7 @@ type AccountDetailUpdateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m AccountDetailUpdateRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -303,7 +303,7 @@ type AccountDetailUpdateResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m AccountDetailUpdateResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -408,7 +408,7 @@ type AccountUsernameUpdateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m AccountUsernameUpdateRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -511,7 +511,7 @@ type AccountUsernameUpdateResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m AccountUsernameUpdateResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -616,7 +616,7 @@ type AccountEmailUpdateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m AccountEmailUpdateRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -718,7 +718,7 @@ type AccountEmailUpdateResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m AccountEmailUpdateResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -822,7 +822,7 @@ type AccountPushRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m AccountPushRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}

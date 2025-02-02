@@ -9,15 +9,15 @@ import (
 	"voo.su/pkg/socket"
 )
 
-type ConsumeDialogKeyboard struct {
+type ConsumeChatKeyboard struct {
 	SenderID   int `json:"sender_id"`
 	ReceiverID int `json:"receiver_id"`
 }
 
-func (h *Handler) onConsumeDialogKeyboard(ctx context.Context, body []byte) {
-	var in ConsumeDialogKeyboard
+func (h *Handler) onConsumeChatKeyboard(ctx context.Context, body []byte) {
+	var in ConsumeChatKeyboard
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeDialogKeyboard json decode err: %s", err.Error())
+		logger.Errorf("onConsumeChatKeyboard json decode err: %s", err.Error())
 		return
 	}
 

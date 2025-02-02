@@ -42,7 +42,7 @@ func (s *SequenceRepository) try(ctx context.Context, userId int, receiverId int
 
 		tx := s.DB.WithContext(ctx).Model(&postgresModel.Message{})
 		if userId == 0 {
-			tx = tx.Where("receiver_id = ? AND dialog_type = ?", receiverId, constant.ChatGroupMode)
+			tx = tx.Where("receiver_id = ? AND chat_type = ?", receiverId, constant.ChatGroupMode)
 		} else {
 			tx = tx.Where("user_id = ? AND receiver_id = ?", userId, receiverId).
 				Or("user_id = ? AND receiver_id = ?", receiverId, userId)

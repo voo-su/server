@@ -10,28 +10,28 @@ import (
 	"voo.su/pkg/socket"
 )
 
-type ConsumeDialog struct {
-	DialogType int   `json:"dialog_type"`
+type ConsumeMessage struct {
+	ChatType   int   `json:"chat_type"`
 	SenderId   int64 `json:"sender_id"`
 	ReceiverId int64 `json:"receiver_id"`
 	RecordId   int64 `json:"record_id"`
 }
 
-func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
-	var in ConsumeDialog
+func (h *Handler) onConsumeMessage(ctx context.Context, body []byte) {
+	var in ConsumeMessage
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeDialog json decode err: %s", err.Error())
+		logger.Errorf("onConsumeMessage json decode err: %s", err.Error())
 		return
 	}
 
 	var clientIds []int64
-	if in.DialogType == constant.ChatPrivateMode {
+	if in.ChatType == constant.ChatPrivateMode {
 		for _, val := range [2]int64{in.SenderId, in.ReceiverId} {
 			ids := h.ClientCache.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.FormatInt(val, 10))
 
 			clientIds = append(clientIds, ids...)
 		}
-	} else if in.DialogType == constant.ChatGroupMode {
+	} else if in.ChatType == constant.ChatGroupMode {
 		ids := h.RoomCache.All(ctx, &redisModel.RoomOption{
 			Channel:  socket.Session.Chat.Name(),
 			RoomType: constant.RoomImGroup,
@@ -44,7 +44,7 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 		return
 	}
 
-	data, err := h.MessageUseCase.GetDialogRecord(ctx, in.RecordId)
+	data, err := h.MessageUseCase.GetRecord(ctx, in.RecordId)
 	if err != nil {
 		return
 	}
@@ -55,7 +55,7 @@ func (h *Handler) onConsumeDialog(ctx context.Context, body []byte) {
 	c.SetMessage(constant.PushEventImMessage, map[string]any{
 		"sender_id":   in.SenderId,
 		"receiver_id": in.ReceiverId,
-		"dialog_type": in.DialogType,
+		"chat_type":   in.ChatType,
 		"data":        data,
 	})
 	socket.Session.Chat.Write(c)

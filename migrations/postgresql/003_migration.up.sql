@@ -1,32 +1,29 @@
-CREATE TABLE group_chats
+CREATE TABLE file_splits
 (
-    id           serial primary key,
-    creator_id   integer      default 0                     NOT NULL,
-    type         smallint     default 1                     NOT NULL,
-    group_name   varchar(30)  default ''::character varying NOT NULL,
-    description  varchar(100) default ''::character varying NOT NULL,
-    avatar       varchar(255) default ''::character varying NOT NULL,
-    max_num      smallint     default 200                   NOT NULL,
-    is_overt     smallint     default 0                     NOT NULL,
-    is_mute      smallint     default 0                     NOT NULL,
-    is_dismiss   smallint     default 0                     NOT NULL,
-    created_at   timestamp                                  NOT NULL,
-    updated_at   timestamp                                  NOT NULL,
-    dismissed_at timestamp
+    id            SERIAL PRIMARY KEY,
+    type          INTEGER      DEFAULT 1                     NOT NULL,
+    drive         INTEGER      DEFAULT 1                     NOT NULL,
+    upload_id     VARCHAR(100) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    user_id       INTEGER      DEFAULT 0                     NOT NULL,
+    original_name VARCHAR(100) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    split_index   INTEGER      DEFAULT 0                     NOT NULL,
+    split_num     INTEGER      DEFAULT 0                     NOT NULL,
+    path          VARCHAR(255) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    file_ext      VARCHAR(10)  DEFAULT ''::CHARACTER VARYING NOT NULL,
+    file_size     INTEGER                                    NOT NULL,
+    is_delete     INTEGER      DEFAULT 0                     NOT NULL,
+    attr          JSONB                                      NOT NULL,
+    created_at    TIMESTAMP                                  NOT NULL,
+    updated_at    TIMESTAMP                                  NOT NULL
 );
 
-CREATE TABLE group_chat_members
+CREATE TABLE bots
 (
-    id            serial primary key,
-    group_id      integer     default 0                     NOT NULL,
-    user_id       integer     default 0                     NOT NULL,
-    leader        smallint    default 0                     NOT NULL,
-    user_card     varchar(20) default ''::character varying NOT NULL,
-    is_quit       smallint    default 0                     NOT NULL,
-    is_mute       smallint    default 0                     NOT NULL,
-    min_record_id integer     default 0                     NOT NULL,
-    join_time     timestamp,
-    created_at    timestamp                                 NOT NULL,
-    updated_at    timestamp                                 NOT NULL
+    id          SERIAL PRIMARY KEY,
+    user_id     INTEGER      DEFAULT 0                     NOT NULL,
+    bot_type    INTEGER      DEFAULT 0,
+    name        VARCHAR(255) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    description VARCHAR(255) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    avatar      VARCHAR(255) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    created_at  TIMESTAMP                                  NOT NULL
 );
-

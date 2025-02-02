@@ -54,7 +54,7 @@ func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data
 	if err := h.MessageUseCase.SendText(ctx, client.Uid(), &entity.SendText{
 		Content: in.Content.Content,
 		Receiver: entity.MessageReceiver{
-			DialogType: in.Content.Receiver.DialogType,
+			ChatType:   in.Content.Receiver.ChatType,
 			ReceiverId: in.Content.Receiver.ReceiverId,
 		},
 	}); err != nil {
@@ -149,7 +149,7 @@ func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data
 		Lang: m.Content.Lang,
 		Code: m.Content.Code,
 		Receiver: &v1Pb.MessageReceiver{
-			DialogType: m.Content.Receiver.DialogType,
+			ChatType:   m.Content.Receiver.ChatType,
 			ReceiverId: m.Content.Receiver.ReceiverId,
 		},
 	}); err != nil {

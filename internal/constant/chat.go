@@ -37,8 +37,8 @@ const (
 )
 
 const (
-	DialogRecordDialogTypePrivate = 1
-	DialogRecordDialogTypeGroup   = 2
+	ChatTypePrivate = 1
+	ChatTypeGroup   = 2
 )
 
 const (

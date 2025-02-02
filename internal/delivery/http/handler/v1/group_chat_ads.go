@@ -61,11 +61,11 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *ginutil.Context) error {
 	}
 
 	_ = g.MessageUseCase.SendSysOther(ctx.Ctx(), &model.Message{
-		DialogType: constant.DialogRecordDialogTypeGroup,
+		ChatType:   constant.ChatTypeGroup,
 		MsgType:    constant.ChatMsgSysGroupAds,
 		UserId:     uid,
 		ReceiverId: int(params.GroupId),
-		Extra: jsonutil.Encode(entity.DialogRecordExtraGroupAds{
+		Extra: jsonutil.Encode(entity.MessageExtraGroupAds{
 			OwnerId:   uid,
 			OwnerName: "magomedcoder",
 			Title:     params.Title,

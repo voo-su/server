@@ -11,14 +11,14 @@ import (
 	"voo.su/pkg/socket"
 )
 
-type ConsumeDialogRevoke struct {
+type ConsumeMessageRevoke struct {
 	MsgId string `json:"msg_id"`
 }
 
-func (h *Handler) onConsumeDialogRevoke(ctx context.Context, body []byte) {
-	var in ConsumeDialogRevoke
+func (h *Handler) onConsumeMessageRevoke(ctx context.Context, body []byte) {
+	var in ConsumeMessageRevoke
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeDialogRevoke json decode err: %s", err.Error())
+		logger.Errorf("onConsumeMessageRevoke json decode err: %s", err.Error())
 		return
 	}
 
@@ -28,12 +28,12 @@ func (h *Handler) onConsumeDialogRevoke(ctx context.Context, body []byte) {
 	}
 
 	var clientIds []int64
-	if record.DialogType == constant.ChatPrivateMode {
+	if record.ChatType == constant.ChatPrivateMode {
 		for _, uid := range [2]int{record.UserId, record.ReceiverId} {
 			ids := h.ClientCache.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.Itoa(uid))
 			clientIds = append(clientIds, ids...)
 		}
-	} else if record.DialogType == constant.ChatGroupMode {
+	} else if record.ChatType == constant.ChatGroupMode {
 		clientIds = h.RoomCache.All(ctx, &redisModel.RoomOption{
 			Channel:  socket.Session.Chat.Name(),
 			RoomType: constant.RoomImGroup,
@@ -49,7 +49,7 @@ func (h *Handler) onConsumeDialogRevoke(ctx context.Context, body []byte) {
 	c.SetAck(true)
 	c.SetReceive(clientIds...)
 	c.SetMessage(constant.PushEventImMessageRevoke, map[string]any{
-		"dialog_type": record.DialogType,
+		"chat_type":   record.ChatType,
 		"sender_id":   record.UserId,
 		"receiver_id": record.ReceiverId,
 		"msg_id":      record.MsgId,

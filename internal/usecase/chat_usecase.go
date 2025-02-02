@@ -56,7 +56,7 @@ func NewChatUseCase(
 func (c *ChatUseCase) List(ctx context.Context, uid int) ([]*entity.SearchChat, error) {
 	fields := []string{
 		"c.id",
-		"c.dialog_type",
+		"c.chat_type",
 		"c.receiver_id",
 		"c.updated_at",
 		"c.is_disturb",
@@ -73,8 +73,8 @@ func (c *ChatUseCase) List(ctx context.Context, uid int) ([]*entity.SearchChat, 
 	query := c.Source.Postgres().WithContext(ctx).
 		Select(fields).
 		Table("chats c").
-		Joins("LEFT JOIN users AS u ON c.receiver_id = u.id AND c.dialog_type = 1").
-		Joins("LEFT JOIN group_chats AS g ON c.receiver_id = g.id AND c.dialog_type = 2").
+		Joins("LEFT JOIN users AS u ON c.receiver_id = u.id AND c.chat_type = 1").
+		Joins("LEFT JOIN group_chats AS g ON c.receiver_id = g.id AND c.chat_type = 2").
 		Where("c.user_id = ? AND c.is_delete = 0", uid).
 		Order("c.updated_at DESC")
 
@@ -88,20 +88,20 @@ func (c *ChatUseCase) List(ctx context.Context, uid int) ([]*entity.SearchChat, 
 
 type CreateChatOpt struct {
 	UserId     int
-	DialogType int
+	ChatType   int
 	ReceiverId int
 	IsBoot     bool
 }
 
 func (c *ChatUseCase) Create(ctx context.Context, opt *CreateChatOpt) (*postgresModel.Chat, error) {
-	result, err := c.ChatRepo.FindByWhere(ctx, "dialog_type = ? AND user_id = ? AND receiver_id = ?", opt.DialogType, opt.UserId, opt.ReceiverId)
+	result, err := c.ChatRepo.FindByWhere(ctx, "chat_type = ? AND user_id = ? AND receiver_id = ?", opt.ChatType, opt.UserId, opt.ReceiverId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		result = &postgresModel.Chat{
-			DialogType: opt.DialogType,
+			ChatType:   opt.ChatType,
 			UserId:     opt.UserId,
 			ReceiverId: opt.ReceiverId,
 		}
@@ -132,7 +132,7 @@ func (c *ChatUseCase) Delete(ctx context.Context, uid int, id int) error {
 
 type RemoveRecordListOpt struct {
 	UserId     int
-	DialogType int
+	ChatType   int
 	ReceiverId int
 	RecordIds  string
 }
@@ -143,12 +143,12 @@ func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordLis
 		findIds []int64
 		ids     = sliceutil.Unique(sliceutil.ParseIds(opt.RecordIds))
 	)
-	if opt.DialogType == constant.ChatPrivateMode {
+	if opt.ChatType == constant.ChatPrivateMode {
 		subQuery := db.Where("user_id = ? AND receiver_id = ?", opt.UserId, opt.ReceiverId).
 			Or("user_id = ? AND receiver_id = ?", opt.ReceiverId, opt.UserId)
 		db.Model(&postgresModel.Message{}).
 			Where("id IN ?", ids).
-			Where("dialog_type = ?", constant.ChatPrivateMode).
+			Where("chat_type = ?", constant.ChatPrivateMode).
 			Where(subQuery).
 			Pluck("id", &findIds)
 	} else {
@@ -157,7 +157,7 @@ func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordLis
 		}
 
 		db.Model(&postgresModel.Message{}).
-			Where("id in ? AND dialog_type = ?", ids, constant.ChatGroupMode).
+			Where("id in ? AND chat_type = ?", ids, constant.ChatGroupMode).
 			Pluck("id", &findIds)
 	}
 	if len(ids) != len(findIds) {
@@ -192,7 +192,7 @@ func (c *ChatUseCase) Top(ctx context.Context, opt *ChatTopOpt) error {
 
 type ChatDisturbOpt struct {
 	UserId     int
-	DialogType int
+	ChatType   int
 	ReceiverId int
 	IsDisturb  int
 }
@@ -201,7 +201,7 @@ func (c *ChatUseCase) Disturb(ctx context.Context, opt *ChatDisturbOpt) error {
 	_, err := c.ChatRepo.UpdateWhere(ctx, map[string]any{
 		"is_disturb": opt.IsDisturb,
 		"updated_at": time.Now(),
-	}, "user_id = ? AND receiver_id = ? AND dialog_type = ?", opt.UserId, opt.ReceiverId, opt.DialogType)
+	}, "user_id = ? AND receiver_id = ? AND chat_type = ?", opt.UserId, opt.ReceiverId, opt.ChatType)
 	return err
 }
 
@@ -222,7 +222,7 @@ func (c *ChatUseCase) BatchAddList(ctx context.Context, uid int, values map[stri
 		return
 	}
 
-	c.Source.Postgres().WithContext(ctx).Exec(fmt.Sprintf("INSERT INTO chats (dialog_type, user_id, receiver_id, created_at, updated_at) VALUES %s ON DUPLICATE KEY UPDATE is_delete = 0, updated_at = '%s'", strings.Join(data, ","), ctime))
+	c.Source.Postgres().WithContext(ctx).Exec(fmt.Sprintf("INSERT INTO chats (chat_type, user_id, receiver_id, created_at, updated_at) VALUES %s ON DUPLICATE KEY UPDATE is_delete = 0, updated_at = '%s'", strings.Join(data, ","), ctime))
 }
 
 func (c *ChatUseCase) Collect(ctx context.Context, uid int, recordId int64) error {
@@ -239,17 +239,17 @@ func (c *ChatUseCase) Collect(ctx context.Context, uid int, recordId int64) erro
 		return errors.New(c.Locale.Localize("cannot_favorite_message"))
 	}
 
-	if record.DialogType == constant.ChatPrivateMode {
+	if record.ChatType == constant.ChatPrivateMode {
 		if record.UserId != uid && record.ReceiverId != uid {
 			return constant.ErrPermissionDenied
 		}
-	} else if record.DialogType == constant.ChatGroupMode {
+	} else if record.ChatType == constant.ChatGroupMode {
 		if !c.GroupChatMemberRepo.IsMember(ctx, record.ReceiverId, uid, true) {
 			return constant.ErrPermissionDenied
 		}
 	}
 
-	var file entity.DialogRecordExtraImage
+	var file entity.MessageExtraImage
 	if err := jsonutil.Decode(record.Extra, &file); err != nil {
 		return err
 	}

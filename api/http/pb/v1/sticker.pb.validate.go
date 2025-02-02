@@ -75,7 +75,7 @@ type StickerListItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m StickerListItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -179,7 +179,7 @@ type StickerSetSystemRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m StickerSetSystemRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -321,7 +321,7 @@ type StickerSetSystemResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m StickerSetSystemResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -425,7 +425,7 @@ type StickerDeleteRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m StickerDeleteRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -561,7 +561,7 @@ type StickerSysListResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m StickerSysListResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -731,7 +731,7 @@ type StickerListResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m StickerListResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -837,7 +837,7 @@ type StickerUploadResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m StickerUploadResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -947,7 +947,7 @@ type StickerSysListResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m StickerSysListResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1090,7 +1090,7 @@ type StickerListResponse_SysStickerMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m StickerListResponse_SysStickerMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}

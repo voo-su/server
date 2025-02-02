@@ -6,6 +6,7 @@ import (
 	"fmt"
 	_nats "github.com/nats-io/nats.go"
 	"io/ioutil"
+	"log"
 	"voo.su/internal/config"
 	"voo.su/internal/domain/entity"
 	"voo.su/pkg/logger"
@@ -23,7 +24,7 @@ func (p *PushHandle) Handle(ctx context.Context) error {
 		p.WebPush(string(msg.Data))
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	select {}

@@ -36,12 +36,12 @@ func (d *Dashboard) Dashboard(ctx *ginutil.Context) error {
 		log.Println(err)
 	}
 
-	groupMessages, err := d.MessageUseCase.MessageRepo.QueryCount(ctx.Ctx(), "dialog_type = ?", 2)
+	groupMessages, err := d.MessageUseCase.MessageRepo.QueryCount(ctx.Ctx(), "chat_type = ?", 2)
 	if err != nil {
 		log.Println(err)
 	}
 
-	privateMessages, err := d.MessageUseCase.MessageRepo.QueryCount(ctx.Ctx(), "dialog_type = ?", 1)
+	privateMessages, err := d.MessageUseCase.MessageRepo.QueryCount(ctx.Ctx(), "chat_type = ?", 1)
 	if err != nil {
 		log.Println(err)
 	}

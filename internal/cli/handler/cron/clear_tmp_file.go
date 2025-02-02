@@ -55,7 +55,7 @@ func (c *ClearTmpFile) Handle(ctx context.Context) error {
 
 		for _, item := range items {
 			list := make([]*model.FileSplit, 0)
-			c.DB.Table("splits").
+			c.DB.Table("file_splits").
 				Where("user_id = ? AND upload_id = ? AND type = 2", item.UserId, item.UploadId).
 				Scan(&list)
 

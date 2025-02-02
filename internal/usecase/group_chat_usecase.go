@@ -59,9 +59,9 @@ type GroupCreateOpt struct {
 
 func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int, error) {
 	var (
-		err        error
-		members    []*postgresModel.GroupChatMember
-		dialogList []*postgresModel.Chat
+		err     error
+		members []*postgresModel.GroupChatMember
+		chats   []*postgresModel.Chat
 	)
 	uids := sliceutil.Unique(append(opt.MemberIds, opt.UserId))
 	group := &postgresModel.GroupChat{
@@ -77,7 +77,7 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 			return err
 		}
 
-		addMembers := make([]entity.DialogRecordExtraGroupMembers, 0, len(opt.MemberIds))
+		addMembers := make([]entity.MessageExtraGroupMembers, 0, len(opt.MemberIds))
 		tx.Table("users").
 			Select("id AS user_id", "username").
 			Where("id IN ?", opt.MemberIds).
@@ -94,8 +94,8 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 				Leader:   leader,
 				JoinTime: joinTime,
 			})
-			dialogList = append(dialogList, &postgresModel.Chat{
-				DialogType: 2,
+			chats = append(chats, &postgresModel.Chat{
+				ChatType:   2,
 				UserId:     val,
 				ReceiverId: group.Id,
 			})
@@ -104,7 +104,7 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 			return err
 		}
 
-		if err = tx.Create(dialogList).Error; err != nil {
+		if err = tx.Create(chats).Error; err != nil {
 			return err
 		}
 
@@ -118,11 +118,11 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 
 		record := &postgresModel.Message{
 			MsgId:      strutil.NewMsgId(),
-			DialogType: constant.ChatGroupMode,
+			ChatType:   constant.ChatGroupMode,
 			ReceiverId: group.Id,
 			MsgType:    constant.ChatMsgSysGroupCreate,
 			Sequence:   g.SequenceRepo.Get(ctx, 0, group.Id),
-			Extra: jsonutil.Encode(entity.DialogRecordExtraGroupCreate{
+			Extra: jsonutil.Encode(entity.MessageExtraGroupCreate{
 				OwnerId:   user.Id,
 				OwnerName: user.Username,
 				Members:   addMembers,
@@ -213,11 +213,11 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 
 	record := &postgresModel.Message{
 		MsgId:      strutil.NewMsgId(),
-		DialogType: constant.ChatGroupMode,
+		ChatType:   constant.ChatGroupMode,
 		ReceiverId: groupId,
 		MsgType:    constant.ChatMsgSysGroupMemberQuit,
 		Sequence:   g.SequenceRepo.Get(ctx, 0, groupId),
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraGroupMemberQuit{
+		Extra: jsonutil.Encode(&entity.MessageExtraGroupMemberQuit{
 			OwnerId:   user.Id,
 			OwnerName: user.Username,
 		}),
@@ -257,7 +257,7 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 		"data": jsonutil.Encode(map[string]any{
 			"sender_id":   record.UserId,
 			"receiver_id": record.ReceiverId,
-			"dialog_type": record.DialogType,
+			"chat_type":   record.ChatType,
 			"record_id":   record.Id,
 		}),
 	}))
@@ -273,12 +273,12 @@ type GroupInviteOpt struct {
 
 func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) error {
 	var (
-		err              error
-		addMembers       []*postgresModel.GroupChatMember
-		addDialogList    []*postgresModel.Chat
-		updateDialogList []int
-		dialogList       []*postgresModel.Chat
-		db               = g.Source.Postgres().WithContext(ctx)
+		err        error
+		addMembers []*postgresModel.GroupChatMember
+		addChat    []*postgresModel.Chat
+		updateChat []int
+		chats      []*postgresModel.Chat
+		db         = g.Source.Postgres().WithContext(ctx)
 	)
 	m := make(map[int]struct{})
 	for _, value := range g.MemberRepo.GetMemberIds(ctx, opt.GroupId) {
@@ -287,9 +287,9 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 
 	listHash := make(map[int]*postgresModel.Chat)
 	db.Select("id", "user_id", "is_delete").
-		Where("user_id IN ? AND receiver_id = ? AND dialog_type = ?", opt.MemberIds, opt.GroupId, 2).
-		Find(&dialogList)
-	for _, item := range dialogList {
+		Where("user_id IN ? AND receiver_id = ? AND chat_type = ?", opt.MemberIds, opt.GroupId, 2).
+		Find(&chats)
+	for _, item := range chats {
 		listHash[item.UserId] = item
 	}
 
@@ -311,9 +311,9 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		memberMaps[item.Id] = item
 	}
 
-	members := make([]entity.DialogRecordExtraGroupMembers, 0)
+	members := make([]entity.MessageExtraGroupMembers, 0)
 	for _, value := range opt.MemberIds {
-		members = append(members, entity.DialogRecordExtraGroupMembers{
+		members = append(members, entity.MessageExtraGroupMembers{
 			UserId:   value,
 			Username: memberMaps[value].Username,
 		})
@@ -327,13 +327,13 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		}
 
 		if item, ok := listHash[value]; !ok {
-			addDialogList = append(addDialogList, &postgresModel.Chat{
-				DialogType: constant.ChatGroupMode,
+			addChat = append(addChat, &postgresModel.Chat{
+				ChatType:   constant.ChatGroupMode,
 				UserId:     value,
 				ReceiverId: opt.GroupId,
 			})
 		} else if item.IsDelete == 1 {
-			updateDialogList = append(updateDialogList, item.Id)
+			updateChat = append(updateChat, item.Id)
 		}
 	}
 	if len(addMembers) == 0 {
@@ -342,13 +342,13 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 
 	record := &postgresModel.Message{
 		MsgId:      strutil.NewMsgId(),
-		DialogType: constant.ChatGroupMode,
+		ChatType:   constant.ChatGroupMode,
 		ReceiverId: opt.GroupId,
 		MsgType:    constant.ChatMsgSysGroupMemberJoin,
 		Sequence:   g.SequenceRepo.Get(ctx, 0, opt.GroupId),
 	}
 
-	record.Extra = jsonutil.Encode(&entity.DialogRecordExtraGroupJoin{
+	record.Extra = jsonutil.Encode(&entity.MessageExtraGroupJoin{
 		OwnerId:   memberMaps[opt.UserId].Id,
 		OwnerName: memberMaps[opt.UserId].Username,
 		Members:   members,
@@ -360,14 +360,14 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 			return err
 		}
 
-		if len(addDialogList) > 0 {
-			if err = tx.Create(&addDialogList).Error; err != nil {
+		if len(addChat) > 0 {
+			if err = tx.Create(&addChat).Error; err != nil {
 				return err
 			}
 		}
 
-		if len(updateDialogList) > 0 {
-			tx.Model(&postgresModel.Chat{}).Where("id IN ?", updateDialogList).Updates(map[string]any{
+		if len(updateChat) > 0 {
+			tx.Model(&postgresModel.Chat{}).Where("id IN ?", updateChat).Updates(map[string]any{
 				"is_delete":  0,
 				"created_at": timeutil.DateTime(),
 			})
@@ -396,7 +396,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		"data": jsonutil.Encode(map[string]any{
 			"sender_id":   record.UserId,
 			"receiver_id": record.ReceiverId,
-			"dialog_type": record.DialogType,
+			"chat_type":   record.ChatType,
 			"record_id":   record.Id,
 		}),
 	}))
@@ -441,9 +441,9 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 		memberMaps[item.Id] = item
 	}
 
-	members := make([]entity.DialogRecordExtraGroupMembers, 0)
+	members := make([]entity.MessageExtraGroupMembers, 0)
 	for _, value := range opt.MemberIds {
-		members = append(members, entity.DialogRecordExtraGroupMembers{
+		members = append(members, entity.MessageExtraGroupMembers{
 			UserId:   value,
 			Username: memberMaps[value].Username,
 		})
@@ -452,10 +452,10 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 	record := &postgresModel.Message{
 		MsgId:      strutil.NewMsgId(),
 		Sequence:   g.SequenceRepo.Get(ctx, 0, opt.GroupId),
-		DialogType: constant.ChatGroupMode,
+		ChatType:   constant.ChatGroupMode,
 		ReceiverId: opt.GroupId,
 		MsgType:    constant.ChatMsgSysGroupMemberKicked,
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraGroupMemberKicked{
+		Extra: jsonutil.Encode(&entity.MessageExtraGroupMemberKicked{
 			OwnerId:   memberMaps[opt.UserId].Id,
 			OwnerName: memberMaps[opt.UserId].Username,
 			Members:   members,
@@ -495,7 +495,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 			"data": jsonutil.Encode(map[string]any{
 				"sender_id":   int64(record.UserId),
 				"receiver_id": int64(record.ReceiverId),
-				"dialog_type": record.DialogType,
+				"chat_type":   record.ChatType,
 				"record_id":   int64(record.Id),
 			}),
 		}))
@@ -505,7 +505,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 	return nil
 }
 
-type session struct {
+type Session struct {
 	ReceiverID int `json:"receiver_id"`
 	IsDisturb  int `json:"is_disturb"`
 }
@@ -536,13 +536,13 @@ func (g *GroupChatUseCase) List(userId int) ([]*entity.GroupItem, error) {
 	query := g.Source.Postgres().
 		Table("chats").
 		Select("receiver_id,is_disturb").
-		Where("dialog_type = ? AND receiver_id in ?", 2, ids)
-	list := make([]*session, 0)
+		Where("chat_type = ? AND receiver_id in ?", 2, ids)
+	list := make([]*Session, 0)
 	if err := query.Find(&list).Error; err != nil {
 		return nil, err
 	}
 
-	hash := make(map[int]*session)
+	hash := make(map[int]*Session)
 	for i := range list {
 		hash[list[i].ReceiverID] = list[i]
 	}

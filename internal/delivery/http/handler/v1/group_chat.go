@@ -135,7 +135,7 @@ func (g *GroupChat) Setting(ctx *ginutil.Context) error {
 	//_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 	//	Content: g.Locale.Localize("group_info_changed_by_owner_or_admin"),
 	//	Receiver: &v1Pb.MessageReceiver{
-	//		DialogType: constant.ChatPrivateMode,
+	//		ChatType: constant.ChatPrivateMode,
 	//		ReceiverId: params.GroupId,
 	//	},
 	//})
@@ -237,7 +237,6 @@ func (g *GroupChat) Members(ctx *ginutil.Context) error {
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
-
 	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.GroupId))
 	if err != nil {
 		return ctx.Error(g.Locale.Localize("network_error"))
@@ -333,7 +332,7 @@ func (g *GroupChat) Dismiss(ctx *ginutil.Context) error {
 	_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 		Content: g.Locale.Localize("group_dissolved_by_owner"),
 		Receiver: &v1Pb.MessageReceiver{
-			DialogType: constant.ChatGroupMode,
+			ChatType:   constant.ChatGroupMode,
 			ReceiverId: params.GroupId,
 		},
 	})
@@ -384,13 +383,13 @@ func (g *GroupChat) Mute(ctx *ginutil.Context) error {
 	var msgType int
 	if params.Mode == 1 {
 		msgType = constant.ChatMsgSysGroupMuted
-		extra = entity.DialogRecordExtraGroupMuted{
+		extra = entity.MessageExtraGroupMuted{
 			OwnerId:   user.Id,
 			OwnerName: user.Username,
 		}
 	} else {
 		msgType = constant.ChatMsgSysGroupCancelMuted
-		extra = entity.DialogRecordExtraGroupCancelMuted{
+		extra = entity.MessageExtraGroupCancelMuted{
 			OwnerId:   user.Id,
 			OwnerName: user.Username,
 		}
@@ -398,7 +397,7 @@ func (g *GroupChat) Mute(ctx *ginutil.Context) error {
 
 	if err := g.MessageUseCase.SendSysOther(ctx.Ctx(), &postgresModel.Message{
 		MsgType:    msgType,
-		DialogType: constant.DialogRecordDialogTypeGroup,
+		ChatType:   constant.ChatTypeGroup,
 		UserId:     uid,
 		ReceiverId: int(params.GroupId),
 		Extra:      jsonutil.Encode(extra),

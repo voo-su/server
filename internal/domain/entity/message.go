@@ -2,11 +2,11 @@ package entity
 
 import "time"
 
-type DialogRecordsItem struct {
+type MessageItem struct {
 	Id         int    `json:"id"`
 	Sequence   int    `json:"sequence"`
 	MsgId      string `json:"msg_id"`
-	DialogType int    `json:"dialog_type"`
+	ChatType   int    `json:"chat_type"`
 	MsgType    int    `json:"msg_type"`
 	UserId     int    `json:"user_id"`
 	ReceiverId int    `json:"receiver_id"`
@@ -23,7 +23,7 @@ type DialogRecordsItem struct {
 }
 
 type QueryGetHistoryOpt struct {
-	DialogType int
+	ChatType   int
 	UserId     int
 	ReceiverId int
 	MsgType    []int
@@ -31,11 +31,11 @@ type QueryGetHistoryOpt struct {
 	Limit      int
 }
 
-type QueryDialogRecordsItem struct {
+type QueryMessageItem struct {
 	Id         int       `json:"id"`
 	MsgId      string    `json:"msg_id"`
 	Sequence   int64     `json:"sequence"`
-	DialogType int       `json:"dialog_type"`
+	ChatType   int       `json:"chat_type"`
 	MsgType    int       `json:"msg_type"`
 	UserId     int       `json:"user_id"`
 	ReceiverId int       `json:"receiver_id"`
@@ -52,7 +52,7 @@ type QueryDialogRecordsItem struct {
 	Extra      string    `json:"extra"`
 }
 
-type DialogRecordExtraGroupMembers struct {
+type MessageExtraGroupMembers struct {
 	UserId   int    `gorm:"column:user_id;" json:"user_id"`
 	Username string `gorm:"column:username;" json:"username"`
 }
@@ -65,37 +65,37 @@ type Reply struct {
 	MsgId    string `json:"msg_id,omitempty"`
 }
 
-type DialogRecordExtraCode struct {
+type MessageExtraCode struct {
 	Lang string `json:"translations"`
 	Code string `json:"code"`
 }
 
-type DialogRecordExtraLocation struct {
+type MessageExtraLocation struct {
 	Longitude   string `json:"longitude"`
 	Latitude    string `json:"latitude"`
 	Description string `json:"description"`
 }
 
-type DialogRecordExtraForward struct {
-	DialogType int              `json:"dialog_type"`
+type MessageExtraForward struct {
+	ChatType   int              `json:"chat_type"`
 	UserId     int              `json:"user_id"`
 	ReceiverId int              `json:"receiver_id"`
 	MsgIds     []int            `json:"msg_ids"`
 	Records    []map[string]any `json:"records"`
 }
 
-type DialogRecordExtraLogin struct {
+type MessageExtraLogin struct {
 	IP       string `json:"ip"`
 	Agent    string `json:"agent"`
 	Address  string `json:"address"`
 	Datetime string `json:"datetime"`
 }
 
-type DialogRecordExtraCard struct {
+type MessageExtraCard struct {
 	UserId int `json:"user_id"`
 }
 
-type DialogRecordExtraFile struct {
+type MessageExtraFile struct {
 	Name   string `json:"name"`
 	Drive  int    `json:"drive"`
 	Suffix string `json:"suffix"`
@@ -103,7 +103,7 @@ type DialogRecordExtraFile struct {
 	Path   string `json:"path"`
 }
 
-type DialogRecordExtraImage struct {
+type MessageExtraImage struct {
 	Name   string `json:"name"`
 	Suffix string `json:"suffix"`
 	Size   int    `json:"size"`
@@ -112,7 +112,7 @@ type DialogRecordExtraImage struct {
 	Height int    `json:"height"`
 }
 
-type DialogRecordExtraAudio struct {
+type MessageExtraAudio struct {
 	Name     string `json:"name"`
 	Suffix   string `json:"suffix"`
 	Size     int    `json:"size"`
@@ -120,7 +120,7 @@ type DialogRecordExtraAudio struct {
 	Duration int    `json:"duration"`
 }
 
-type DialogRecordExtraVideo struct {
+type MessageExtraVideo struct {
 	Name     string `json:"name"`
 	Cover    string `json:"cover"`
 	Suffix   string `json:"suffix"`
@@ -129,99 +129,99 @@ type DialogRecordExtraVideo struct {
 	Duration int    `json:"duration"`
 }
 
-type DialogRecordExtraGroupCreate struct {
-	OwnerId   int                             `json:"owner_id"`
-	OwnerName string                          `json:"owner_name"`
-	Members   []DialogRecordExtraGroupMembers `json:"members"`
+type MessageExtraGroupCreate struct {
+	OwnerId   int                        `json:"owner_id"`
+	OwnerName string                     `json:"owner_name"`
+	Members   []MessageExtraGroupMembers `json:"members"`
 }
 
-type DialogRecordExtraGroupJoin struct {
-	OwnerId   int                             `json:"owner_id"`
-	OwnerName string                          `json:"owner_name"`
-	Members   []DialogRecordExtraGroupMembers `json:"members"`
+type MessageExtraGroupJoin struct {
+	OwnerId   int                        `json:"owner_id"`
+	OwnerName string                     `json:"owner_name"`
+	Members   []MessageExtraGroupMembers `json:"members"`
 }
 
-type DialogRecordExtraGroupTransfer struct {
+type MessageExtraGroupTransfer struct {
 	OldOwnerId   int    `json:"old_owner_id"`
 	OldOwnerName string `json:"old_owner_name"`
 	NewOwnerId   int    `json:"new_owner_id"`
 	NewOwnerName string `json:"new_owner_name"`
 }
 
-type DialogRecordExtraGroupMuted struct {
+type MessageExtraGroupMuted struct {
 	OwnerId   int    `json:"owner_id"`
 	OwnerName string `json:"owner_name"`
 }
 
-type DialogRecordExtraGroupCancelMuted struct {
+type MessageExtraGroupCancelMuted struct {
 	OwnerId   int    `json:"owner_id"`
 	OwnerName string `json:"owner_name"`
 }
 
-type DialogRecordExtraGroupMemberMuted struct {
-	OwnerId   int                             `json:"owner_id"`
-	OwnerName string                          `json:"owner_name"`
-	Members   []DialogRecordExtraGroupMembers `json:"members"`
+type MessageExtraGroupMemberMuted struct {
+	OwnerId   int                        `json:"owner_id"`
+	OwnerName string                     `json:"owner_name"`
+	Members   []MessageExtraGroupMembers `json:"members"`
 }
 
-type DialogRecordExtraGroupMemberCancelMuted struct {
-	OwnerId   int                             `json:"owner_id"`
-	OwnerName string                          `json:"owner_name"`
-	Members   []DialogRecordExtraGroupMembers `json:"members"`
+type MessageExtraGroupMemberCancelMuted struct {
+	OwnerId   int                        `json:"owner_id"`
+	OwnerName string                     `json:"owner_name"`
+	Members   []MessageExtraGroupMembers `json:"members"`
 }
 
-type DialogRecordExtraGroupDismissed struct {
+type MessageExtraGroupDismissed struct {
 	OwnerId   int    `json:"owner_id"`
 	OwnerName string `json:"owner_name"`
 }
 
-type DialogRecordExtraGroupMemberQuit struct {
+type MessageExtraGroupMemberQuit struct {
 	OwnerId   int    `json:"owner_id"`
 	OwnerName string `json:"owner_name"`
 }
 
-type DialogRecordExtraGroupMemberKicked struct {
-	OwnerId   int                             `json:"owner_id"`
-	OwnerName string                          `json:"owner_name"`
-	Members   []DialogRecordExtraGroupMembers `json:"members"`
+type MessageExtraGroupMemberKicked struct {
+	OwnerId   int                        `json:"owner_id"`
+	OwnerName string                     `json:"owner_name"`
+	Members   []MessageExtraGroupMembers `json:"members"`
 }
 
-type DialogRecordExtraGroupMessageRevoke struct {
+type MessageExtraGroupMessageRevoke struct {
 	OwnerId         int    `json:"owner_id"`
 	OwnerName       string `json:"owner_name"`
 	RevokeMessageId string `json:"revoke_message_id"`
 }
 
-type DialogRecordExtraGroupAds struct {
+type MessageExtraGroupAds struct {
 	OwnerId   int    `json:"owner_id"`
 	OwnerName string `json:"owner_name"`
 	Title     string `json:"title"`
 	Content   string `json:"content"`
 }
 
-type DialogRecordExtraText struct {
+type MessageExtraText struct {
 	Content string `json:"content"`
 }
 
-type DialogRecordExtraMixedItem struct {
+type MessageExtraMixedItem struct {
 	Type    int    `json:"type"`
 	Content string `json:"content"`
 	Link    string `json:"link,omitempty"`
 }
 
-type DialogRecordExtraMixed struct {
-	Items []*DialogRecordExtraMixedItem `json:"items"`
+type MessageExtraMixed struct {
+	Items []*MessageExtraMixedItem `json:"items"`
 }
 
 type MessageAccess struct {
-	DialogType        int
+	ChatType          int
 	UserId            int
 	ReceiverId        int
 	IsVerifyGroupMute bool
 }
 
 type MessageReceiver struct {
-	DialogType int32
+	ChatType   int32
 	ReceiverId int32
 }
 

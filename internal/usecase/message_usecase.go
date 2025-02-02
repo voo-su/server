@@ -36,9 +36,9 @@ import (
 type IMessageUseCase interface {
 	IsAccess(ctx context.Context, opt *entity.MessageAccess) error
 
-	GetHistory(ctx context.Context, opt *entity.QueryGetHistoryOpt) ([]*entity.DialogRecordsItem, error)
+	GetHistory(ctx context.Context, opt *entity.QueryGetHistoryOpt) ([]*entity.MessageItem, error)
 
-	GetDialogRecord(ctx context.Context, recordId int64) (*entity.DialogRecordsItem, error)
+	GetRecord(ctx context.Context, recordId int64) (*entity.MessageItem, error)
 
 	GetMessageByRecordId(ctx context.Context, recordId int64) (*postgresModel.Message, error)
 
@@ -97,12 +97,11 @@ type MessageUseCase struct {
 	MessageCache        *redisRepo.MessageCacheRepository
 	ServerCache         *redisRepo.ServerCacheRepository
 	ClientCache         *redisRepo.ClientCacheRepository
-	DialogVoteCache     *redisRepo.VoteCacheRepository
 	Nats                nats.INatsClient
 }
 
 func (m *MessageUseCase) IsAccess(ctx context.Context, opt *entity.MessageAccess) error {
-	if opt.DialogType == constant.ChatPrivateMode {
+	if opt.ChatType == constant.ChatPrivateMode {
 		if m.ContactRepo.IsFriend(ctx, opt.UserId, opt.ReceiverId, false) {
 			return nil
 		}
@@ -141,13 +140,13 @@ func (m *MessageUseCase) IsAccess(ctx context.Context, opt *entity.MessageAccess
 	return nil
 }
 
-func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHistoryOpt) ([]*entity.DialogRecordsItem, error) {
+func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHistoryOpt) ([]*entity.MessageItem, error) {
 	var (
-		items  = make([]*entity.QueryDialogRecordsItem, 0, opt.Limit)
+		items  = make([]*entity.QueryMessageItem, 0, opt.Limit)
 		fields = []string{
 			"messages.id",
 			"messages.sequence",
-			"messages.dialog_type",
+			"messages.chat_type",
 			"messages.msg_type",
 			"messages.msg_id",
 			"messages.user_id",
@@ -170,7 +169,7 @@ func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHis
 		query.Where("messages.sequence < ?", opt.RecordId)
 	}
 
-	if opt.DialogType == constant.ChatPrivateMode {
+	if opt.ChatType == constant.ChatPrivateMode {
 		subQuery := m.Source.Postgres().Where("messages.user_id = ? AND messages.receiver_id = ?", opt.UserId, opt.ReceiverId)
 		subQuery.Or("messages.user_id = ? AND messages.receiver_id = ?", opt.ReceiverId, opt.UserId)
 		query.Where(subQuery)
@@ -182,28 +181,28 @@ func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHis
 		query.Where("messages.msg_type in ?", opt.MsgType)
 	}
 
-	query.Where("messages.dialog_type = ?", opt.DialogType)
+	query.Where("messages.chat_type = ?", opt.ChatType)
 	query.Where("COALESCE(message_delete.id,0) = 0")
 	query.Select(fields).Order("messages.sequence desc").Limit(opt.Limit)
 	if err := query.Scan(&items).Error; err != nil {
 		return nil, err
 	}
 	if len(items) == 0 {
-		return make([]*entity.DialogRecordsItem, 0), nil
+		return make([]*entity.MessageItem, 0), nil
 	}
 
-	return m.HandleDialogRecords(ctx, items)
+	return m.HandleRecords(ctx, items)
 }
 
-func (m *MessageUseCase) GetDialogRecord(ctx context.Context, recordId int64) (*entity.DialogRecordsItem, error) {
+func (m *MessageUseCase) GetRecord(ctx context.Context, recordId int64) (*entity.MessageItem, error) {
 	var (
 		err    error
-		item   *entity.QueryDialogRecordsItem
+		item   *entity.QueryMessageItem
 		fields = []string{
 			"messages.id",
 			"messages.msg_id",
 			"messages.sequence",
-			"messages.dialog_type",
+			"messages.chat_type",
 			"messages.msg_type",
 			"messages.user_id",
 			"messages.receiver_id",
@@ -223,7 +222,7 @@ func (m *MessageUseCase) GetDialogRecord(ctx context.Context, recordId int64) (*
 		return nil, err
 	}
 
-	list, err := m.HandleDialogRecords(ctx, []*entity.QueryDialogRecordsItem{item})
+	list, err := m.HandleRecords(ctx, []*entity.QueryMessageItem{item})
 	if err != nil {
 		return nil, err
 	}
@@ -231,17 +230,17 @@ func (m *MessageUseCase) GetDialogRecord(ctx context.Context, recordId int64) (*
 	return list[0], nil
 }
 
-func (m *MessageUseCase) GetForwardRecords(ctx context.Context, uid int, recordId int64) ([]*entity.DialogRecordsItem, error) {
+func (m *MessageUseCase) GetForwardRecords(ctx context.Context, uid int, recordId int64) ([]*entity.MessageItem, error) {
 	record, err := m.MessageRepo.FindById(ctx, int(recordId))
 	if err != nil {
 		return nil, err
 	}
 
-	//if record.DialogType == domain.ChatPrivateMode {
+	//if record.ChatType == domain.ChatPrivateMode {
 	//	if record.UserId != uid && record.ReceiverId != uid {
 	//		return nil, domain.ErrPermissionDenied
 	//	}
-	//} else if record.DialogType == domain.ChatGroupMode {
+	//} else if record.ChatType == domain.ChatGroupMode {
 	//	if !s.GroupMemberRepo.IsMember(ctx, record.ReceiverId, uid, true) {
 	//		return nil, domain.ErrPermissionDenied
 	//	}
@@ -249,17 +248,17 @@ func (m *MessageUseCase) GetForwardRecords(ctx context.Context, uid int, recordI
 	//	return nil, domain.ErrPermissionDenied
 	//}
 
-	var extra entity.DialogRecordExtraForward
+	var extra entity.MessageExtraForward
 	if err := jsonutil.Decode(record.Extra, &extra); err != nil {
 		return nil, err
 	}
 	var (
-		items  = make([]*entity.QueryDialogRecordsItem, 0)
+		items  = make([]*entity.QueryMessageItem, 0)
 		fields = []string{
 			"messages.id",
 			"messages.msg_id",
 			"messages.sequence",
-			"messages.dialog_type",
+			"messages.chat_type",
 			"messages.msg_type",
 			"messages.user_id",
 			"messages.receiver_id",
@@ -280,10 +279,10 @@ func (m *MessageUseCase) GetForwardRecords(ctx context.Context, uid int, recordI
 		return nil, err
 	}
 
-	return m.HandleDialogRecords(ctx, items)
+	return m.HandleRecords(ctx, items)
 }
 
-func (m *MessageUseCase) HandleDialogRecords(ctx context.Context, items []*entity.QueryDialogRecordsItem) ([]*entity.DialogRecordsItem, error) {
+func (m *MessageUseCase) HandleRecords(ctx context.Context, items []*entity.QueryMessageItem) ([]*entity.MessageItem, error) {
 	var (
 		votes     []int
 		voteItems []*postgresModel.MessageVote
@@ -303,13 +302,13 @@ func (m *MessageUseCase) HandleDialogRecords(ctx context.Context, items []*entit
 		}
 	}
 
-	newItems := make([]*entity.DialogRecordsItem, 0, len(items))
+	newItems := make([]*entity.MessageItem, 0, len(items))
 	for _, item := range items {
-		data := &entity.DialogRecordsItem{
+		data := &entity.MessageItem{
 			Id:         item.Id,
 			MsgId:      item.MsgId,
 			Sequence:   int(item.Sequence),
-			DialogType: item.DialogType,
+			ChatType:   item.ChatType,
 			MsgType:    item.MsgType,
 			UserId:     item.UserId,
 			ReceiverId: item.ReceiverId,
@@ -394,7 +393,7 @@ func (m *MessageUseCase) GetMessageByRecordId(ctx context.Context, recordId int6
 
 func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *entity.SendText) error {
 	data := &postgresModel.Message{
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeText,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
@@ -407,7 +406,7 @@ func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *entity.Send
 
 func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error {
 	data := &postgresModel.Message{
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgSysText,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
@@ -419,11 +418,11 @@ func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *v1Pb.
 
 func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *entity.SendImage) error {
 	data := &postgresModel.Message{
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeImage,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraImage{
+		Extra: jsonutil.Encode(&entity.MessageExtraImage{
 			Url:    req.Url,
 			Width:  int(req.Width),
 			Height: int(req.Height),
@@ -437,11 +436,11 @@ func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *entity.Sen
 
 func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *entity.SendVideo) error {
 	data := &postgresModel.Message{
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeVideo,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraVideo{
+		Extra: jsonutil.Encode(&entity.MessageExtraVideo{
 			Cover:    req.Cover,
 			Suffix:   strutil.FileSuffix(req.Url),
 			Size:     int(req.Size),
@@ -456,11 +455,11 @@ func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *entity.Sen
 
 func (m *MessageUseCase) SendAudio(ctx context.Context, uid int, req *entity.SendAudio) error {
 	data := &postgresModel.Message{
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeAudio,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraAudio{
+		Extra: jsonutil.Encode(&entity.MessageExtraAudio{
 			Suffix:   strutil.FileSuffix(req.Url),
 			Size:     int(req.Size),
 			Url:      req.Url,
@@ -497,7 +496,7 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *entity.Send
 
 	data := &postgresModel.Message{
 		MsgId:      encrypt.Md5(req.UploadId),
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 	}
@@ -505,7 +504,7 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *entity.Send
 	switch entity.GetMediaType(file.FileExt) {
 	case constant.MediaFileAudio:
 		data.MsgType = constant.ChatMsgTypeAudio
-		data.Extra = jsonutil.Encode(&entity.DialogRecordExtraAudio{
+		data.Extra = jsonutil.Encode(&entity.MessageExtraAudio{
 			Suffix:   file.FileExt,
 			Size:     int(file.FileSize),
 			Url:      publicUrl,
@@ -513,7 +512,7 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *entity.Send
 		})
 	case constant.MediaFileVideo:
 		data.MsgType = constant.ChatMsgTypeVideo
-		data.Extra = jsonutil.Encode(&entity.DialogRecordExtraVideo{
+		data.Extra = jsonutil.Encode(&entity.MessageExtraVideo{
 			Cover:    "",
 			Suffix:   file.FileExt,
 			Size:     int(file.FileSize),
@@ -522,7 +521,7 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *entity.Send
 		})
 	case constant.MediaFileOther:
 		data.MsgType = constant.ChatMsgTypeFile
-		data.Extra = jsonutil.Encode(&entity.DialogRecordExtraFile{
+		data.Extra = jsonutil.Encode(&entity.MessageExtraFile{
 			Drive:  file.Drive,
 			Name:   file.OriginalName,
 			Suffix: file.FileExt,
@@ -537,11 +536,11 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *entity.Send
 func (m *MessageUseCase) SendBotFile(ctx context.Context, uid int, req *entity.SendBotFile) error {
 	data := &postgresModel.Message{
 		MsgId:      strutil.NewMsgId(),
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 		MsgType:    constant.ChatMsgTypeFile,
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraFile{
+		Extra: jsonutil.Encode(&entity.MessageExtraFile{
 			Drive:  req.Drive,
 			Name:   req.OriginalName,
 			Suffix: req.FileExt,
@@ -556,7 +555,7 @@ func (m *MessageUseCase) SendBotFile(ctx context.Context, uid int, req *entity.S
 func (m *MessageUseCase) SendVote(ctx context.Context, uid int, req *v1Pb.VoteMessageRequest) error {
 	data := &postgresModel.Message{
 		MsgId:      strutil.NewMsgId(),
-		DialogType: constant.ChatGroupMode,
+		ChatType:   constant.ChatGroupMode,
 		MsgType:    constant.ChatMsgTypeVote,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
@@ -610,9 +609,9 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 	}
 
 	for _, record := range items {
-		if record.DialogType == constant.ChatPrivateMode {
+		if record.ChatType == constant.ChatPrivateMode {
 			m.UnreadCache.Incr(ctx, constant.ChatPrivateMode, uid, record.ReceiverId)
-		} else if record.DialogType == constant.ChatGroupMode {
+		} else if record.ChatType == constant.ChatGroupMode {
 			pipe := m.Source.Redis().Pipeline()
 			for _, uid := range m.GroupChatMemberRepo.GetMemberIds(ctx, record.ReceiverId) {
 				m.UnreadCache.PipeIncr(ctx, pipe, constant.ChatGroupMode, record.ReceiverId, uid)
@@ -620,7 +619,7 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 			_, _ = pipe.Exec(ctx)
 		}
 
-		_ = m.MessageCache.Set(ctx, record.DialogType, uid, record.ReceiverId, &redisModel.LastCacheMessage{
+		_ = m.MessageCache.Set(ctx, record.ChatType, uid, record.ReceiverId, &redisModel.LastCacheMessage{
 			Content:  m.Locale.Localize("forwarded_message"),
 			Datetime: timeutil.DateTime(),
 		})
@@ -632,7 +631,7 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 				"data": jsonutil.Encode(map[string]any{
 					"sender_id":   uid,
 					"receiver_id": item.ReceiverId,
-					"dialog_type": item.DialogType,
+					"chat_type":   item.ChatType,
 					"record_id":   item.RecordId,
 				}),
 			})
@@ -646,20 +645,20 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 }
 
 func (m *MessageUseCase) SendMixedMessage(ctx context.Context, uid int, req *v1Pb.MixedMessageRequest) error {
-	items := make([]*entity.DialogRecordExtraMixedItem, 0)
+	items := make([]*entity.MessageExtraMixedItem, 0)
 	for _, item := range req.Items {
-		items = append(items, &entity.DialogRecordExtraMixedItem{
+		items = append(items, &entity.MessageExtraMixedItem{
 			Type:    int(item.Type),
 			Content: item.Content,
 		})
 	}
 
 	data := &postgresModel.Message{
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeMixed,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra:      jsonutil.Encode(entity.DialogRecordExtraMixed{Items: items}),
+		Extra:      jsonutil.Encode(entity.MessageExtraMixed{Items: items}),
 		QuoteId:    req.QuoteId,
 	}
 
@@ -677,11 +676,11 @@ func (m *MessageUseCase) SendLogin(ctx context.Context, uid int, req *entity.Sen
 	}
 
 	data := &postgresModel.Message{
-		DialogType: constant.ChatPrivateMode,
+		ChatType:   constant.ChatPrivateMode,
 		MsgType:    constant.ChatMsgTypeLogin,
 		UserId:     bot.UserId,
 		ReceiverId: uid,
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraLogin{
+		Extra: jsonutil.Encode(&entity.MessageExtraLogin{
 			IP:       req.Ip,
 			Agent:    req.Agent,
 			Address:  req.Address,
@@ -702,11 +701,11 @@ func (m *MessageUseCase) SendSticker(ctx context.Context, uid int, req *v1Pb.Sti
 	}
 
 	data := &postgresModel.Message{
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeImage,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraImage{
+		Extra: jsonutil.Encode(&entity.MessageExtraImage{
 			Url:    sticker.Url,
 			Width:  0,
 			Height: 0,
@@ -718,11 +717,11 @@ func (m *MessageUseCase) SendSticker(ctx context.Context, uid int, req *v1Pb.Sti
 
 func (m *MessageUseCase) SendCode(ctx context.Context, uid int, req *v1Pb.CodeMessageRequest) error {
 	data := &postgresModel.Message{
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeCode,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraCode{
+		Extra: jsonutil.Encode(&entity.MessageExtraCode{
 			Lang: req.Lang,
 			Code: req.Code,
 		}),
@@ -732,11 +731,11 @@ func (m *MessageUseCase) SendCode(ctx context.Context, uid int, req *v1Pb.CodeMe
 
 func (m *MessageUseCase) SendLocation(ctx context.Context, uid int, req *v1Pb.LocationMessageRequest) error {
 	data := &postgresModel.Message{
-		DialogType: int(req.Receiver.DialogType),
+		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeLocation,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.DialogRecordExtraLocation{
+		Extra: jsonutil.Encode(&entity.MessageExtraLocation{
 			Longitude:   req.Longitude,
 			Latitude:    req.Latitude,
 			Description: req.Description,
@@ -749,7 +748,7 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int64, options
 	db := m.Source.Postgres().WithContext(ctx)
 	fields := []string{
 		"messages.receiver_id",
-		"messages.dialog_type",
+		"messages.chat_type",
 		"messages.msg_type",
 		"vote.id as vote_id",
 		"vote.id as record_id",
@@ -772,7 +771,7 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int64, options
 		return nil, fmt.Errorf(m.Locale.Localize("record_not_related_to_voting_info"), vote.MsgType)
 	}
 
-	if vote.DialogType == constant.ChatGroupMode {
+	if vote.ChatType == constant.ChatGroupMode {
 		var count int64
 		db.Table("group_chat_members").Where("group_id = ? AND user_id = ? AND is_quit = 0", vote.ReceiverId, uid).Count(&count)
 		if count == 0 {
@@ -855,7 +854,7 @@ func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) erro
 		return err
 	}
 
-	_ = m.MessageCache.Set(ctx, record.DialogType, record.UserId, record.ReceiverId, &redisModel.LastCacheMessage{
+	_ = m.MessageCache.Set(ctx, record.ChatType, record.UserId, record.ReceiverId, &redisModel.LastCacheMessage{
 		Content:  m.Locale.Localize("message_deleted"),
 		Datetime: timeutil.DateTime(),
 	})
@@ -944,7 +943,7 @@ func (m *MessageUseCase) loadReply(_ context.Context, data *postgresModel.Messag
 }
 
 func (m *MessageUseCase) loadSequence(ctx context.Context, data *postgresModel.Message) {
-	if data.DialogType == constant.ChatGroupMode {
+	if data.ChatType == constant.ChatGroupMode {
 		data.Sequence = m.Sequence.Get(ctx, 0, data.ReceiverId)
 	} else {
 		data.Sequence = m.Sequence.Get(ctx, data.UserId, data.ReceiverId)
@@ -952,12 +951,12 @@ func (m *MessageUseCase) loadSequence(ctx context.Context, data *postgresModel.M
 }
 
 func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.Message, opt map[string]string) {
-	if record.DialogType == constant.ChatPrivateMode {
+	if record.ChatType == constant.ChatPrivateMode {
 		m.UnreadCache.Incr(ctx, constant.ChatPrivateMode, record.UserId, record.ReceiverId)
 		if record.MsgType == constant.ChatMsgSysText {
 			m.UnreadCache.Incr(ctx, 1, record.ReceiverId, record.UserId)
 		}
-	} else if record.DialogType == constant.ChatGroupMode {
+	} else if record.ChatType == constant.ChatGroupMode {
 		pipe := m.Source.Redis().Pipeline()
 		for _, uid := range m.GroupChatMemberRepo.GetMemberIds(ctx, record.ReceiverId) {
 			if uid != record.UserId {
@@ -968,7 +967,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 		_, _ = pipe.Exec(ctx)
 	}
 
-	_ = m.MessageCache.Set(ctx, record.DialogType, record.UserId, record.ReceiverId, &redisModel.LastCacheMessage{
+	_ = m.MessageCache.Set(ctx, record.ChatType, record.UserId, record.ReceiverId, &redisModel.LastCacheMessage{
 		Content:  opt["text"],
 		Datetime: timeutil.DateTime(),
 	})
@@ -978,12 +977,12 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 		"data": jsonutil.Encode(map[string]any{
 			"sender_id":   record.UserId,
 			"receiver_id": record.ReceiverId,
-			"dialog_type": record.DialogType,
+			"chat_type":   record.ChatType,
 			"record_id":   record.Id,
 		}),
 	})
 
-	if record.DialogType == constant.ChatPrivateMode {
+	if record.ChatType == constant.ChatPrivateMode {
 		sids := m.ServerCache.All(ctx, 1)
 		if len(sids) > 3 {
 			pipe := m.Source.Redis().Pipeline()

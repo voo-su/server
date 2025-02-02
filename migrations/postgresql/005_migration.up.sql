@@ -1,19 +1,24 @@
-CREATE TABLE message_delete
+CREATE TABLE message_votes
 (
-    id         serial primary key,
-    record_id  integer default 0 NOT NULL,
-    user_id    integer default 0 NOT NULL,
-    created_at timestamp         NOT NULL
+    id            SERIAL PRIMARY KEY,
+    record_id     INTEGER      DEFAULT 0                     NOT NULL,
+    user_id       INTEGER      DEFAULT 0                     NOT NULL,
+    title         VARCHAR(255) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    answer_mode   INTEGER      DEFAULT 0                     NOT NULL,
+    answer_option JSONB                                      NOT NULL,
+    answer_num    INTEGER      DEFAULT 0                     NOT NULL,
+    answered_num  INTEGER      DEFAULT 0                     NOT NULL,
+    is_anonymous  INTEGER      DEFAULT 0                     NOT NULL,
+    status        INTEGER      DEFAULT 0                     NOT NULL,
+    created_at    TIMESTAMP                                  NOT NULL,
+    updated_at    TIMESTAMP                                  NOT NULL
 );
 
-CREATE TABLE message_read
+CREATE TABLE message_vote_answers
 (
-    id          serial primary key,
-    msg_id      varchar(64) default '':: character varying NOT NULL,
-    user_id     integer     default 0                      NOT NULL,
-    receiver_id integer     default 0                      NOT NULL,
-    created_at  timestamp with time zone                   NOT NULL,
-    updated_at  timestamp with time zone                   NOT NULL,
-    constraint unique_user_receiver_msg
-        unique (user_id, receiver_id, msg_id)
+    id         SERIAL PRIMARY KEY,
+    vote_id    INTEGER DEFAULT 0          NOT NULL,
+    user_id    INTEGER DEFAULT 0          NOT NULL,
+    option     CHAR    DEFAULT ''::bpchar NOT NULL,
+    created_at TIMESTAMP                  NOT NULL
 );

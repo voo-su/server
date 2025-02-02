@@ -35,20 +35,20 @@ func NewMessageForward(
 type ForwardRecord struct {
 	RecordId   int
 	ReceiverId int
-	DialogType int
+	ChatType   int
 }
 
 func (m *MessageForward) Verify(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) error {
 	query := m.Source.Postgres().WithContext(ctx).
 		Model(&postgresModel.Message{}).
 		Where("id in ?", req.MessageIds)
-	if req.Receiver.DialogType == constant.ChatPrivateMode {
+	if req.Receiver.ChatType == constant.ChatPrivateMode {
 		subWhere := m.Source.Postgres().Where("user_id = ? AND receiver_id = ?", uid, req.Receiver.ReceiverId)
 		subWhere.Or("user_id = ? AND receiver_id = ?", req.Receiver.ReceiverId, uid)
 		query.Where(subWhere)
 	}
 
-	query.Where("dialog_type = ?", req.Receiver.DialogType).
+	query.Where("chat_type = ?", req.Receiver.ChatType).
 		Where("msg_type in ?", []int{1, 2, 3, 4, 5, 6, 7, 8, constant.ChatMsgTypeForward}).
 		Where("is_revoke = ?", 0)
 
@@ -68,13 +68,13 @@ func (m *MessageForward) MultiMergeForward(ctx context.Context, uid int, req *v1
 	for _, userId := range req.Uids {
 		receives = append(receives, map[string]int{
 			"receiver_id": int(userId),
-			"dialog_type": 1,
+			"chat_type":   1,
 		})
 	}
 	for _, gid := range req.Gids {
 		receives = append(receives, map[string]int{
 			"receiver_id": int(gid),
-			"dialog_type": 2,
+			"chat_type":   2,
 		})
 	}
 
@@ -88,7 +88,7 @@ func (m *MessageForward) MultiMergeForward(ctx context.Context, uid int, req *v1
 		ids = append(ids, int(id))
 	}
 
-	extra := jsonutil.Encode(entity.DialogRecordExtraForward{
+	extra := jsonutil.Encode(entity.MessageExtraForward{
 		MsgIds:  ids,
 		Records: tmpRecords,
 	})
@@ -97,13 +97,13 @@ func (m *MessageForward) MultiMergeForward(ctx context.Context, uid int, req *v1
 	for _, item := range receives {
 		data := &postgresModel.Message{
 			MsgId:      strutil.NewMsgId(),
-			DialogType: item["dialog_type"],
+			ChatType:   item["chat_type"],
 			MsgType:    constant.ChatMsgTypeForward,
 			UserId:     uid,
 			ReceiverId: item["receiver_id"],
 			Extra:      extra,
 		}
-		if data.DialogType == constant.ChatGroupMode {
+		if data.ChatType == constant.ChatGroupMode {
 			data.Sequence = m.SequenceRepo.Get(ctx, 0, data.ReceiverId)
 		} else {
 			data.Sequence = m.SequenceRepo.Get(ctx, uid, data.ReceiverId)
@@ -119,7 +119,7 @@ func (m *MessageForward) MultiMergeForward(ctx context.Context, uid int, req *v1
 		list = append(list, &ForwardRecord{
 			RecordId:   record.Id,
 			ReceiverId: record.ReceiverId,
-			DialogType: record.DialogType,
+			ChatType:   record.ChatType,
 		})
 	}
 
@@ -135,13 +135,13 @@ func (m *MessageForward) MultiSplitForward(ctx context.Context, uid int, req *v1
 	for _, userId := range req.Uids {
 		receives = append(receives, map[string]int{
 			"receiver_id": int(userId),
-			"dialog_type": constant.DialogRecordDialogTypePrivate})
+			"chat_type":   constant.ChatTypePrivate})
 	}
 
 	for _, gid := range req.Gids {
 		receives = append(receives, map[string]int{
 			"receiver_id": int(gid),
-			"dialog_type": constant.DialogRecordDialogTypeGroup,
+			"chat_type":   constant.ChatTypeGroup,
 		})
 	}
 
@@ -153,7 +153,7 @@ func (m *MessageForward) MultiSplitForward(ctx context.Context, uid int, req *v1
 	recordsLen := int64(len(records))
 	for _, v := range receives {
 		var sequences []int64
-		if v["dialog_type"] == constant.DialogRecordDialogTypeGroup {
+		if v["chat_type"] == constant.ChatTypeGroup {
 			sequences = m.SequenceRepo.BatchGet(ctx, 0, v["receiver_id"], recordsLen)
 		} else {
 			sequences = m.SequenceRepo.BatchGet(ctx, uid, v["receiver_id"], recordsLen)
@@ -162,7 +162,7 @@ func (m *MessageForward) MultiSplitForward(ctx context.Context, uid int, req *v1
 		for i, item := range records {
 			items = append(items, &postgresModel.Message{
 				MsgId:      strutil.NewMsgId(),
-				DialogType: v["dialog_type"],
+				ChatType:   v["chat_type"],
 				MsgType:    item.MsgType,
 				UserId:     uid,
 				ReceiverId: v["receiver_id"],
@@ -181,7 +181,7 @@ func (m *MessageForward) MultiSplitForward(ctx context.Context, uid int, req *v1
 		list = append(list, &ForwardRecord{
 			RecordId:   item.Id,
 			ReceiverId: item.ReceiverId,
-			DialogType: item.DialogType,
+			ChatType:   item.ChatType,
 		})
 	}
 

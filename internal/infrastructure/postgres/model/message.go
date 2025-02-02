@@ -6,7 +6,7 @@ type Message struct {
 	Id         int       `gorm:"primaryKey"`
 	MsgId      string    `gorm:"column:msg_id;NOT NULL"`
 	Sequence   int64     `gorm:"column:sequence;default:0;NOT NULL"`
-	DialogType int       `gorm:"column:dialog_type;default:1;NOT NULL"`
+	ChatType   int       `gorm:"column:chat_type;default:1;NOT NULL"`
 	MsgType    int       `gorm:"column:msg_type;default:0;NOT NULL"`
 	UserId     int       `gorm:"column:user_id;default:0;NOT NULL"`
 	ReceiverId int       `gorm:"column:receiver_id;default:0;NOT NULL"`

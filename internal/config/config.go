@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"gopkg.in/yaml.v3"
+	"log"
 	"os"
 	"time"
 	"voo.su/pkg/encrypt"
@@ -34,7 +35,7 @@ func New(filename string) *Config {
 
 	var conf Config
 	if err := yaml.Unmarshal(content, &conf); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		panic(fmt.Sprintf("Ошибка при разборе: %v", err))
 	}
 

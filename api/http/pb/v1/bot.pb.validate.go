@@ -73,7 +73,7 @@ type BotCreateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m BotCreateRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -175,7 +175,7 @@ type BotCreateResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m BotCreateResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -277,7 +277,7 @@ type BotListRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m BotListRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -411,7 +411,7 @@ type BotListResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m BotListResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -517,7 +517,7 @@ type BotListResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m BotListResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}

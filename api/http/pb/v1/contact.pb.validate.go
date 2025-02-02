@@ -71,7 +71,7 @@ type ContactListRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactListRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -207,7 +207,7 @@ type ContactListResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactListResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -311,7 +311,7 @@ type ContactDetailRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactDetailRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -433,7 +433,7 @@ type ContactDetailResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactDetailResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -537,7 +537,7 @@ type ContactDeleteRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactDeleteRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -639,7 +639,7 @@ type ContactDeleteResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactDeleteResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -745,7 +745,7 @@ type ContactChangeGroupRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactChangeGroupRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -847,7 +847,7 @@ type ContactChangeGroupResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactChangeGroupResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -951,7 +951,7 @@ type ContactRequestCreateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactRequestCreateRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1056,7 +1056,7 @@ type ContactApplyUnreadNumResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactApplyUnreadNumResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1159,7 +1159,7 @@ type ContactRequestCreateResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactRequestCreateResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1264,7 +1264,7 @@ type ContactRequestAcceptRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactRequestAcceptRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1367,7 +1367,7 @@ type ContactRequestAcceptResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactRequestAcceptResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1472,7 +1472,7 @@ type ContactRequestDeclineRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactRequestDeclineRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1575,7 +1575,7 @@ type ContactRequestDeclineResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactRequestDeclineResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1712,7 +1712,7 @@ type ContactRequestListResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactRequestListResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1818,7 +1818,7 @@ type ContactFolderCreateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderCreateRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1922,7 +1922,7 @@ type ContactFolderCreateResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderCreateResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2031,7 +2031,7 @@ type ContactFolderUpdateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderUpdateRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2135,7 +2135,7 @@ type ContactFolderUpdateResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderUpdateResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2240,7 +2240,7 @@ type ContactFolderDeleteRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderDeleteRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2344,7 +2344,7 @@ type ContactFolderDeleteResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderDeleteResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2481,7 +2481,7 @@ type ContactFolderSortRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderSortRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2583,7 +2583,7 @@ type ContactFolderSortResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderSortResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2685,7 +2685,7 @@ type ContactFolderListRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderListRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2821,7 +2821,7 @@ type ContactFolderListResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderListResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2957,7 +2957,7 @@ type ContactFolderSaveRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderSaveRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -3059,7 +3059,7 @@ type ContactFolderSaveResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderSaveResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -3179,7 +3179,7 @@ type ContactListResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactListResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -3295,7 +3295,7 @@ type ContactRequestListResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactRequestListResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -3402,7 +3402,7 @@ type ContactFolderSortRequest_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderSortRequest_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -3513,7 +3513,7 @@ type ContactFolderListResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderListResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -3622,7 +3622,7 @@ type ContactFolderSaveRequest_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ContactFolderSaveRequest_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}

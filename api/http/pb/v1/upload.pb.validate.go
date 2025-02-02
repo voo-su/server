@@ -73,7 +73,7 @@ type UploadAvatarResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m UploadAvatarResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -175,7 +175,7 @@ type UploadImagerRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m UploadImagerRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -279,7 +279,7 @@ type UploadImageResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m UploadImageResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -385,7 +385,7 @@ type UploadInitiateMultipartRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m UploadInitiateMultipartRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -494,7 +494,7 @@ type UploadInitiateMultipartResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m UploadInitiateMultipartResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -603,7 +603,7 @@ type UploadMultipartRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m UploadMultipartRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -709,7 +709,7 @@ type UploadMultipartResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m UploadMultipartResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}

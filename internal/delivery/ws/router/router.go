@@ -21,6 +21,13 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handle *handler.Handl
 		panic(err)
 	}
 
+	router.Use(ginutil.CorsMiddleware(
+		conf.App.Cors.Origin,
+		"Content-Type,User-Agent,Authorization",
+		"OPTIONS,GET,POST,PUT,DELETE",
+		conf.App.Cors.Credentials,
+		conf.App.Cors.MaxAge,
+	))
 	router.Use(ginutil.AccessLogMiddleware(src))
 
 	router.Use(func(c *gin.Context) {

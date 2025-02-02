@@ -57,7 +57,7 @@ func (m *ChatCreateRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for DialogType
+	// no validation rules for ChatType
 
 	// no validation rules for ReceiverId
 
@@ -75,7 +75,7 @@ type ChatCreateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatCreateRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -165,7 +165,7 @@ func (m *ChatCreateResponse) validate(all bool) error {
 
 	// no validation rules for Id
 
-	// no validation rules for DialogType
+	// no validation rules for ChatType
 
 	// no validation rules for ReceiverId
 
@@ -205,7 +205,7 @@ type ChatCreateResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatCreateResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -295,7 +295,7 @@ func (m *ChatItem) validate(all bool) error {
 
 	// no validation rules for Id
 
-	// no validation rules for DialogType
+	// no validation rules for ChatType
 
 	// no validation rules for ReceiverId
 
@@ -334,7 +334,7 @@ type ChatItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -468,7 +468,7 @@ type ChatListResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatListResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -570,7 +570,7 @@ type ChatDeleteRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatDeleteRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -672,7 +672,7 @@ type ChatDeleteResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatDeleteResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -778,7 +778,7 @@ type ChatTopRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatTopRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -878,7 +878,7 @@ type ChatTopResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatTopResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -964,7 +964,7 @@ func (m *ChatDisturbRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for DialogType
+	// no validation rules for ChatType
 
 	// no validation rules for ReceiverId
 
@@ -984,7 +984,7 @@ type ChatDisturbRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatDisturbRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1086,7 +1086,7 @@ type ChatDisturbResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatDisturbResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1174,7 +1174,7 @@ func (m *ChatClearUnreadNumRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for DialogType
+	// no validation rules for ChatType
 
 	// no validation rules for ReceiverId
 
@@ -1192,7 +1192,7 @@ type ChatClearUnreadNumRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatClearUnreadNumRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1294,7 +1294,7 @@ type ChatClearUnreadNumResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ChatClearUnreadNumResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}

@@ -20,13 +20,13 @@ func NewMessageCacheRepository(rds *redis.Client) *MessageCacheRepository {
 	}
 }
 
-func (m *MessageCacheRepository) Set(ctx context.Context, dialogType int, sender int, receive int, message *model.LastCacheMessage) error {
+func (m *MessageCacheRepository) Set(ctx context.Context, ChatType int, sender int, receive int, message *model.LastCacheMessage) error {
 	text := jsonutil.Encode(message)
-	return m.Rds.HSet(ctx, lastMessageCacheKey, m.name(dialogType, sender, receive), text).Err()
+	return m.Rds.HSet(ctx, lastMessageCacheKey, m.name(ChatType, sender, receive), text).Err()
 }
 
-func (m *MessageCacheRepository) Get(ctx context.Context, dialogType int, sender int, receive int) (*model.LastCacheMessage, error) {
-	res, err := m.Rds.HGet(ctx, lastMessageCacheKey, m.name(dialogType, sender, receive)).Result()
+func (m *MessageCacheRepository) Get(ctx context.Context, ChatType int, sender int, receive int) (*model.LastCacheMessage, error) {
+	res, err := m.Rds.HGet(ctx, lastMessageCacheKey, m.name(ChatType, sender, receive)).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func (m *MessageCacheRepository) MGet(ctx context.Context, fields []string) ([]*
 	return items, nil
 }
 
-func (m *MessageCacheRepository) name(dialogType int, sender int, receive int) string {
-	if dialogType == 2 {
+func (m *MessageCacheRepository) name(ChatType int, sender int, receive int) string {
+	if ChatType == 2 {
 		sender = 0
 	}
 
@@ -65,5 +65,5 @@ func (m *MessageCacheRepository) name(dialogType int, sender int, receive int) s
 		sender, receive = receive, sender
 	}
 
-	return fmt.Sprintf("%d_%d_%d", dialogType, sender, receive)
+	return fmt.Sprintf("%d_%d_%d", ChatType, sender, receive)
 }

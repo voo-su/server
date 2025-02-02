@@ -56,7 +56,7 @@ func (m *Message) Send(ctx *ginutil.Context) error {
 	}
 
 	if err := m.MessageUseCase.IsAccess(ctx.Ctx(), &entity.MessageAccess{
-		DialogType:        int(params.Receiver.DialogType),
+		ChatType:          int(params.Receiver.ChatType),
 		UserId:            ctx.UserId(),
 		ReceiverId:        int(params.Receiver.ReceiverId),
 		IsVerifyGroupMute: true,
@@ -75,7 +75,7 @@ func (m *Message) onSendText(ctx *ginutil.Context) error {
 
 	if err := m.MessageUseCase.SendText(ctx.Ctx(), ctx.UserId(), &entity.SendText{
 		Receiver: entity.MessageReceiver{
-			DialogType: params.Receiver.DialogType,
+			ChatType:   params.Receiver.ChatType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
 		Content: params.Content,
@@ -95,7 +95,7 @@ func (m *Message) onSendImage(ctx *ginutil.Context) error {
 
 	if err := m.MessageUseCase.SendImage(ctx.Ctx(), ctx.UserId(), &entity.SendImage{
 		Receiver: entity.MessageReceiver{
-			DialogType: params.Receiver.DialogType,
+			ChatType:   params.Receiver.ChatType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
 		Url:     params.Url,
@@ -117,7 +117,7 @@ func (m *Message) onSendVideo(ctx *ginutil.Context) error {
 
 	if err := m.MessageUseCase.SendVideo(ctx.Ctx(), ctx.UserId(), &entity.SendVideo{
 		Receiver: entity.MessageReceiver{
-			DialogType: params.Receiver.DialogType,
+			ChatType:   params.Receiver.ChatType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
 		Url:      params.Url,
@@ -139,7 +139,7 @@ func (m *Message) onSendAudio(ctx *ginutil.Context) error {
 
 	if err := m.MessageUseCase.SendAudio(ctx.Ctx(), ctx.UserId(), &entity.SendAudio{
 		Receiver: entity.MessageReceiver{
-			DialogType: params.Receiver.DialogType,
+			ChatType:   params.Receiver.ChatType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
 		Url:  params.Url,
@@ -159,7 +159,7 @@ func (m *Message) onSendFile(ctx *ginutil.Context) error {
 
 	if err := m.MessageUseCase.SendFile(ctx.Ctx(), ctx.UserId(), &entity.SendFile{
 		Receiver: entity.MessageReceiver{
-			DialogType: params.Receiver.DialogType,
+			ChatType:   params.Receiver.ChatType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
 		UploadId: params.UploadId,
@@ -259,7 +259,7 @@ func (m *Message) Vote(ctx *ginutil.Context) error {
 
 	uid := ctx.UserId()
 	if err := m.MessageUseCase.IsAccess(ctx.Ctx(), &entity.MessageAccess{
-		DialogType:        constant.ChatGroupMode,
+		ChatType:          constant.ChatGroupMode,
 		UserId:            uid,
 		ReceiverId:        int(params.ReceiverId),
 		IsVerifyGroupMute: true,
@@ -273,7 +273,7 @@ func (m *Message) Vote(ctx *ginutil.Context) error {
 		Options:   params.Options,
 		Anonymous: params.Anonymous,
 		Receiver: &v1Pb.MessageReceiver{
-			DialogType: constant.ChatGroupMode,
+			ChatType:   constant.ChatGroupMode,
 			ReceiverId: int32(params.ReceiverId),
 		},
 	}); err != nil {
@@ -304,7 +304,7 @@ func (m *Message) Delete(ctx *ginutil.Context) error {
 
 	if err := m.ChatUseCase.DeleteRecordList(ctx.Ctx(), &usecase.RemoveRecordListOpt{
 		UserId:     ctx.UserId(),
-		DialogType: int(params.DialogType),
+		ChatType:   int(params.ChatType),
 		ReceiverId: int(params.ReceiverId),
 		RecordIds:  params.RecordIds,
 	}); err != nil {
@@ -335,9 +335,9 @@ func (m *Message) GetHistory(ctx *ginutil.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if params.DialogType == constant.ChatGroupMode {
+	if params.ChatType == constant.ChatGroupMode {
 		if err := m.MessageUseCase.IsAccess(ctx.Ctx(), &entity.MessageAccess{
-			DialogType: int(params.DialogType),
+			ChatType:   int(params.ChatType),
 			UserId:     uid,
 			ReceiverId: int(params.ReceiverId),
 		}); err != nil {
@@ -349,7 +349,7 @@ func (m *Message) GetHistory(ctx *ginutil.Context) error {
 				"msg_id":      strutil.NewMsgId(),
 				"msg_type":    constant.ChatMsgSysText,
 				"receiver_id": params.ReceiverId,
-				"dialog_type": params.DialogType,
+				"chat_type":   params.ChatType,
 				"user_id":     0,
 			})
 
@@ -362,7 +362,7 @@ func (m *Message) GetHistory(ctx *ginutil.Context) error {
 	}
 
 	records, err := m.MessageUseCase.GetHistory(ctx.Ctx(), &entity.QueryGetHistoryOpt{
-		DialogType: int(params.DialogType),
+		ChatType:   int(params.ChatType),
 		UserId:     uid,
 		ReceiverId: int(params.ReceiverId),
 		RecordId:   int(params.RecordId),
@@ -397,7 +397,7 @@ func (m *Message) Download(ctx *ginutil.Context) error {
 
 	uid := ctx.UserId()
 	if uid != record.UserId {
-		if record.DialogType == constant.ChatPrivateMode {
+		if record.ChatType == constant.ChatPrivateMode {
 			if record.ReceiverId != uid {
 				return ctx.Forbidden(m.Locale.Localize("access_rights_missing"))
 			}
@@ -408,7 +408,7 @@ func (m *Message) Download(ctx *ginutil.Context) error {
 		}
 	}
 
-	var fileInfo entity.DialogRecordExtraFile
+	var fileInfo entity.MessageExtraFile
 	if err := jsonutil.Decode(record.Extra, &fileInfo); err != nil {
 		return ctx.Error(err.Error())
 	}

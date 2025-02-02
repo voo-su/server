@@ -100,7 +100,7 @@ func (c *Contact) Delete(ctx *ginutil.Context) error {
 	_ = c.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
 		Content: c.Locale.Localize("contact_deleted"),
 		Receiver: &v1Pb.MessageReceiver{
-			DialogType: constant.ChatPrivateMode,
+			ChatType:   constant.ChatPrivateMode,
 			ReceiverId: params.FriendId,
 		},
 	})

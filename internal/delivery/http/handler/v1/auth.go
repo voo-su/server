@@ -84,7 +84,7 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 
 		_, err = a.ChatUseCase.Create(ctx.Ctx(), &usecase.CreateChatOpt{
 			UserId:     user.Id,
-			DialogType: constant.ChatPrivateMode,
+			ChatType:   constant.ChatPrivateMode,
 			ReceiverId: bot.UserId,
 			IsBoot:     true,
 		})

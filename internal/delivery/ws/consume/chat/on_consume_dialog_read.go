@@ -9,14 +9,14 @@ import (
 	"voo.su/pkg/socket"
 )
 
-type ConsumeDialogRead struct {
+type ConsumeMessageRead struct {
 	SenderId   int      `json:"sender_id"`
 	ReceiverId int      `json:"receiver_id"`
 	MsgIds     []string `json:"msg_ids"`
 }
 
-func (h *Handler) onConsumeDialogRead(ctx context.Context, body []byte) {
-	var in ConsumeDialogRead
+func (h *Handler) onConsumeMessageRead(ctx context.Context, body []byte) {
+	var in ConsumeMessageRead
 	if err := json.Unmarshal(body, &in); err != nil {
 		logger.Errorf("onConsumeContactApply json decode err: %s", err.Error())
 		return

@@ -73,7 +73,7 @@ type SearchUsersRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m SearchUsersRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -209,7 +209,7 @@ type SearchUserResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m SearchUserResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -315,7 +315,7 @@ type SearchGroupChatsRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m SearchGroupChatsRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -453,7 +453,7 @@ type SearchGroupChatsResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m SearchGroupChatsResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -565,7 +565,7 @@ type SearchUserResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m SearchUserResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -685,7 +685,7 @@ type SearchGroupChatsResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m SearchGroupChatsResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}

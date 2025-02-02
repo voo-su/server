@@ -26,10 +26,10 @@ type Handler struct {
 
 func (h *Handler) init() {
 	handlers = make(map[string]func(ctx context.Context, data []byte))
-	handlers[constant.SubEventImMessage] = h.onConsumeDialog
-	handlers[constant.SubEventImMessageKeyboard] = h.onConsumeDialogKeyboard
-	handlers[constant.SubEventImMessageRead] = h.onConsumeDialogRead
-	handlers[constant.SubEventImMessageRevoke] = h.onConsumeDialogRevoke
+	handlers[constant.SubEventImMessage] = h.onConsumeMessage
+	handlers[constant.SubEventImMessageKeyboard] = h.onConsumeChatKeyboard
+	handlers[constant.SubEventImMessageRead] = h.onConsumeMessageRead
+	handlers[constant.SubEventImMessageRevoke] = h.onConsumeMessageRevoke
 	handlers[constant.SubEventContactStatus] = h.onConsumeContactStatus
 	handlers[constant.SubEventContactRequest] = h.onConsumeContactApply
 	handlers[constant.SubEventGroupChatJoin] = h.onConsumeGroupJoin

@@ -75,7 +75,7 @@ type ProjectCommentCreateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCommentCreateRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -180,7 +180,7 @@ type ProjectCommentCreateResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCommentCreateResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -285,7 +285,7 @@ type ProjectCommentRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCommentRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -421,7 +421,7 @@ type ProjectCommentResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCommentResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -533,7 +533,7 @@ type ProjectCommentResponse_UserMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCommentResponse_UserMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -673,7 +673,7 @@ type ProjectCommentResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCommentResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}

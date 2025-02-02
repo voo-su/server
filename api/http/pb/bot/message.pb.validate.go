@@ -75,7 +75,7 @@ type MessageSendRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m MessageSendRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -177,7 +177,7 @@ type MessageSendResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m MessageSendResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -279,7 +279,7 @@ type MessageChatsRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m MessageChatsRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -415,7 +415,7 @@ type MessageChatsResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m MessageChatsResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -521,7 +521,7 @@ type MessageChatsResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m MessageChatsResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}

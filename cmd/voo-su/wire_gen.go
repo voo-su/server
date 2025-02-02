@@ -96,7 +96,6 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		MessageCache:        messageCacheRepository,
 		ServerCache:         serverCacheRepository,
 		ClientCache:         clientCacheRepository,
-		DialogVoteCache:     voteCacheRepository,
 		Nats:                iNatsClient,
 	}
 	auth := &v1.Auth{
@@ -341,7 +340,6 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 		MessageCache:        messageCacheRepository,
 		ServerCache:         serverCacheRepository,
 		ClientCache:         clientCacheRepository,
-		DialogVoteCache:     voteCacheRepository,
 		Nats:                iNatsClient,
 	}
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
@@ -434,7 +432,6 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 		MessageCache:        messageCacheRepository,
 		ServerCache:         serverCacheRepository,
 		ClientCache:         clientCacheRepository,
-		DialogVoteCache:     voteCacheRepository,
 		Nats:                iNatsClient,
 	}
 	auth := handler3.NewAuthHandler(conf, iLocale, authUseCase, ipAddressUseCase, chatUseCase, botUseCase, messageUseCase)

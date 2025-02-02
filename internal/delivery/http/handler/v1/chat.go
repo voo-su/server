@@ -38,17 +38,17 @@ func (c *Chat) Create(ctx *ginutil.Context) error {
 		agent = encrypt.Md5(agent)
 	}
 
-	if params.DialogType == constant.ChatPrivateMode && int(params.ReceiverId) == ctx.UserId() {
+	if params.ChatType == constant.ChatPrivateMode && int(params.ReceiverId) == ctx.UserId() {
 		return ctx.Error(c.Locale.Localize("creation_error"))
 	}
 
-	key := fmt.Sprintf("dialog:list:%d-%d-%d-%s", uid, params.ReceiverId, params.DialogType, agent)
+	key := fmt.Sprintf("chat:list:%d-%d-%d-%s", uid, params.ReceiverId, params.ChatType, agent)
 	if !c.ChatUseCase.RedisLockRepo.Lock(ctx.Ctx(), key, 10) {
 		return ctx.Error(c.Locale.Localize("creation_error"))
 	}
 
 	if c.MessageUseCase.IsAccess(ctx.Ctx(), &entity.MessageAccess{
-		DialogType: int(params.DialogType),
+		ChatType:   int(params.ChatType),
 		UserId:     uid,
 		ReceiverId: int(params.ReceiverId),
 	}) != nil {
@@ -57,7 +57,7 @@ func (c *Chat) Create(ctx *ginutil.Context) error {
 
 	result, err := c.ChatUseCase.Create(ctx.Ctx(), &usecase.CreateChatOpt{
 		UserId:     uid,
-		DialogType: int(params.DialogType),
+		ChatType:   int(params.ChatType),
 		ReceiverId: int(params.ReceiverId),
 	})
 	if err != nil {
@@ -66,12 +66,12 @@ func (c *Chat) Create(ctx *ginutil.Context) error {
 
 	item := &v1Pb.ChatItem{
 		Id:         int32(result.Id),
-		DialogType: int32(result.DialogType),
+		ChatType:   int32(result.ChatType),
 		ReceiverId: int32(result.ReceiverId),
 		IsBot:      int32(result.IsBot),
 		UpdatedAt:  timeutil.DateTime(),
 	}
-	if item.DialogType == constant.ChatPrivateMode {
+	if item.ChatType == constant.ChatPrivateMode {
 		item.UnreadNum = int32(c.ChatUseCase.UnreadCacheRepo.Get(ctx.Ctx(), 1, int(params.ReceiverId), uid))
 		if user, err := c.UserUseCase.UserRepo.FindById(ctx.Ctx(), result.ReceiverId); err == nil {
 			item.Username = user.Username
@@ -79,20 +79,20 @@ func (c *Chat) Create(ctx *ginutil.Context) error {
 			item.Surname = user.Surname
 			item.Avatar = user.Avatar
 		}
-	} else if result.DialogType == constant.ChatGroupMode {
+	} else if result.ChatType == constant.ChatGroupMode {
 		if group, err := c.GroupChatUseCase.GroupChatRepo.FindById(ctx.Ctx(), int(params.ReceiverId)); err == nil {
 			item.Name = group.Name
 		}
 	}
 
-	if msg, err := c.ChatUseCase.MessageCacheRepo.Get(ctx.Ctx(), result.DialogType, uid, result.ReceiverId); err == nil {
+	if msg, err := c.ChatUseCase.MessageCacheRepo.Get(ctx.Ctx(), result.ChatType, uid, result.ReceiverId); err == nil {
 		item.MsgText = msg.Content
 		item.UpdatedAt = msg.Datetime
 	}
 
 	return ctx.Success(&v1Pb.ChatCreateResponse{
 		Id:         item.Id,
-		DialogType: item.DialogType,
+		ChatType:   item.ChatType,
 		ReceiverId: item.ReceiverId,
 		IsTop:      item.IsTop,
 		IsDisturb:  item.IsDisturb,
@@ -121,7 +121,7 @@ func (c *Chat) List(ctx *ginutil.Context) error {
 	}
 	friends := make([]int, 0)
 	for _, item := range data {
-		if item.DialogType == 1 {
+		if item.ChatType == 1 {
 			friends = append(friends, item.ReceiverId)
 		}
 	}
@@ -130,7 +130,7 @@ func (c *Chat) List(ctx *ginutil.Context) error {
 	for _, item := range data {
 		value := &v1Pb.ChatItem{
 			Id:         int32(item.Id),
-			DialogType: int32(item.DialogType),
+			ChatType:   int32(item.ChatType),
 			ReceiverId: int32(item.ReceiverId),
 			IsTop:      int32(item.IsTop),
 			IsDisturb:  int32(item.IsDisturb),
@@ -140,11 +140,11 @@ func (c *Chat) List(ctx *ginutil.Context) error {
 			UpdatedAt:  timeutil.FormatDatetime(item.UpdatedAt),
 		}
 
-		if num, ok := unReads[fmt.Sprintf("%d_%d", item.DialogType, item.ReceiverId)]; ok {
+		if num, ok := unReads[fmt.Sprintf("%d_%d", item.ChatType, item.ReceiverId)]; ok {
 			value.UnreadNum = int32(num)
 		}
 
-		if item.DialogType == 1 {
+		if item.ChatType == 1 {
 			value.Username = item.Username
 			value.Avatar = item.UserAvatar
 			//if item.IsBot == 1 {
@@ -163,7 +163,7 @@ func (c *Chat) List(ctx *ginutil.Context) error {
 			value.Avatar = item.GroupAvatar
 		}
 
-		if msg, err := c.ChatUseCase.MessageCacheRepo.Get(ctx.Ctx(), item.DialogType, uid, item.ReceiverId); err == nil {
+		if msg, err := c.ChatUseCase.MessageCacheRepo.Get(ctx.Ctx(), item.ChatType, uid, item.ReceiverId); err == nil {
 			value.MsgText = msg.Content
 			value.UpdatedAt = msg.Datetime
 		}
@@ -192,7 +192,7 @@ func (c *Chat) ClearUnreadMessage(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	c.ChatUseCase.UnreadCacheRepo.Reset(ctx.Ctx(), int(params.DialogType), int(params.ReceiverId), ctx.UserId())
+	c.ChatUseCase.UnreadCacheRepo.Reset(ctx.Ctx(), int(params.ChatType), int(params.ReceiverId), ctx.UserId())
 
 	return ctx.Success(&v1Pb.ChatClearUnreadNumResponse{})
 }
@@ -222,7 +222,7 @@ func (c *Chat) Disturb(ctx *ginutil.Context) error {
 
 	if err := c.ChatUseCase.Disturb(ctx.Ctx(), &usecase.ChatDisturbOpt{
 		UserId:     ctx.UserId(),
-		DialogType: int(params.DialogType),
+		ChatType:   int(params.ChatType),
 		ReceiverId: int(params.ReceiverId),
 		IsDisturb:  int(params.IsDisturb),
 	}); err != nil {

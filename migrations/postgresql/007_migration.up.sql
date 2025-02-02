@@ -1,37 +1,30 @@
-CREATE TABLE contact_folders
+CREATE TABLE stickers
 (
-    id         serial primary key,
-    user_id    integer     default 0                     NOT NULL,
-    name       varchar(50) default ''::character varying NOT NULL,
-    num        integer     default 0                     NOT NULL,
-    sort       integer     default 0                     NOT NULL,
-    created_at timestamp                                 NOT NULL,
-    updated_at timestamp                                 NOT NULL
+    id         SERIAL PRIMARY KEY,
+    name       VARCHAR(50)  DEFAULT ''::CHARACTER VARYING NOT NULL,
+    icon       VARCHAR(255) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    status     INTEGER      DEFAULT 0                     NOT NULL,
+    created_at TIMESTAMP                                  NOT NULL,
+    updated_at TIMESTAMP                                  NOT NULL
 );
 
-CREATE TABLE group_chat_ads
+CREATE TABLE sticker_users
 (
-    id            serial primary key,
-    group_id      integer     default 0                     NOT NULL,
-    creator_id    integer     default 0                     NOT NULL,
-    title         varchar(50) default ''::character varying NOT NULL,
-    content       text                                      NOT NULL,
-    confirm_users jsonb,
-    is_delete     smallint    default 0                     NOT NULL,
-    is_top        smallint    default 0                     NOT NULL,
-    is_confirm    smallint    default 0                     NOT NULL,
-    created_at    timestamp                                 NOT NULL,
-    updated_at    timestamp                                 NOT NULL,
-    deleted_at    timestamp
+    id          SERIAL PRIMARY KEY,
+    user_id     INTEGER                                    NOT NULL,
+    sticker_ids VARCHAR(255) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    created_at  TIMESTAMP                                  NOT NULL
 );
 
-CREATE TABLE group_chat_requests
+CREATE TABLE sticker_items
 (
-    id         serial primary key,
-    group_id   integer default 0 NOT NULL,
-    user_id    integer default 0 NOT NULL,
-    status     integer default 1 NOT NULL,
-    created_at timestamp         NOT NULL,
-    updated_at timestamp         NOT NULL
+    id          SERIAL PRIMARY KEY,
+    sticker_id  INTEGER      DEFAULT 0                     NOT NULL,
+    user_id     INTEGER      DEFAULT 0                     NOT NULL,
+    description VARCHAR(255) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    url         VARCHAR(255) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    file_suffix VARCHAR(10)  DEFAULT ''::CHARACTER VARYING NOT NULL,
+    file_size   BIGINT       DEFAULT 0                     NOT NULL,
+    created_at  TIMESTAMP                                  NOT NULL,
+    updated_at  TIMESTAMP                                  NOT NULL
 );
-

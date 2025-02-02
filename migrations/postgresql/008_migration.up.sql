@@ -1,29 +1,36 @@
-create index idx_msg_id on message_read (msg_id);
-create index idx_created_at on message_read (created_at);
-create index idx_updated_at on message_read (updated_at);
-
-ALTER TABLE users ALTER COLUMN created_at SET DEFAULT now();
-ALTER TABLE users ALTER COLUMN updated_at SET DEFAULT now();
-
-ALTER TABLE bots alter COLUMN created_at SET DEFAULT now();
-ALTER TABLE bots ADD creator_id INT DEFAULT NULL;
-ALTER TABLE bots ADD COLUMN token VARCHAR(255) UNIQUE NOT NULL;
-
-ALTER TABLE splits ALTER COLUMN upload_id type VARCHAR using upload_id::varchar;
-ALTER TABLE splits ALTER COLUMN original_name type VARCHAR using original_name::varchar;
-
-CREATE TABLE push_tokens
+CREATE TABLE contact_folders
 (
-    id           SERIAL PRIMARY KEY,
-    user_id      INT          NOT NULL,
-    platform     VARCHAR(255) NOT NULL,
-    token        TEXT         NOT NULL,
-    web_endpoint TEXT,
-    web_p256dh   TEXT,
-    web_auth     TEXT,
-    is_active    BOOLEAN   DEFAULT TRUE,
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id         SERIAL PRIMARY KEY,
+    user_id    INTEGER     DEFAULT 0                      NOT NULL,
+    name       VARCHAR(50) DEFAULT '':: CHARACTER VARYING NOT NULL,
+    num        INTEGER     DEFAULT 0                      NOT NULL,
+    sort       INTEGER     DEFAULT 0                      NOT NULL,
+    created_at TIMESTAMP                                  NOT NULL,
+    updated_at TIMESTAMP                                  NOT NULL
 );
 
-alter table splits alter column file_ext type varchar(255) using file_ext::varchar(255);
-alter table splits rename to file_splits;
+CREATE TABLE group_chat_ads
+(
+    id            SERIAL PRIMARY KEY,
+    group_id      INTEGER     DEFAULT 0                      NOT NULL,
+    creator_id    INTEGER     DEFAULT 0                      NOT NULL,
+    title         VARCHAR(50) DEFAULT '':: CHARACTER VARYING NOT NULL,
+    content       TEXT                                       NOT NULL,
+    confirm_users JSONB,
+    is_delete     INTEGER     DEFAULT 0                      NOT NULL,
+    is_top        INTEGER     DEFAULT 0                      NOT NULL,
+    is_confirm    INTEGER     DEFAULT 0                      NOT NULL,
+    created_at    TIMESTAMP                                  NOT NULL,
+    updated_at    TIMESTAMP                                  NOT NULL,
+    deleted_at    TIMESTAMP
+);
+
+CREATE TABLE group_chat_requests
+(
+    id         SERIAL PRIMARY KEY,
+    group_id   INTEGER DEFAULT 0 NOT NULL,
+    user_id    INTEGER DEFAULT 0 NOT NULL,
+    status     INTEGER DEFAULT 1 NOT NULL,
+    created_at TIMESTAMP         NOT NULL,
+    updated_at TIMESTAMP         NOT NULL
+);

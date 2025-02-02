@@ -199,6 +199,14 @@ yarn build
 cd /usr/src/voo-su
 ```
 
+``` sh
+cp /usr/src/voo-su /usr/bin
+```
+
+``` sh
+chmod 775 /usr/bin/voo-su
+```
+
 ```bash
 mkdit /etc/voo-su && ln -sf /usr/src/voo-su/configs/voo-su.yaml /etc/voo-su/voo-su.yaml
 ```
@@ -208,11 +216,7 @@ You need to configure the connection settings in the file:
 * /usr/src/voo-su/configs/voo-su.yaml
 
 ```bash
-clickhouse-client --user clickhouse --password clickhouse --database=voo_su < /usr/src/voo-su/migrations/clickhouse/000_migration.up.sql
-```
-
-```bash
-psql -d voo_su -f /usr/src/voo-su/migrations/postgresql/000_migration.up.sql
+voo-su cli-migrate
 ```
 
 ```bash

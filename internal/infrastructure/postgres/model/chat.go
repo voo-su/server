@@ -4,7 +4,7 @@ import "time"
 
 type Chat struct {
 	Id         int       `gorm:"primaryKey"`
-	DialogType int       `gorm:"column:dialog_type;default:1;NOT NULL"`
+	ChatType   int       `gorm:"column:chat_type;default:1;NOT NULL"`
 	UserId     int       `gorm:"column:user_id;default:0;NOT NULL"`
 	ReceiverId int       `gorm:"column:receiver_id;default:0;NOT NULL"`
 	IsTop      int       `gorm:"column:is_top;default:0;NOT NULL"`

@@ -38,7 +38,7 @@ func (m *Message) GetHistory(ctx context.Context, in *messagePb.GetHistoryReques
 
 	if in.ChatType == constant.ChatGroupMode {
 		if err := m.MessageUseCase.IsAccess(ctx, &entity.MessageAccess{
-			DialogType: int(in.ChatType),
+			ChatType:   int(in.ChatType),
 			UserId:     uid,
 			ReceiverId: int(in.ReceiverId),
 		}); err != nil {
@@ -58,7 +58,7 @@ func (m *Message) GetHistory(ctx context.Context, in *messagePb.GetHistoryReques
 	}
 
 	records, err := m.MessageUseCase.GetHistory(ctx, &entity.QueryGetHistoryOpt{
-		DialogType: int(in.ChatType),
+		ChatType:   int(in.ChatType),
 		UserId:     uid,
 		ReceiverId: int(in.ReceiverId),
 		RecordId:   int(in.RecordId),
@@ -72,7 +72,7 @@ func (m *Message) GetHistory(ctx context.Context, in *messagePb.GetHistoryReques
 	for _, item := range records {
 		items = append(items, &messagePb.MessageItem{
 			Id:       item.MsgId,
-			ChatType: int32(item.DialogType),
+			ChatType: int32(item.ChatType),
 			MsgType:  int32(item.MsgType),
 			Content:  item.Content,
 		})

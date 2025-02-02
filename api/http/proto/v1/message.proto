@@ -7,14 +7,14 @@ import "tagger/tagger.proto";
 option go_package = "./v1;v1_pb";
 
 message GetRecordsRequest {
-    int64 dialog_type = 1 [(tagger.tags) = "form:\"dialog_type\" json:\"dialog_type\" binding:\"required,oneof=1 2\" label:\"dialog_type\""];
+    int64 chat_type = 1 [(tagger.tags) = "form:\"chat_type\" json:\"chat_type\" binding:\"required,oneof=1 2\" label:\"chat_type\""];
     int64 receiver_id = 2 [(tagger.tags) = "form:\"receiver_id\" json:\"receiver_id\" binding:\"required,numeric,min=1\" label:\"receiver_id\""];
     int64 record_id = 3 [(tagger.tags) = "form:\"record_id\" json:\"record_id\" binding:\"min=0,numeric\" label:\"record_id\""];
     int64 limit = 4 [(tagger.tags) = "form:\"limit\" json:\"limit\" binding:\"required,numeric,max=100\" label:\"limit\""];
 }
 
 message MessageReceiver {
-    int32 dialog_type = 1 [(tagger.tags) = "binding:\"required\" label:\"dialog_type\""];
+    int32 chat_type = 1 [(tagger.tags) = "binding:\"required\" label:\"chat_type\""];
     int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\" label:\"receiver_id\""];
 }
 
@@ -152,7 +152,7 @@ message VoteMessageHandleRequest {
 }
 
 message DeleteMessageRequest {
-    int64 dialog_type = 1 [(tagger.tags) = "form:\"dialog_type\" json:\"dialog_type\" binding:\"required,oneof=1 2\" label:\"dialog_type\""];
+    int64 chat_type = 1 [(tagger.tags) = "form:\"chat_type\" json:\"chat_type\" binding:\"required,oneof=1 2\" label:\"chat_type\""];
     int64 receiver_id = 2 [(tagger.tags) = "form:\"receiver_id\" json:\"receiver_id\" binding:\"required,numeric,gt=0\" label:\"receiver_id\""];
     string record_ids = 3 [(tagger.tags) = "form:\"record_id\" json:\"record_id\" binding:\"required,ids\" label:\"record_id\""];
 }

@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	VoteUsersCache     = "dialog:vote:answer-users:%d"
-	VoteStatisticCache = "dialog:vote:statistic:%d"
+	VoteUsersCache     = "chat:vote:answer-users:%d"
+	VoteStatisticCache = "chat:vote:statistic:%d"
 )
 
 type VoteCacheRepository struct {

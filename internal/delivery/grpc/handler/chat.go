@@ -53,17 +53,17 @@ func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb
 	for _, item := range data {
 		value := &chatPb.ChatItem{
 			Id:        int32(item.Id),
-			ChatType:  int32(item.DialogType),
+			ChatType:  int32(item.ChatType),
 			Avatar:    item.UserAvatar,
 			MsgText:   "",
 			UpdatedAt: timeutil.FormatDatetime(item.UpdatedAt),
 		}
 
-		if num, ok := unReads[fmt.Sprintf("%d_%d", item.DialogType, item.ReceiverId)]; ok {
+		if num, ok := unReads[fmt.Sprintf("%d_%d", item.ChatType, item.ReceiverId)]; ok {
 			value.UnreadNum = int32(num)
 		}
 
-		if item.DialogType == 1 {
+		if item.ChatType == 1 {
 			value.Username = item.Username
 			value.Avatar = item.UserAvatar
 			value.Name = item.Name
@@ -73,7 +73,7 @@ func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb
 			value.Avatar = item.GroupAvatar
 		}
 
-		if msg, err := c.ChatUseCase.MessageCacheRepo.Get(ctx, item.DialogType, uid, item.ReceiverId); err == nil {
+		if msg, err := c.ChatUseCase.MessageCacheRepo.Get(ctx, item.ChatType, uid, item.ReceiverId); err == nil {
 			value.MsgText = msg.Content
 			value.UpdatedAt = msg.Datetime
 		}

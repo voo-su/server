@@ -76,7 +76,7 @@ func (m *Message) Message(ctx *ginutil.Context) error {
 
 	if err := m.MessageUseCase.SendText(ctx.Ctx(), bot.UserId, &entity.SendText{
 		Receiver: entity.MessageReceiver{
-			DialogType: 2,
+			ChatType:   2,
 			ReceiverId: params.ChatId,
 		},
 		Content: params.Text,
@@ -117,7 +117,7 @@ func (m *Message) Photo(ctx *ginutil.Context) error {
 
 	if err := m.MessageUseCase.SendImage(ctx.Ctx(), bot.UserId, &entity.SendImage{
 		Receiver: entity.MessageReceiver{
-			DialogType: 2,
+			ChatType:   2,
 			ReceiverId: int32(chatId),
 		},
 		Url:     *filePath,
@@ -159,7 +159,7 @@ func (m *Message) Video(ctx *ginutil.Context) error {
 
 	if err := m.MessageUseCase.SendVideo(ctx.Ctx(), bot.UserId, &entity.SendVideo{
 		Receiver: entity.MessageReceiver{
-			DialogType: 2,
+			ChatType:   2,
 			ReceiverId: int32(chatId),
 		},
 		Url:     *filePath,
@@ -201,7 +201,7 @@ func (m *Message) Audio(ctx *ginutil.Context) error {
 
 	if err := m.MessageUseCase.SendAudio(ctx.Ctx(), bot.UserId, &entity.SendAudio{
 		Receiver: entity.MessageReceiver{
-			DialogType: 2,
+			ChatType:   2,
 			ReceiverId: int32(chatId),
 		},
 		Url:     *filePath,
@@ -243,7 +243,7 @@ func (m *Message) Document(ctx *ginutil.Context) error {
 
 	if err := m.MessageUseCase.SendBotFile(ctx.Ctx(), bot.UserId, &entity.SendBotFile{
 		Receiver: entity.MessageReceiver{
-			DialogType: 2,
+			ChatType:   2,
 			ReceiverId: int32(chatId),
 		},
 		Drive:        1,

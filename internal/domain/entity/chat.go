@@ -8,7 +8,7 @@ import (
 
 type SearchChat struct {
 	Id          int       `json:"id" `
-	DialogType  int       `json:"dialog_type" `
+	ChatType    int       `json:"chat_type" `
 	ReceiverId  int       `json:"receiver_id" `
 	IsDelete    int       `json:"is_delete"`
 	IsTop       int       `json:"is_top"`

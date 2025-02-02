@@ -79,7 +79,7 @@ type ProjectTaskCreateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskCreateRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -183,7 +183,7 @@ type ProjectTaskCreateResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskCreateResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -287,7 +287,7 @@ type ProjectTaskRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -423,7 +423,7 @@ type ProjectTaskResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -529,7 +529,7 @@ type ProjectExecutorRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectExecutorRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -631,7 +631,7 @@ type ProjectExecutorResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectExecutorResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -741,7 +741,7 @@ type ProjectTaskMoveRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskMoveRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -843,7 +843,7 @@ type ProjectTaskMoveResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskMoveResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -947,7 +947,7 @@ type ProjectTaskDetailRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskDetailRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1115,7 +1115,7 @@ type ProjectTaskDetailResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskDetailResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1221,7 +1221,7 @@ type ProjectTaskTypeNameRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskTypeNameRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1323,7 +1323,7 @@ type ProjectTaskTypeNameResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskTypeNameResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1430,7 +1430,7 @@ type ProjectCoexecutorInviteRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCoexecutorInviteRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1533,7 +1533,7 @@ type ProjectCoexecutorInviteResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCoexecutorInviteResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1638,7 +1638,7 @@ type ProjectCoexecutorsRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCoexecutorsRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1774,7 +1774,7 @@ type ProjectCoexecutorsResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCoexecutorsResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1880,7 +1880,7 @@ type ProjectWatcherInviteRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectWatcherInviteRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -1983,7 +1983,7 @@ type ProjectWatcherInviteResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectWatcherInviteResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2088,7 +2088,7 @@ type ProjectWatchersRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectWatchersRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2224,7 +2224,7 @@ type ProjectWatchersResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectWatchersResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2330,7 +2330,7 @@ type ProjectTaskResponse_TasksMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskResponse_TasksMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2470,7 +2470,7 @@ type ProjectTaskResponse_CategoriesMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskResponse_CategoriesMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2585,7 +2585,7 @@ type ProjectTaskDetailResponse_MemberMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectTaskDetailResponse_MemberMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2698,7 +2698,7 @@ type ProjectCoexecutorsResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectCoexecutorsResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -2811,7 +2811,7 @@ type ProjectWatchersResponse_ItemMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ProjectWatchersResponse_ItemMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}

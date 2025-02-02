@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
+	"log"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure"
@@ -56,7 +57,7 @@ func (c *ContactRequestUseCase) Create(ctx context.Context, opt *ContactApplyCre
 		return nil
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	return nil
