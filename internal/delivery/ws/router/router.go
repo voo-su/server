@@ -4,22 +4,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-	"os"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/delivery/ws/handler"
 	"voo.su/internal/delivery/ws/middleware"
+	clickhouseRepo "voo.su/internal/infrastructure/clickhouse/repository"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
 )
 
-func NewRouter(conf *config.Config, locale locale.ILocale, handle *handler.Handler, session *redisRepo.JwtTokenCacheRepository) *gin.Engine {
+func NewRouter(
+	conf *config.Config,
+	locale locale.ILocale,
+	handle *handler.Handler,
+	session *redisRepo.JwtTokenCacheRepository,
+	accessLogRepo *clickhouseRepo.AccessLogRepository,
+) *gin.Engine {
 	router := gin.New()
-	src, err := os.OpenFile(conf.App.LogPath("ws_access.log"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		panic(err)
-	}
 
 	router.Use(ginutil.CorsMiddleware(
 		conf.App.Cors.Origin,
@@ -28,7 +30,7 @@ func NewRouter(conf *config.Config, locale locale.ILocale, handle *handler.Handl
 		conf.App.Cors.Credentials,
 		conf.App.Cors.MaxAge,
 	))
-	router.Use(ginutil.AccessLogMiddleware(src))
+	router.Use(middleware.AccessLogMiddleware(accessLogRepo))
 
 	router.Use(func(c *gin.Context) {
 		acceptLang := c.GetHeader("Accept-Language")

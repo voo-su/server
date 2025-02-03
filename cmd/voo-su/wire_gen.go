@@ -265,7 +265,8 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Bot:     botHandler,
 		Manager: managerHandler,
 	}
-	engine := router.NewRouter(conf, iLocale, handlerHandler, jwtTokenCacheRepository)
+	accessLogRepository := repository3.NewAccessLogRepository(conn)
+	engine := router.NewRouter(conf, iLocale, handlerHandler, jwtTokenCacheRepository, accessLogRepository)
 	appProvider := &http.AppProvider{
 		Conf:   conf,
 		Engine: engine,
@@ -303,7 +304,8 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 		Conf: conf,
 	}
 	jwtTokenCacheRepository := repository.NewJwtTokenCacheRepository(client)
-	engine := router2.NewRouter(conf, iLocale, handlerHandler, jwtTokenCacheRepository)
+	accessLogRepository := repository3.NewAccessLogRepository(conn)
+	engine := router2.NewRouter(conf, iLocale, handlerHandler, jwtTokenCacheRepository, accessLogRepository)
 	healthSubscribe := process.NewHealthSubscribe(conf, serverCacheRepository)
 	chatRepository := repository2.NewChatRepository(db)
 	redisLockCacheRepository := repository.NewRedisLockCacheRepository(client)

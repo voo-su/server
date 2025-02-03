@@ -7,4 +7,5 @@ import (
 
 var ProviderSet = wire.NewSet(
 	repository.NewAuthCodeRepository,
+	repository.NewAccessLogRepository,
 )
