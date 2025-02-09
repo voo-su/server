@@ -82,3 +82,20 @@ func (m *Message) GetHistory(ctx context.Context, in *messagePb.GetHistoryReques
 		Items: items,
 	}, nil
 }
+
+func (m *Message) Send(ctx context.Context, in *messagePb.SendMessageRequest) (*messagePb.SendMessageResponse, error) {
+	uid := grpcutil.UserId(ctx)
+
+	if err := m.MessageUseCase.SendText(ctx, uid, &entity.SendText{
+		Receiver: entity.MessageReceiver{
+			ChatType:   int32(in.ChatType),
+			ReceiverId: int32(in.ReceiverId),
+		},
+		Content: in.Message,
+		//QuoteId: ,
+	}); err != nil {
+		return nil, status.Error(codes.Unknown, err.Error())
+	}
+
+	return &messagePb.SendMessageResponse{}, nil
+}

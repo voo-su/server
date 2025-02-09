@@ -92,7 +92,9 @@ func (a *AccessLogStore) init() error {
 
 	if strings.HasPrefix(a.ctx.GetHeader("Content-Type"), "application/json") {
 		var jsonBody map[string]interface{}
-		_ = json.Unmarshal(body, &jsonBody)
+		if err := json.Unmarshal(body, &jsonBody); err != nil {
+			log.Println(err)
+		}
 		a.data.RequestBody = fmt.Sprintf("%v", jsonBody)
 	}
 
@@ -113,7 +115,9 @@ func (a *AccessLogStore) load() {
 
 	if strings.HasPrefix(writer.Header().Get("Content-Type"), "application/json") {
 		var body map[string]interface{}
-		_ = json.Unmarshal(writer.body.Bytes(), &body)
+		if err := json.Unmarshal(writer.body.Bytes(), &body); err != nil {
+			log.Println(err)
+		}
 		a.data.ResponseBodyRaw = fmt.Sprintf("%v", body)
 	}
 }
