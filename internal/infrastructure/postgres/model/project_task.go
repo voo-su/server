@@ -1,10 +1,13 @@
 package model
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type ProjectTask struct {
-	Id          int64     `gorm:"primaryKey"`
-	ProjectId   int64     `gorm:"column:project_id"`
+	Id          uuid.UUID `gorm:"column:id;type:uuid;default:gen_random_uuid()"`
+	ProjectId   uuid.UUID `gorm:"column:project_id"`
 	TypeId      int       `gorm:"column:type_id"`
 	Title       string    `gorm:"column:title"`
 	Description string    `gorm:"column:description"`

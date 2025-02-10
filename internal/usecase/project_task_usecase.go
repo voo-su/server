@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"time"
 	"voo.su/internal/domain/entity"
@@ -10,14 +11,14 @@ import (
 )
 
 type ProjectTaskOpt struct {
-	ProjectId   int64
+	ProjectId   uuid.UUID
 	TypeId      int
 	Title       string
 	Description string
 	CreatedBy   int
 }
 
-func (p *ProjectUseCase) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (int64, error) {
+func (p *ProjectUseCase) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (uuid.UUID, error) {
 	task := &postgresModel.ProjectTask{
 		ProjectId:   opt.ProjectId,
 		TypeId:      opt.TypeId,
@@ -36,7 +37,7 @@ func (p *ProjectUseCase) CreateTask(ctx context.Context, opt *ProjectTaskOpt) (i
 	return task.Id, nil
 }
 
-func (p *ProjectUseCase) TypeTasks(ctx context.Context, projectId int64) ([]*postgresModel.ProjectTaskType, error) {
+func (p *ProjectUseCase) TypeTasks(ctx context.Context, projectId uuid.UUID) ([]*postgresModel.ProjectTaskType, error) {
 	tx := p.Source.Postgres().WithContext(ctx).
 		Table("project_task_types").
 		Where("project_id = ?", projectId)
@@ -49,7 +50,7 @@ func (p *ProjectUseCase) TypeTasks(ctx context.Context, projectId int64) ([]*pos
 	return items, nil
 }
 
-func (p *ProjectUseCase) Tasks(ctx context.Context, projectId int64, typeId int64) ([]*postgresModel.ProjectTask, error) {
+func (p *ProjectUseCase) Tasks(ctx context.Context, projectId uuid.UUID, typeId int64) ([]*postgresModel.ProjectTask, error) {
 	tx := p.Source.Postgres().WithContext(ctx).
 		Table("project_tasks").
 		Where("project_id = ? AND type_id = ?", projectId, typeId)
@@ -62,7 +63,7 @@ func (p *ProjectUseCase) Tasks(ctx context.Context, projectId int64, typeId int6
 	return items, nil
 }
 
-func (p *ProjectUseCase) TaskDetail(ctx context.Context, taskId int64) (*entity.ProjectTaskDetailWithMember, error) {
+func (p *ProjectUseCase) TaskDetail(ctx context.Context, taskId uuid.UUID) (*entity.ProjectTaskDetailWithMember, error) {
 	fields := []string{
 		"project_tasks.*",
 		"assigner.id AS assigner_id",
@@ -91,7 +92,7 @@ func (p *ProjectUseCase) TaskDetail(ctx context.Context, taskId int64) (*entity.
 	return &taskDetail, nil
 }
 
-func (p *ProjectUseCase) TaskExecutor(ctx context.Context, taskId int64, memberId int64) error {
+func (p *ProjectUseCase) TaskExecutor(ctx context.Context, taskId uuid.UUID, memberId int64) error {
 	_, err := p.ProjectTaskRepo.UpdateById(ctx, taskId, map[string]any{
 		"executor_id": memberId,
 	})
@@ -102,7 +103,7 @@ func (p *ProjectUseCase) TaskExecutor(ctx context.Context, taskId int64, memberI
 	return nil
 }
 
-func (p *ProjectUseCase) TaskMove(ctx context.Context, projectId int64, taskId int64, fromId int64, toId int64) error {
+func (p *ProjectUseCase) TaskMove(ctx context.Context, projectId uuid.UUID, taskId uuid.UUID, fromId int64, toId int64) error {
 	_, err := p.ProjectTaskRepo.UpdateWhere(ctx, map[string]any{
 		"type_id": toId,
 	}, "id = ? AND project_id = ? AND type_id = ?", taskId, projectId, fromId)
@@ -113,7 +114,7 @@ func (p *ProjectUseCase) TaskMove(ctx context.Context, projectId int64, taskId i
 	return nil
 }
 
-func (p *ProjectUseCase) TaskTypeName(ctx context.Context, taskId int64, name string) error {
+func (p *ProjectUseCase) TaskTypeName(ctx context.Context, taskId uuid.UUID, name string) error {
 	_, err := p.ProjectTaskTypeRepo.UpdateWhere(ctx, map[string]any{
 		"title": name,
 	}, "id = ?", taskId)
@@ -124,7 +125,7 @@ func (p *ProjectUseCase) TaskTypeName(ctx context.Context, taskId int64, name st
 	return nil
 }
 
-func (p *ProjectUseCase) IsMemberProjectByTask(ctx context.Context, taskId int64, uid int) bool {
+func (p *ProjectUseCase) IsMemberProjectByTask(ctx context.Context, taskId uuid.UUID, uid int) bool {
 	tx := p.Source.Postgres().WithContext(ctx).
 		Table("project_tasks").
 		Joins("INNER JOIN project_members ON project_members.project_id = project_tasks.project_id").
@@ -138,7 +139,7 @@ func (p *ProjectUseCase) IsMemberProjectByTask(ctx context.Context, taskId int64
 	return count > 0
 }
 
-func (p *ProjectUseCase) InviteCoexecutor(ctx context.Context, taskId int64, memberIds []int, uid int) error {
+func (p *ProjectUseCase) InviteCoexecutor(ctx context.Context, taskId uuid.UUID, memberIds []int, uid int) error {
 	var (
 		err            error
 		addCoexecutors []*postgresModel.ProjectTaskCoexecutor
@@ -152,7 +153,7 @@ func (p *ProjectUseCase) InviteCoexecutor(ctx context.Context, taskId int64, mem
 	for _, value := range memberIds {
 		if _, ok := m[value]; !ok {
 			addCoexecutors = append(addCoexecutors, &postgresModel.ProjectTaskCoexecutor{
-				TaskId:    int(taskId),
+				TaskId:    taskId,
 				MemberId:  value,
 				CreatedBy: uid,
 			})
@@ -176,7 +177,7 @@ func (p *ProjectUseCase) InviteCoexecutor(ctx context.Context, taskId int64, mem
 	return nil
 }
 
-func (p *ProjectUseCase) GetCoexecutors(ctx context.Context, taskId int64) ([]*entity.ProjectMemberItem, error) {
+func (p *ProjectUseCase) GetCoexecutors(ctx context.Context, taskId uuid.UUID) ([]*entity.ProjectMemberItem, error) {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",
@@ -198,7 +199,7 @@ func (p *ProjectUseCase) GetCoexecutors(ctx context.Context, taskId int64) ([]*e
 	return items, nil
 }
 
-func (p *ProjectUseCase) InviteWatcher(ctx context.Context, taskId int64, memberIds []int, uid int) error {
+func (p *ProjectUseCase) InviteWatcher(ctx context.Context, taskId uuid.UUID, memberIds []int, uid int) error {
 	var (
 		err         error
 		addWatchers []*postgresModel.ProjectTaskWatcher
@@ -212,7 +213,7 @@ func (p *ProjectUseCase) InviteWatcher(ctx context.Context, taskId int64, member
 	for _, value := range memberIds {
 		if _, ok := m[value]; !ok {
 			addWatchers = append(addWatchers, &postgresModel.ProjectTaskWatcher{
-				TaskId:    int(taskId),
+				TaskId:    taskId,
 				MemberId:  value,
 				CreatedBy: uid,
 			})
@@ -236,7 +237,7 @@ func (p *ProjectUseCase) InviteWatcher(ctx context.Context, taskId int64, member
 	return nil
 }
 
-func (p *ProjectUseCase) GetWatchers(ctx context.Context, taskId int64) ([]*entity.ProjectMemberItem, error) {
+func (p *ProjectUseCase) GetWatchers(ctx context.Context, taskId uuid.UUID) ([]*entity.ProjectMemberItem, error) {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",
@@ -259,7 +260,7 @@ func (p *ProjectUseCase) GetWatchers(ctx context.Context, taskId int64) ([]*enti
 }
 
 type ProjectCommentOpt struct {
-	TaskId    int64
+	TaskId    uuid.UUID
 	Comment   string
 	CreatedBy int
 }
@@ -280,7 +281,7 @@ func (p *ProjectUseCase) CreateComment(ctx context.Context, opt *ProjectCommentO
 	return comment.Id, nil
 }
 
-func (p *ProjectUseCase) Comments(ctx context.Context, TaskId int64) ([]*postgresModel.ProjectTaskComment, error) {
+func (p *ProjectUseCase) Comments(ctx context.Context, TaskId uuid.UUID) ([]*postgresModel.ProjectTaskComment, error) {
 	tx := p.Source.Postgres().WithContext(ctx).
 		Table("project_task_comments").
 		Where("task_id = ?", TaskId)

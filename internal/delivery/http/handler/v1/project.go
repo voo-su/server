@@ -2,6 +2,7 @@ package v1
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
@@ -33,7 +34,7 @@ func (p *Project) Create(ctx *ginutil.Context) error {
 	uIds := sliceutil.Unique(sliceutil.ParseIds(params.Ids))
 	if len(uIds) != 0 {
 		if err := p.ProjectUseCase.Invite(ctx.Ctx(), &usecase.ProjectInviteOpt{
-			ProjectId: int(projectId),
+			ProjectId: projectId,
 			UserId:    uid,
 			MemberIds: uIds,
 		}); err != nil {
@@ -41,7 +42,9 @@ func (p *Project) Create(ctx *ginutil.Context) error {
 		}
 	}
 
-	return ctx.Success(&v1Pb.ProjectCreateResponse{Id: projectId})
+	return ctx.Success(&v1Pb.ProjectCreateResponse{
+		Id: projectId.String(),
+	})
 }
 
 func (p *Project) Projects(ctx *ginutil.Context) error {
@@ -53,7 +56,7 @@ func (p *Project) Projects(ctx *ginutil.Context) error {
 	items := make([]*v1Pb.ProjectListResponse_Item, 0)
 	for _, item := range data {
 		items = append(items, &v1Pb.ProjectListResponse_Item{
-			Id:    int64(item.Id),
+			Id:    item.Id.String(),
 			Title: item.Name,
 		})
 	}
@@ -67,14 +70,19 @@ func (p *Project) Detail(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
+	projectId, err := uuid.Parse(params.Id)
+	if err != nil {
+		return ctx.Error(p.Locale.Localize("network_error"))
+	}
+
 	uid := ctx.UserId()
-	task, err := p.ProjectUseCase.Detail(ctx.Ctx(), uid, params.Id)
+	task, err := p.ProjectUseCase.Detail(ctx.Ctx(), uid, projectId)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
 
 	return ctx.Success(v1Pb.ProjectDetailResponse{
-		Id:   task.Id,
+		Id:   task.Id.String(),
 		Name: task.Name,
 	})
 }
@@ -85,7 +93,12 @@ func (p *Project) Members(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	list := p.ProjectUseCase.GetMembers(ctx.Ctx(), params.ProjectId)
+	projectId, err := uuid.Parse(params.ProjectId)
+	if err != nil {
+		return ctx.Error(p.Locale.Localize("network_error"))
+	}
+
+	list := p.ProjectUseCase.GetMembers(ctx.Ctx(), projectId)
 
 	items := make([]*v1Pb.ProjectMembersResponse_Item, 0)
 	for _, item := range list {
@@ -104,16 +117,21 @@ func (p *Project) GetInviteFriends(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
+	projectId, err := uuid.Parse(params.ProjectId)
+	if err != nil && projectId != uuid.Nil {
+		return ctx.Error(p.Locale.Localize("network_error"))
+	}
+
 	items, err := p.ContactUseCase.List(ctx.Ctx(), ctx.UserId())
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
 
-	if params.ProjectId <= 0 {
+	if projectId == uuid.Nil {
 		return ctx.Success(items)
 	}
 
-	mIds := p.ProjectUseCase.ProjectMemberRepo.GetMemberIds(ctx.Ctx(), int(params.ProjectId))
+	mIds := p.ProjectUseCase.ProjectMemberRepo.GetMemberIds(ctx.Ctx(), projectId)
 	if len(mIds) == 0 {
 		return ctx.Success(items)
 	}
@@ -139,14 +157,19 @@ func (p *Project) Invite(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	key := fmt.Sprintf("project-join:%d", params.ProjectId)
+	projectId, err := uuid.Parse(params.ProjectId)
+	if err != nil {
+		return ctx.Error(p.Locale.Localize("network_error"))
+	}
+
+	key := fmt.Sprintf("project-join:%s", projectId)
 	if !p.ProjectUseCase.RedisLockCacheRepo.Lock(ctx.Ctx(), key, 20) {
 		return ctx.Error(p.Locale.Localize("network_error"))
 	}
 
 	defer p.ProjectUseCase.RedisLockCacheRepo.UnLock(ctx.Ctx(), key)
 
-	project, err := p.ProjectUseCase.ProjectRepo.FindById(ctx.Ctx(), int(params.ProjectId))
+	project, err := p.ProjectUseCase.ProjectRepo.FindByWhere(ctx.Ctx(), "project_id = ?", projectId)
 	if err != nil {
 		return ctx.Error(p.Locale.Localize("network_error"))
 	}
@@ -161,12 +184,12 @@ func (p *Project) Invite(ctx *ginutil.Context) error {
 	}
 
 	uid := ctx.UserId()
-	if !p.ProjectUseCase.IsMember(ctx.Ctx(), int(params.ProjectId), uid, true) {
+	if !p.ProjectUseCase.IsMember(ctx.Ctx(), projectId, uid, true) {
 		return ctx.Error(p.Locale.Localize("not_project_member_cannot_invite"))
 	}
 
 	if err := p.ProjectUseCase.Invite(ctx.Ctx(), &usecase.ProjectInviteOpt{
-		ProjectId: int(params.ProjectId),
+		ProjectId: projectId,
 		UserId:    uid,
 		MemberIds: uIds,
 	}); err != nil {

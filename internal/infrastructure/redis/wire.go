@@ -19,4 +19,5 @@ var ProviderSet = wire.NewSet(
 	repository.NewVoteCacheRepository,
 	repository.NewUnreadCacheRepository,
 	repository.NewGroupChatRequestCacheRepository,
+	repository.NewProjectContactCacheRepository,
 )

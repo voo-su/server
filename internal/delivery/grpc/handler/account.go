@@ -28,7 +28,7 @@ func (a *Account) List(ctx context.Context, in *accountPb.GetAccountRequest) (*a
 	}
 
 	return &accountPb.GetAccountResponse{
-		Id:       int32(user.Id),
+		Id:       int64(user.Id),
 		Username: user.Username,
 		Email:    user.Email,
 		Avatar:   user.Avatar,

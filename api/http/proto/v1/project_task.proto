@@ -7,23 +7,23 @@ import "tagger/tagger.proto";
 option go_package = "./v1;v1_pb";
 
 message ProjectTaskCreateRequest {
-    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\" label:\"project_id\""];
+    string project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\" label:\"project_id\""];
     int64 type_id = 2 [(tagger.tags) = "form:\"type_id\" binding:\"required\" label:\"type_id\""];
     string title = 3 [(tagger.tags) = "form:\"title\" label:\"title\""];
     string description = 4 [(tagger.tags) = "form:\"description\" label:\"description\""];
 }
 
 message ProjectTaskCreateResponse {
-    int64 id = 1;
+    string id = 1;
 }
 
 message ProjectTaskRequest {
-    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\" label:\"project_id\""];
+    string project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\" label:\"project_id\""];
 }
 
 message ProjectTaskResponse {
     message Tasks {
-        int64 id = 1 [(tagger.tags) = "json:\"id\""];
+        string id = 1 [(tagger.tags) = "json:\"id\""];
         string title = 2 [(tagger.tags) = "json:\"title\""];
     }
 
@@ -37,15 +37,15 @@ message ProjectTaskResponse {
 }
 
 message ProjectExecutorRequest {
-    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
+    string task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
     int64 member_id = 2 [(tagger.tags) = "form:\"member_id\" binding:\"required\" label:\"member_id\""];
 }
 
 message ProjectExecutorResponse {}
 
 message ProjectTaskMoveRequest {
-    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\" label:\"project_id\""];
-    int64 task_id = 2 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
+    string project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\" label:\"project_id\""];
+    string task_id = 2 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
     int64 from_id = 3 [(tagger.tags) = "form:\"from_id\" binding:\"required\" label:\"from_id\""];
     int64 to_id = 4 [(tagger.tags) = "form:\"to_id\" binding:\"required\" label:\"to_id\""];
 }
@@ -53,7 +53,7 @@ message ProjectTaskMoveRequest {
 message ProjectTaskMoveResponse {}
 
 message ProjectTaskDetailRequest {
-    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
+    string task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
 }
 
 message ProjectTaskDetailResponse {
@@ -65,7 +65,7 @@ message ProjectTaskDetailResponse {
         string surname = 5 [(tagger.tags) = "json:\"surname\""];
     }
 
-    int64 id = 1 [(tagger.tags) = "json:\"id\""];
+    string id = 1 [(tagger.tags) = "json:\"id\""];
     string title = 2 [(tagger.tags) = "json:\"title\""];
     string description = 3 [(tagger.tags) = "json:\"description\""];
     string created_at = 4 [(tagger.tags) = "json:\"created_at\""];
@@ -74,21 +74,21 @@ message ProjectTaskDetailResponse {
 }
 
 message ProjectTaskTypeNameRequest {
-    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
+    string task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
     string name = 2 [(tagger.tags) = "form:\"name\" binding:\"required\" label:\"name\""];
 }
 
 message ProjectTaskTypeNameResponse {}
 
 message ProjectCoexecutorInviteRequest {
-    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
+    string task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
     string member_ids = 2 [(tagger.tags) = "form:\"member_ids\" binding:\"required\" label:\"member_ids\""];
 }
 
 message ProjectCoexecutorInviteResponse {}
 
 message ProjectCoexecutorsRequest {
-    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
+    string task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
 }
 
 message ProjectCoexecutorsResponse {
@@ -104,14 +104,14 @@ message ProjectCoexecutorsResponse {
 }
 
 message ProjectWatcherInviteRequest {
-    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
+    string task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
     string member_ids = 2 [(tagger.tags) = "form:\"member_ids\" binding:\"required\" label:\"member_ids\""];
 }
 
 message ProjectWatcherInviteResponse {}
 
 message ProjectWatchersRequest {
-    int64 task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
+    string task_id = 1 [(tagger.tags) = "form:\"task_id\" binding:\"required\" label:\"task_id\""];
 }
 
 message ProjectWatchersResponse {

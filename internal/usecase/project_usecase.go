@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"time"
 	"voo.su/internal/domain/entity"
@@ -22,7 +23,7 @@ type ProjectUseCase struct {
 	ProjectTaskRepo           *postgresRepo.ProjectTaskRepository
 	ProjectTaskCommentRepo    *postgresRepo.ProjectTaskCommentRepository
 	UserRepo                  *postgresRepo.UserRepository
-	RelationCache             *redisRepo.RelationCacheRepository
+	ProjectContactCache       *redisRepo.ProjectContactCacheRepository
 	ProjectTaskCoexecutorRepo *postgresRepo.ProjectTaskCoexecutorRepository
 	ProjectTaskWatcherRepo    *postgresRepo.ProjectTaskWatcherRepository
 	RedisLockCacheRepo        *redisRepo.RedisLockCacheRepository
@@ -37,7 +38,7 @@ func NewProjectUseCase(
 	projectTaskRepo *postgresRepo.ProjectTaskRepository,
 	projectTaskCommentRepo *postgresRepo.ProjectTaskCommentRepository,
 	userRepo *postgresRepo.UserRepository,
-	relationCache *redisRepo.RelationCacheRepository,
+	projectContactCache *redisRepo.ProjectContactCacheRepository,
 	projectTaskCoexecutorRepo *postgresRepo.ProjectTaskCoexecutorRepository,
 	projectTaskWatcherRepo *postgresRepo.ProjectTaskWatcherRepository,
 	redisLockCacheRepo *redisRepo.RedisLockCacheRepository,
@@ -51,7 +52,7 @@ func NewProjectUseCase(
 		ProjectTaskRepo:           projectTaskRepo,
 		ProjectTaskCommentRepo:    projectTaskCommentRepo,
 		UserRepo:                  userRepo,
-		RelationCache:             relationCache,
+		ProjectContactCache:       projectContactCache,
 		ProjectTaskCoexecutorRepo: projectTaskCoexecutorRepo,
 		ProjectTaskWatcherRepo:    projectTaskWatcherRepo,
 		RedisLockCacheRepo:        redisLockCacheRepo,
@@ -63,7 +64,7 @@ type ProjectOpt struct {
 	Title  string
 }
 
-func (p *ProjectUseCase) CreateProject(ctx context.Context, opt *ProjectOpt) (int64, error) {
+func (p *ProjectUseCase) CreateProject(ctx context.Context, opt *ProjectOpt) (uuid.UUID, error) {
 	var (
 		err       error
 		members   []*postgresModel.ProjectMember
@@ -107,7 +108,7 @@ func (p *ProjectUseCase) CreateProject(ctx context.Context, opt *ProjectOpt) (in
 		return nil
 	})
 
-	return int64(project.Id), nil
+	return project.Id, nil
 }
 
 func (p *ProjectUseCase) Projects(userId int) ([]*entity.ProjectItem, error) {
@@ -128,7 +129,7 @@ func (p *ProjectUseCase) Projects(userId int) ([]*entity.ProjectItem, error) {
 		return items, nil
 	}
 
-	ids := make([]int, 0, length)
+	ids := make([]uuid.UUID, 0, length)
 	for i := range items {
 		ids = append(ids, items[i].Id)
 	}
@@ -136,7 +137,7 @@ func (p *ProjectUseCase) Projects(userId int) ([]*entity.ProjectItem, error) {
 	return items, nil
 }
 
-func (p *ProjectUseCase) Detail(ctx context.Context, uid int, projectId int64) (*entity.ProjectDetailItem, error) {
+func (p *ProjectUseCase) Detail(ctx context.Context, uid int, projectId uuid.UUID) (*entity.ProjectDetailItem, error) {
 	exist, err := p.ProjectMemberRepo.QueryExist(ctx, "project_id = ? AND user_id = ?", projectId, uid)
 	if err != nil {
 		return nil, errors.New(p.Locale.Localize("not_project_member"))
@@ -145,18 +146,18 @@ func (p *ProjectUseCase) Detail(ctx context.Context, uid int, projectId int64) (
 		return nil, errors.New(p.Locale.Localize("not_project_member"))
 	}
 
-	project, err := p.ProjectRepo.FindById(ctx, int(projectId))
+	project, err := p.ProjectRepo.FindByWhere(ctx, "id = ?", projectId)
 	if err != nil {
 		return nil, err
 	}
 
 	return &entity.ProjectDetailItem{
-		Id:   int64(project.Id),
+		Id:   project.Id,
 		Name: project.Name,
 	}, nil
 }
 
-func (p *ProjectUseCase) GetMembers(ctx context.Context, projectId int64) []*entity.ProjectMemberItem {
+func (p *ProjectUseCase) GetMembers(ctx context.Context, projectId uuid.UUID) []*entity.ProjectMemberItem {
 	fields := []string{
 		"project_members.id AS id",
 		"project_members.user_id AS user_id",
@@ -173,8 +174,8 @@ func (p *ProjectUseCase) GetMembers(ctx context.Context, projectId int64) []*ent
 	return items
 }
 
-func (p *ProjectUseCase) IsMember(ctx context.Context, gid, uid int, cache bool) bool {
-	if cache && p.RelationCache.IsGroupRelation(ctx, uid, gid) == nil {
+func (p *ProjectUseCase) IsMember(ctx context.Context, gid uuid.UUID, uid int, cache bool) bool {
+	if cache && p.ProjectContactCache.IsGroupRelation(ctx, uid, gid) == nil {
 		return true
 	}
 
@@ -183,14 +184,14 @@ func (p *ProjectUseCase) IsMember(ctx context.Context, gid, uid int, cache bool)
 		return false
 	}
 	if exist {
-		p.RelationCache.SetGroupRelation(ctx, uid, gid)
+		p.ProjectContactCache.SetGroupRelation(ctx, uid, gid)
 	}
 
 	return exist
 }
 
 type ProjectInviteOpt struct {
-	ProjectId int
+	ProjectId uuid.UUID
 	UserId    int
 	MemberIds []int
 }

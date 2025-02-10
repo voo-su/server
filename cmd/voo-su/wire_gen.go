@@ -208,9 +208,10 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	projectTaskTypeRepository := repository2.NewProjectTaskTypeRepository(db)
 	projectTaskRepository := repository2.NewProjectTaskRepository(db)
 	projectTaskCommentRepository := repository2.NewProjectTaskCommentRepository(db)
+	projectContactCacheRepository := repository.NewProjectContactCacheRepository(client)
 	projectTaskCoexecutorRepository := repository2.NewProjectTaskCoexecutorRepository(db)
 	projectTaskWatcherRepository := repository2.NewProjectTaskWatcherRepository(db)
-	projectUseCase := usecase.NewProjectUseCase(iLocale, source, projectRepository, projectMemberRepository, projectTaskTypeRepository, projectTaskRepository, projectTaskCommentRepository, userRepository, relationCacheRepository, projectTaskCoexecutorRepository, projectTaskWatcherRepository, redisLockCacheRepository)
+	projectUseCase := usecase.NewProjectUseCase(iLocale, source, projectRepository, projectMemberRepository, projectTaskTypeRepository, projectTaskRepository, projectTaskCommentRepository, userRepository, projectContactCacheRepository, projectTaskCoexecutorRepository, projectTaskWatcherRepository, redisLockCacheRepository)
 	project := &v1.Project{
 		Locale:         iLocale,
 		ProjectUseCase: projectUseCase,

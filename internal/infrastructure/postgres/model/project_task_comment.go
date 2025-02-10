@@ -1,10 +1,13 @@
 package model
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type ProjectTaskComment struct {
 	Id        int64     `gorm:"primaryKey"`
-	TaskId    int64     `gorm:"column:task_id"`
+	TaskId    uuid.UUID `gorm:"column:task_id"`
 	Comment   string    `gorm:"column:comment_text"`
 	CreatedBy int       `gorm:"column:created_by"`
 	CreatedAt time.Time `gorm:"column:created_at"`

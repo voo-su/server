@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/google/uuid"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
@@ -19,8 +20,13 @@ func (p *ProjectTaskComment) Create(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
+	taskId, err := uuid.Parse(params.TaskId)
+	if err != nil {
+		return ctx.Error(p.Locale.Localize("network_error"))
+	}
+
 	commentId, err := p.ProjectUseCase.CreateComment(ctx.Ctx(), &usecase.ProjectCommentOpt{
-		TaskId:    params.TaskId,
+		TaskId:    taskId,
 		Comment:   params.Comment,
 		CreatedBy: ctx.UserId(),
 	})
@@ -28,7 +34,7 @@ func (p *ProjectTaskComment) Create(ctx *ginutil.Context) error {
 		return ctx.Error(p.Locale.Localize("creation_failed_try_later") + ": " + err.Error())
 	}
 
-	return ctx.Success(&v1Pb.ProjectCreateResponse{Id: commentId})
+	return ctx.Success(&v1Pb.ProjectCommentCreateResponse{Id: commentId})
 }
 
 func (p *ProjectTaskComment) Comments(ctx *ginutil.Context) error {
@@ -37,7 +43,12 @@ func (p *ProjectTaskComment) Comments(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	data, err := p.ProjectUseCase.Comments(ctx.Ctx(), params.TaskId)
+	taskId, err := uuid.Parse(params.TaskId)
+	if err != nil {
+		return ctx.Error(p.Locale.Localize("network_error"))
+	}
+
+	data, err := p.ProjectUseCase.Comments(ctx.Ctx(), taskId)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -51,7 +62,7 @@ func (p *ProjectTaskComment) Comments(ctx *ginutil.Context) error {
 
 		items = append(items, &v1Pb.ProjectCommentResponse_Item{
 			Id:      item.Id,
-			TaskId:  item.TaskId,
+			TaskId:  item.TaskId.String(),
 			Comment: item.Comment,
 			User: &v1Pb.ProjectCommentResponse_User{
 				Id:       int64(user.Id),

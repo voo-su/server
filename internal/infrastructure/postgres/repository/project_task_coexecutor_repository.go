@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/pkg/gormutil"
@@ -15,7 +16,7 @@ func NewProjectTaskCoexecutorRepository(db *gorm.DB) *ProjectTaskCoexecutorRepos
 	return &ProjectTaskCoexecutorRepository{Repo: gormutil.NewRepo[model.ProjectTaskCoexecutor](db)}
 }
 
-func (p *ProjectTaskCoexecutorRepository) GetCoexecutorIds(ctx context.Context, taskId int64) []int {
+func (p *ProjectTaskCoexecutorRepository) GetCoexecutorIds(ctx context.Context, taskId uuid.UUID) []int {
 	var ids []int
 	_ = p.Repo.Model(ctx).
 		Select("member_id").

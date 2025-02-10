@@ -12,14 +12,14 @@ message ProjectCreateRequest {
 }
 
 message ProjectCreateResponse {
-    int64 id = 1 [(tagger.tags) = "json:\"id\""];
+    string id = 1 [(tagger.tags) = "json:\"id\""];
 }
 
 message ProjectListRequest {}
 
 message ProjectListResponse {
     message Item {
-        int64 id = 1 [(tagger.tags) = "json:\"id\""];
+        string id = 1 [(tagger.tags) = "json:\"id\""];
         string title = 2 [(tagger.tags) = "json:\"title\""];
     }
 
@@ -27,16 +27,16 @@ message ProjectListResponse {
 }
 
 message ProjectDetailRequest {
-    int64 id = 1 [(tagger.tags) = "form:\"id\" binding:\"required\" label:\"id\""];
+    string id = 1 [(tagger.tags) = "form:\"id\" binding:\"required\" label:\"id\""];
 }
 
 message ProjectDetailResponse {
-    int64 id = 1 [(tagger.tags) = "json:\"id\""];
+    string id = 1 [(tagger.tags) = "json:\"id\""];
     string name = 2 [(tagger.tags) = "json:\"name\""];
 }
 
 message ProjectMembersRequest {
-    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\" label:\"project_id\""];
+    string project_id = 1 [(tagger.tags) = "form:\"project_id\" binding:\"required\" label:\"project_id\""];
 }
 
 message ProjectMembersResponse {
@@ -49,7 +49,7 @@ message ProjectMembersResponse {
 }
 
 message ProjectInviteFriendsRequest {
-    int64 project_id = 1 [(tagger.tags) = "form:\"project_id\" label:\"project_id\""];
+    string project_id = 1 [(tagger.tags) = "form:\"project_id\" label:\"project_id\""];
 }
 
 message ProjectInviteFriendsResponse {
@@ -62,7 +62,7 @@ message ProjectInviteFriendsResponse {
 }
 
 message ProjectInviteRequest {
-    int32 project_id = 1 [(tagger.tags) = "binding:\"required\" label:\"project_id\""];
+    string project_id = 1 [(tagger.tags) = "binding:\"required\" label:\"project_id\""];
     string ids = 2 [(tagger.tags) = "binding:\"required,ids\" label:\"ids\""];
 }
 

@@ -1,15 +1,18 @@
 package entity
 
-import "voo.su/internal/infrastructure/postgres/model"
+import (
+	"github.com/google/uuid"
+	"voo.su/internal/infrastructure/postgres/model"
+)
 
 type ProjectItem struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 type ProjectDetailItem struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	Id   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 type ProjectMemberItem struct {

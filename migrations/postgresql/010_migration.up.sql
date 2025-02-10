@@ -1,6 +1,6 @@
 CREATE TABLE projects
 (
-    id         SERIAL PRIMARY KEY,
+    id         uuid DEFAULT gen_random_uuid(),
     name       VARCHAR(255),
     created_by INTEGER,
     created_at TIMESTAMPTZ
@@ -9,7 +9,7 @@ CREATE TABLE projects
 CREATE TABLE project_members
 (
     id         SERIAL PRIMARY KEY,
-    project_id INTEGER,
+    project_id uuid,
     user_id    INTEGER,
     created_by INTEGER,
     created_at TIMESTAMPTZ
@@ -18,7 +18,7 @@ CREATE TABLE project_members
 CREATE TABLE project_task_types
 (
     id         SERIAL PRIMARY KEY,
-    project_id INTEGER,
+    project_id uuid,
     title      VARCHAR(255),
     created_by INTEGER,
     created_at TIMESTAMPTZ
@@ -26,8 +26,8 @@ CREATE TABLE project_task_types
 
 CREATE TABLE project_tasks
 (
-    id          SERIAL PRIMARY KEY,
-    project_id  INTEGER,
+    id          uuid DEFAULT gen_random_uuid(),
+    project_id  uuid,
     type_id     INTEGER,
     title       VARCHAR(255),
     description TEXT,
@@ -40,7 +40,7 @@ CREATE TABLE project_tasks
 CREATE TABLE project_task_coexecutors
 (
     id         SERIAL PRIMARY KEY,
-    task_id    INTEGER,
+    task_id    uuid,
     member_id  INTEGER,
     created_by INTEGER,
     created_at TIMESTAMPTZ
@@ -49,7 +49,7 @@ CREATE TABLE project_task_coexecutors
 CREATE TABLE project_task_watchers
 (
     id         SERIAL PRIMARY KEY,
-    task_id    INTEGER,
+    task_id    uuid,
     member_id  INTEGER,
     created_by INTEGER,
     created_at TIMESTAMPTZ
@@ -58,7 +58,7 @@ CREATE TABLE project_task_watchers
 CREATE TABLE project_task_comments
 (
     id           SERIAL PRIMARY KEY,
-    task_id      INTEGER,
+    task_id      uuid,
     comment_text TEXT,
     created_by   INTEGER,
     created_at   TIMESTAMPTZ
