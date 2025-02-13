@@ -41,7 +41,7 @@ func (c *Contact) List(ctx context.Context, in *contactPb.GetContactListRequest)
 	items := make([]*contactPb.ContactItem, 0)
 	for _, item := range list {
 		items = append(items, &contactPb.ContactItem{
-			Id:       int32(item.Id),
+			Id:       int64(item.Id),
 			Username: item.Username,
 			Name:     item.Name,
 			Surname:  item.Surname,

@@ -45,14 +45,17 @@ func (m *Message) GetHistory(ctx context.Context, in *messagePb.GetHistoryReques
 			items := make([]*messagePb.MessageItem, 0)
 
 			items = append(items, &messagePb.MessageItem{
-				Id:       strutil.NewMsgId(),
-				ChatType: int32(in.ChatType),
-				MsgType:  constant.ChatMsgSysText,
-				Content:  m.Locale.Localize("insufficient_permissions_to_view_messages"),
+				Id:         strutil.NewMsgId(),
+				ChatType:   int32(in.ChatType),
+				MsgType:    constant.ChatMsgSysText,
+				ReceiverId: in.ReceiverId,
+				Content:    m.Locale.Localize("insufficient_permissions_to_view_messages"),
 			})
 
 			return &messagePb.GetHistoryResponse{
-				Items: items,
+				Limit:    in.Limit,
+				RecordId: 0,
+				Items:    items,
 			}, nil
 		}
 	}
@@ -71,15 +74,26 @@ func (m *Message) GetHistory(ctx context.Context, in *messagePb.GetHistoryReques
 	items := make([]*messagePb.MessageItem, 0)
 	for _, item := range records {
 		items = append(items, &messagePb.MessageItem{
-			Id:       item.MsgId,
-			ChatType: int32(item.ChatType),
-			MsgType:  int32(item.MsgType),
-			Content:  item.Content,
+			Id:         item.MsgId,
+			ChatType:   int32(item.ChatType),
+			MsgType:    int32(item.MsgType),
+			ReceiverId: int64(item.ReceiverId),
+			UserId:     int64(item.UserId),
+			Content:    item.Content,
+			IsRead:     item.IsRead == 1,
+			CreatedAt:  item.CreatedAt,
 		})
 	}
 
+	rid := 0
+	if length := len(records); length > 0 {
+		rid = records[length-1].Sequence
+	}
+
 	return &messagePb.GetHistoryResponse{
-		Items: items,
+		Limit:    in.Limit,
+		RecordId: int64(rid),
+		Items:    items,
 	}, nil
 }
 

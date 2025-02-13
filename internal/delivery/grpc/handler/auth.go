@@ -139,6 +139,6 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 	return &authPb.AuthVerifyResponse{
 		Type:        "Bearer",
 		AccessToken: token,
-		ExpiresIn:   int32(a.Conf.App.Jwt.ExpiresTime),
+		ExpiresIn:   a.Conf.App.Jwt.ExpiresTime,
 	}, nil
 }

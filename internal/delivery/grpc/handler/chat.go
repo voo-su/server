@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"strconv"
 	chatPb "voo.su/api/grpc/gen/go/pb"
 	"voo.su/internal/config"
+	"voo.su/internal/constant"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/grpcutil"
 	"voo.su/pkg/locale"
@@ -38,29 +40,37 @@ func NewChatHandler(
 
 func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb.GetChatListResponse, error) {
 	uid := grpcutil.UserId(ctx)
-
 	unReads := c.ChatUseCase.UnreadCacheRepo.All(ctx, uid)
 	if len(unReads) > 0 {
 		c.ChatUseCase.BatchAddList(ctx, uid, unReads)
 	}
 
-	data, err := c.ChatUseCase.List(ctx, 1)
+	data, err := c.ChatUseCase.List(ctx, uid)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
+	}
+	friends := make([]int, 0)
+	for _, item := range data {
+		if item.ChatType == 1 {
+			friends = append(friends, item.ReceiverId)
+		}
 	}
 
 	items := make([]*chatPb.ChatItem, 0)
 	for _, item := range data {
 		value := &chatPb.ChatItem{
-			Id:        int32(item.Id),
-			ChatType:  int32(item.ChatType),
-			Avatar:    item.UserAvatar,
-			MsgText:   "",
-			UpdatedAt: timeutil.FormatDatetime(item.UpdatedAt),
+			Id:         int64(item.Id),
+			ChatType:   int32(item.ChatType),
+			ReceiverId: int64(item.ReceiverId),
+			Avatar:     item.UserAvatar,
+			MsgText:    "",
+			UpdatedAt:  timeutil.FormatDatetime(item.UpdatedAt),
+			IsDisturb:  item.IsDisturb == 1,
+			IsBot:      item.IsBot == 1,
 		}
 
 		if num, ok := unReads[fmt.Sprintf("%d_%d", item.ChatType, item.ReceiverId)]; ok {
-			value.UnreadNum = int32(num)
+			value.UnreadNum = int64(num)
 		}
 
 		if item.ChatType == 1 {
@@ -68,6 +78,7 @@ func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb
 			value.Avatar = item.UserAvatar
 			value.Name = item.Name
 			value.Surname = item.Surname
+			value.IsOnline = c.ChatUseCase.ClientCacheRepo.IsOnline(ctx, constant.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))
 		} else {
 			value.Name = item.GroupName
 			value.Avatar = item.GroupAvatar
