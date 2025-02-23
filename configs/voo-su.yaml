@@ -73,3 +73,6 @@ push:
   web_push:
     private_key: xxxxxxxxxx
     public_key: xxxxxxxxxx
+  firebase:
+    project_id: xxxxxxxxxx
+    json_path: xxxxxxxxxx.json

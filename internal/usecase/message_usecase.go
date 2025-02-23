@@ -319,10 +319,14 @@ func (m *MessageUseCase) HandleRecords(ctx context.Context, items []*entity.Quer
 			IsRevoke:   item.IsRevoke,
 			IsMark:     item.IsMark,
 			IsRead:     item.IsRead,
-			Content:    item.Content,
 			CreatedAt:  timeutil.FormatDatetime(item.CreatedAt),
 			Extra:      make(map[string]any),
 		}
+
+		if item.IsRevoke == 0 {
+			data.Content = item.Content
+		}
+
 		_ = jsonutil.Decode(item.Extra, &data.Extra)
 		switch item.MsgType {
 		//case constant.ChatMsgSysGroupCreate:
@@ -951,8 +955,10 @@ func (m *MessageUseCase) loadSequence(ctx context.Context, data *postgresModel.M
 }
 
 func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.Message, opt map[string]string) {
+	userIds := make([]int, 0)
 	if record.ChatType == constant.ChatPrivateMode {
 		m.UnreadCache.Incr(ctx, constant.ChatPrivateMode, record.UserId, record.ReceiverId)
+		userIds = append(userIds, record.ReceiverId)
 		if record.MsgType == constant.ChatMsgSysText {
 			m.UnreadCache.Incr(ctx, 1, record.ReceiverId, record.UserId)
 		}
@@ -961,6 +967,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 		for _, uid := range m.GroupChatMemberRepo.GetMemberIds(ctx, record.ReceiverId) {
 			if uid != record.UserId {
 				m.UnreadCache.PipeIncr(ctx, pipe, constant.ChatGroupMode, record.ReceiverId, uid)
+				userIds = append(userIds, uid)
 			}
 		}
 
@@ -1001,43 +1008,25 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 			}
 		}
 	}
+
 	if err := m.Source.Redis().Publish(ctx, constant.ImTopicChat, content).Err(); err != nil {
 		logger.Errorf(m.Locale.Localize("notification_sending_error"), err.Error())
 	}
 
-	return
+	// PUSH
 
-	// TODO
-	uids := make([]int, 0)
+	pushPayload := &entity.PushPayload{
+		UserIds: userIds,
+		Message: opt["text"],
+	}
 
-	uids = append(uids, 1)
+	pushData, err := json.Marshal(pushPayload)
+	if err != nil {
+		log.Fatal(m.Locale.Localize("json_serialization_error"), err)
+	}
 
-	pushTokens := make([]*postgresModel.PushToken, 0)
-	if err := m.Source.Postgres().
-		Table("push_tokens").
-		Where("user_id in ?", uids).
-		Scan(&pushTokens).
-		Error; err != nil {
+	if err := m.Nats.Publish(constant.QueuePush, pushData); err != nil {
 		fmt.Println(err)
 	}
 
-	for _, item := range pushTokens {
-		webPushContent := &entity.WebPush{
-			Endpoint: item.WebEndpoint,
-			Keys: entity.WebPushKeys{
-				P256dh: item.WebP256dh,
-				Auth:   item.WebAuth,
-			},
-			Message: opt["text"],
-		}
-
-		webPushData, err := json.Marshal(webPushContent)
-		if err != nil {
-			log.Fatal(m.Locale.Localize("json_serialization_error"), err)
-		}
-
-		if err := m.Nats.Publish("web-push", webPushData); err != nil {
-			fmt.Println(err)
-		}
-	}
 }

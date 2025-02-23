@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"log"
+	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure"
 	"voo.su/internal/infrastructure/postgres/model"
@@ -37,7 +38,7 @@ func NewUserUseCase(
 func (u *UserUseCase) WebPushInit(ctx context.Context, uid int64, webPush entity.WebPush) {
 	if err := u.PushTokenRepo.Create(ctx, &model.PushToken{
 		UserId:      uid,
-		Platform:    "webpush",
+		Platform:    constant.PushPlatformWeb,
 		WebEndpoint: webPush.Endpoint,
 		WebP256dh:   webPush.Keys.P256dh,
 		WebAuth:     webPush.Keys.Auth,

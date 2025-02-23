@@ -287,7 +287,8 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	conn := provider.NewClickHouseClient(conf, iLocale)
 	source := infrastructure.NewSource(db, conn, client)
 	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(iLocale, source, groupChatMemberRepository)
-	chatHandler := chat.NewHandler(client, groupChatMemberUseCase)
+	iNatsClient := provider.NewNatsClient(conf)
+	chatHandler := chat.NewHandler(client, groupChatMemberUseCase, iNatsClient)
 	chatEvent := &event.ChatEvent{
 		Redis:                  client,
 		Conf:                   conf,
@@ -324,7 +325,6 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	botRepository := repository2.NewBotRepository(db)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
 	contactRepository := repository2.NewContactRepository(db, relationCacheRepository)
-	iNatsClient := provider.NewNatsClient(conf)
 	messageUseCase := &usecase.MessageUseCase{
 		Conf:                conf,
 		Locale:              iLocale,
@@ -443,7 +443,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	account := handler3.NewAccountHandler(userUseCase)
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	handlerChat := handler3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase)
-	message := handler3.NewMessageHandler(conf, iLocale, messageUseCase)
+	message := handler3.NewMessageHandler(conf, iLocale, chatUseCase, messageUseCase, iNatsClient)
 	contact := handler3.NewContactHandler(conf, iLocale, contactUseCase)
 	appProvider := &grpc.AppProvider{
 		Conf:           conf,
@@ -487,9 +487,12 @@ func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
 		Redis: client,
 	}
 	iNatsClient := provider.NewNatsClient(conf)
+	conn := provider.NewClickHouseClient(conf, iLocale)
+	source := infrastructure.NewSource(db, conn, client)
 	pushHandle := queue.PushHandle{
-		Conf: conf,
-		Nats: iNatsClient,
+		Conf:   conf,
+		Nats:   iNatsClient,
+		Source: source,
 	}
 	queueJobs := &cli.QueueJobs{
 		EmailHandle: emailHandle,
