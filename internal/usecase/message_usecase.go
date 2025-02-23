@@ -588,7 +588,8 @@ func (m *MessageUseCase) SendVote(ctx context.Context, uid int, req *v1Pb.VoteMe
 		}).Error
 	})
 	if err == nil {
-		m.afterHandle(ctx, data, map[string]string{"text": m.Locale.Localize("vote")})
+		data.Content = m.Locale.Localize("vote")
+		m.afterHandle(ctx, data)
 	}
 
 	return err
@@ -887,15 +888,14 @@ func (m *MessageUseCase) save(ctx context.Context, data *postgresModel.Message) 
 		return err
 	}
 
-	option := make(map[string]string)
 	switch data.MsgType {
 	case constant.ChatMsgTypeText:
-		option["text"] = strutil.MtSubstr(strutil.ReplaceImgAll(data.Content), 0, 300)
+		data.Content = strutil.MtSubstr(strutil.ReplaceImgAll(data.Content), 0, 300)
 	default:
-		option["text"] = entity.GetChatMsgTypeMapping(m.Locale, data.MsgType)
+		data.Content = entity.GetChatMsgTypeMapping(m.Locale, data.MsgType)
 	}
 
-	m.afterHandle(ctx, data, option)
+	m.afterHandle(ctx, data)
 
 	return nil
 }
@@ -954,7 +954,46 @@ func (m *MessageUseCase) loadSequence(ctx context.Context, data *postgresModel.M
 	}
 }
 
-func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.Message, opt map[string]string) {
+func (m *MessageUseCase) writeMessageToQueue(userIds []int, message *postgresModel.Message) {
+	content := jsonutil.Encode(map[string]any{
+		"event": constant.SubEventImMessage,
+		"data": jsonutil.Encode(entity.ConsumeMessage{
+			UserIds: userIds,
+			Message: entity.Message{
+				Id:         message.MsgId,
+				ChatType:   message.ChatType,
+				MsgType:    message.MsgType,
+				ReceiverId: message.ReceiverId,
+				UserId:     message.UserId,
+				Content:    message.Content,
+				IsRead:     message.IsRead == 1,
+				CreatedAt:  message.CreatedAt.String(),
+			},
+		}),
+	})
+
+	if err := m.Nats.Publish(constant.ImTopicChat, []byte(content)); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func (m *MessageUseCase) writeMessageToPushQueue(userIds []int, message *postgresModel.Message) {
+	pushPayload := &entity.PushPayload{
+		UserIds: userIds,
+		Message: message.Content,
+	}
+
+	pushData, err := json.Marshal(pushPayload)
+	if err != nil {
+		log.Fatal(m.Locale.Localize("json_serialization_error"), err)
+	}
+
+	if err := m.Nats.Publish(constant.QueuePush, pushData); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.Message) {
 	userIds := make([]int, 0)
 	if record.ChatType == constant.ChatPrivateMode {
 		m.UnreadCache.Incr(ctx, constant.ChatPrivateMode, record.UserId, record.ReceiverId)
@@ -975,7 +1014,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 	}
 
 	_ = m.MessageCache.Set(ctx, record.ChatType, record.UserId, record.ReceiverId, &redisModel.LastCacheMessage{
-		Content:  opt["text"],
+		Content:  record.Content,
 		Datetime: timeutil.DateTime(),
 	})
 
@@ -1013,20 +1052,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 		logger.Errorf(m.Locale.Localize("notification_sending_error"), err.Error())
 	}
 
-	// PUSH
+	m.writeMessageToQueue(userIds, record)
 
-	pushPayload := &entity.PushPayload{
-		UserIds: userIds,
-		Message: opt["text"],
-	}
-
-	pushData, err := json.Marshal(pushPayload)
-	if err != nil {
-		log.Fatal(m.Locale.Localize("json_serialization_error"), err)
-	}
-
-	if err := m.Nats.Publish(constant.QueuePush, pushData); err != nil {
-		fmt.Println(err)
-	}
-
+	m.writeMessageToPushQueue(userIds, record)
 }

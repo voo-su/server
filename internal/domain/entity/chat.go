@@ -56,3 +56,29 @@ func GetChatMsgTypeMapping(locale locale.ILocale, msgType int) string {
 
 	return locale.Localize("unknown")
 }
+
+type Message struct {
+	Id         string `json:"id"`
+	ChatType   int    `json:"chat_type"`
+	MsgType    int    `json:"msg_type"`
+	ReceiverId int    `json:"receiver_id"`
+	UserId     int    `json:"user_id"`
+	Content    string `json:"content"`
+	IsRead     bool   `json:"is_read"`
+	CreatedAt  string `json:"created_at"`
+}
+
+type ConsumeMessage struct {
+	UserIds []int   `json:"user_ids"`
+	Message Message `json:"message"`
+}
+
+type SubscribeContent struct {
+	Event string `json:"event"`
+	Data  string `json:"data"`
+}
+
+type ConsumeChatKeyboard struct {
+	SenderId   int `json:"sender_id"`
+	ReceiverId int `json:"receiver_id"`
+}

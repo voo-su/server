@@ -5,6 +5,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"log"
 	"voo.su/internal/usecase"
+	"voo.su/pkg/nats"
 	"voo.su/pkg/socket"
 )
 
@@ -15,15 +16,18 @@ type Handler struct {
 	MemberUseCase  *usecase.GroupChatMemberUseCase
 	Handlers       map[string]func(ctx context.Context, client socket.IClient, data []byte)
 	MessageUseCase usecase.IMessageUseCase
+	Nats           nats.INatsClient
 }
 
 func NewHandler(
 	redis *redis.Client,
 	memberUseCase *usecase.GroupChatMemberUseCase,
+	nats nats.INatsClient,
 ) *Handler {
 	return &Handler{
 		Redis:         redis,
 		MemberUseCase: memberUseCase,
+		Nats:          nats,
 	}
 }
 

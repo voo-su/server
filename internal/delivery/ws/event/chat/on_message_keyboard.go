@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"voo.su/internal/constant"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/logger"
@@ -23,11 +24,18 @@ func (h *Handler) onKeyboardMessage(ctx context.Context, _ socket.IClient, data 
 		logger.Errorf("onKeyboardMessage json decode err: %s", err.Error())
 		return
 	}
-	h.Redis.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
+
+	_data := jsonutil.Encode(map[string]any{
 		"event": constant.SubEventImMessageKeyboard,
 		"data": jsonutil.Encode(map[string]any{
 			"sender_id":   in.Content.SenderID,
 			"receiver_id": in.Content.ReceiverID,
 		}),
-	}))
+	})
+
+	if err := h.Nats.Publish(constant.ImTopicChat, []byte(_data)); err != nil {
+		fmt.Println(err)
+	}
+
+	h.Redis.Publish(ctx, constant.ImTopicChat, _data)
 }

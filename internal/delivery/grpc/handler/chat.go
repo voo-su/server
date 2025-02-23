@@ -38,7 +38,7 @@ func NewChatHandler(
 	}
 }
 
-func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb.GetChatListResponse, error) {
+func (c *Chat) Chats(ctx context.Context, in *chatPb.GetChatsRequest) (*chatPb.GetChatsResponse, error) {
 	uid := grpcutil.UserId(ctx)
 	unReads := c.ChatUseCase.UnreadCacheRepo.All(ctx, uid)
 	if len(unReads) > 0 {
@@ -70,7 +70,7 @@ func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb
 		}
 
 		if num, ok := unReads[fmt.Sprintf("%d_%d", item.ChatType, item.ReceiverId)]; ok {
-			value.UnreadNum = int64(num)
+			value.UnreadCount = int64(num)
 		}
 
 		if item.ChatType == 1 {
@@ -91,7 +91,7 @@ func (c *Chat) List(ctx context.Context, in *chatPb.GetChatListRequest) (*chatPb
 		items = append(items, value)
 	}
 
-	return &chatPb.GetChatListResponse{
+	return &chatPb.GetChatsResponse{
 		Items: items,
 	}, nil
 }

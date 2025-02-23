@@ -10,6 +10,7 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/delivery/ws/consume"
+	"voo.su/internal/domain/entity"
 	"voo.su/pkg"
 )
 
@@ -38,15 +39,11 @@ type IConsume interface {
 func (m *MessageSubscribe) Setup(ctx context.Context) error {
 	go m.subscribe(ctx, []string{
 		constant.ImTopicChat,
-		fmt.Sprintf(constant.ImTopicChatPrivate,
-			m.Conf.ServerId())}, m.DefaultConsume)
+		fmt.Sprintf(constant.ImTopicChatPrivate, m.Conf.ServerId()),
+	}, m.DefaultConsume)
 	<-ctx.Done()
-	return nil
-}
 
-type SubscribeContent struct {
-	Event string `json:"event"`
-	Data  string `json:"data"`
+	return nil
 }
 
 func (m *MessageSubscribe) subscribe(ctx context.Context, topic []string, consume IConsume) {
@@ -61,16 +58,18 @@ func (m *MessageSubscribe) subscribe(ctx context.Context, topic []string, consum
 
 func (m *MessageSubscribe) handle(worker *pool.Pool, data *redis.Message, consume IConsume) {
 	worker.Go(func() {
-		var in SubscribeContent
+		var in entity.SubscribeContent
 		if err := json.Unmarshal([]byte(data.Payload), &in); err != nil {
 			log.Printf("Content unsubscription error: %s", err)
 			return
 		}
+
 		defer func() {
 			if err := recover(); err != nil {
 				log.Printf("Error subscribing to call notification: %s", pkg.PanicTrace(err))
 			}
 		}()
+
 		consume.Call(in.Event, []byte(in.Data))
 	})
 }

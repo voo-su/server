@@ -2,10 +2,10 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"log"
 	"strconv"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
@@ -71,13 +71,13 @@ func AuthorizationServerInterceptor(ctx context.Context, req interface{}, info *
 
 	claims, token, err := grpcutil.GrpcToken(ctx, authService.Locale, constant.GuardGrpcAuth, authService.Conf.App.Jwt.Secret)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil, status.Errorf(codes.Unauthenticated, "unauthorized")
 	}
 
 	uid, err := strconv.Atoi(claims.ID)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil, status.Errorf(codes.Unauthenticated, "unauthorized")
 	}
 
