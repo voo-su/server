@@ -142,3 +142,12 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 		ExpiresIn:   a.Conf.App.Jwt.ExpiresTime,
 	}, nil
 }
+
+func (a *Auth) Logout(ctx context.Context, in *authPb.AuthLogoutRequest) (*authPb.AuthLogoutResponse, error) {
+	// TODO
+	_ = a.AuthUseCase.JwtTokenCacheRepo.SetBlackList(ctx, in.AccessToken, 0)
+
+	return &authPb.AuthLogoutResponse{
+		Success: true,
+	}, nil
+}

@@ -98,6 +98,11 @@ func (c *Chat) SendMessage(ctx context.Context, in *chatPb.SendMessageRequest) (
 	return &chatPb.SendMessageResponse{}, nil
 }
 
+//func (c *Chat) SendPhoto(ctx context.Context, in *chatPb.SendPhotoRequest) (*chatPb.SendPhotoResponse, error) {
+//	// TODO
+//	return &chatPb.DeleteMessagesResponse{}, nil
+//}
+
 func (c *Chat) ViewMessages(ctx context.Context, in *chatPb.ViewMessagesRequest) (*chatPb.ViewMessagesResponse, error) {
 	uid := grpcutil.UserId(ctx)
 

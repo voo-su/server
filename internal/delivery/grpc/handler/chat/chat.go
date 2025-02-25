@@ -34,6 +34,7 @@ func NewChatHandler(
 	locale locale.ILocale,
 	contactUseCase *usecase.ContactUseCase,
 	chatUseCase *usecase.ChatUseCase,
+	messageUseCase *usecase.MessageUseCase,
 	nats nats.INatsClient,
 ) *Chat {
 	return &Chat{
@@ -41,6 +42,7 @@ func NewChatHandler(
 		Locale:         locale,
 		ContactUseCase: contactUseCase,
 		ChatUseCase:    chatUseCase,
+		MessageUseCase: messageUseCase,
 		userChannels:   make(map[int64]chan *chatPb.Update),
 		Nats:           nats,
 	}
