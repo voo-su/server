@@ -17,14 +17,14 @@ import (
 )
 
 type AppProvider struct {
-	Conf           *config.Config
-	AuthMiddleware *middleware.AuthMiddleware
-	RoutesServices *middleware.GrpcMethodService
-	AuthHandler    pb.AuthServiceServer
-	AccountHandler pb.AccountServiceServer
-	ChatHandler    pb.ChatServiceServer
-	MessageHandler pb.MessageServiceServer
-	ContactHandler pb.ContactServiceServer
+	Conf             *config.Config
+	AuthMiddleware   *middleware.AuthMiddleware
+	RoutesServices   *middleware.GrpcMethodService
+	AuthHandler      pb.AuthServiceServer
+	AccountHandler   pb.AccountServiceServer
+	ChatHandler      pb.ChatServiceServer
+	GroupChatHandler pb.GroupChatServiceServer
+	ContactHandler   pb.ContactServiceServer
 }
 
 func serve(app *AppProvider) error {
@@ -46,7 +46,7 @@ func serve(app *AppProvider) error {
 	pb.RegisterAuthServiceServer(srv, app.AuthHandler)
 	pb.RegisterAccountServiceServer(srv, app.AccountHandler)
 	pb.RegisterChatServiceServer(srv, app.ChatHandler)
-	pb.RegisterMessageServiceServer(srv, app.MessageHandler)
+	pb.RegisterGroupChatServiceServer(srv, app.GroupChatHandler)
 	pb.RegisterContactServiceServer(srv, app.ContactHandler)
 
 	reflection.Register(srv)

@@ -56,6 +56,19 @@ func NewV1(conf *config.Config, locale locale.ILocale, router *gin.Engine, handl
 			chat.POST("/topping", ginutil.HandlerFunc(handler.V1.Chat.Top))
 			chat.POST("/disturb", ginutil.HandlerFunc(handler.V1.Chat.Disturb))
 			chat.POST("/unread/clear", ginutil.HandlerFunc(handler.V1.Chat.ClearUnreadMessage))
+			chat.GET("/messages", ginutil.HandlerFunc(handler.V1.Message.GetHistory))
+			chat.POST("/messages/send", ginutil.HandlerFunc(handler.V1.Message.Send))
+			chat.GET("/messages/file/download", ginutil.HandlerFunc(handler.V1.Message.Download))
+			chat.POST("/messages/delete", ginutil.HandlerFunc(handler.V1.Message.Delete))
+			chat.POST("/messages/revoke", ginutil.HandlerFunc(handler.V1.Message.Revoke))
+			chat.POST("/messages/vote", ginutil.HandlerFunc(handler.V1.Message.Vote))
+			chat.POST("/messages/vote/handle", ginutil.HandlerFunc(handler.V1.Message.HandleVote))
+			chat.GET("/messages/stickers", ginutil.HandlerFunc(handler.V1.Sticker.CollectList))
+			chat.POST("/messages/stickers", ginutil.HandlerFunc(handler.V1.Sticker.Upload))
+			chat.POST("/messages/stickers/delete", ginutil.HandlerFunc(handler.V1.Sticker.DeleteCollect))
+			chat.POST("/messages/collect", ginutil.HandlerFunc(handler.V1.Message.Collect))
+			chat.GET("/messages/stickers/system/list", ginutil.HandlerFunc(handler.V1.Sticker.SystemList))
+			chat.POST("/messages/stickers/system/install", ginutil.HandlerFunc(handler.V1.Sticker.SetSystemSticker))
 		}
 		groupChat := v1.Group("/group-chats").Use(authorize)
 		{
@@ -81,22 +94,6 @@ func NewV1(conf *config.Config, locale locale.ILocale, router *gin.Engine, handl
 			groupChat.POST("/requests/agree", ginutil.HandlerFunc(handler.V1.GroupChatRequest.Agree))
 			groupChat.GET("/requests/all", ginutil.HandlerFunc(handler.V1.GroupChatRequest.All))
 			groupChat.GET("/requests/unread", ginutil.HandlerFunc(handler.V1.GroupChatRequest.RequestUnreadNum))
-		}
-		message := v1.Group("/messages").Use(authorize)
-		{
-			message.GET("", ginutil.HandlerFunc(handler.V1.Message.GetHistory))
-			message.POST("/send", ginutil.HandlerFunc(handler.V1.Message.Send))
-			message.GET("/file/download", ginutil.HandlerFunc(handler.V1.Message.Download))
-			message.POST("/delete", ginutil.HandlerFunc(handler.V1.Message.Delete))
-			message.POST("/revoke", ginutil.HandlerFunc(handler.V1.Message.Revoke))
-			message.POST("/vote", ginutil.HandlerFunc(handler.V1.Message.Vote))
-			message.POST("/vote/handle", ginutil.HandlerFunc(handler.V1.Message.HandleVote))
-			message.GET("/stickers", ginutil.HandlerFunc(handler.V1.Sticker.CollectList))
-			message.POST("/stickers", ginutil.HandlerFunc(handler.V1.Sticker.Upload))
-			message.POST("/stickers/delete", ginutil.HandlerFunc(handler.V1.Sticker.DeleteCollect))
-			message.GET("/stickers/system/list", ginutil.HandlerFunc(handler.V1.Sticker.SystemList))
-			message.POST("/stickers/system/install", ginutil.HandlerFunc(handler.V1.Sticker.SetSystemSticker))
-			message.POST("/collect", ginutil.HandlerFunc(handler.V1.Message.Collect))
 		}
 		upload := v1.Group("/upload").Use(authorize)
 		{

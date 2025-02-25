@@ -20,14 +20,14 @@ func NewAccountHandler(userUseCase *usecase.UserUseCase) *Account {
 	}
 }
 
-func (a *Account) List(ctx context.Context, in *accountPb.GetAccountRequest) (*accountPb.GetAccountResponse, error) {
+func (a *Account) GetProfile(ctx context.Context, in *accountPb.GetProfileRequest) (*accountPb.GetProfileResponse, error) {
 	uid := grpcutil.UserId(ctx)
 	user, err := a.UserUseCase.UserRepo.FindById(ctx, uid)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
 
-	return &accountPb.GetAccountResponse{
+	return &accountPb.GetProfileResponse{
 		Id:       int64(user.Id),
 		Username: user.Username,
 		Email:    user.Email,

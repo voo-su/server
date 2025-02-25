@@ -1,4 +1,4 @@
-package handler
+package chat
 
 import (
 	"context"
@@ -6,12 +6,14 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"strconv"
+	"sync"
 	chatPb "voo.su/api/grpc/gen/go/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/grpcutil"
 	"voo.su/pkg/locale"
+	"voo.su/pkg/nats"
 	"voo.su/pkg/timeutil"
 )
 
@@ -22,6 +24,9 @@ type Chat struct {
 	ContactUseCase *usecase.ContactUseCase
 	ChatUseCase    *usecase.ChatUseCase
 	MessageUseCase usecase.IMessageUseCase
+	mu             sync.Mutex
+	userChannels   map[int64]chan *chatPb.Update
+	Nats           nats.INatsClient
 }
 
 func NewChatHandler(
@@ -29,16 +34,19 @@ func NewChatHandler(
 	locale locale.ILocale,
 	contactUseCase *usecase.ContactUseCase,
 	chatUseCase *usecase.ChatUseCase,
+	nats nats.INatsClient,
 ) *Chat {
 	return &Chat{
 		Conf:           conf,
 		Locale:         locale,
 		ContactUseCase: contactUseCase,
 		ChatUseCase:    chatUseCase,
+		userChannels:   make(map[int64]chan *chatPb.Update),
+		Nats:           nats,
 	}
 }
 
-func (c *Chat) Chats(ctx context.Context, in *chatPb.GetChatsRequest) (*chatPb.GetChatsResponse, error) {
+func (c *Chat) GetChats(ctx context.Context, in *chatPb.GetChatsRequest) (*chatPb.GetChatsResponse, error) {
 	uid := grpcutil.UserId(ctx)
 	unReads := c.ChatUseCase.UnreadCacheRepo.All(ctx, uid)
 	if len(unReads) > 0 {
@@ -59,14 +67,16 @@ func (c *Chat) Chats(ctx context.Context, in *chatPb.GetChatsRequest) (*chatPb.G
 	items := make([]*chatPb.ChatItem, 0)
 	for _, item := range data {
 		value := &chatPb.ChatItem{
-			Id:         int64(item.Id),
-			ChatType:   int32(item.ChatType),
-			ReceiverId: int64(item.ReceiverId),
-			Avatar:     item.UserAvatar,
-			MsgText:    "",
-			UpdatedAt:  timeutil.FormatDatetime(item.UpdatedAt),
-			IsDisturb:  item.IsDisturb == 1,
-			IsBot:      item.IsBot == 1,
+			Id: int64(item.Id),
+			Receiver: &chatPb.Receiver{
+				ChatType:   int32(item.ChatType),
+				ReceiverId: int64(item.ReceiverId),
+			},
+			Avatar:    item.UserAvatar,
+			MsgText:   "",
+			UpdatedAt: timeutil.FormatDatetime(item.UpdatedAt),
+			IsDisturb: item.IsDisturb == 1,
+			IsBot:     item.IsBot == 1,
 		}
 
 		if num, ok := unReads[fmt.Sprintf("%d_%d", item.ChatType, item.ReceiverId)]; ok {
@@ -78,7 +88,7 @@ func (c *Chat) Chats(ctx context.Context, in *chatPb.GetChatsRequest) (*chatPb.G
 			value.Avatar = item.UserAvatar
 			value.Name = item.Name
 			value.Surname = item.Surname
-			value.IsOnline = c.ChatUseCase.ClientCacheRepo.IsOnline(ctx, constant.ImChannelChat, strconv.Itoa(int(value.ReceiverId)))
+			value.IsOnline = c.ChatUseCase.ClientCacheRepo.IsOnline(ctx, constant.ImChannelChat, strconv.Itoa(int(value.Receiver.ReceiverId)))
 		} else {
 			value.Name = item.GroupName
 			value.Avatar = item.GroupAvatar

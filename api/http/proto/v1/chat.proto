@@ -76,3 +76,158 @@ message ChatClearUnreadNumRequest {
 }
 
 message ChatClearUnreadNumResponse {}
+
+message GetRecordsRequest {
+    int64 chat_type = 1 [(tagger.tags) = "form:\"chat_type\" json:\"chat_type\" binding:\"required,oneof=1 2\" label:\"chat_type\""];
+    int64 receiver_id = 2 [(tagger.tags) = "form:\"receiver_id\" json:\"receiver_id\" binding:\"required,numeric,min=1\" label:\"receiver_id\""];
+    int64 record_id = 3 [(tagger.tags) = "form:\"record_id\" json:\"record_id\" binding:\"min=0,numeric\" label:\"record_id\""];
+    int64 limit = 4 [(tagger.tags) = "form:\"limit\" json:\"limit\" binding:\"required,numeric,max=100\" label:\"limit\""];
+}
+
+message MessageReceiver {
+    int32 chat_type = 1 [(tagger.tags) = "binding:\"required\" label:\"chat_type\""];
+    int32 receiver_id = 2 [(tagger.tags) = "binding:\"required\" label:\"receiver_id\""];
+}
+
+message PublishBaseMessageRequest {
+    string type = 1 [(tagger.tags) = "binding:\"required\" label:\"type\""];
+    MessageReceiver receiver = 2 [(tagger.tags) = "binding:\"required\" label:\"receiver\""];
+}
+
+message TextMessageRequest {
+    message Mention {
+        int32 all = 1 [(tagger.tags) = "label:\"all\""];
+        repeated int32 uids = 2 [(tagger.tags) = "label:\"uids\""];
+    }
+
+    MessageReceiver receiver = 1 [(tagger.tags) = "label:\"receiver\""];
+    string type = 2 [(tagger.tags) = "label:\"type\""];
+    string content = 3 [(tagger.tags) = "binding:\"required\" label:\"content\""];
+    Mention mention = 4 [(tagger.tags) = "label:\"mention\""];
+    string quote_id = 5 [(tagger.tags) = "label:\"quote_id\""];
+}
+
+message ImageMessageRequest {
+    MessageReceiver receiver = 1 [(tagger.tags) = "label:\"receiver\""];
+    string type = 2 [(tagger.tags) = "label:\"type\""];
+    string url = 3 [(tagger.tags) = "binding:\"required\" label:\"url\""];
+    int32 width = 4 [(tagger.tags) = "binding:\"required\" label:\"width\""];
+    int32 height = 5 [(tagger.tags) = "binding:\"required\" label:\"height\""];
+    int32 size = 6 [(tagger.tags) = "binding:\"required\" label:\"size\""];
+    string quote_id = 7 [(tagger.tags) = "label:\"quote_id\""];
+}
+
+message VideoMessageRequest {
+    MessageReceiver receiver = 1 [(tagger.tags) = "label:\"receiver\""];
+    string type = 2 [(tagger.tags) = "label:\"type\""];
+    string url = 3 [(tagger.tags) = "binding:\"required\" label:\"url\""];
+    int32 duration = 4 [(tagger.tags) = "binding:\"required,gt=0\" label:\"duration\""];
+    int32 size = 5 [(tagger.tags) = "binding:\"required\" label:\"size\""];
+    string cover = 6;
+}
+
+message AudioMessageRequest {
+    MessageReceiver receiver = 1 [(tagger.tags) = "label:\"receiver\""];
+    string type = 2 [(tagger.tags) = "label:\"type\""];
+    string url = 3 [(tagger.tags) = "binding:\"required\" label:\"url\""];
+    int32 duration = 4 [(tagger.tags) = "binding:\"required,gt=0\" label:\"duration\""];
+    int32 size = 5 [(tagger.tags) = "binding:\"required\" label:\"size\""];
+}
+
+message FileMessageRequest {
+    MessageReceiver receiver = 1 [(tagger.tags) = "label:\"receiver\""];
+    string type = 2 [(tagger.tags) = "label:\"type\""];
+    string upload_id = 3 [(tagger.tags) = "binding:\"required\" label:\"upload_id\""];
+}
+
+message VoteMessageRequest {
+    MessageReceiver receiver = 1 [(tagger.tags) = "label:\"options\""];
+    string type = 2 [(tagger.tags) = "label:\"options\""];
+    string title = 3 [(tagger.tags) = "binding:\"required\" label:\"title\""];
+    int32 mode = 4 [(tagger.tags) = "binding:\"required\" label:\"mode\""];
+    int32 anonymous = 5 [(tagger.tags) = "binding:\"required\" label:\"anonymous\""];
+    repeated string options = 6 [(tagger.tags) = "binding:\"required\" label:\"options\""];
+}
+
+message VoteSendMessageRequest {
+    int64 receiver_id = 1 [(tagger.tags) = "form:\"receiver_id\" json:\"receiver_id\" binding:\"required,numeric,gt=0\" label:\"receiver_id\""];
+    int32 mode = 2 [(tagger.tags) = "form:\"mode\" json:\"mode\" binding:\"oneof=0 1\" label:\"mode\""];
+    int32 anonymous = 3 [(tagger.tags) = "form:\"anonymous\" json:\"anonymous\" binding:\"oneof=0 1\" label:\"anonymous\""];
+    string title = 4 [(tagger.tags) = "form:\"title\" json:\"title\" binding:\"required\" label:\"title\""];
+    repeated string options = 5 [(tagger.tags) = "form:\"options\" json:\"options\" label:\"options\""];
+}
+
+message StickerMessageRequest {
+    string type = 1;
+    int32 sticker_id = 2 [(tagger.tags) = "binding:\"required\""];
+    MessageReceiver receiver = 3;
+}
+
+message ForwardMessageRequest {
+    MessageReceiver receiver = 1 [(tagger.tags) = "label:\"receiver\""];
+    string type = 2 [(tagger.tags) = "label:\"type\""];
+    int32 mode = 3 [(tagger.tags) = "binding:\"required\" label:\"mode\""];
+    repeated int32 message_ids = 4 [(tagger.tags) = "binding:\"required\" label:\"message_ids\""];
+    repeated int32 gids = 5 [(tagger.tags) = "label:\"gids\""];
+    repeated int32 uids = 6 [(tagger.tags) = "label:\"uids\""];
+}
+
+message MixedMessageRequest {
+    message Item {
+        int32 type = 1 [(tagger.tags) = "label:\"type\""];
+        string content = 2 [(tagger.tags) = "label:\"content\""];
+    }
+
+    MessageReceiver receiver = 1 [(tagger.tags) = "label:\"receiver\""];
+    string type = 2 [(tagger.tags) = "label:\"type\""];
+    repeated Item items = 3 [(tagger.tags) = "label:\"items\""];
+    string quote_id = 4 [(tagger.tags) = "label:\"quote_id\""];
+}
+
+message CodeMessageRequest {
+    MessageReceiver receiver = 1  [(tagger.tags) = "label:\"receiver\""];
+    string type = 2 [(tagger.tags) = "label:\"type\""];
+    string lang = 3 [(tagger.tags) = "binding:\"required\" label:\"lang\""];
+    string code = 4 [(tagger.tags) = "binding:\"required\" label:\"code\""];
+}
+
+message LocationMessageRequest {
+    MessageReceiver receiver = 1;
+    string type = 2;
+    string longitude = 3 [(tagger.tags) = "binding:\"required\" label:\"longitude\""];
+    string latitude = 4 [(tagger.tags) = "binding:\"required\" label:\"latitude\""];
+    string description = 5 [(tagger.tags) = "binding:\"required\" label:\"description\""];
+}
+
+message KeyboardMessage{
+    message Data{
+        int32 sender_id = 1;
+        int32 receiver_id = 2;
+    }
+
+    string event = 1;
+    Data data = 3;
+}
+
+message CollectMessageRequest {
+    int64 record_id = 1 [(tagger.tags) = "form:\"record_id\" json:\"record_id\" binding:\"required,numeric,gt=0\" label:\"record_id\""];
+}
+
+message DownloadChatFileRequest {
+    int64 record_id = 1 [(tagger.tags) = "form:\"cr_id\" json:\"cr_id\" binding:\"required,min=1\" label:\"cr_id\""];
+}
+
+message VoteMessageHandleRequest {
+    int64 record_id = 1 [(tagger.tags) = "form:\"record_id\" json:\"record_id\" binding:\"required,gt=0\" label:\"record_id\""];
+    string options = 2 [(tagger.tags) = "form:\"options\" json:\"options\" binding:\"required\" label:\"options\""];
+}
+
+message DeleteMessageRequest {
+    int64 chat_type = 1 [(tagger.tags) = "form:\"chat_type\" json:\"chat_type\" binding:\"required,oneof=1 2\" label:\"chat_type\""];
+    int64 receiver_id = 2 [(tagger.tags) = "form:\"receiver_id\" json:\"receiver_id\" binding:\"required,numeric,gt=0\" label:\"receiver_id\""];
+    string record_ids = 3 [(tagger.tags) = "form:\"record_id\" json:\"record_id\" binding:\"required,ids\" label:\"record_id\""];
+}
+
+message RevokeMessageRequest {
+    string msg_id = 1 [(tagger.tags) = "form:\"msg_id\" json:\"msg_id\" binding:\"required\" label:\"msg_id\""];
+}

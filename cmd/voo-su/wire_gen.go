@@ -13,6 +13,7 @@ import (
 	"voo.su/internal/config"
 	"voo.su/internal/delivery/grpc"
 	handler3 "voo.su/internal/delivery/grpc/handler"
+	chat3 "voo.su/internal/delivery/grpc/handler/chat"
 	"voo.su/internal/delivery/grpc/middleware"
 	"voo.su/internal/delivery/http"
 	"voo.su/internal/delivery/http/handler"
@@ -442,18 +443,18 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	userUseCase := usecase.NewUserUseCase(iLocale, source, userRepository, userSessionRepository, pushTokenRepository)
 	account := handler3.NewAccountHandler(userUseCase)
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
-	handlerChat := handler3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase)
-	message := handler3.NewMessageHandler(conf, iLocale, chatUseCase, messageUseCase, iNatsClient)
+	chatChat := chat3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase, iNatsClient)
+	groupChat := handler3.NewGroupChatHandler(conf, iLocale, contactUseCase, chatUseCase)
 	contact := handler3.NewContactHandler(conf, iLocale, contactUseCase)
 	appProvider := &grpc.AppProvider{
-		Conf:           conf,
-		AuthMiddleware: authMiddleware,
-		RoutesServices: grpcMethodService,
-		AuthHandler:    auth,
-		AccountHandler: account,
-		ChatHandler:    handlerChat,
-		MessageHandler: message,
-		ContactHandler: contact,
+		Conf:             conf,
+		AuthMiddleware:   authMiddleware,
+		RoutesServices:   grpcMethodService,
+		AuthHandler:      auth,
+		AccountHandler:   account,
+		ChatHandler:      chatChat,
+		GroupChatHandler: groupChat,
+		ContactHandler:   contact,
 	}
 	return appProvider
 }
