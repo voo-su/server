@@ -51,7 +51,6 @@ func (a *Account) ChangeDetail(ctx *ginutil.Context) error {
 	}
 
 	_, err := a.UserUseCase.UserRepo.UpdateById(ctx.Ctx(), ctx.UserId(), map[string]any{
-		//"username": strings.TrimSpace(strings.Replace(params.Username, " ", "", -1)),
 		"avatar":   params.Avatar,
 		"name":     params.Name,
 		"surname":  params.Surname,
@@ -107,7 +106,9 @@ func (a *Account) Push(ctx *ginutil.Context) error {
 		return ctx.Error(a.Locale.Localize("general_error"))
 	}
 
-	a.UserUseCase.WebPushInit(ctx.Ctx(), int64(uid), in)
+	if err := a.UserUseCase.WebPushInit(ctx.Ctx(), int64(uid), &in); err != nil {
+		return ctx.Error(a.Locale.Localize("general_error"))
+	}
 
 	return ctx.Success(a.Locale.Localize("success"))
 }

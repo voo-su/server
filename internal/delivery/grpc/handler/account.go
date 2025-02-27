@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	accountPb "voo.su/api/grpc/gen/go/pb"
@@ -74,17 +75,80 @@ func (a *Account) UpdateProfilePhoto(ctx context.Context, in *accountPb.UpdatePr
 	return &accountPb.UpdateProfilePhotoResponse{}, nil
 }
 
-func (a *Account) getNotifySettings(ctx context.Context, in *accountPb.GetNotifySettingsRequest) (*accountPb.GetNotifySettingsResponse, error) {
-	// TODO
-	return &accountPb.GetNotifySettingsResponse{}, nil
+func (a *Account) GetNotifySettings(ctx context.Context, in *accountPb.GetNotifySettingsRequest) (*accountPb.GetNotifySettingsResponse, error) {
+	uid := grpcutil.UserId(ctx)
+
+	res := &accountPb.GetNotifySettingsResponse{}
+	switch entity := in.Entity.Entity.(type) {
+	case *accountPb.NotifyEntity_Chat:
+		fmt.Println(entity.Chat.ChatId)
+		// TODO
+	case *accountPb.NotifyEntity_Group:
+		fmt.Println(entity.Group.GroupId)
+		// TODO
+	case *accountPb.NotifyEntity_Chats:
+		notify, err := a.UserUseCase.GetNotifySettings(ctx, uid)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
+		}
+
+		res.Settings = &accountPb.EntityNotifySettings{
+			MuteUntil:    notify.ChatsMuteUntil,
+			ShowPreviews: notify.ChatsShowPreviews,
+			Silent:       notify.ChatsSilent,
+		}
+	case *accountPb.NotifyEntity_Groups:
+		notify, err := a.UserUseCase.GetNotifySettings(ctx, uid)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
+		}
+
+		res.Settings = &accountPb.EntityNotifySettings{
+			MuteUntil:    notify.GroupMuteUntil,
+			ShowPreviews: notify.GroupShowPreviews,
+			Silent:       notify.GroupSilent,
+		}
+	default:
+		return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
+	}
+
+	return res, nil
 }
 
-func (a *Account) updateNotifySettings(ctx context.Context, in *accountPb.UpdateNotifySettingsRequest) (*accountPb.UpdateNotifySettingsResponse, error) {
-	// TODO
-	return &accountPb.UpdateNotifySettingsResponse{}, nil
+func (a *Account) UpdateNotifySettings(ctx context.Context, in *accountPb.UpdateNotifySettingsRequest) (*accountPb.UpdateNotifySettingsResponse, error) {
+	//uid := grpcutil.UserId(ctx)
+	//if err := a.UserUseCase.UpdateNotifySettings(ctx, uid, &entity.NotifySettings{
+	//	PersonalChats: in.PersonalChats,
+	//	GroupChats:    in.GroupChats,
+	//}); err != nil {
+	//	return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
+	//}
+
+	switch entity := in.Entity.Entity.(type) {
+	case *accountPb.NotifyEntity_Chat:
+		fmt.Println(entity.Chat.ChatId)
+		// TODO
+	case *accountPb.NotifyEntity_Group:
+		fmt.Println(entity.Group.GroupId)
+		// TODO
+	case *accountPb.NotifyEntity_Chats:
+		// TODO
+	case *accountPb.NotifyEntity_Groups:
+		// TODO
+	default:
+		return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
+	}
+
+	return &accountPb.UpdateNotifySettingsResponse{
+		Success: true,
+	}, nil
 }
 
 func (a *Account) RegisterDevice(ctx context.Context, in *accountPb.RegisterDeviceRequest) (*accountPb.RegisterDeviceResponse, error) {
-	// TODO
+	uid := grpcutil.UserId(ctx)
+	if err := a.UserUseCase.RegisterDevice(ctx, int64(uid), in.TokenType, in.Token); err != nil {
+		return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
+	}
+
 	return &accountPb.RegisterDeviceResponse{}, nil
 }

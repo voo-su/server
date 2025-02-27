@@ -2,7 +2,6 @@ package chat
 
 import (
 	"context"
-	"fmt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	chatPb "voo.su/api/grpc/gen/go/pb"
@@ -15,7 +14,6 @@ import (
 func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*chatPb.GetHistoryResponse, error) {
 	uid := grpcutil.UserId(ctx)
 	receiver := in.Receiver
-	fmt.Println(receiver, uid)
 	if receiver.ChatType == constant.ChatGroupMode {
 		if err := c.MessageUseCase.IsAccess(ctx, &entity.MessageAccess{
 			ChatType:   int(receiver.ChatType),
@@ -90,7 +88,7 @@ func (c *Chat) SendMessage(ctx context.Context, in *chatPb.SendMessageRequest) (
 			ReceiverId: int32(in.Receiver.ReceiverId),
 		},
 		Content: in.Message,
-		//QuoteId: ,
+		QuoteId: in.ReplyToMsgId,
 	}); err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}
@@ -98,10 +96,10 @@ func (c *Chat) SendMessage(ctx context.Context, in *chatPb.SendMessageRequest) (
 	return &chatPb.SendMessageResponse{}, nil
 }
 
-//func (c *Chat) SendPhoto(ctx context.Context, in *chatPb.SendPhotoRequest) (*chatPb.SendPhotoResponse, error) {
-//	// TODO
-//	return &chatPb.DeleteMessagesResponse{}, nil
-//}
+func (c *Chat) SendPhoto(ctx context.Context, in *chatPb.SendPhotoRequest) (*chatPb.SendPhotoResponse, error) {
+	// TODO
+	return &chatPb.SendPhotoResponse{}, nil
+}
 
 func (c *Chat) ViewMessages(ctx context.Context, in *chatPb.ViewMessagesRequest) (*chatPb.ViewMessagesResponse, error) {
 	uid := grpcutil.UserId(ctx)
@@ -114,12 +112,15 @@ func (c *Chat) ViewMessages(ctx context.Context, in *chatPb.ViewMessagesRequest)
 }
 
 func (c *Chat) DeleteMessages(ctx context.Context, in *chatPb.DeleteMessagesRequest) (*chatPb.DeleteMessagesResponse, error) {
-	uid := grpcutil.UserId(ctx)
-	fmt.Println(uid)
-	fmt.Println(in.Receiver.ChatType)
-	fmt.Println(in.Receiver.ReceiverId)
-	fmt.Println(in.MessageIds)
-	fmt.Println(in.Revoke)
-	// TODO
+	//uid := grpcutil.UserId(ctx)
+	//if err := c.ChatUseCase.DeleteRecordList(ctx, &usecase.RemoveRecordListOpt{
+	//	UserId:     uid,
+	//	ChatType:   int(in.Receiver.ChatType),
+	//	ReceiverId: int(in.Receiver.ReceiverId),
+	//	RecordIds:  in.MessageIds,
+	//}); err != nil {
+	//	return nil, status.Error(codes.Unknown, err.Error())
+	//}
+
 	return &chatPb.DeleteMessagesResponse{}, nil
 }

@@ -30,7 +30,7 @@ func NewContactHandler(
 	}
 }
 
-func (c *Contact) List(ctx context.Context, in *contactPb.GetContactListRequest) (*contactPb.GetContactListResponse, error) {
+func (c *Contact) GetContacts(ctx context.Context, in *contactPb.GetContactsRequest) (*contactPb.GetContactsResponse, error) {
 	uid := grpcutil.UserId(ctx)
 
 	list, err := c.ContactUseCase.List(ctx, uid)
@@ -48,7 +48,7 @@ func (c *Contact) List(ctx context.Context, in *contactPb.GetContactListRequest)
 		})
 	}
 
-	return &contactPb.GetContactListResponse{
+	return &contactPb.GetContactsResponse{
 		Items: items,
 	}, nil
 }

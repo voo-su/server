@@ -18,7 +18,7 @@ func GrpcToken(ctx context.Context, locale locale.ILocale, guard string, secret 
 	}
 
 	tokens := md.Get("Authorization")
-	token := tokens[len(tokens)-1]
+	token := strings.TrimPrefix(tokens[len(tokens)-1], "Bearer ")
 
 	userClaims, err := jwtutil.Verify(locale, guard, secret, token)
 	if err != nil {
