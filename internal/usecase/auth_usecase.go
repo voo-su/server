@@ -154,3 +154,12 @@ func (a *AuthUseCase) Register(ctx context.Context, email string) (*postgresMode
 
 	return nil, errors.New(a.Locale.Localize("general_error"))
 }
+
+func (a *AuthUseCase) GetSessionByToken(ctx context.Context, token string) (*postgresModel.UserSession, error) {
+	session, err := a.UserSessionRepo.FindByWhere(ctx, "access_token = ? AND is_logout = ?", token, false)
+	if err != nil {
+		return nil, err
+	}
+
+	return session, nil
+}

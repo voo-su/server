@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
@@ -35,16 +36,65 @@ func NewUserUseCase(
 	}
 }
 
-func (u *UserUseCase) WebPushInit(ctx context.Context, uid int64, webPush *entity.WebPush) error {
-	if err := u.PushTokenRepo.Create(ctx, &model.PushToken{
-		UserId:      uid,
-		Platform:    constant.PushPlatformWeb,
-		WebEndpoint: webPush.Endpoint,
-		WebP256dh:   webPush.Keys.P256dh,
-		WebAuth:     webPush.Keys.Auth,
-	}); err != nil {
+func (u *UserUseCase) WebPushInit(ctx context.Context, uid int64, sessionId int64, webPush *entity.WebPush) error {
+	existingToken, err := u.PushTokenRepo.FindByWhere(ctx, "user_session_id = ? AND is_active = ?", sessionId, true)
+	if err != nil && err != sql.ErrNoRows {
 		log.Println(err)
 		return err
+	}
+
+	if existingToken != nil {
+		_, err := u.PushTokenRepo.UpdateById(ctx, existingToken.Id, map[string]any{
+			"web_endpoint": webPush.Endpoint,
+			"web_p256dh":   webPush.Keys.P256dh,
+			"web_auth":     webPush.Keys.Auth,
+		})
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+	} else {
+		if err := u.PushTokenRepo.Create(ctx, &model.PushToken{
+			UserId:        uid,
+			UserSessionId: sessionId,
+			Platform:      constant.PushPlatformWeb,
+			WebEndpoint:   webPush.Endpoint,
+			WebP256dh:     webPush.Keys.P256dh,
+			WebAuth:       webPush.Keys.Auth,
+		}); err != nil {
+			log.Println(err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (u *UserUseCase) RegisterDevice(ctx context.Context, uid int64, sessionId int64, tokenType int32, token string) error {
+	existingToken, err := u.PushTokenRepo.FindByWhere(ctx, "user_session_id = ? AND is_active = ?", sessionId, true)
+	if err != nil && err != sql.ErrNoRows {
+		log.Println(err)
+		return err
+	}
+
+	if existingToken != nil {
+		_, err := u.PushTokenRepo.UpdateById(ctx, existingToken.Id, map[string]any{
+			"token": token,
+		})
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+	} else {
+		if err := u.PushTokenRepo.Create(ctx, &model.PushToken{
+			UserId:        uid,
+			UserSessionId: sessionId,
+			Platform:      constant.PushPlatformMobile,
+			Token:         token,
+		}); err != nil {
+			log.Println(err)
+			return err
+		}
 	}
 
 	return nil
@@ -75,18 +125,5 @@ func (u *UserUseCase) UpdateNotifySettings(ctx context.Context, uid int, data *e
 	//	return err
 	//}
 	//
-	return nil
-}
-
-func (u *UserUseCase) RegisterDevice(ctx context.Context, uid int64, tokenType int32, token string) error {
-	if err := u.PushTokenRepo.Create(ctx, &model.PushToken{
-		UserId:   uid,
-		Platform: constant.PushPlatformMobile,
-		Token:    token,
-	}); err != nil {
-		log.Println(err)
-		return err
-	}
-
 	return nil
 }

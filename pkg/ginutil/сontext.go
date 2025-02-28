@@ -25,6 +25,10 @@ func New(ctx *gin.Context) *Context {
 	return &Context{ctx}
 }
 
+func (c *Context) Ctx() context.Context {
+	return c.Context.Request.Context()
+}
+
 func (c *Context) Unauthorized(message string) error {
 	c.Context.AbortWithStatusJSON(http.StatusUnauthorized, &Response{
 		Code:    http.StatusUnauthorized,
@@ -110,14 +114,6 @@ func (c *Context) Raw(value string) error {
 	return nil
 }
 
-func (c *Context) UserId() int {
-	if session := c.JwtSession(); session != nil {
-		return session.Uid
-	}
-
-	return 0
-}
-
 func (c *Context) JwtSession() *jwtutil.JSession {
 	data, isOk := c.Context.Get(jwtutil.JWTSession)
 	if !isOk {
@@ -127,6 +123,18 @@ func (c *Context) JwtSession() *jwtutil.JSession {
 	return data.(*jwtutil.JSession)
 }
 
-func (c *Context) Ctx() context.Context {
-	return c.Context.Request.Context()
+func (c *Context) UserId() int {
+	if session := c.JwtSession(); session != nil {
+		return session.Uid
+	}
+
+	return 0
+}
+
+func (c *Context) UserToken() string {
+	if session := c.JwtSession(); session != nil {
+		return session.Token
+	}
+
+	return ""
 }

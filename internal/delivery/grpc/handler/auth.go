@@ -128,7 +128,7 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 	})
 
 	if err := a.AuthUseCase.UserSessionRepo.Create(ctx, &postgresModel.UserSession{
-		UserId:      user.Id,
+		UserId:      int64(user.Id),
 		AccessToken: token,
 		UserIp:      ip,
 		UserAgent:   userAgent,

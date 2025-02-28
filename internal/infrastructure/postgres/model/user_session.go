@@ -3,8 +3,8 @@ package model
 import "time"
 
 type UserSession struct {
-	Id          int       `gorm:"primaryKey"`
-	UserId      int       `gorm:"column:user_id;NOT NULL"`
+	Id          int64     `gorm:"primaryKey"`
+	UserId      int64     `gorm:"column:user_id;NOT NULL"`
 	AccessToken string    `gorm:"column:access_token;NOT NULL"`
 	UpdatedAt   time.Time `gorm:"column:updated_at"`
 	Logout      bool      `gorm:"column:is_logout;default false"`

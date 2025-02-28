@@ -84,7 +84,7 @@ func (c *Chat) SendMessage(ctx context.Context, in *chatPb.SendMessageRequest) (
 
 	if err := c.MessageUseCase.SendText(ctx, uid, &entity.SendText{
 		Receiver: entity.MessageReceiver{
-			ChatType:   int32(in.Receiver.ChatType),
+			ChatType:   in.Receiver.ChatType,
 			ReceiverId: int32(in.Receiver.ReceiverId),
 		},
 		Content: in.Message,

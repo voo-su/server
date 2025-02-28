@@ -24,7 +24,7 @@ func (s *Search) Users(ctx *ginutil.Context) error {
 	}
 
 	uid := ctx.UserId()
-	list, err := s.UserUseCase.UserRepo.Search(params.Q, uid)
+	list, err := s.UserUseCase.UserRepo.Search(params.Q, uid, 100)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.Error(s.Locale.Localize("nothing_found"))

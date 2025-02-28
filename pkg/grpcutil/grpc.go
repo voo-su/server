@@ -67,3 +67,13 @@ func UserId(ctx context.Context) int {
 
 	return session.Uid
 }
+
+func UserToken(ctx context.Context) string {
+	session, ok := ctx.Value(jwtutil.JWTSession).(*jwtutil.JSession)
+	if !ok {
+		fmt.Println("failed to retrieve user from context")
+		return ""
+	}
+
+	return session.Token
+}

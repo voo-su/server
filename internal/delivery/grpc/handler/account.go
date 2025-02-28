@@ -16,12 +16,18 @@ type Account struct {
 	accountPb.UnimplementedAccountServiceServer
 	Locale      locale.ILocale
 	UserUseCase *usecase.UserUseCase
+	AuthUseCase *usecase.AuthUseCase
 }
 
-func NewAccountHandler(locale locale.ILocale, userUseCase *usecase.UserUseCase) *Account {
+func NewAccountHandler(
+	locale locale.ILocale,
+	userUseCase *usecase.UserUseCase,
+	authUseCase *usecase.AuthUseCase,
+) *Account {
 	return &Account{
 		Locale:      locale,
 		UserUseCase: userUseCase,
+		AuthUseCase: authUseCase,
 	}
 }
 
@@ -146,9 +152,17 @@ func (a *Account) UpdateNotifySettings(ctx context.Context, in *accountPb.Update
 
 func (a *Account) RegisterDevice(ctx context.Context, in *accountPb.RegisterDeviceRequest) (*accountPb.RegisterDeviceResponse, error) {
 	uid := grpcutil.UserId(ctx)
-	if err := a.UserUseCase.RegisterDevice(ctx, int64(uid), in.TokenType, in.Token); err != nil {
+	token := grpcutil.UserToken(ctx)
+	session, err := a.AuthUseCase.GetSessionByToken(ctx, token)
+	if err != nil {
 		return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
 	}
 
-	return &accountPb.RegisterDeviceResponse{}, nil
+	if err := a.UserUseCase.RegisterDevice(ctx, int64(uid), session.Id, in.TokenType, in.Token); err != nil {
+		return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
+	}
+
+	return &accountPb.RegisterDeviceResponse{
+		Success: true,
+	}, nil
 }

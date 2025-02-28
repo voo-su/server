@@ -49,10 +49,10 @@ func (u *UserRepository) FindByEmail(email string) (*model.User, error) {
 	return u.Repo.FindByWhere(context.TODO(), "email = ?", email)
 }
 
-func (u *UserRepository) Search(q string, id int) ([]*model.User, error) {
+func (u *UserRepository) Search(q string, id int, limit int) ([]*model.User, error) {
 	return u.Repo.FindAll(context.TODO(), func(db *gorm.DB) {
 		query := "%" + q + "%"
-		db.Where("id <> ? AND is_bot = 0 AND lower(username) LIKE lower(?) OR lower(name) LIKE lower(?) OR lower(surname) LIKE lower(?)", id, query, query, query)
+		db.Where("id <> ? AND is_bot = 0 AND lower(username) LIKE lower(?) OR lower(name) LIKE lower(?) OR lower(surname) LIKE lower(?)", id, query, query, query).Limit(limit)
 	})
 }
 

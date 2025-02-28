@@ -1053,6 +1053,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 	}
 
 	m.writeMessageToQueue(userIds, record)
-
-	m.writeMessageToPushQueue(userIds, record)
+	if record.ChatType == constant.ChatPrivateMode {
+		m.writeMessageToPushQueue(userIds, record)
+	}
 }

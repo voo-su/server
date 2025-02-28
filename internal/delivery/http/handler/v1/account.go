@@ -17,6 +17,7 @@ import (
 type Account struct {
 	Locale      locale.ILocale
 	UserUseCase *usecase.UserUseCase
+	AuthUseCase *usecase.AuthUseCase
 }
 
 func (a *Account) Get(ctx *ginutil.Context) error {
@@ -99,6 +100,12 @@ func (a *Account) Push(ctx *ginutil.Context) error {
 	}
 
 	uid := ctx.UserId()
+	token := ctx.UserToken()
+
+	session, err := a.AuthUseCase.GetSessionByToken(ctx.Ctx(), token)
+	if err != nil {
+		return ctx.Error(a.Locale.Localize("general_error"))
+	}
 
 	var in entity.WebPush
 	if err := json.Unmarshal([]byte(params.Subscription), &in); err != nil {
@@ -106,7 +113,7 @@ func (a *Account) Push(ctx *ginutil.Context) error {
 		return ctx.Error(a.Locale.Localize("general_error"))
 	}
 
-	if err := a.UserUseCase.WebPushInit(ctx.Ctx(), int64(uid), &in); err != nil {
+	if err := a.UserUseCase.WebPushInit(ctx.Ctx(), int64(uid), session.Id, &in); err != nil {
 		return ctx.Error(a.Locale.Localize("general_error"))
 	}
 

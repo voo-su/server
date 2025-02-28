@@ -110,7 +110,7 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 	})
 
 	if err := a.UserUseCase.UserSessionRepo.Create(ctx.Ctx(), &postgresModel.UserSession{
-		UserId:      user.Id,
+		UserId:      int64(user.Id),
 		AccessToken: token,
 		UserIp:      ip,
 		UserAgent:   ctx.Context.GetHeader("user-agent"),
