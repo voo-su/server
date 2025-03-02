@@ -11,7 +11,7 @@ type PushToken struct {
 	WebEndpoint   string    `gorm:"column:web_endpoint"`
 	WebP256dh     string    `gorm:"column:web_p256dh"`
 	WebAuth       string    `gorm:"column:web_auth"`
-	IsActive      bool      `gorm:"column:is_active;default:true"`
+	IsActive      bool      `gorm:"column:is_active;DEFAULT:TRUE"`
 	CreatedAt     time.Time `gorm:"column:created_at;autoCreateTime"`
 }
 

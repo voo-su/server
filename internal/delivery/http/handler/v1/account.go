@@ -114,6 +114,7 @@ func (a *Account) Push(ctx *ginutil.Context) error {
 	}
 
 	if err := a.UserUseCase.WebPushInit(ctx.Ctx(), int64(uid), session.Id, &in); err != nil {
+		logger.Errorf("%s: %s", a.Locale.Localize("decode_error"), err)
 		return ctx.Error(a.Locale.Localize("general_error"))
 	}
 

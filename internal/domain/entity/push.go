@@ -20,3 +20,9 @@ type MobilePush struct {
 	Token   string
 	Message string
 }
+
+type NotifySettings struct {
+	MuteUntil    int32
+	ShowPreviews bool
+	Silent       bool
+}

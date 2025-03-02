@@ -60,6 +60,9 @@ func (c *ChatUseCase) List(ctx context.Context, uid int) ([]*entity.SearchChat, 
 		"c.receiver_id",
 		"c.updated_at",
 		"c.is_disturb",
+		"c.notify_mute_until",
+		"c.notify_show_previews",
+		"c.notify_silent",
 		"c.is_top",
 		"c.is_bot",
 		"u.avatar as user_avatar",
@@ -260,4 +263,33 @@ func (c *ChatUseCase) Collect(ctx context.Context, uid int, recordId int64) erro
 		FileSuffix: file.Suffix,
 		FileSize:   file.Size,
 	}).Error
+}
+
+func (c *ChatUseCase) GetNotifySettings(ctx context.Context, chatType int, uid int, chatId int64) (*entity.NotifySettings, error) {
+	notify, err := c.ChatRepo.FindByWhere(ctx, "user_id = ? AND receiver_id = ? AND chat_type = ?", uid, chatId, chatType)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.NotifySettings{
+		MuteUntil:    notify.NotifyMuteUntil,
+		ShowPreviews: notify.NotifyShowPreviews,
+		Silent:       notify.NotifySilent,
+	}, nil
+}
+
+func (c *ChatUseCase) UpdateNotifySettings(ctx context.Context, chatType int, uid int, chatId int64, data *entity.NotifySettings) error {
+	// TODO
+	disturb := 0
+	if data.MuteUntil > 0 {
+		disturb = 1
+	}
+	_, err := c.ChatRepo.UpdateWhere(ctx, map[string]any{
+		"is_disturb":           disturb,
+		"notify_mute_until":    data.MuteUntil,
+		"notify_show_previews": data.ShowPreviews,
+		"notify_silent":        data.Silent,
+	}, "user_id = ? AND receiver_id = ? AND chat_type = ?", uid, chatId, chatType)
+	return err
+
 }

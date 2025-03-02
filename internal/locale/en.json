@@ -126,5 +126,9 @@
     "service_start": "Service %s start",
     "file_not_found": "File not found",
     "unable_to_get_file_information": "Unable to get file information",
-    "failed_to_send_file": "Failed to send file"
+    "failed_to_send_file": "Failed to send file",
+
+    "token_not_provided": "Token was not provided. Please provide a token."
+
+
 }

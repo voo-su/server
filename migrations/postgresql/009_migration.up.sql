@@ -29,11 +29,15 @@ ALTER TABLE file_splits ALTER COLUMN file_ext type VARCHAR(255) using file_ext::
 
 --UPDATE--
 ALTER TABLE users ADD notify_chats_mute_until INTEGER DEFAULT 0 NOT NULL;
-ALTER TABLE users ADD notify_chats_show_previews boolean DEFAULT TRUE NOT NULL;
-ALTER TABLE users ADD notify_chats_silent boolean DEFAULT FALSE NOT NULL;
+ALTER TABLE users ADD notify_chats_show_previews BOOLEAN DEFAULT TRUE NOT NULL;
+ALTER TABLE users ADD notify_chats_silent BOOLEAN DEFAULT FALSE NOT NULL;
 
 ALTER TABLE users ADD notify_group_mute_until INTEGER DEFAULT 0 NOT NULL;
-ALTER TABLE users ADD notify_group_show_previews boolean DEFAULT TRUE NOT NULL;
-ALTER TABLE users ADD notify_group_silent boolean DEFAULT FALSE NOT NULL;
+ALTER TABLE users ADD notify_group_show_previews BOOLEAN DEFAULT TRUE NOT NULL;
+ALTER TABLE users ADD notify_group_silent BOOLEAN DEFAULT FALSE NOT NULL;
+
+ALTER TABLE chats ADD notify_mute_until INTEGER DEFAULT 0 NOT NULL;
+ALTER TABLE chats ADD notify_show_previews BOOLEAN DEFAULT TRUE NOT NULL;
+ALTER TABLE chats ADD notify_silent BOOLEAN DEFAULT FALSE NOT NULL;
 
 ALTER TABLE push_tokens ADD user_session_id INTEGER;

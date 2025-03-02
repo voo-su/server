@@ -2,7 +2,8 @@ package usecase
 
 import (
 	"context"
-	"database/sql"
+	"errors"
+	"gorm.io/gorm"
 	"log"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
@@ -37,10 +38,12 @@ func NewUserUseCase(
 }
 
 func (u *UserUseCase) WebPushInit(ctx context.Context, uid int64, sessionId int64, webPush *entity.WebPush) error {
+
 	existingToken, err := u.PushTokenRepo.FindByWhere(ctx, "user_session_id = ? AND is_active = ?", sessionId, true)
-	if err != nil && err != sql.ErrNoRows {
-		log.Println(err)
-		return err
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 	}
 
 	if existingToken != nil {
@@ -70,11 +73,16 @@ func (u *UserUseCase) WebPushInit(ctx context.Context, uid int64, sessionId int6
 	return nil
 }
 
-func (u *UserUseCase) RegisterDevice(ctx context.Context, uid int64, sessionId int64, tokenType int32, token string) error {
+func (u *UserUseCase) DevicePushInit(ctx context.Context, uid int64, sessionId int64, tokenType int32, token string) error {
+	if token == "" {
+		return errors.New(u.Locale.Localize("token_not_provided"))
+	}
+
 	existingToken, err := u.PushTokenRepo.FindByWhere(ctx, "user_session_id = ? AND is_active = ?", sessionId, true)
-	if err != nil && err != sql.ErrNoRows {
-		log.Println(err)
-		return err
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 	}
 
 	if existingToken != nil {
@@ -100,30 +108,55 @@ func (u *UserUseCase) RegisterDevice(ctx context.Context, uid int64, sessionId i
 	return nil
 }
 
-func (u *UserUseCase) GetNotifySettings(ctx context.Context, uid int) (*entity.NotifySettings, error) {
+func (u *UserUseCase) GetNotifySettings(ctx context.Context, notifyType int, uid int) (*entity.NotifySettings, error) {
 	user, err := u.UserRepo.FindById(ctx, uid)
 	if err != nil {
 		return nil, err
 	}
 
-	return &entity.NotifySettings{
-		ChatsMuteUntil:    user.NotifyChatsMuteUntil,
-		ChatsShowPreviews: user.NotifyChatsShowPreviews,
-		ChatsSilent:       user.NotifyChatsSilent,
-		GroupMuteUntil:    user.NotifyGroupMuteUntil,
-		GroupShowPreviews: user.NotifyGroupShowPreviews,
-		GroupSilent:       user.NotifyGroupSilent,
-	}, nil
+	settings := entity.NotifySettings{}
+	switch notifyType {
+	case constant.ChatPrivateMode:
+		settings = entity.NotifySettings{
+			MuteUntil:    user.NotifyChatsMuteUntil,
+			ShowPreviews: user.NotifyChatsShowPreviews,
+			Silent:       user.NotifyChatsSilent,
+		}
+	case constant.ChatGroupMode:
+		settings = entity.NotifySettings{
+			MuteUntil:    user.NotifyGroupMuteUntil,
+			ShowPreviews: user.NotifyGroupShowPreviews,
+			Silent:       user.NotifyGroupSilent,
+		}
+	default:
+		return nil, errors.New("")
+	}
+
+	return &settings, nil
 }
 
-func (u *UserUseCase) UpdateNotifySettings(ctx context.Context, uid int, data *entity.NotifySettings) error {
-	//_, err := u.UserRepo.UpdateById(ctx, uid, map[string]any{
-	//	"personal_chats": data.PersonalChats,
-	//	"group_chats":    data.GroupChats,
-	//})
-	//if err != nil {
-	//	return err
-	//}
-	//
+func (u *UserUseCase) UpdateNotifySettings(ctx context.Context, uid int, notifyType int, data *entity.NotifySettings) error {
+	settings := map[string]any{}
+	switch notifyType {
+	case constant.ChatPrivateMode:
+		settings = map[string]any{
+			"notify_chats_mute_until":    data.MuteUntil,
+			"notify_chats_show_previews": data.ShowPreviews,
+			"notify_chats_silent":        data.Silent,
+		}
+	case constant.ChatGroupMode:
+		settings = map[string]any{
+			"notify_group_mute_until":    data.MuteUntil,
+			"notify_group_show_previews": data.ShowPreviews,
+			"notify_group_silent":        data.Silent,
+		}
+	default:
+		return errors.New("")
+	}
+	_, err := u.UserRepo.UpdateById(ctx, uid, settings)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

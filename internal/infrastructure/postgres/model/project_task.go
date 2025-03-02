@@ -6,7 +6,7 @@ import (
 )
 
 type ProjectTask struct {
-	Id          uuid.UUID `gorm:"column:id;type:uuid;default:gen_random_uuid()"`
+	Id          uuid.UUID `gorm:"column:id;type:uuid;DEFAULT:gen_random_uuid()"`
 	ProjectId   uuid.UUID `gorm:"column:project_id"`
 	TypeId      int       `gorm:"column:type_id"`
 	Title       string    `gorm:"column:title"`

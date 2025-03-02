@@ -7,20 +7,23 @@ import (
 )
 
 type SearchChat struct {
-	Id          int       `json:"id" `
-	ChatType    int       `json:"chat_type" `
-	ReceiverId  int       `json:"receiver_id" `
-	IsDelete    int       `json:"is_delete"`
-	IsTop       int       `json:"is_top"`
-	IsBot       int       `json:"is_bot"`
-	IsDisturb   int       `json:"is_disturb"`
-	UserAvatar  string    `json:"user_avatar"`
-	Username    string    `json:"username"`
-	Name        string    `json:"name"`
-	Surname     string    `json:"surname"`
-	GroupName   string    `json:"group_name"`
-	GroupAvatar string    `json:"group_avatar"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	Id                 int       `gorm:"id" `
+	ChatType           int       `gorm:"chat_type" `
+	ReceiverId         int       `gorm:"receiver_id" `
+	IsDelete           int       `gorm:"is_delete"`
+	IsTop              int       `gorm:"is_top"`
+	IsBot              int       `gorm:"is_bot"`
+	NotifyMuteUntil    int32     `gorm:"column:notify_mute_until"`
+	NotifyShowPreviews bool      `gorm:"column:notify_show_previews"`
+	NotifySilent       bool      `gorm:"column:notify_silent"`
+	IsDisturb          int       `gorm:"is_disturb"`
+	UserAvatar         string    `gorm:"user_avatar"`
+	Username           string    `gorm:"username"`
+	Name               string    `gorm:"name"`
+	Surname            string    `gorm:"surname"`
+	GroupName          string    `gorm:"group_name"`
+	GroupAvatar        string    `gorm:"group_avatar"`
+	UpdatedAt          time.Time `gorm:"updated_at"`
 }
 
 func GetChatMsgTypeMapping(locale locale.ILocale, msgType int) string {

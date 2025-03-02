@@ -126,5 +126,7 @@
     "service_start": "Запуск %s сервиса",
     "file_not_found": "Файл не найден",
     "unable_to_get_file_information": "Не удалось получить информацию о файле",
-    "failed_to_send_file": "Не удалось отправить файл"
+    "failed_to_send_file": "Не удалось отправить файл",
+
+    "token_not_provided": "Токен не был предоставлен. Пожалуйста, передайте токен."
 }
