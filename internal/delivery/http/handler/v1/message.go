@@ -13,6 +13,7 @@ import (
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
+	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
@@ -306,7 +307,7 @@ func (m *Message) Delete(ctx *ginutil.Context) error {
 		UserId:     ctx.UserId(),
 		ChatType:   int(params.ChatType),
 		ReceiverId: int(params.ReceiverId),
-		RecordIds:  params.RecordIds,
+		MsgIds:     sliceutil.ParseIds(params.MsgIds),
 	}); err != nil {
 		return ctx.Error(err.Error())
 	}

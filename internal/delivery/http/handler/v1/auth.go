@@ -2,6 +2,8 @@ package v1
 
 import (
 	"fmt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"strconv"
 	"time"
 	v1Pb "voo.su/api/http/pb/v1"
@@ -126,11 +128,9 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 }
 
 func (a *Auth) Logout(ctx *ginutil.Context) error {
-	session := ctx.JwtSession()
-	if session != nil {
-		if ex := session.ExpiresAt - time.Now().Unix(); ex > 0 {
-			_ = a.AuthUseCase.JwtTokenCacheRepo.SetBlackList(ctx.Ctx(), session.Token, time.Duration(ex)*time.Second)
-		}
+	token := ctx.UserToken()
+	if err := a.AuthUseCase.Logout(ctx.Ctx(), token); err != nil {
+		return ctx.Error(status.Error(codes.Unknown, a.Locale.Localize("general_error")))
 	}
 
 	return ctx.Success(nil)

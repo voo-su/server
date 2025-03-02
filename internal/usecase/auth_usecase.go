@@ -5,21 +5,22 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"log"
 	"time"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
-	"voo.su/pkg"
-	"voo.su/pkg/jwtutil"
-	"voo.su/pkg/locale"
-
 	clickhouseModel "voo.su/internal/infrastructure/clickhouse/model"
 	clickhouseRepo "voo.su/internal/infrastructure/clickhouse/repository"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
+	"voo.su/pkg"
 	"voo.su/pkg/email"
+	"voo.su/pkg/jwtutil"
+	"voo.su/pkg/locale"
 	"voo.su/pkg/strutil"
 	"voo.su/resource"
 )
@@ -162,4 +163,26 @@ func (a *AuthUseCase) GetSessionByToken(ctx context.Context, token string) (*pos
 	}
 
 	return session, nil
+}
+
+func (a *AuthUseCase) Logout(ctx context.Context, token string) error {
+	if err := a.JwtTokenCacheRepo.SetBlackList(ctx, token, 0); err != nil {
+		log.Println(err)
+	}
+
+	session, err := a.GetSessionByToken(ctx, token)
+	if err != nil {
+		return status.Error(codes.Unknown, a.Locale.Localize("general_error"))
+	}
+
+	_, err = a.UserSessionRepo.UpdateById(ctx, session.Id, map[string]any{
+		"is_logout": true,
+		"logout_at": time.Now(),
+	})
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
 }

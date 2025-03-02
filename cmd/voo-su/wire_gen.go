@@ -445,7 +445,9 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	account := handler3.NewAccountHandler(iLocale, userUseCase, authUseCase, chatUseCase)
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	chatChat := chat3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, iNatsClient)
-	groupChat := handler3.NewGroupChatHandler(conf, iLocale, contactUseCase, chatUseCase)
+	groupChatUseCase := usecase.NewGroupChatUseCase(iLocale, source, groupChatRepository, groupChatMemberRepository, sequenceRepository, relationCacheRepository, redisLockCacheRepository)
+	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(iLocale, source, groupChatMemberRepository)
+	groupChat := handler3.NewGroupChatHandler(conf, iLocale, contactUseCase, chatUseCase, groupChatUseCase, groupChatMemberUseCase)
 	contact := handler3.NewContactHandler(conf, iLocale, contactUseCase, userUseCase)
 	appProvider := &grpc.AppProvider{
 		Conf:             conf,

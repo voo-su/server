@@ -144,8 +144,11 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 }
 
 func (a *Auth) Logout(ctx context.Context, in *authPb.AuthLogoutRequest) (*authPb.AuthLogoutResponse, error) {
-	// TODO
-	_ = a.AuthUseCase.JwtTokenCacheRepo.SetBlackList(ctx, in.AccessToken, 0)
+	token := grpcutil.UserToken(ctx)
+
+	if err := a.AuthUseCase.Logout(ctx, token); err != nil {
+		return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
+	}
 
 	return &authPb.AuthLogoutResponse{
 		Success: true,

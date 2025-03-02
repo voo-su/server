@@ -3866,7 +3866,7 @@ func (m *DeleteMessageRequest) validate(all bool) error {
 
 	// no validation rules for ReceiverId
 
-	// no validation rules for RecordIds
+	// no validation rules for MsgIds
 
 	if len(errors) > 0 {
 		return DeleteMessageRequestMultiError(errors)

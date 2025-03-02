@@ -137,14 +137,14 @@ type RemoveRecordListOpt struct {
 	UserId     int
 	ChatType   int
 	ReceiverId int
-	RecordIds  string
+	MsgIds     []int
 }
 
 func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordListOpt) error {
 	var (
 		db      = c.Source.Postgres().WithContext(ctx)
 		findIds []int64
-		ids     = sliceutil.Unique(sliceutil.ParseIds(opt.RecordIds))
+		ids     = sliceutil.Unique(opt.MsgIds)
 	)
 	if opt.ChatType == constant.ChatPrivateMode {
 		subQuery := db.Where("user_id = ? AND receiver_id = ?", opt.UserId, opt.ReceiverId).

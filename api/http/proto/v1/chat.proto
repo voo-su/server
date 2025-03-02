@@ -225,7 +225,7 @@ message VoteMessageHandleRequest {
 message DeleteMessageRequest {
     int64 chat_type = 1 [(tagger.tags) = "form:\"chat_type\" json:\"chat_type\" binding:\"required,oneof=1 2\" label:\"chat_type\""];
     int64 receiver_id = 2 [(tagger.tags) = "form:\"receiver_id\" json:\"receiver_id\" binding:\"required,numeric,gt=0\" label:\"receiver_id\""];
-    string record_ids = 3 [(tagger.tags) = "form:\"record_id\" json:\"record_id\" binding:\"required,ids\" label:\"record_id\""];
+    string msg_ids = 3 [(tagger.tags) = "form:\"msg_ids\" json:\"msg_ids\" binding:\"required,ids\" label:\"msg_ids\""];
 }
 
 message RevokeMessageRequest {
