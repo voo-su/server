@@ -307,7 +307,7 @@ func (m *Message) Delete(ctx *ginutil.Context) error {
 		UserId:     ctx.UserId(),
 		ChatType:   int(params.ChatType),
 		ReceiverId: int(params.ReceiverId),
-		MsgIds:     sliceutil.ParseIds(params.MsgIds),
+		MsgIds:     sliceutil.ParseIdsToInt64(params.MsgIds),
 	}); err != nil {
 		return ctx.Error(err.Error())
 	}

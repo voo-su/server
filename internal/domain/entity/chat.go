@@ -61,7 +61,7 @@ func GetChatMsgTypeMapping(locale locale.ILocale, msgType int) string {
 }
 
 type Message struct {
-	Id         string `json:"id"`
+	Id         int64  `json:"id"`
 	ChatType   int    `json:"chat_type"`
 	MsgType    int    `json:"msg_type"`
 	ReceiverId int    `json:"receiver_id"`

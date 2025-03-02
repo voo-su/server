@@ -93,7 +93,6 @@ func (c *Chat) GetUpdates(req *chatPb.UpdatesRequest, stream chatPb.ChatService_
 			}
 			fmt.Println(_in)
 			for _, rid := range _in.UserIds {
-
 				onMessage(int64(rid), _in.Message)
 			}
 

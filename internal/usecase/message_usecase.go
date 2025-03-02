@@ -327,6 +327,8 @@ func (m *MessageUseCase) HandleRecords(ctx context.Context, items []*entity.Quer
 			data.Content = item.Content
 		}
 
+		data.Extra0 = item.Extra
+
 		_ = jsonutil.Decode(item.Extra, &data.Extra)
 		switch item.MsgType {
 		//case constant.ChatMsgSysGroupCreate:
@@ -396,6 +398,16 @@ func (m *MessageUseCase) GetMessageByRecordId(ctx context.Context, recordId int6
 }
 
 func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *entity.SendText) error {
+	if req.ReplyToMsgId != 0 {
+		message, err := m.MessageRepo.FindById(ctx, int(req.ReplyToMsgId))
+		if err != nil {
+
+		}
+		if message != nil {
+			req.QuoteId = message.MsgId
+		}
+	}
+
 	data := &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeText,
@@ -954,13 +966,14 @@ func (m *MessageUseCase) loadSequence(ctx context.Context, data *postgresModel.M
 	}
 }
 
-func (m *MessageUseCase) writeMessageToQueue(userIds []int, message *postgresModel.Message) {
+func (m *MessageUseCase) writeMessageToQueue(uid int, userIds []int, message *postgresModel.Message) {
+	userIds = append(userIds, uid)
 	content := jsonutil.Encode(map[string]any{
 		"event": constant.SubEventImMessage,
 		"data": jsonutil.Encode(entity.ConsumeMessage{
 			UserIds: userIds,
 			Message: entity.Message{
-				Id:         message.MsgId,
+				Id:         int64(message.Id),
 				ChatType:   message.ChatType,
 				MsgType:    message.MsgType,
 				ReceiverId: message.ReceiverId,
@@ -973,7 +986,7 @@ func (m *MessageUseCase) writeMessageToQueue(userIds []int, message *postgresMod
 	})
 
 	if err := m.Nats.Publish(constant.ImTopicChat, []byte(content)); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
 
@@ -989,7 +1002,7 @@ func (m *MessageUseCase) writeMessageToPushQueue(userIds []int, message *postgre
 	}
 
 	if err := m.Nats.Publish(constant.QueuePush, pushData); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
 
@@ -1052,7 +1065,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 		logger.Errorf(m.Locale.Localize("notification_sending_error"), err.Error())
 	}
 
-	m.writeMessageToQueue(userIds, record)
+	m.writeMessageToQueue(record.UserId, userIds, record)
 	if record.ChatType == constant.ChatPrivateMode {
 		m.writeMessageToPushQueue(userIds, record)
 	}

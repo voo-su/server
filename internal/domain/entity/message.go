@@ -20,6 +20,7 @@ type MessageItem struct {
 	Content    string `json:"content"`
 	CreatedAt  string `json:"created_at"`
 	Extra      any    `json:"extra"`
+	Extra0     string `json:"extra0"`
 }
 
 type QueryGetHistoryOpt struct {
@@ -226,9 +227,10 @@ type MessageReceiver struct {
 }
 
 type SendText struct {
-	Receiver MessageReceiver
-	Content  string
-	QuoteId  string
+	Receiver     MessageReceiver
+	Content      string
+	QuoteId      string
+	ReplyToMsgId int64
 }
 
 type SendImage struct {

@@ -69,6 +69,21 @@ func ParseIds(str string) []int {
 	return ids
 }
 
+func ParseIdsToInt64(str string) []int64 {
+	str = strings.TrimSpace(str)
+	ids := make([]int64, 0)
+	if str == "" {
+		return ids
+	}
+	for _, value := range strings.Split(str, ",") {
+		if id, err := strconv.ParseInt(value, 10, 64); err == nil {
+			ids = append(ids, id)
+		}
+	}
+
+	return ids
+}
+
 func ToIds[T IInt](items []T) string {
 	tmp := make([]string, 0, len(items))
 	for _, item := range items {

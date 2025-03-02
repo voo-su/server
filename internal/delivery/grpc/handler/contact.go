@@ -80,7 +80,7 @@ func (c *Contact) Search(ctx context.Context, in *contactPb.SearchRequest) (*con
 		return nil, nil
 	}
 
-	list, err := c.UserUseCase.UserRepo.Search(in.Q, uid, int(in.Id))
+	list, err := c.UserUseCase.UserRepo.Search(in.Q, uid, int(in.Limit))
 	if err != nil {
 		return nil, nil
 	}

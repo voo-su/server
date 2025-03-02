@@ -137,7 +137,7 @@ type RemoveRecordListOpt struct {
 	UserId     int
 	ChatType   int
 	ReceiverId int
-	MsgIds     []int
+	MsgIds     []int64
 }
 
 func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordListOpt) error {
@@ -170,7 +170,7 @@ func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordLis
 	items := make([]*postgresModel.MessageDelete, 0, len(ids))
 	for _, val := range ids {
 		items = append(items, &postgresModel.MessageDelete{
-			RecordId:  val,
+			RecordId:  int(val),
 			UserId:    opt.UserId,
 			CreatedAt: time.Now(),
 		})
