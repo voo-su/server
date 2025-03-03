@@ -74,12 +74,43 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 				fmt.Println(err)
 			}
 
-			messageItem.Media = &chatPb.Media{
-				Media: &chatPb.Media_MessageMediaPhoto{
+			messageItem.Media = &chatPb.MessageMedia{
+				Media: &chatPb.MessageMedia_MessageMediaPhoto{
 					MessageMediaPhoto: &chatPb.MessageMediaPhoto{
 						Photo: file.Url,
 					},
 				},
+			}
+		}
+
+		if item.QuoteId != "" {
+			type ReplyData struct {
+				UserId   int    `json:"user_id,omitempty"`
+				Username string `json:"username,omitempty"`
+				MsgType  int    `json:"msg_type,omitempty"`
+				Content  string `json:"content,omitempty"`
+				MsgId    string `json:"msg_id,omitempty"`
+			}
+			type Reply struct {
+				Reply ReplyData `json:"reply,omitempty"`
+			}
+
+			var reply Reply
+			if err := jsonutil.Decode(item.Extra0, &reply); err != nil {
+				fmt.Println(err)
+			}
+
+			mId, err := c.MessageUseCase.GetMessageByMsgId(ctx, item.QuoteId)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			messageItem.Reply = &chatPb.MessageReply{
+				Id:       int64(mId),
+				MsgType:  int32(reply.Reply.MsgType),
+				UserId:   int64(reply.Reply.UserId),
+				Username: reply.Reply.MsgId,
+				Content:  reply.Reply.MsgId,
 			}
 		}
 

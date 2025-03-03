@@ -75,6 +75,8 @@ type IMessageUseCase interface {
 	Vote(ctx context.Context, uid int, msgId int64, optionsValue string) (*postgresRepo.VoteStatistics, error)
 
 	Revoke(ctx context.Context, uid int, msgId string) error
+
+	GetMessageByMsgId(ctx context.Context, msgId string) (int, error)
 }
 
 var _ IMessageUseCase = (*MessageUseCase)(nil)
@@ -155,6 +157,7 @@ func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHis
 			"messages.is_read",
 			"messages.content",
 			"messages.extra",
+			"messages.quote_id",
 			"messages.created_at",
 			"users.username",
 			"users.name as name",
@@ -319,6 +322,7 @@ func (m *MessageUseCase) HandleRecords(ctx context.Context, items []*entity.Quer
 			IsRevoke:   item.IsRevoke,
 			IsMark:     item.IsMark,
 			IsRead:     item.IsRead,
+			QuoteId:    item.QuoteId,
 			CreatedAt:  timeutil.FormatDatetime(item.CreatedAt),
 			Extra:      make(map[string]any),
 		}
@@ -964,6 +968,16 @@ func (m *MessageUseCase) loadSequence(ctx context.Context, data *postgresModel.M
 	} else {
 		data.Sequence = m.Sequence.Get(ctx, data.UserId, data.ReceiverId)
 	}
+}
+
+func (m *MessageUseCase) GetMessageByMsgId(ctx context.Context, msgId string) (int, error) {
+	message, err := m.MessageRepo.FindByWhere(ctx, "msg_id = ?", msgId)
+	if err != nil {
+		log.Println(err)
+		return 0, nil
+	}
+
+	return message.Id, nil
 }
 
 func (m *MessageUseCase) writeMessageToQueue(uid int, userIds []int, message *postgresModel.Message) {

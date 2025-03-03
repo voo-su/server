@@ -158,22 +158,26 @@ func (a *Account) UpdateNotifySettings(ctx context.Context, in *accountPb.Update
 	case *accountPb.NotifyEntity_Chat:
 		chatId := e.Chat.ChatId
 		if err := a.ChatUseCase.UpdateNotifySettings(ctx, constant.ChatPrivateMode, uid, chatId, settings); err != nil {
+			log.Println(err)
 			return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
 		}
 
 	case *accountPb.NotifyEntity_Group:
 		groupId := e.Group.GroupId
 		if err := a.ChatUseCase.UpdateNotifySettings(ctx, constant.ChatGroupMode, uid, groupId, settings); err != nil {
+			log.Println(err)
 			return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
 		}
 
 	case *accountPb.NotifyEntity_Chats:
 		if err := a.UserUseCase.UpdateNotifySettings(ctx, constant.ChatPrivateMode, uid, settings); err != nil {
+			log.Println(err)
 			return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
 		}
 
 	case *accountPb.NotifyEntity_Groups:
 		if err := a.UserUseCase.UpdateNotifySettings(ctx, constant.ChatGroupMode, uid, settings); err != nil {
+			log.Println(err)
 			return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
 		}
 

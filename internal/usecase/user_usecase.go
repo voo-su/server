@@ -135,7 +135,7 @@ func (u *UserUseCase) GetNotifySettings(ctx context.Context, notifyType int, uid
 	return &settings, nil
 }
 
-func (u *UserUseCase) UpdateNotifySettings(ctx context.Context, uid int, notifyType int, data *entity.NotifySettings) error {
+func (u *UserUseCase) UpdateNotifySettings(ctx context.Context, notifyType int, uid int, data *entity.NotifySettings) error {
 	settings := map[string]any{}
 	switch notifyType {
 	case constant.ChatPrivateMode:

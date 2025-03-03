@@ -21,6 +21,7 @@ type MessageItem struct {
 	CreatedAt  string `json:"created_at"`
 	Extra      any    `json:"extra"`
 	Extra0     string `json:"extra0"`
+	QuoteId    string `json:"quote_id"`
 }
 
 type QueryGetHistoryOpt struct {
@@ -43,7 +44,7 @@ type QueryMessageItem struct {
 	IsRevoke   int       `json:"is_revoke"`
 	IsMark     int       `json:"is_mark"`
 	IsRead     int       `json:"is_read"`
-	QuoteId    int       `json:"quote_id"`
+	QuoteId    string    `json:"quote_id"`
 	Content    string    `json:"content"`
 	CreatedAt  time.Time `json:"created_at"`
 	Username   string    `json:"username"`
