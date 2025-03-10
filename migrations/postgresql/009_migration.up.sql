@@ -27,7 +27,6 @@ CREATE TABLE push_tokens
 
 ALTER TABLE file_splits ALTER COLUMN file_ext type VARCHAR(255) using file_ext::varchar(255);
 
---UPDATE--
 ALTER TABLE users ADD notify_chats_mute_until INTEGER DEFAULT 0 NOT NULL;
 ALTER TABLE users ADD notify_chats_show_previews BOOLEAN DEFAULT TRUE NOT NULL;
 ALTER TABLE users ADD notify_chats_silent BOOLEAN DEFAULT FALSE NOT NULL;
@@ -41,3 +40,8 @@ ALTER TABLE chats ADD notify_show_previews BOOLEAN DEFAULT TRUE NOT NULL;
 ALTER TABLE chats ADD notify_silent BOOLEAN DEFAULT FALSE NOT NULL;
 
 ALTER TABLE push_tokens ADD user_session_id INTEGER;
+
+--UPDATE--
+ALTER TABLE group_chat_members RENAME COLUMN min_record_id TO min_message_id;
+ALTER TABLE message_votes RENAME COLUMN record_id TO message_id;
+ALTER TABLE message_delete RENAME COLUMN record_id TO message_id;

@@ -170,7 +170,7 @@ func (c *ChatUseCase) DeleteRecordList(ctx context.Context, opt *RemoveRecordLis
 	items := make([]*postgresModel.MessageDelete, 0, len(ids))
 	for _, val := range ids {
 		items = append(items, &postgresModel.MessageDelete{
-			RecordId:  int(val),
+			MessageId: int(val),
 			UserId:    opt.UserId,
 			CreatedAt: time.Now(),
 		})
@@ -228,32 +228,32 @@ func (c *ChatUseCase) BatchAddList(ctx context.Context, uid int, values map[stri
 	c.Source.Postgres().WithContext(ctx).Exec(fmt.Sprintf("INSERT INTO chats (chat_type, user_id, receiver_id, created_at, updated_at) VALUES %s ON DUPLICATE KEY UPDATE is_delete = 0, updated_at = '%s'", strings.Join(data, ","), ctime))
 }
 
-func (c *ChatUseCase) Collect(ctx context.Context, uid int, recordId int64) error {
-	var record postgresModel.Message
-	if err := c.Source.Postgres().First(&record, recordId).Error; err != nil {
+func (c *ChatUseCase) Collect(ctx context.Context, uid int, messageId int64) error {
+	var message postgresModel.Message
+	if err := c.Source.Postgres().First(&message, messageId).Error; err != nil {
 		return err
 	}
 
-	if record.MsgType != constant.ChatMsgTypeImage {
+	if message.MsgType != constant.ChatMsgTypeImage {
 		return errors.New(c.Locale.Localize("cannot_favorite_message"))
 	}
 
-	if record.IsRevoke == 1 {
+	if message.IsRevoke == 1 {
 		return errors.New(c.Locale.Localize("cannot_favorite_message"))
 	}
 
-	if record.ChatType == constant.ChatPrivateMode {
-		if record.UserId != uid && record.ReceiverId != uid {
+	if message.ChatType == constant.ChatPrivateMode {
+		if message.UserId != uid && message.ReceiverId != uid {
 			return constant.ErrPermissionDenied
 		}
-	} else if record.ChatType == constant.ChatGroupMode {
-		if !c.GroupChatMemberRepo.IsMember(ctx, record.ReceiverId, uid, true) {
+	} else if message.ChatType == constant.ChatGroupMode {
+		if !c.GroupChatMemberRepo.IsMember(ctx, message.ReceiverId, uid, true) {
 			return constant.ErrPermissionDenied
 		}
 	}
 
 	var file entity.MessageExtraImage
-	if err := jsonutil.Decode(record.Extra, &file); err != nil {
+	if err := jsonutil.Decode(message.Extra, &file); err != nil {
 		return err
 	}
 

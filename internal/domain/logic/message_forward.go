@@ -33,7 +33,7 @@ func NewMessageForward(
 }
 
 type ForwardRecord struct {
-	RecordId   int
+	MessageId  int
 	ReceiverId int
 	ChatType   int
 }
@@ -78,7 +78,7 @@ func (m *MessageForward) MultiMergeForward(ctx context.Context, uid int, req *v1
 		})
 	}
 
-	tmpRecords, err := m.aggregation(ctx, req)
+	tmpMessages, err := m.aggregation(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -89,11 +89,11 @@ func (m *MessageForward) MultiMergeForward(ctx context.Context, uid int, req *v1
 	}
 
 	extra := jsonutil.Encode(entity.MessageExtraForward{
-		MsgIds:  ids,
-		Records: tmpRecords,
+		MsgIds:   ids,
+		Messages: tmpMessages,
 	})
 
-	records := make([]*postgresModel.Message, 0, len(receives))
+	messages := make([]*postgresModel.Message, 0, len(receives))
 	for _, item := range receives {
 		data := &postgresModel.Message{
 			MsgId:      strutil.NewMsgId(),
@@ -108,16 +108,16 @@ func (m *MessageForward) MultiMergeForward(ctx context.Context, uid int, req *v1
 		} else {
 			data.Sequence = m.SequenceRepo.Get(ctx, uid, data.ReceiverId)
 		}
-		records = append(records, data)
+		messages = append(messages, data)
 	}
-	if err := m.Source.Postgres().WithContext(ctx).Create(records).Error; err != nil {
+	if err := m.Source.Postgres().WithContext(ctx).Create(messages).Error; err != nil {
 		return nil, err
 	}
 
-	list := make([]*ForwardRecord, 0, len(records))
-	for _, record := range records {
+	list := make([]*ForwardRecord, 0, len(messages))
+	for _, record := range messages {
 		list = append(list, &ForwardRecord{
-			RecordId:   record.Id,
+			MessageId:  record.Id,
 			ReceiverId: record.ReceiverId,
 			ChatType:   record.ChatType,
 		})
@@ -129,7 +129,7 @@ func (m *MessageForward) MultiMergeForward(ctx context.Context, uid int, req *v1
 func (m *MessageForward) MultiSplitForward(ctx context.Context, uid int, req *v1Pb.ForwardMessageRequest) ([]*ForwardRecord, error) {
 	var (
 		receives = make([]map[string]int, 0)
-		records  = make([]*postgresModel.Message, 0)
+		messages = make([]*postgresModel.Message, 0)
 		db       = m.Source.Postgres().WithContext(ctx)
 	)
 	for _, userId := range req.Uids {
@@ -145,21 +145,21 @@ func (m *MessageForward) MultiSplitForward(ctx context.Context, uid int, req *v1
 		})
 	}
 
-	if err := db.Model(&postgresModel.Message{}).Where("id IN ?", req.MessageIds).Scan(&records).Error; err != nil {
+	if err := db.Model(&postgresModel.Message{}).Where("id IN ?", req.MessageIds).Scan(&messages).Error; err != nil {
 		return nil, err
 	}
 
-	items := make([]*postgresModel.Message, 0, len(receives)*len(records))
-	recordsLen := int64(len(records))
+	items := make([]*postgresModel.Message, 0, len(receives)*len(messages))
+	messagesLen := int64(len(messages))
 	for _, v := range receives {
 		var sequences []int64
 		if v["chat_type"] == constant.ChatTypeGroup {
-			sequences = m.SequenceRepo.BatchGet(ctx, 0, v["receiver_id"], recordsLen)
+			sequences = m.SequenceRepo.BatchGet(ctx, 0, v["receiver_id"], messagesLen)
 		} else {
-			sequences = m.SequenceRepo.BatchGet(ctx, uid, v["receiver_id"], recordsLen)
+			sequences = m.SequenceRepo.BatchGet(ctx, uid, v["receiver_id"], messagesLen)
 		}
 
-		for i, item := range records {
+		for i, item := range messages {
 			items = append(items, &postgresModel.Message{
 				MsgId:      strutil.NewMsgId(),
 				ChatType:   v["chat_type"],
@@ -179,7 +179,7 @@ func (m *MessageForward) MultiSplitForward(ctx context.Context, uid int, req *v1
 	list := make([]*ForwardRecord, 0, len(items))
 	for _, item := range items {
 		list = append(list, &ForwardRecord{
-			RecordId:   item.Id,
+			MessageId:  item.Id,
 			ReceiverId: item.ReceiverId,
 			ChatType:   item.ChatType,
 		})

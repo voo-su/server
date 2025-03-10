@@ -29,7 +29,7 @@ type QueryGetHistoryOpt struct {
 	UserId     int
 	ReceiverId int
 	MsgType    []int
-	RecordId   int
+	MessageId  int
 	Limit      int
 }
 
@@ -83,7 +83,7 @@ type MessageExtraForward struct {
 	UserId     int              `json:"user_id"`
 	ReceiverId int              `json:"receiver_id"`
 	MsgIds     []int            `json:"msg_ids"`
-	Records    []map[string]any `json:"records"`
+	Messages   []map[string]any `json:"messages"`
 }
 
 type MessageExtraLogin struct {

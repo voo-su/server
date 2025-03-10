@@ -321,7 +321,7 @@ func (m *Message) HandleVote(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	data, err := m.MessageUseCase.Vote(ctx.Ctx(), ctx.UserId(), params.RecordId, params.Options)
+	data, err := m.MessageUseCase.Vote(ctx.Ctx(), ctx.UserId(), params.MessageId, params.Options)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -330,7 +330,7 @@ func (m *Message) HandleVote(ctx *ginutil.Context) error {
 }
 
 func (m *Message) GetHistory(ctx *ginutil.Context) error {
-	params := &v1Pb.GetRecordsRequest{}
+	params := &v1Pb.GetMessagesRequest{}
 	if err := ctx.Context.ShouldBindQuery(params); err != nil {
 		return ctx.InvalidParams(err)
 	}
@@ -355,18 +355,18 @@ func (m *Message) GetHistory(ctx *ginutil.Context) error {
 			})
 
 			return ctx.Success(map[string]any{
-				"limit":     params.Limit,
-				"record_id": 0,
-				"items":     items,
+				"limit":      params.Limit,
+				"message_id": 0,
+				"items":      items,
 			})
 		}
 	}
 
-	records, err := m.MessageUseCase.GetHistory(ctx.Ctx(), &entity.QueryGetHistoryOpt{
+	messages, err := m.MessageUseCase.GetHistory(ctx.Ctx(), &entity.QueryGetHistoryOpt{
 		ChatType:   int(params.ChatType),
 		UserId:     uid,
 		ReceiverId: int(params.ReceiverId),
-		RecordId:   int(params.RecordId),
+		MessageId:  int(params.MessageId),
 		Limit:      int(params.Limit),
 	})
 	if err != nil {
@@ -374,14 +374,14 @@ func (m *Message) GetHistory(ctx *ginutil.Context) error {
 	}
 
 	rid := 0
-	if length := len(records); length > 0 {
-		rid = records[length-1].Sequence
+	if length := len(messages); length > 0 {
+		rid = messages[length-1].Sequence
 	}
 
 	return ctx.Success(map[string]any{
-		"limit":     params.Limit,
-		"record_id": rid,
-		"items":     records,
+		"limit":      params.Limit,
+		"message_id": rid,
+		"items":      messages,
 	})
 }
 
@@ -391,7 +391,7 @@ func (m *Message) Download(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	record, err := m.MessageUseCase.GetMessageByRecordId(ctx.Ctx(), params.RecordId)
+	record, err := m.MessageUseCase.GetMessageByMessageId(ctx.Ctx(), params.MessageId)
 	if err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -457,7 +457,7 @@ func (m *Message) Collect(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := m.ChatUseCase.Collect(ctx.Ctx(), ctx.UserId(), params.RecordId); err != nil {
+	if err := m.ChatUseCase.Collect(ctx.Ctx(), ctx.UserId(), params.MessageId); err != nil {
 		return ctx.Error(err.Error())
 	}
 

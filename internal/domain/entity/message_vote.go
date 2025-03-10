@@ -1,7 +1,7 @@
 package entity
 
 type QueryVoteModel struct {
-	RecordId     int    `json:"record_id"`
+	MessageId    int    `json:"message_id"`
 	ReceiverId   int    `json:"receiver_id"`
 	ChatType     int    `json:"chat_type"`
 	MsgType      int    `json:"msg_type"`

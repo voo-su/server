@@ -17,15 +17,15 @@ CREATE TABLE group_chats
 
 CREATE TABLE group_chat_members
 (
-    id            SERIAL PRIMARY KEY,
-    group_id      INTEGER     DEFAULT 0                     NOT NULL,
-    user_id       INTEGER     DEFAULT 0                     NOT NULL,
-    leader        INTEGER     DEFAULT 0                     NOT NULL,
-    user_card     VARCHAR(20) DEFAULT ''::CHARACTER VARYING NOT NULL,
-    is_quit       INTEGER     DEFAULT 0                     NOT NULL,
-    is_mute       INTEGER     DEFAULT 0                     NOT NULL,
-    min_record_id INTEGER     DEFAULT 0                     NOT NULL,
-    join_time     TIMESTAMP,
-    created_at    TIMESTAMP                                 NOT NULL,
-    updated_at    TIMESTAMP                                 NOT NULL
+    id             SERIAL PRIMARY KEY,
+    group_id       INTEGER     DEFAULT 0                     NOT NULL,
+    user_id        INTEGER     DEFAULT 0                     NOT NULL,
+    leader         INTEGER     DEFAULT 0                     NOT NULL,
+    user_card      VARCHAR(20) DEFAULT ''::CHARACTER VARYING NOT NULL,
+    is_quit        INTEGER     DEFAULT 0                     NOT NULL,
+    is_mute        INTEGER     DEFAULT 0                     NOT NULL,
+    min_message_id INTEGER     DEFAULT 0                     NOT NULL,
+    join_time      TIMESTAMP,
+    created_at     TIMESTAMP                                 NOT NULL,
+    updated_at     TIMESTAMP                                 NOT NULL
 );

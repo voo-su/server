@@ -1,7 +1,7 @@
 CREATE TABLE message_votes
 (
     id            SERIAL PRIMARY KEY,
-    record_id     INTEGER      DEFAULT 0                     NOT NULL,
+    message_id    INTEGER      DEFAULT 0                     NOT NULL,
     user_id       INTEGER      DEFAULT 0                     NOT NULL,
     title         VARCHAR(255) DEFAULT ''::CHARACTER VARYING NOT NULL,
     answer_mode   INTEGER      DEFAULT 0                     NOT NULL,

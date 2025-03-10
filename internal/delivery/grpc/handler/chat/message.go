@@ -42,11 +42,11 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 		}
 	}
 
-	records, err := c.MessageUseCase.GetHistory(ctx, &entity.QueryGetHistoryOpt{
+	messages, err := c.MessageUseCase.GetHistory(ctx, &entity.QueryGetHistoryOpt{
 		ChatType:   int(receiver.ChatType),
 		ReceiverId: int(receiver.ReceiverId),
 		UserId:     uid,
-		RecordId:   int(in.MessageId),
+		MessageId:  int(in.MessageId),
 		Limit:      int(in.Limit),
 	})
 	if err != nil {
@@ -54,7 +54,7 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 	}
 
 	items := make([]*chatPb.MessageItem, 0)
-	for _, item := range records {
+	for _, item := range messages {
 		messageItem := &chatPb.MessageItem{
 			Id: int64(item.Id),
 			Receiver: &chatPb.Receiver{
@@ -118,8 +118,8 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 	}
 
 	rid := 0
-	if length := len(records); length > 0 {
-		rid = records[length-1].Sequence
+	if length := len(messages); length > 0 {
+		rid = messages[length-1].Sequence
 	}
 
 	return &chatPb.GetHistoryResponse{

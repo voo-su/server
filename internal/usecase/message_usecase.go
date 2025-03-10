@@ -38,9 +38,9 @@ type IMessageUseCase interface {
 
 	GetHistory(ctx context.Context, opt *entity.QueryGetHistoryOpt) ([]*entity.MessageItem, error)
 
-	GetRecord(ctx context.Context, recordId int64) (*entity.MessageItem, error)
+	GetMessage(ctx context.Context, messageId int64) (*entity.MessageItem, error)
 
-	GetMessageByRecordId(ctx context.Context, recordId int64) (*postgresModel.Message, error)
+	GetMessageByMessageId(ctx context.Context, messageId int64) (*postgresModel.Message, error)
 
 	SendText(ctx context.Context, uid int, req *entity.SendText) error
 
@@ -167,9 +167,9 @@ func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHis
 	)
 	query := m.Source.Postgres().WithContext(ctx).Table("messages")
 	query.Joins("LEFT JOIN users ON messages.user_id = users.id")
-	query.Joins("LEFT JOIN message_delete ON messages.id = message_delete.record_id AND message_delete.user_id = ?", opt.UserId)
-	if opt.RecordId > 0 {
-		query.Where("messages.sequence < ?", opt.RecordId)
+	query.Joins("LEFT JOIN message_delete ON messages.id = message_delete.message_id AND message_delete.user_id = ?", opt.UserId)
+	if opt.MessageId > 0 {
+		query.Where("messages.sequence < ?", opt.MessageId)
 	}
 
 	if opt.ChatType == constant.ChatPrivateMode {
@@ -194,10 +194,10 @@ func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHis
 		return make([]*entity.MessageItem, 0), nil
 	}
 
-	return m.HandleRecords(ctx, items)
+	return m.HandleMessages(ctx, items)
 }
 
-func (m *MessageUseCase) GetRecord(ctx context.Context, recordId int64) (*entity.MessageItem, error) {
+func (m *MessageUseCase) GetMessage(ctx context.Context, messageId int64) (*entity.MessageItem, error) {
 	var (
 		err    error
 		item   *entity.QueryMessageItem
@@ -220,12 +220,12 @@ func (m *MessageUseCase) GetRecord(ctx context.Context, recordId int64) (*entity
 	query := m.Source.Postgres().
 		Table("messages").
 		Joins("LEFT JOIN users on messages.user_id = users.id").
-		Where("messages.id = ?", recordId)
+		Where("messages.id = ?", messageId)
 	if err = query.Select(fields).Take(&item).Error; err != nil {
 		return nil, err
 	}
 
-	list, err := m.HandleRecords(ctx, []*entity.QueryMessageItem{item})
+	list, err := m.HandleMessages(ctx, []*entity.QueryMessageItem{item})
 	if err != nil {
 		return nil, err
 	}
@@ -233,8 +233,8 @@ func (m *MessageUseCase) GetRecord(ctx context.Context, recordId int64) (*entity
 	return list[0], nil
 }
 
-func (m *MessageUseCase) GetForwardRecords(ctx context.Context, uid int, recordId int64) ([]*entity.MessageItem, error) {
-	record, err := m.MessageRepo.FindById(ctx, int(recordId))
+func (m *MessageUseCase) GetForwardMessages(ctx context.Context, uid int, messageId int64) ([]*entity.MessageItem, error) {
+	record, err := m.MessageRepo.FindById(ctx, int(messageId))
 	if err != nil {
 		return nil, err
 	}
@@ -282,10 +282,10 @@ func (m *MessageUseCase) GetForwardRecords(ctx context.Context, uid int, recordI
 		return nil, err
 	}
 
-	return m.HandleRecords(ctx, items)
+	return m.HandleMessages(ctx, items)
 }
 
-func (m *MessageUseCase) HandleRecords(ctx context.Context, items []*entity.QueryMessageItem) ([]*entity.MessageItem, error) {
+func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.QueryMessageItem) ([]*entity.MessageItem, error) {
 	var (
 		votes     []int
 		voteItems []*postgresModel.MessageVote
@@ -299,9 +299,9 @@ func (m *MessageUseCase) HandleRecords(ctx context.Context, items []*entity.Quer
 
 	hashVotes := make(map[int]*postgresModel.MessageVote)
 	if len(votes) > 0 {
-		m.Source.Postgres().Model(&postgresModel.MessageVote{}).Where("record_id in ?", votes).Scan(&voteItems)
+		m.Source.Postgres().Model(&postgresModel.MessageVote{}).Where("message_id IN ?", votes).Scan(&voteItems)
 		for i := range voteItems {
-			hashVotes[voteItems[i].RecordId] = voteItems[i]
+			hashVotes[voteItems[i].MessageId] = voteItems[i]
 		}
 	}
 
@@ -373,7 +373,7 @@ func (m *MessageUseCase) HandleRecords(ctx context.Context, items []*entity.Quer
 				data.Extra = map[string]any{
 					"detail": map[string]any{
 						"id":            value.Id,
-						"record_id":     value.RecordId,
+						"message_id":    value.MessageId,
 						"title":         value.Title,
 						"answer_mode":   value.AnswerMode,
 						"status":        value.Status,
@@ -392,8 +392,8 @@ func (m *MessageUseCase) HandleRecords(ctx context.Context, items []*entity.Quer
 	return newItems, nil
 }
 
-func (m *MessageUseCase) GetMessageByRecordId(ctx context.Context, recordId int64) (*postgresModel.Message, error) {
-	record, err := m.MessageRepo.FindById(ctx, int(recordId))
+func (m *MessageUseCase) GetMessageByMessageId(ctx context.Context, messageId int64) (*postgresModel.Message, error) {
+	record, err := m.MessageRepo.FindById(ctx, int(messageId))
 	if err != nil {
 		return nil, err
 	}
@@ -594,7 +594,7 @@ func (m *MessageUseCase) SendVote(ctx context.Context, uid int, req *v1Pb.VoteMe
 			return err
 		}
 		return tx.Create(&postgresModel.MessageVote{
-			RecordId:     data.Id,
+			MessageId:    data.Id,
 			UserId:       uid,
 			Title:        req.Title,
 			AnswerMode:   int(req.Mode),
@@ -653,7 +653,7 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 					"sender_id":   uid,
 					"receiver_id": item.ReceiverId,
 					"chat_type":   item.ChatType,
-					"record_id":   item.RecordId,
+					"message_id":  item.MessageId,
 				}),
 			})
 			pipe.Publish(ctx, constant.ImTopicChat, data)
@@ -772,7 +772,7 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int64, options
 		"messages.chat_type",
 		"messages.msg_type",
 		"vote.id as vote_id",
-		"vote.id as record_id",
+		"vote.id as message_id",
 		"vote.answer_mode",
 		"vote.answer_option",
 		"vote.answer_num",
@@ -780,7 +780,7 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int64, options
 	}
 	query := db.Select(fields).
 		Table("messages").
-		Joins("LEFT JOIN message_votes as vote ON vote.record_id = messages.id").
+		Joins("LEFT JOIN message_votes as vote ON vote.message_id = messages.id").
 		Where("messages.id = ?", msgId)
 
 	var vote entity.QueryVoteModel
@@ -1051,7 +1051,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 			"sender_id":   record.UserId,
 			"receiver_id": record.ReceiverId,
 			"chat_type":   record.ChatType,
-			"record_id":   record.Id,
+			"message_id":  record.Id,
 		}),
 	})
 

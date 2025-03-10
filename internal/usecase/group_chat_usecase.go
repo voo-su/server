@@ -116,7 +116,7 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 			return err
 		}
 
-		record := &postgresModel.Message{
+		message := &postgresModel.Message{
 			MsgId:      strutil.NewMsgId(),
 			ChatType:   constant.ChatGroupMode,
 			ReceiverId: group.Id,
@@ -128,7 +128,7 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 				Members:   addMembers,
 			}),
 		}
-		if err = tx.Create(record).Error; err != nil {
+		if err = tx.Create(message).Error; err != nil {
 			return err
 		}
 
@@ -211,7 +211,7 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 		return err
 	}
 
-	record := &postgresModel.Message{
+	message := &postgresModel.Message{
 		MsgId:      strutil.NewMsgId(),
 		ChatType:   constant.ChatGroupMode,
 		ReceiverId: groupId,
@@ -232,7 +232,7 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 			return err
 		}
 
-		if err = tx.Create(record).Error; err != nil {
+		if err = tx.Create(message).Error; err != nil {
 			return err
 		}
 
@@ -255,10 +255,10 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 	g.Source.Redis().Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
 		"event": constant.SubEventImMessage,
 		"data": jsonutil.Encode(map[string]any{
-			"sender_id":   record.UserId,
-			"receiver_id": record.ReceiverId,
-			"chat_type":   record.ChatType,
-			"record_id":   record.Id,
+			"sender_id":   message.UserId,
+			"receiver_id": message.ReceiverId,
+			"chat_type":   message.ChatType,
+			"message_id":  message.Id,
 		}),
 	}))
 
@@ -340,7 +340,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		return errors.New(g.Locale.Localize("all_invited_contacts_are_group_members"))
 	}
 
-	record := &postgresModel.Message{
+	message := &postgresModel.Message{
 		MsgId:      strutil.NewMsgId(),
 		ChatType:   constant.ChatGroupMode,
 		ReceiverId: opt.GroupId,
@@ -348,7 +348,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 		Sequence:   g.SequenceRepo.Get(ctx, 0, opt.GroupId),
 	}
 
-	record.Extra = jsonutil.Encode(&entity.MessageExtraGroupJoin{
+	message.Extra = jsonutil.Encode(&entity.MessageExtraGroupJoin{
 		OwnerId:   memberMaps[opt.UserId].Id,
 		OwnerName: memberMaps[opt.UserId].Username,
 		Members:   members,
@@ -372,7 +372,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 				"created_at": timeutil.DateTime(),
 			})
 		}
-		if err = tx.Create(record).Error; err != nil {
+		if err = tx.Create(message).Error; err != nil {
 			return err
 		}
 
@@ -394,10 +394,10 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 	g.Source.Redis().Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
 		"event": constant.SubEventImMessage,
 		"data": jsonutil.Encode(map[string]any{
-			"sender_id":   record.UserId,
-			"receiver_id": record.ReceiverId,
-			"chat_type":   record.ChatType,
-			"record_id":   record.Id,
+			"sender_id":   message.UserId,
+			"receiver_id": message.ReceiverId,
+			"chat_type":   message.ChatType,
+			"message_id":  message.Id,
 		}),
 	}))
 	return nil
@@ -449,7 +449,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 		})
 	}
 
-	record := &postgresModel.Message{
+	message := &postgresModel.Message{
 		MsgId:      strutil.NewMsgId(),
 		Sequence:   g.SequenceRepo.Get(ctx, 0, opt.GroupId),
 		ChatType:   constant.ChatGroupMode,
@@ -472,7 +472,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 			return err
 		}
 
-		return tx.Create(record).Error
+		return tx.Create(message).Error
 	})
 	if err != nil {
 		return err
@@ -493,10 +493,10 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 		pipe.Publish(ctx, constant.ImTopicChat, jsonutil.Encode(map[string]any{
 			"event": constant.SubEventImMessage,
 			"data": jsonutil.Encode(map[string]any{
-				"sender_id":   int64(record.UserId),
-				"receiver_id": int64(record.ReceiverId),
-				"chat_type":   record.ChatType,
-				"record_id":   int64(record.Id),
+				"sender_id":   int64(message.UserId),
+				"receiver_id": int64(message.ReceiverId),
+				"chat_type":   message.ChatType,
+				"message_id":  int64(message.Id),
 			}),
 		}))
 		return nil

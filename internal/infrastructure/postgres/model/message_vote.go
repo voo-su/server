@@ -4,7 +4,7 @@ import "time"
 
 type MessageVote struct {
 	Id           int       `gorm:"primaryKey"`
-	RecordId     int       `gorm:"column:record_id;DEFAULT:0;NOT NULL"`
+	MessageId    int       `gorm:"column:message_id;DEFAULT:0;NOT NULL"`
 	UserId       int       `gorm:"column:user_id;DEFAULT:0;NOT NULL"`
 	Title        string    `gorm:"column:title;NOT NULL"`
 	AnswerMode   int       `gorm:"column:answer_mode;DEFAULT:0;NOT NULL"`

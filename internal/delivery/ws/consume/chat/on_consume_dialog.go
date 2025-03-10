@@ -14,7 +14,7 @@ type ConsumeMessage struct {
 	ChatType   int   `json:"chat_type"`
 	SenderId   int64 `json:"sender_id"`
 	ReceiverId int64 `json:"receiver_id"`
-	RecordId   int64 `json:"record_id"`
+	MessageId  int64 `json:"message_id"`
 }
 
 func (h *Handler) onConsumeMessage(ctx context.Context, body []byte) {
@@ -44,7 +44,7 @@ func (h *Handler) onConsumeMessage(ctx context.Context, body []byte) {
 		return
 	}
 
-	data, err := h.MessageUseCase.GetRecord(ctx, in.RecordId)
+	data, err := h.MessageUseCase.GetMessage(ctx, in.MessageId)
 	if err != nil {
 		return
 	}

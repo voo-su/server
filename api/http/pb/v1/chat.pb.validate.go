@@ -1360,22 +1360,22 @@ var _ interface {
 	ErrorName() string
 } = ChatClearUnreadNumResponseValidationError{}
 
-// Validate checks the field values on GetRecordsRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *GetRecordsRequest) Validate() error {
+// Validate checks the field values on GetMessagesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetMessagesRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on GetRecordsRequest with the rules
+// ValidateAll checks the field values on GetMessagesRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// GetRecordsRequestMultiError, or nil if none found.
-func (m *GetRecordsRequest) ValidateAll() error {
+// GetMessagesRequestMultiError, or nil if none found.
+func (m *GetMessagesRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *GetRecordsRequest) validate(all bool) error {
+func (m *GetMessagesRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -1386,24 +1386,24 @@ func (m *GetRecordsRequest) validate(all bool) error {
 
 	// no validation rules for ReceiverId
 
-	// no validation rules for RecordId
+	// no validation rules for MessageId
 
 	// no validation rules for Limit
 
 	if len(errors) > 0 {
-		return GetRecordsRequestMultiError(errors)
+		return GetMessagesRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// GetRecordsRequestMultiError is an error wrapping multiple validation errors
-// returned by GetRecordsRequest.ValidateAll() if the designated constraints
+// GetMessagesRequestMultiError is an error wrapping multiple validation errors
+// returned by GetMessagesRequest.ValidateAll() if the designated constraints
 // aren't met.
-type GetRecordsRequestMultiError []error
+type GetMessagesRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m GetRecordsRequestMultiError) Error() string {
+func (m GetMessagesRequestMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1412,11 +1412,11 @@ func (m GetRecordsRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m GetRecordsRequestMultiError) AllErrors() []error { return m }
+func (m GetMessagesRequestMultiError) AllErrors() []error { return m }
 
-// GetRecordsRequestValidationError is the validation error returned by
-// GetRecordsRequest.Validate if the designated constraints aren't met.
-type GetRecordsRequestValidationError struct {
+// GetMessagesRequestValidationError is the validation error returned by
+// GetMessagesRequest.Validate if the designated constraints aren't met.
+type GetMessagesRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1424,24 +1424,24 @@ type GetRecordsRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e GetRecordsRequestValidationError) Field() string { return e.field }
+func (e GetMessagesRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GetRecordsRequestValidationError) Reason() string { return e.reason }
+func (e GetMessagesRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GetRecordsRequestValidationError) Cause() error { return e.cause }
+func (e GetMessagesRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GetRecordsRequestValidationError) Key() bool { return e.key }
+func (e GetMessagesRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GetRecordsRequestValidationError) ErrorName() string {
-	return "GetRecordsRequestValidationError"
+func (e GetMessagesRequestValidationError) ErrorName() string {
+	return "GetMessagesRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GetRecordsRequestValidationError) Error() string {
+func (e GetMessagesRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1453,14 +1453,14 @@ func (e GetRecordsRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGetRecordsRequest.%s: %s%s",
+		"invalid %sGetMessagesRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GetRecordsRequestValidationError{}
+var _ error = GetMessagesRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -1468,7 +1468,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GetRecordsRequestValidationError{}
+} = GetMessagesRequestValidationError{}
 
 // Validate checks the field values on MessageReceiver with the rules defined
 // in the proto definition for this message. If any rules are violated, the
@@ -3548,7 +3548,7 @@ func (m *CollectMessageRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for RecordId
+	// no validation rules for MessageId
 
 	if len(errors) > 0 {
 		return CollectMessageRequestMultiError(errors)
@@ -3652,7 +3652,7 @@ func (m *DownloadChatFileRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for RecordId
+	// no validation rules for MessageId
 
 	if len(errors) > 0 {
 		return DownloadChatFileRequestMultiError(errors)
@@ -3756,7 +3756,7 @@ func (m *VoteMessageHandleRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for RecordId
+	// no validation rules for MessageId
 
 	// no validation rules for Options
 

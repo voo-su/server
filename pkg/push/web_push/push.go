@@ -20,7 +20,7 @@ import (
 	"golang.org/x/crypto/hkdf"
 )
 
-const MaxRecordSize uint32 = 4096
+const MaxMessageSize uint32 = 4096
 
 // saltFunc генерирует соль размером 16 байт
 var saltFunc = func() ([]byte, error) {
@@ -39,7 +39,7 @@ type IHTTPClient interface {
 
 type Options struct {
 	HTTPClient      IHTTPClient
-	RecordSize      uint32    // Ограничение размера записи
+	MessageSize     uint32    // Ограничение размера записи
 	Subscriber      string    // Указывается в VAPID JWT токене
 	Topic           string    // Устанавливает заголовок Topic для группировки сообщений (опционально)
 	TTL             int       // Устанавливает TTL в POST-запросе к конечной точке
@@ -156,18 +156,18 @@ func SendNotificationWithContext(ctx context.Context, message []byte, s *Subscri
 	}
 
 	// Получаем размер записи
-	recordSize := options.RecordSize
-	if recordSize == 0 {
-		recordSize = MaxRecordSize
+	messageSize := options.MessageSize
+	if messageSize == 0 {
+		messageSize = MaxMessageSize
 	}
 
-	recordLength := int(recordSize) - 16
+	recordLength := int(messageSize) - 16
 
 	// Заголовок шифрования контента
 	recordBuf := bytes.NewBuffer(salt)
 
 	rs := make([]byte, 4)
-	binary.BigEndian.PutUint32(rs, recordSize)
+	binary.BigEndian.PutUint32(rs, messageSize)
 
 	recordBuf.Write(rs)
 	recordBuf.Write([]byte{byte(len(localPublicKey))})

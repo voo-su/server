@@ -1,7 +1,7 @@
 CREATE TABLE message_delete
 (
     id         SERIAL PRIMARY KEY,
-    record_id  INTEGER DEFAULT 0 NOT NULL,
+    message_id INTEGER DEFAULT 0 NOT NULL,
     user_id    INTEGER DEFAULT 0 NOT NULL,
     created_at TIMESTAMP         NOT NULL
 );
