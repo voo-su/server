@@ -1,4 +1,4 @@
-CREATE TABLE auth_codes
+CREATE TABLE IF NOT EXISTS auth_codes
 (
     email         String,
     code          String,
@@ -8,7 +8,7 @@ CREATE TABLE auth_codes
 ) ENGINE = MergeTree()
       ORDER BY (email, created_at);
 
-CREATE TABLE access_logs
+CREATE TABLE IF NOT EXISTS access_logs
 (
     remote_addr       String,
     request_uri       String,

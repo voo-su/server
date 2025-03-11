@@ -4,8 +4,7 @@
 
 Before starting, ensure you have the following tools installed:
 
-- [Docker](https://docs.docker.com/get-started/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Docker](https://docs.docker.com/engine/install/)
 
 ## Installation Guide
 

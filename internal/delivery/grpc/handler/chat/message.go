@@ -77,7 +77,39 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 			messageItem.Media = &chatPb.MessageMedia{
 				Media: &chatPb.MessageMedia_MessageMediaPhoto{
 					MessageMediaPhoto: &chatPb.MessageMediaPhoto{
-						Photo: file.Url,
+						File: file.Url,
+					},
+				},
+			}
+		}
+
+		if item.MsgType == constant.ChatMsgTypeVideo {
+			var file entity.MessageExtraVideo
+			if err := jsonutil.Decode(item.Extra0, &file); err != nil {
+				fmt.Println(err)
+			}
+
+			messageItem.Media = &chatPb.MessageMedia{
+				Media: &chatPb.MessageMedia_MessageMediaDocument{
+					MessageMediaDocument: &chatPb.MessageMediaDocument{
+						File:     file.Url,
+						MimeType: "video/" + file.Suffix,
+					},
+				},
+			}
+		}
+
+		if item.MsgType == constant.ChatMsgTypeAudio {
+			var file entity.MessageExtraAudio
+			if err := jsonutil.Decode(item.Extra0, &file); err != nil {
+				fmt.Println(err)
+			}
+
+			messageItem.Media = &chatPb.MessageMedia{
+				Media: &chatPb.MessageMedia_MessageMediaDocument{
+					MessageMediaDocument: &chatPb.MessageMediaDocument{
+						File:     file.Url,
+						MimeType: "audio/" + file.Suffix,
 					},
 				},
 			}

@@ -2,28 +2,26 @@
 
 set -x
 
-docker-compose up -d
+docker compose -f docker-compose.dev.yaml up -d
 
-if ! docker ps | grep -q clickhouse; then
-    echo "The ClickHouse container is not running."
-    exit 1
-fi
-
-if ! docker ps | grep -q postgres; then
+if ! docker inspect -f '{{.State.Running}}' postgres &>/dev/null; then
     echo "The PostgreSQL container is not running."
     exit 1
 fi
 
-docker exec -i clickhouse clickhouse-client --user clickhouse --password clickhouse --database=voo_su < ./migrations/clickhouse/001_migration.up.sql
-docker exec -it clickhouse clickhouse-client --user clickhouse --password clickhouse --database=voo_su -q 'SHOW TABLES;'
-docker exec -i postgres psql -U postgres -d voo_su -f ./migrations/postgresql/001_migration.up.sql
-docker exec -i postgres psql -U postgres -d voo_su -f ./migrations/postgresql/002_migration.up.sql
-docker exec -i postgres psql -U postgres -d voo_su -f ./migrations/postgresql/003_migration.up.sql
-docker exec -i postgres psql -U postgres -d voo_su -f ./migrations/postgresql/004_migration.up.sql
-docker exec -i postgres psql -U postgres -d voo_su -f ./migrations/postgresql/005_migration.up.sql
-docker exec -i postgres psql -U postgres -d voo_su -f ./migrations/postgresql/006_migration.up.sql
-docker exec -i postgres psql -U postgres -d voo_su -f ./migrations/postgresql/007_migration.up.sql
-docker exec -i postgres psql -U postgres -d voo_su -f ./migrations/postgresql/008_migration.up.sql
-docker exec -i postgres psql -U postgres -d voo_su -f ./migrations/postgresql/009_migration.up.sql
-docker exec -i postgres psql -U postgres -d voo_su -f ./migrations/postgresql/010_migration.up.sql
-docker exec -it postgres psql -U postgres -d voo_su -c '\dt'
+if ! docker inspect -f '{{.State.Running}}' clickhouse &>/dev/null; then
+    echo "The ClickHouse container is not running."
+    exit 1
+fi
+
+until docker exec -i postgres pg_isready -U postgres; do
+    sleep 2
+done
+
+while IFS= read -r migration; do
+    docker exec -i postgres psql -U postgres -d voo_su <"$migration"
+done < <(find ./migrations/postgres -type f -name "*.up.sql" | sort)
+
+while IFS= read -r migration; do
+    cat "$migration" | docker exec -i clickhouse clickhouse-client --user clickhouse --password clickhouse --database=voo_su
+done < <(find ./migrations/clickhouse -type f -name "*.up.sql" | sort)
