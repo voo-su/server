@@ -141,8 +141,8 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 				Id:       int64(mId),
 				MsgType:  int32(reply.Reply.MsgType),
 				UserId:   int64(reply.Reply.UserId),
-				Username: reply.Reply.MsgId,
-				Content:  reply.Reply.MsgId,
+				Username: reply.Reply.Username,
+				Content:  reply.Reply.Content,
 			}
 		}
 

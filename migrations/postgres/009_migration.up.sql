@@ -41,7 +41,15 @@ ALTER TABLE chats ADD notify_silent BOOLEAN DEFAULT FALSE NOT NULL;
 
 ALTER TABLE push_tokens ADD user_session_id INTEGER;
 
---UPDATE--
+
 ALTER TABLE group_chat_members RENAME COLUMN min_record_id TO min_message_id;
 ALTER TABLE message_votes RENAME COLUMN record_id TO message_id;
 ALTER TABLE message_delete RENAME COLUMN record_id TO message_id;
+
+--UPDATE--
+ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+ALTER TABLE users ALTER COLUMN email SET DEFAULT NULL;
+ALTER TABLE users ALTER COLUMN about DROP NOT NULL;
+ALTER TABLE users ALTER COLUMN about SET DEFAULT NULL;
+
+CREATE UNIQUE INDEX unique_lower_email ON users (LOWER(email)) WHERE email IS NOT NULL;

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gorm.io/gorm"
+	"strings"
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/pkg/gormutil"
 )
@@ -37,7 +38,7 @@ func (u *UserRepository) IsEmailExist(ctx context.Context, email string) bool {
 		return false
 	}
 
-	exist, _ := u.Repo.QueryExist(ctx, "email = ?", email)
+	exist, _ := u.Repo.QueryExist(ctx, "LOWER(email) = ?", strings.ToLower(email))
 	return exist
 }
 
@@ -46,7 +47,7 @@ func (u *UserRepository) FindByEmail(email string) (*model.User, error) {
 		return nil, fmt.Errorf("пуст")
 	}
 
-	return u.Repo.FindByWhere(context.TODO(), "email = ?", email)
+	return u.Repo.FindByWhere(context.TODO(), "LOWER(email) = ?", strings.ToLower(email))
 }
 
 func (u *UserRepository) Search(q string, id int, limit int) ([]*model.User, error) {

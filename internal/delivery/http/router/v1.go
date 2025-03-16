@@ -76,7 +76,7 @@ func NewV1(conf *config.Config, locale locale.ILocale, router *gin.Engine, handl
 			groupChat.POST("/create", ginutil.HandlerFunc(handler.V1.GroupChat.Create))
 			groupChat.GET("/get", ginutil.HandlerFunc(handler.V1.GroupChat.Get))
 			groupChat.POST("/invite", ginutil.HandlerFunc(handler.V1.GroupChat.Invite))
-			groupChat.POST("/leave-chat", ginutil.HandlerFunc(handler.V1.GroupChat.SignOut))
+			groupChat.POST("/leave", ginutil.HandlerFunc(handler.V1.GroupChat.Leave))
 			groupChat.POST("/setting", ginutil.HandlerFunc(handler.V1.GroupChat.Setting))
 			groupChat.POST("/assign-admin", ginutil.HandlerFunc(handler.V1.GroupChat.AssignAdmin))
 			groupChat.GET("/members", ginutil.HandlerFunc(handler.V1.GroupChat.Members))

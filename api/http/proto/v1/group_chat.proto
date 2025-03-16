@@ -80,7 +80,7 @@ message GroupChatGetInviteFriendsRequest {
     int32 group_id = 1 [(tagger.tags) = "form:\"group_id\""];
 }
 
-message GroupChatSecedeRequest {
+message GroupChatLeaveRequest {
     int32 group_id = 1 [(tagger.tags) = "binding:\"required\""];
 }
 

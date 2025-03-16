@@ -86,8 +86,8 @@ func (g *GroupChat) Invite(ctx *ginutil.Context) error {
 	return ctx.Success(&v1Pb.GroupChatInviteResponse{})
 }
 
-func (g *GroupChat) SignOut(ctx *ginutil.Context) error {
-	params := &v1Pb.GroupChatSecedeRequest{}
+func (g *GroupChat) Leave(ctx *ginutil.Context) error {
+	params := &v1Pb.GroupChatLeaveRequest{}
 	if err := ctx.Context.ShouldBind(params); err != nil {
 		return ctx.InvalidParams(err)
 	}

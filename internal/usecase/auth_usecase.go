@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"log"
+	"strings"
 	"time"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
@@ -135,25 +136,26 @@ func (a *AuthUseCase) Send(ctx context.Context, channel string, _email string, t
 }
 
 func (a *AuthUseCase) Register(ctx context.Context, email string) (*postgresModel.User, error) {
-	if a.UserRepo.IsEmailExist(ctx, email) {
-		return a.UserRepo.FindByEmail(email)
+	email = strings.TrimSpace(email)
+	if email == "" {
+		return nil, errors.New("email не может быть пустым")
 	}
 
-	for {
-		username := uuid.New().String()
-		var user postgresModel.User
-		result := a.UserRepo.Db.Where("username = ?", username).First(&user)
-		if result.Error != nil {
-			if result.Error == gorm.ErrRecordNotFound {
-				user.Email = email
-				user.Username = username
-				return a.UserRepo.Create(&user)
-			}
-			log.Fatal(result.Error)
-		}
+	lowerEmail := strings.ToLower(email)
+	user, err := a.UserRepo.FindByEmail(lowerEmail)
+	if err == nil {
+		return user, nil
+	}
+	if err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	username := uuid.New().String()
+	user = &postgresModel.User{
+		Email:    email,
+		Username: username,
 	}
 
-	return nil, errors.New(a.Locale.Localize("general_error"))
+	return a.UserRepo.Create(user)
 }
 
 func (a *AuthUseCase) GetSessionByToken(ctx context.Context, token string) (*postgresModel.UserSession, error) {

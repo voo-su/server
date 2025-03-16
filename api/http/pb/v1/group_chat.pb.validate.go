@@ -1369,22 +1369,22 @@ var _ interface {
 	ErrorName() string
 } = GroupChatGetInviteFriendsRequestValidationError{}
 
-// Validate checks the field values on GroupChatSecedeRequest with the rules
+// Validate checks the field values on GroupChatLeaveRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *GroupChatSecedeRequest) Validate() error {
+func (m *GroupChatLeaveRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on GroupChatSecedeRequest with the rules
+// ValidateAll checks the field values on GroupChatLeaveRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// GroupChatSecedeRequestMultiError, or nil if none found.
-func (m *GroupChatSecedeRequest) ValidateAll() error {
+// GroupChatLeaveRequestMultiError, or nil if none found.
+func (m *GroupChatLeaveRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *GroupChatSecedeRequest) validate(all bool) error {
+func (m *GroupChatLeaveRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -1394,19 +1394,19 @@ func (m *GroupChatSecedeRequest) validate(all bool) error {
 	// no validation rules for GroupId
 
 	if len(errors) > 0 {
-		return GroupChatSecedeRequestMultiError(errors)
+		return GroupChatLeaveRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// GroupChatSecedeRequestMultiError is an error wrapping multiple validation
-// errors returned by GroupChatSecedeRequest.ValidateAll() if the designated
+// GroupChatLeaveRequestMultiError is an error wrapping multiple validation
+// errors returned by GroupChatLeaveRequest.ValidateAll() if the designated
 // constraints aren't met.
-type GroupChatSecedeRequestMultiError []error
+type GroupChatLeaveRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m GroupChatSecedeRequestMultiError) Error() string {
+func (m GroupChatLeaveRequestMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1415,11 +1415,11 @@ func (m GroupChatSecedeRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m GroupChatSecedeRequestMultiError) AllErrors() []error { return m }
+func (m GroupChatLeaveRequestMultiError) AllErrors() []error { return m }
 
-// GroupChatSecedeRequestValidationError is the validation error returned by
-// GroupChatSecedeRequest.Validate if the designated constraints aren't met.
-type GroupChatSecedeRequestValidationError struct {
+// GroupChatLeaveRequestValidationError is the validation error returned by
+// GroupChatLeaveRequest.Validate if the designated constraints aren't met.
+type GroupChatLeaveRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1427,24 +1427,24 @@ type GroupChatSecedeRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e GroupChatSecedeRequestValidationError) Field() string { return e.field }
+func (e GroupChatLeaveRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e GroupChatSecedeRequestValidationError) Reason() string { return e.reason }
+func (e GroupChatLeaveRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e GroupChatSecedeRequestValidationError) Cause() error { return e.cause }
+func (e GroupChatLeaveRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e GroupChatSecedeRequestValidationError) Key() bool { return e.key }
+func (e GroupChatLeaveRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e GroupChatSecedeRequestValidationError) ErrorName() string {
-	return "GroupChatSecedeRequestValidationError"
+func (e GroupChatLeaveRequestValidationError) ErrorName() string {
+	return "GroupChatLeaveRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e GroupChatSecedeRequestValidationError) Error() string {
+func (e GroupChatLeaveRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1456,14 +1456,14 @@ func (e GroupChatSecedeRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sGroupChatSecedeRequest.%s: %s%s",
+		"invalid %sGroupChatLeaveRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = GroupChatSecedeRequestValidationError{}
+var _ error = GroupChatLeaveRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -1471,7 +1471,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = GroupChatSecedeRequestValidationError{}
+} = GroupChatLeaveRequestValidationError{}
 
 // Validate checks the field values on GroupSettingRequest with the rules
 // defined in the proto definition for this message. If any rules are
