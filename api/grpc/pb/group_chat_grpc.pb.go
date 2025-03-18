@@ -25,6 +25,7 @@ const (
 	GroupChatService_AddUserToGroupChat_FullMethodName      = "/group_chat.GroupChatService/AddUserToGroupChat"
 	GroupChatService_RemoveUserFromGroupChat_FullMethodName = "/group_chat.GroupChatService/RemoveUserFromGroupChat"
 	GroupChatService_LeaveGroupChat_FullMethodName          = "/group_chat.GroupChatService/LeaveGroupChat"
+	GroupChatService_DeleteGroupChat_FullMethodName         = "/group_chat.GroupChatService/DeleteGroupChat"
 )
 
 // GroupChatServiceClient is the client API for GroupChatService service.
@@ -43,6 +44,8 @@ type GroupChatServiceClient interface {
 	RemoveUserFromGroupChat(ctx context.Context, in *RemoveUserFromGroupChatRequest, opts ...grpc.CallOption) (*RemoveUserFromGroupChatResponse, error)
 	// A user leaving the group chat
 	LeaveGroupChat(ctx context.Context, in *LeaveGroupChatRequest, opts ...grpc.CallOption) (*LeaveGroupChatResponse, error)
+	// Deleting a group chat
+	DeleteGroupChat(ctx context.Context, in *DeleteGroupChatRequest, opts ...grpc.CallOption) (*DeleteGroupChatResponse, error)
 }
 
 type groupChatServiceClient struct {
@@ -113,6 +116,16 @@ func (c *groupChatServiceClient) LeaveGroupChat(ctx context.Context, in *LeaveGr
 	return out, nil
 }
 
+func (c *groupChatServiceClient) DeleteGroupChat(ctx context.Context, in *DeleteGroupChatRequest, opts ...grpc.CallOption) (*DeleteGroupChatResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteGroupChatResponse)
+	err := c.cc.Invoke(ctx, GroupChatService_DeleteGroupChat_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GroupChatServiceServer is the server API for GroupChatService service.
 // All implementations must embed UnimplementedGroupChatServiceServer
 // for forward compatibility.
@@ -129,6 +142,8 @@ type GroupChatServiceServer interface {
 	RemoveUserFromGroupChat(context.Context, *RemoveUserFromGroupChatRequest) (*RemoveUserFromGroupChatResponse, error)
 	// A user leaving the group chat
 	LeaveGroupChat(context.Context, *LeaveGroupChatRequest) (*LeaveGroupChatResponse, error)
+	// Deleting a group chat
+	DeleteGroupChat(context.Context, *DeleteGroupChatRequest) (*DeleteGroupChatResponse, error)
 	mustEmbedUnimplementedGroupChatServiceServer()
 }
 
@@ -156,6 +171,9 @@ func (UnimplementedGroupChatServiceServer) RemoveUserFromGroupChat(context.Conte
 }
 func (UnimplementedGroupChatServiceServer) LeaveGroupChat(context.Context, *LeaveGroupChatRequest) (*LeaveGroupChatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LeaveGroupChat not implemented")
+}
+func (UnimplementedGroupChatServiceServer) DeleteGroupChat(context.Context, *DeleteGroupChatRequest) (*DeleteGroupChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteGroupChat not implemented")
 }
 func (UnimplementedGroupChatServiceServer) mustEmbedUnimplementedGroupChatServiceServer() {}
 func (UnimplementedGroupChatServiceServer) testEmbeddedByValue()                          {}
@@ -286,6 +304,24 @@ func _GroupChatService_LeaveGroupChat_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GroupChatService_DeleteGroupChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteGroupChatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupChatServiceServer).DeleteGroupChat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GroupChatService_DeleteGroupChat_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupChatServiceServer).DeleteGroupChat(ctx, req.(*DeleteGroupChatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GroupChatService_ServiceDesc is the grpc.ServiceDesc for GroupChatService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -316,6 +352,10 @@ var GroupChatService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LeaveGroupChat",
 			Handler:    _GroupChatService_LeaveGroupChat_Handler,
+		},
+		{
+			MethodName: "DeleteGroupChat",
+			Handler:    _GroupChatService_DeleteGroupChat_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

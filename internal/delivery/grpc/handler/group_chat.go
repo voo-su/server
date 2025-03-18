@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 	"log"
 	groupChatPb "voo.su/api/grpc/pb"
+	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/usecase"
@@ -193,6 +194,30 @@ func (g *GroupChat) LeaveGroupChat(ctx context.Context, in *groupChatPb.LeaveGro
 	}
 
 	return &groupChatPb.LeaveGroupChatResponse{
+		Success: true,
+	}, nil
+}
+
+func (g *GroupChat) DeleteGroupChat(ctx context.Context, in *groupChatPb.DeleteGroupChatRequest) (*groupChatPb.DeleteGroupChatResponse, error) {
+	uid := grpcutil.UserId(ctx)
+	gid := int(in.Id)
+	if !g.GroupChatMemberUseCase.MemberRepo.IsMaster(ctx, gid, uid) {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("no_permission_to_dissolve_group"))
+	}
+
+	if err := g.GroupChatUseCase.Dismiss(ctx, gid, uid); err != nil {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("group_dissolution_failed"))
+	}
+
+	_ = g.MessageUseCase.SendSystemText(ctx, uid, &v1Pb.TextMessageRequest{
+		Content: g.Locale.Localize("group_dissolved_by_owner"),
+		Receiver: &v1Pb.MessageReceiver{
+			ChatType:   constant.ChatGroupMode,
+			ReceiverId: int32(gid),
+		},
+	})
+
+	return &groupChatPb.DeleteGroupChatResponse{
 		Success: true,
 	}, nil
 }
