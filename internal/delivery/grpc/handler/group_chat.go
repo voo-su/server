@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log"
-	groupChatPb "voo.su/api/grpc/gen/go/pb"
+	groupChatPb "voo.su/api/grpc/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/usecase"

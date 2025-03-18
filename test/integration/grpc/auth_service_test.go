@@ -3,7 +3,7 @@ package grpc
 import (
 	"fmt"
 	"testing"
-	authPb "voo.su/api/grpc/gen/go/pb"
+	authPb "voo.su/api/grpc/pb"
 )
 
 func TestAuthLoginService(t *testing.T) {

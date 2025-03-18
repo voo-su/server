@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/google/wire"
-	"voo.su/api/grpc/gen/go/pb"
+	"voo.su/api/grpc/pb"
 	"voo.su/internal/delivery/grpc/handler/chat"
 )
 

@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"testing"
-	chatPb "voo.su/api/grpc/gen/go/pb"
+	chatPb "voo.su/api/grpc/pb"
 )
 
 func TestChatListService(t *testing.T) {
@@ -11,7 +11,7 @@ func TestChatListService(t *testing.T) {
 	defer conn.Close()
 
 	client := chatPb.NewChatServiceClient(conn)
-	res, err := client.List(ctx, &chatPb.GetChatListRequest{})
+	res, err := client.GetChats(ctx, &chatPb.GetChatsRequest{})
 	if err != nil {
 		t.Errorf("Ошибка при выполнении запроса List: %v", err)
 		return
@@ -25,7 +25,7 @@ func TestChatListService(t *testing.T) {
 		if item.Id == 0 {
 			t.Error("Обнаружен чат с Id равным 0, ожидался валидный идентификатор")
 		}
-		if item.ChatType == 0 {
+		if item.Receiver.ChatType == 0 {
 			t.Error("Обнаружен чат с ChatType равным 0, ожидался валидный тип чата")
 		}
 		if item.Name == "" && item.Username == "" {

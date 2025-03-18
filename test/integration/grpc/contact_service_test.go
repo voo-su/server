@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"testing"
-	contactPb "voo.su/api/grpc/gen/go/pb"
+	contactPb "voo.su/api/grpc/pb"
 )
 
 func TestContactListService(t *testing.T) {
@@ -11,7 +11,7 @@ func TestContactListService(t *testing.T) {
 	defer conn.Close()
 
 	client := contactPb.NewContactServiceClient(conn)
-	res, err := client.List(ctx, &contactPb.GetContactListRequest{})
+	res, err := client.GetContacts(ctx, &contactPb.GetContactsRequest{})
 	if err != nil {
 		t.Errorf("Ошибка при выполнении запроса List: %v", err)
 		return

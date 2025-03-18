@@ -10,7 +10,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"voo.su/api/grpc/gen/go/pb"
+	"voo.su/api/grpc/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/delivery/grpc/middleware"
 )

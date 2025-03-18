@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 	"strconv"
 	"time"
-	authPb "voo.su/api/grpc/gen/go/pb"
+	authPb "voo.su/api/grpc/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"

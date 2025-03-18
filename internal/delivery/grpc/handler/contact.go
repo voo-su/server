@@ -4,7 +4,7 @@ import (
 	"context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	contactPb "voo.su/api/grpc/gen/go/pb"
+	contactPb "voo.su/api/grpc/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/grpcutil"

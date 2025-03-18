@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 	"log"
 	"strconv"
-	chatPb "voo.su/api/grpc/gen/go/pb"
+	chatPb "voo.su/api/grpc/pb"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/pkg/grpcutil"
