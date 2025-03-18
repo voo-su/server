@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"fmt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"log"
 	"strconv"
 	"time"
 	v1Pb "voo.su/api/http/pb/v1"
@@ -70,18 +70,18 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 	}
 
 	if err := a.AuthUseCase.Delete(ctx.Ctx(), constant.LoginChannel, params.Token); err != nil {
-		fmt.Println(err)
+		log.Printf("Error - Verify - AuthUseCase.Delete: %v", err)
 	}
 
 	ip := ctx.Context.ClientIP()
 	bot, err := a.BotUseCase.BotRepo.GetLoginBot(ctx.Ctx())
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("Error - Verify - BotRepo.GetLoginBot: %v", err)
 	}
 	if bot != nil {
 		address, err := a.IpAddressUseCase.FindAddress(ip)
 		if err != nil {
-			fmt.Println(err)
+			log.Printf("Error - Verify - IpAddressUseCase.FindAddress: %v", err)
 		}
 
 		_, err = a.ChatUseCase.Create(ctx.Ctx(), &usecase.CreateChatOpt{
@@ -91,7 +91,7 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 			IsBoot:     true,
 		})
 		if err != nil {
-			fmt.Println(err)
+			log.Printf("Error - Verify - ChatUseCase.Create: %v", err)
 		}
 
 		if err := a.MessageUseCase.SendLogin(ctx.Ctx(), user.Id, &entity.SendLogin{
@@ -99,7 +99,7 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 			Agent:   ctx.Context.GetHeader("user-agent"),
 			Address: address,
 		}); err != nil {
-			fmt.Println(err)
+			log.Printf("Error - Verify - MessageUseCase.SendLogin: %v", err)
 		}
 	}
 
@@ -117,7 +117,7 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 		UserIp:      ip,
 		UserAgent:   ctx.Context.GetHeader("user-agent"),
 	}); err != nil {
-		fmt.Println(err)
+		log.Printf("Error - Verify - UserSessionRepo.Create: %v", err)
 	}
 
 	return ctx.Success(&v1Pb.AuthVerifyResponse{

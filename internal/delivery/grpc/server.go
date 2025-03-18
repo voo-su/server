@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	cliV2 "github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
@@ -18,8 +17,7 @@ import (
 
 type AppProvider struct {
 	Conf             *config.Config
-	AuthMiddleware   *middleware.AuthMiddleware
-	RoutesServices   *middleware.GrpcMethodService
+	Middleware       middleware.Middleware
 	AuthHandler      pb.AuthServiceServer
 	AccountHandler   pb.AccountServiceServer
 	ChatHandler      pb.ChatServiceServer
@@ -27,55 +25,56 @@ type AppProvider struct {
 	ContactHandler   pb.ContactServiceServer
 }
 
-func serve(app *AppProvider) error {
-	listener, err := net.Listen(
-		app.Conf.Server.Grpc.Protocol,
-		app.Conf.Server.Grpc.GetGrpc(),
-	)
-	if err != nil {
-		return err
-	}
-
-	grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr))
-
-	srv := grpc.NewServer(grpc.UnaryInterceptor(grpcMiddleware.ChainUnaryServer(
-		middleware.LoggingServerInterceptor,
-		middleware.AuthorizationServerInterceptor,
-	)))
-
-	pb.RegisterAuthServiceServer(srv, app.AuthHandler)
-	pb.RegisterAccountServiceServer(srv, app.AccountHandler)
-	pb.RegisterChatServiceServer(srv, app.ChatHandler)
-	pb.RegisterGroupChatServiceServer(srv, app.GroupChatHandler)
-	pb.RegisterContactServiceServer(srv, app.ContactHandler)
-
-	reflection.Register(srv)
-
-	if err := srv.Serve(listener); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func Run(ctx2 *cliV2.Context, app *AppProvider) error {
 	ctx := context.Background()
-
-	ctx = middleware.RegisterGlobalService(ctx, app.AuthMiddleware)
-	ctx = middleware.RegisterGlobalService(ctx, app.RoutesServices)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	group, _ := errgroup.WithContext(ctx)
 	group.Go(func() error {
+
+		listener, err := net.Listen(
+			app.Conf.Server.Grpc.Protocol,
+			app.Conf.Server.Grpc.GetGrpc(),
+		)
+		if err != nil {
+			return err
+		}
+
+		grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr))
+
+		srv := grpc.NewServer(
+			grpc.ChainUnaryInterceptor(
+				middleware.UnaryLoggingInterceptor,
+				app.Middleware.Auth.UnaryAuthInterceptor,
+			),
+			grpc.ChainStreamInterceptor(
+				middleware.StreamLoggingInterceptor,
+				app.Middleware.Auth.StreamAuthInterceptor,
+			),
+		)
+
+		pb.RegisterAuthServiceServer(srv, app.AuthHandler)
+		pb.RegisterAccountServiceServer(srv, app.AccountHandler)
+		pb.RegisterChatServiceServer(srv, app.ChatHandler)
+		pb.RegisterGroupChatServiceServer(srv, app.GroupChatHandler)
+		pb.RegisterContactServiceServer(srv, app.ContactHandler)
+
+		reflection.Register(srv)
+
 		log.Printf(
 			"GRPC %s://%s:%d \n",
 			app.Conf.Server.Grpc.Protocol,
 			app.Conf.Server.Grpc.Host,
 			app.Conf.Server.Grpc.Port,
 		)
-		return serve(app)
+
+		if err := srv.Serve(listener); err != nil {
+			return err
+		}
+
+		return nil
 	})
 
 	log.Fatal(group.Wait())

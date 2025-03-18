@@ -16,7 +16,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/minio/minio-go/v7 v7.0.84
 	github.com/nats-io/nats.go v1.38.0

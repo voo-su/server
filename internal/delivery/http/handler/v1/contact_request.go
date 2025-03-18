@@ -63,7 +63,7 @@ func (c *ContactRequest) Accept(ctx *ginutil.Context) error {
 	//		ReceiverId: int32(applyInfo.FriendId),
 	//	},
 	//}); err != nil {
-	//	fmt.Println(err)
+	//	log.Println(err)
 	//}
 
 	return ctx.Success(&v1Pb.ContactRequestAcceptResponse{})

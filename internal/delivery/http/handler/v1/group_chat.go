@@ -2,6 +2,7 @@ package v1
 
 import (
 	"fmt"
+	"log"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
@@ -402,7 +403,7 @@ func (g *GroupChat) Mute(ctx *ginutil.Context) error {
 		ReceiverId: int(params.GroupId),
 		Extra:      jsonutil.Encode(extra),
 	}); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	return ctx.Success(v1Pb.GroupChatMuteResponse{})

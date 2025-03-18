@@ -383,7 +383,9 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	iLocale := provider.NewLocale(conf)
 	authMiddleware := middleware.NewAuthMiddleware(conf, iLocale)
-	grpcMethodService := middleware.NewGrpMethodsService()
+	middlewareMiddleware := middleware.Middleware{
+		Auth: authMiddleware,
+	}
 	email := provider.NewEmailClient(conf)
 	client := provider.NewRedisClient(conf, iLocale)
 	smsCacheRepository := repository.NewSmsCacheRepository(client)
@@ -451,8 +453,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	contact := handler3.NewContactHandler(conf, iLocale, contactUseCase, userUseCase)
 	appProvider := &grpc.AppProvider{
 		Conf:             conf,
-		AuthMiddleware:   authMiddleware,
-		RoutesServices:   grpcMethodService,
+		Middleware:       middlewareMiddleware,
 		AuthHandler:      auth,
 		AccountHandler:   account,
 		ChatHandler:      chatChat,

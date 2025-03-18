@@ -15,61 +15,31 @@ import (
 )
 
 type AuthMiddleware struct {
-	Conf   *config.Config
-	Locale locale.ILocale
+	Conf          *config.Config
+	Locale        locale.ILocale
+	PublicMethods map[string]struct{}
 }
 
-func NewAuthMiddleware(
-	conf *config.Config,
-	locale locale.ILocale,
-) *AuthMiddleware {
+var publicMethods = map[string]struct{}{
+	"/auth.AuthService/Login":  {},
+	"/auth.AuthService/Verify": {},
+}
+
+func NewAuthMiddleware(conf *config.Config, locale locale.ILocale) *AuthMiddleware {
 	return &AuthMiddleware{
-		Conf:   conf,
-		Locale: locale,
+		Conf:          conf,
+		Locale:        locale,
+		PublicMethods: publicMethods,
 	}
 }
 
-type GrpcMethod struct {
-	Name string
+func (a *AuthMiddleware) IsPublicMethod(method string) bool {
+	_, exists := a.PublicMethods[method]
+	return exists
 }
 
-type GrpcMethodService struct {
-	PublicMethods []*GrpcMethod
-}
-
-func NewGrpMethodsService() *GrpcMethodService {
-	return &GrpcMethodService{
-		PublicMethods: []*GrpcMethod{
-			{
-				Name: "/auth.AuthService/Login",
-			},
-			{
-				Name: "/auth.AuthService/Verify",
-			},
-		},
-	}
-}
-
-func (g *GrpcMethodService) IsPublicMethod(method string) bool {
-	isPublic := false
-	for _, route := range g.PublicMethods {
-		if route.Name == method {
-			isPublic = true
-		}
-	}
-	return isPublic
-}
-
-func AuthorizationServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	methodService := GetGlobalService(GrpcMethodsServiceKey).(*GrpcMethodService)
-
-	if methodService.IsPublicMethod(info.FullMethod) {
-		return handler(ctx, req)
-	}
-
-	authService := GetGlobalService(AuthMiddlewareKey).(*AuthMiddleware)
-
-	claims, token, err := grpcutil.GrpcToken(ctx, authService.Locale, constant.GuardGrpcAuth, authService.Conf.App.Jwt.Secret)
+func (a *AuthMiddleware) validateToken(ctx context.Context) (*jwtutil.JSession, error) {
+	claims, token, err := grpcutil.GrpcToken(ctx, a.Locale, constant.GuardGrpcAuth, a.Conf.App.Jwt.Secret)
 	if err != nil {
 		log.Println(err)
 		return nil, status.Errorf(codes.Unauthenticated, "unauthorized")
@@ -81,11 +51,45 @@ func AuthorizationServerInterceptor(ctx context.Context, req interface{}, info *
 		return nil, status.Errorf(codes.Unauthenticated, "unauthorized")
 	}
 
-	ctx = context.WithValue(ctx, jwtutil.JWTSession, &jwtutil.JSession{
+	return &jwtutil.JSession{
 		Uid:       uid,
 		Token:     *token,
 		ExpiresAt: claims.ExpiresAt.Unix(),
-	})
+	}, nil
+}
+
+func (a *AuthMiddleware) UnaryAuthInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	if a.IsPublicMethod(info.FullMethod) {
+		return handler(ctx, req)
+	}
+
+	claims, err := a.validateToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx = context.WithValue(ctx, jwtutil.JWTSession, claims)
 
 	return handler(ctx, req)
+}
+
+type wrappedStream struct {
+	grpc.ServerStream
+	ctx context.Context
+}
+
+func (w *wrappedStream) Context() context.Context {
+	return w.ctx
+}
+
+func (a *AuthMiddleware) StreamAuthInterceptor(srv any, ss grpc.ServerStream, _ *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	claims, err := a.validateToken(ss.Context())
+	if err != nil {
+		return err
+	}
+
+	ctx := context.WithValue(ss.Context(), jwtutil.JWTSession, claims)
+
+	wrapped := &wrappedStream{ServerStream: ss, ctx: ctx}
+	return handler(srv, wrapped)
 }
