@@ -27,7 +27,8 @@ proto:
 	protoc --proto_path=./api/grpc/proto \
 	   --go_out=paths=source_relative:./api/grpc/pb \
 	   --go-grpc_out=paths=source_relative:./api/grpc/pb \
-	   ./api/grpc/proto/*.proto
+	   ./api/grpc/proto/*.proto \
+	  ./api/grpc/proto/common/*.proto
 
 .PHONY: test
 test:

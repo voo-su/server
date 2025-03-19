@@ -44,7 +44,7 @@ type IMessageUseCase interface {
 
 	SendText(ctx context.Context, uid int, req *entity.SendText) error
 
-	SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error
+	SendSystemText(ctx context.Context, uid int, req *entity.TextMessageRequest) error
 
 	SendImage(ctx context.Context, uid int, req *entity.SendImage) error
 
@@ -424,7 +424,7 @@ func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *entity.Send
 	return m.save(ctx, data)
 }
 
-func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *v1Pb.TextMessageRequest) error {
+func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *entity.TextMessageRequest) error {
 	data := &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgSysText,

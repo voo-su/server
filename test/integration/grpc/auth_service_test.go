@@ -1,14 +1,25 @@
 package grpc
 
 import (
+	"context"
 	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"log"
 	"testing"
+	"time"
 	authPb "voo.su/api/grpc/pb"
 )
 
 func TestAuthLoginService(t *testing.T) {
-	conn, ctx, cancel := ConnectToGRPC("127.0.0.1:50051")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
+
+	conn, err := grpc.NewClient("127.0.0.1:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Println("Не удалось подключиться к gRPC серверу")
+	}
+
 	defer conn.Close()
 
 	client := authPb.NewAuthServiceClient(conn)

@@ -279,3 +279,16 @@ type SendLogin struct {
 	Agent   string
 	Address string
 }
+
+type Mention struct {
+	All  int32
+	Uids []int32
+}
+
+type TextMessageRequest struct {
+	Receiver *MessageReceiver
+	Type     string
+	Content  string
+	Mention  *Mention
+	QuoteId  string
+}

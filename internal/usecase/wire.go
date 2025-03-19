@@ -17,7 +17,7 @@ var ProviderSet = wire.NewSet(
 	NewGroupMemberUseCase,
 	NewGroupChatAdsUseCase,
 	NewGroupRequestUseCase,
-	NewFileSplitUseCase,
+	NewUploadUseCase,
 	NewIpAddressUseCase,
 	NewStickerUseCase,
 	NewBotUseCase,

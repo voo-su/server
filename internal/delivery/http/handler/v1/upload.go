@@ -17,10 +17,10 @@ import (
 )
 
 type Upload struct {
-	Conf             *config.Config
-	Locale           locale.ILocale
-	Minio            minio.IMinio
-	FileSplitUseCase *usecase.FileSplitUseCase
+	Conf          *config.Config
+	Locale        locale.ILocale
+	Minio         minio.IMinio
+	UploadUseCase *usecase.UploadUseCase
 }
 
 func (u *Upload) Avatar(ctx *ginutil.Context) error {
@@ -75,7 +75,7 @@ func (u *Upload) InitiateMultipart(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	info, err := u.FileSplitUseCase.InitiateMultipartUpload(ctx.Ctx(), &usecase.MultipartInitiateOpt{
+	info, err := u.UploadUseCase.InitiateMultipartUpload(ctx.Ctx(), &usecase.MultipartInitiateOpt{
 		Name:   params.FileName,
 		Size:   params.FileSize,
 		UserId: ctx.UserId(),
@@ -102,7 +102,7 @@ func (u *Upload) MultipartUpload(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(u.Locale.Localize("file_upload_failure"))
 	}
 
-	if err = u.FileSplitUseCase.MultipartUpload(ctx.Ctx(), &usecase.MultipartUploadOpt{
+	if err = u.UploadUseCase.MultipartUpload(ctx.Ctx(), &usecase.MultipartUploadOpt{
 		UserId:     ctx.UserId(),
 		UploadId:   params.UploadId,
 		SplitIndex: int(params.SplitIndex),

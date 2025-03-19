@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
@@ -97,9 +98,9 @@ func (c *Contact) Delete(ctx *ginutil.Context) error {
 		return ctx.Error(err.Error())
 	}
 
-	_ = c.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
+	_ = c.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &entity.TextMessageRequest{
 		Content: c.Locale.Localize("contact_deleted"),
-		Receiver: &v1Pb.MessageReceiver{
+		Receiver: &entity.MessageReceiver{
 			ChatType:   constant.ChatPrivateMode,
 			ReceiverId: params.FriendId,
 		},

@@ -36,9 +36,9 @@ func (h *Handler) onPublish(ctx context.Context, client socket.IClient, data []b
 }
 
 type TextMessage struct {
-	AckId   string                  `json:"ack_id"`
-	Event   string                  `json:"event"`
-	Content v1Pb.TextMessageRequest `json:"content"`
+	AckId   string                    `json:"ack_id"`
+	Event   string                    `json:"event"`
+	Content entity.TextMessageRequest `json:"content"`
 }
 
 func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data []byte) {
@@ -47,7 +47,7 @@ func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data
 		log.Printf("onTextMessage json decode err: %s", err)
 		return
 	}
-	if in.Content.GetContent() == "" || in.Content.GetReceiver() == nil {
+	if in.Content.Content == "" || in.Content.Receiver == nil {
 		return
 	}
 

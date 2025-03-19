@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"sync"
 	chatPb "voo.su/api/grpc/pb"
+	commonPb "voo.su/api/grpc/pb/common"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/usecase"
@@ -76,7 +77,7 @@ func (c *Chat) GetChats(ctx context.Context, in *chatPb.GetChatsRequest) (*chatP
 			},
 			Avatar:  item.UserAvatar,
 			MsgText: "",
-			NotifySettings: &chatPb.ChatNotifySettings{
+			NotifySettings: &commonPb.EntityNotifySettings{
 				MuteUntil:    item.NotifyMuteUntil,
 				ShowPreviews: item.NotifyShowPreviews,
 				Silent:       item.NotifySilent,

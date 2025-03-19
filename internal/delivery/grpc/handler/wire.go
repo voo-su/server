@@ -22,9 +22,13 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(pb.UnimplementedContactServiceServer), "*"),
 	wire.Bind(new(pb.ContactServiceServer), new(*Contact)),
 
+	wire.Struct(new(pb.UnimplementedUploadServiceServer), "*"),
+	wire.Bind(new(pb.UploadServiceServer), new(*Upload)),
+
 	NewAuthHandler,
 	chat.NewChatHandler,
 	NewGroupChatHandler,
 	NewContactHandler,
 	NewAccountHandler,
+	NewUploadHandler,
 )

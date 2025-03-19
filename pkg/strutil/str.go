@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"math/rand"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -88,4 +89,9 @@ func GenMediaObjectName(ext string, width, height int) string {
 	}
 
 	return fmt.Sprintf("%s/%s/%s", mediaType, time.Now().Format("2006/01/02"), fileName)
+}
+
+func ExtractFileExtension(fileName string) string {
+	ext := strings.TrimPrefix(filepath.Ext(fileName), ".")
+	return strings.ToLower(ext)
 }

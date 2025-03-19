@@ -133,9 +133,9 @@ func (g *GroupChat) Setting(ctx *ginutil.Context) error {
 		return ctx.Error(err.Error())
 	}
 
-	//_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
+	//_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &entity.TextMessageRequest{
 	//	Content: g.Locale.Localize("group_info_changed_by_owner_or_admin"),
-	//	Receiver: &v1Pb.MessageReceiver{
+	//	Receiver: &entity.MessageReceiver{
 	//		ChatType: constant.ChatPrivateMode,
 	//		ReceiverId: params.GroupId,
 	//	},
@@ -330,9 +330,9 @@ func (g *GroupChat) Dismiss(ctx *ginutil.Context) error {
 		return ctx.Error(g.Locale.Localize("group_dissolution_failed"))
 	}
 
-	_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &v1Pb.TextMessageRequest{
+	_ = g.MessageUseCase.SendSystemText(ctx.Ctx(), uid, &entity.TextMessageRequest{
 		Content: g.Locale.Localize("group_dissolved_by_owner"),
-		Receiver: &v1Pb.MessageReceiver{
+		Receiver: &entity.MessageReceiver{
 			ChatType:   constant.ChatGroupMode,
 			ReceiverId: params.GroupId,
 		},

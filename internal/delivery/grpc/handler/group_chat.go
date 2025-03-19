@@ -7,9 +7,9 @@ import (
 	"google.golang.org/grpc/status"
 	"log"
 	groupChatPb "voo.su/api/grpc/pb"
-	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
+	"voo.su/internal/domain/entity"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/grpcutil"
 	"voo.su/pkg/locale"
@@ -31,6 +31,7 @@ func NewGroupChatHandler(
 	locale locale.ILocale,
 	contactUseCase *usecase.ContactUseCase,
 	chatUseCase *usecase.ChatUseCase,
+	messageUseCase *usecase.MessageUseCase,
 	groupChatUseCase *usecase.GroupChatUseCase,
 	groupChatMemberUseCase *usecase.GroupChatMemberUseCase,
 ) *GroupChat {
@@ -39,6 +40,7 @@ func NewGroupChatHandler(
 		Locale:                 locale,
 		ContactUseCase:         contactUseCase,
 		ChatUseCase:            chatUseCase,
+		MessageUseCase:         messageUseCase,
 		GroupChatUseCase:       groupChatUseCase,
 		GroupChatMemberUseCase: groupChatMemberUseCase,
 	}
@@ -209,9 +211,9 @@ func (g *GroupChat) DeleteGroupChat(ctx context.Context, in *groupChatPb.DeleteG
 		return nil, status.Error(codes.Unknown, g.Locale.Localize("group_dissolution_failed"))
 	}
 
-	if err := g.MessageUseCase.SendSystemText(ctx, uid, &v1Pb.TextMessageRequest{
+	if err := g.MessageUseCase.SendSystemText(ctx, uid, &entity.TextMessageRequest{
 		Content: g.Locale.Localize("group_dissolved_by_owner"),
-		Receiver: &v1Pb.MessageReceiver{
+		Receiver: &entity.MessageReceiver{
 			ChatType:   constant.ChatGroupMode,
 			ReceiverId: int32(gid),
 		},

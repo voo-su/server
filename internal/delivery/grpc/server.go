@@ -23,6 +23,7 @@ type AppProvider struct {
 	ChatHandler      pb.ChatServiceServer
 	GroupChatHandler pb.GroupChatServiceServer
 	ContactHandler   pb.ContactServiceServer
+	UploadHandler    pb.UploadServiceServer
 }
 
 func Run(ctx2 *cliV2.Context, app *AppProvider) error {
@@ -60,6 +61,7 @@ func Run(ctx2 *cliV2.Context, app *AppProvider) error {
 		pb.RegisterChatServiceServer(srv, app.ChatHandler)
 		pb.RegisterGroupChatServiceServer(srv, app.GroupChatHandler)
 		pb.RegisterContactServiceServer(srv, app.ContactHandler)
+		pb.RegisterUploadServiceServer(srv, app.UploadHandler)
 
 		reflection.Register(srv)
 

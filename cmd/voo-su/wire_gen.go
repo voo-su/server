@@ -68,7 +68,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	iMinio := provider.NewMinioClient(conf)
 	botUseCase := usecase.NewBotUseCase(conf, iLocale, source, botRepository, userRepository, iMinio)
 	pushTokenRepository := repository2.NewPushTokenRepository(db)
-	userUseCase := usecase.NewUserUseCase(iLocale, source, userRepository, userSessionRepository, pushTokenRepository)
+	userUseCase := usecase.NewUserUseCase(conf, iLocale, source, userRepository, userSessionRepository, pushTokenRepository, iMinio)
 	sequenceCacheRepository := repository.NewSequenceCacheRepository(client)
 	sequenceRepository := repository2.NewSequenceRepository(db, sequenceCacheRepository)
 	messageForward := logic.NewMessageForward(iLocale, source, sequenceRepository)
@@ -148,12 +148,12 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatMemberUseCase: groupChatMemberUseCase,
 		StorageUseCase:         storageUseCase,
 	}
-	fileSplitUseCase := usecase.NewFileSplitUseCase(conf, iLocale, source, fileSplitRepository, iMinio)
+	uploadUseCase := usecase.NewUploadUseCase(conf, iLocale, source, fileSplitRepository, iMinio)
 	upload := &v1.Upload{
-		Conf:             conf,
-		Locale:           iLocale,
-		Minio:            iMinio,
-		FileSplitUseCase: fileSplitUseCase,
+		Conf:          conf,
+		Locale:        iLocale,
+		Minio:         iMinio,
+		UploadUseCase: uploadUseCase,
 	}
 	groupChat := &v1.GroupChat{
 		Locale:                 iLocale,
@@ -443,14 +443,16 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	}
 	auth := handler3.NewAuthHandler(conf, iLocale, authUseCase, ipAddressUseCase, chatUseCase, botUseCase, messageUseCase)
 	pushTokenRepository := repository2.NewPushTokenRepository(db)
-	userUseCase := usecase.NewUserUseCase(iLocale, source, userRepository, userSessionRepository, pushTokenRepository)
-	account := handler3.NewAccountHandler(iLocale, userUseCase, authUseCase, chatUseCase)
+	userUseCase := usecase.NewUserUseCase(conf, iLocale, source, userRepository, userSessionRepository, pushTokenRepository, iMinio)
+	uploadUseCase := usecase.NewUploadUseCase(conf, iLocale, source, fileSplitRepository, iMinio)
+	account := handler3.NewAccountHandler(iLocale, userUseCase, authUseCase, chatUseCase, uploadUseCase)
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	chatChat := chat3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, iNatsClient)
 	groupChatUseCase := usecase.NewGroupChatUseCase(iLocale, source, groupChatRepository, groupChatMemberRepository, sequenceRepository, relationCacheRepository, redisLockCacheRepository)
 	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(iLocale, source, groupChatMemberRepository)
-	groupChat := handler3.NewGroupChatHandler(conf, iLocale, contactUseCase, chatUseCase, groupChatUseCase, groupChatMemberUseCase)
+	groupChat := handler3.NewGroupChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, groupChatUseCase, groupChatMemberUseCase)
 	contact := handler3.NewContactHandler(conf, iLocale, contactUseCase, userUseCase)
+	upload := handler3.NewUploadHandler(conf, iLocale, uploadUseCase)
 	appProvider := &grpc.AppProvider{
 		Conf:             conf,
 		Middleware:       middlewareMiddleware,
@@ -459,6 +461,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 		ChatHandler:      chatChat,
 		GroupChatHandler: groupChat,
 		ContactHandler:   contact,
+		UploadHandler:    upload,
 	}
 	return appProvider
 }

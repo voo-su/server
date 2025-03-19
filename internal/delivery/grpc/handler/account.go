@@ -2,24 +2,30 @@ package handler
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log"
+	"strings"
 	accountPb "voo.su/api/grpc/pb"
+	commonPb "voo.su/api/grpc/pb/common"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/grpcutil"
 	"voo.su/pkg/locale"
+	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
 
 type Account struct {
 	accountPb.UnimplementedAccountServiceServer
-	Locale      locale.ILocale
-	UserUseCase *usecase.UserUseCase
-	AuthUseCase *usecase.AuthUseCase
-	ChatUseCase *usecase.ChatUseCase
+	Locale        locale.ILocale
+	UserUseCase   *usecase.UserUseCase
+	AuthUseCase   *usecase.AuthUseCase
+	ChatUseCase   *usecase.ChatUseCase
+	UploadUseCase *usecase.UploadUseCase
 }
 
 func NewAccountHandler(
@@ -27,12 +33,14 @@ func NewAccountHandler(
 	userUseCase *usecase.UserUseCase,
 	authUseCase *usecase.AuthUseCase,
 	chatUseCase *usecase.ChatUseCase,
+	uploadUseCase *usecase.UploadUseCase,
 ) *Account {
 	return &Account{
-		Locale:      locale,
-		UserUseCase: userUseCase,
-		AuthUseCase: authUseCase,
-		ChatUseCase: chatUseCase,
+		Locale:        locale,
+		UserUseCase:   userUseCase,
+		AuthUseCase:   authUseCase,
+		ChatUseCase:   chatUseCase,
+		UploadUseCase: uploadUseCase,
 	}
 }
 
@@ -82,8 +90,25 @@ func (a *Account) UpdateProfile(ctx context.Context, in *accountPb.UpdateProfile
 }
 
 func (a *Account) UpdateProfilePhoto(ctx context.Context, in *accountPb.UpdateProfilePhotoRequest) (*accountPb.UpdateProfilePhotoResponse, error) {
-	// TODO
-	return &accountPb.UpdateProfilePhotoResponse{}, nil
+	uid := grpcutil.UserId(ctx)
+	inputFile := in.GetFile()
+	if inputFile.GetId() == 0 || inputFile.GetParts() == 0 || strings.TrimSpace(inputFile.GetName()) == "" {
+		return nil, fmt.Errorf("неверные параметры файла")
+	}
+
+	fileExt := strutil.ExtractFileExtension(inputFile.GetName())
+	finalPath, err := a.UploadUseCase.AssembleFileParts(ctx, inputFile.GetId(), inputFile.GetParts(), fileExt)
+	if err != nil {
+		log.Printf("ошибка сборки файла: %v", err)
+		return nil, errors.New("ошибка сборки файла")
+	}
+
+	if err := a.UserUseCase.UpdateUserAvatar(ctx, uid, finalPath); err != nil {
+		log.Printf("не удалось обновить аватар: %v", err)
+		return nil, errors.New("не удалось обновить аватар")
+	}
+
+	return &accountPb.UpdateProfilePhotoResponse{Success: true}, nil
 }
 
 func (a *Account) GetNotifySettings(ctx context.Context, in *accountPb.GetNotifySettingsRequest) (*accountPb.GetNotifySettingsResponse, error) {
@@ -98,7 +123,7 @@ func (a *Account) GetNotifySettings(ctx context.Context, in *accountPb.GetNotify
 			return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
 		}
 
-		res.Settings = &accountPb.EntityNotifySettings{
+		res.Settings = &commonPb.EntityNotifySettings{
 			MuteUntil:    notify.MuteUntil,
 			ShowPreviews: notify.ShowPreviews,
 			Silent:       notify.Silent,
@@ -111,7 +136,7 @@ func (a *Account) GetNotifySettings(ctx context.Context, in *accountPb.GetNotify
 			return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
 		}
 
-		res.Settings = &accountPb.EntityNotifySettings{
+		res.Settings = &commonPb.EntityNotifySettings{
 			MuteUntil:    notify.MuteUntil,
 			ShowPreviews: notify.ShowPreviews,
 			Silent:       notify.Silent,
@@ -122,7 +147,7 @@ func (a *Account) GetNotifySettings(ctx context.Context, in *accountPb.GetNotify
 			return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
 		}
 
-		res.Settings = &accountPb.EntityNotifySettings{
+		res.Settings = &commonPb.EntityNotifySettings{
 			MuteUntil:    notify.MuteUntil,
 			ShowPreviews: notify.ShowPreviews,
 			Silent:       notify.Silent,
@@ -134,7 +159,7 @@ func (a *Account) GetNotifySettings(ctx context.Context, in *accountPb.GetNotify
 			return nil, status.Error(codes.Unknown, a.Locale.Localize("general_error"))
 		}
 
-		res.Settings = &accountPb.EntityNotifySettings{
+		res.Settings = &commonPb.EntityNotifySettings{
 			MuteUntil:    notify.MuteUntil,
 			ShowPreviews: notify.ShowPreviews,
 			Silent:       notify.Silent,

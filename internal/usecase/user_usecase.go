@@ -5,36 +5,55 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"log"
+	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure"
 	"voo.su/internal/infrastructure/postgres/model"
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	"voo.su/pkg/locale"
+	"voo.su/pkg/minio"
 )
 
 type UserUseCase struct {
+	Conf            *config.Config
 	Locale          locale.ILocale
 	Source          *infrastructure.Source
 	UserRepo        *postgresRepo.UserRepository
 	UserSessionRepo *postgresRepo.UserSessionRepository
 	PushTokenRepo   *postgresRepo.PushTokenRepository
+	Minio           minio.IMinio
 }
 
 func NewUserUseCase(
+	conf *config.Config,
 	locale locale.ILocale,
 	source *infrastructure.Source,
 	userRepo *postgresRepo.UserRepository,
 	userSessionRepo *postgresRepo.UserSessionRepository,
 	pushTokenRepo *postgresRepo.PushTokenRepository,
+	minio minio.IMinio,
 ) *UserUseCase {
 	return &UserUseCase{
+		Conf:            conf,
 		Locale:          locale,
 		Source:          source,
 		UserRepo:        userRepo,
 		UserSessionRepo: userSessionRepo,
 		PushTokenRepo:   pushTokenRepo,
+		Minio:           minio,
 	}
+}
+
+func (u *UserUseCase) UpdateUserAvatar(ctx context.Context, uid int, avatarPath string) error {
+	_, err := u.UserRepo.UpdateById(ctx, uid, map[string]any{
+		"avatar": u.Minio.PublicUrl(u.Conf.Minio.GetBucket(), avatarPath),
+	})
+	if err != nil {
+		return errors.New(u.Locale.Localize("personal_info_update_error"))
+	}
+
+	return nil
 }
 
 func (u *UserUseCase) WebPushInit(ctx context.Context, uid int64, sessionId int64, webPush *entity.WebPush) error {
