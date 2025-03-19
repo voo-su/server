@@ -209,15 +209,74 @@ func (g *GroupChat) DeleteGroupChat(ctx context.Context, in *groupChatPb.DeleteG
 		return nil, status.Error(codes.Unknown, g.Locale.Localize("group_dissolution_failed"))
 	}
 
-	_ = g.MessageUseCase.SendSystemText(ctx, uid, &v1Pb.TextMessageRequest{
+	if err := g.MessageUseCase.SendSystemText(ctx, uid, &v1Pb.TextMessageRequest{
 		Content: g.Locale.Localize("group_dissolved_by_owner"),
 		Receiver: &v1Pb.MessageReceiver{
 			ChatType:   constant.ChatGroupMode,
 			ReceiverId: int32(gid),
 		},
-	})
+	}); err != nil {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("network_error"))
+	}
 
 	return &groupChatPb.DeleteGroupChatResponse{
+		Success: true,
+	}, nil
+}
+
+func (g *GroupChat) EditNameGroupChat(ctx context.Context, in *groupChatPb.EditNameGroupChatRequest) (*groupChatPb.EditNameGroupChatResponse, error) {
+	uid := grpcutil.UserId(ctx)
+	gid := int(in.Id)
+	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx, gid)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("network_error"))
+	}
+
+	if group != nil && group.IsDismiss == 1 {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("group_dissolved"))
+	}
+
+	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx, gid, uid) {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("no_permission_for_action"))
+	}
+
+	if err := g.GroupChatUseCase.Update(ctx, &usecase.GroupUpdateOpt{
+		GroupId: gid,
+		Name:    in.Name,
+	}); err != nil {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("network_error"))
+	}
+
+	return &groupChatPb.EditNameGroupChatResponse{
+		Success: true,
+	}, nil
+}
+
+func (g *GroupChat) EditAboutGroupChat(ctx context.Context, in *groupChatPb.EditAboutGroupChatRequest) (*groupChatPb.EditAboutGroupChatResponse, error) {
+	uid := grpcutil.UserId(ctx)
+	gid := int(in.Id)
+
+	group, err := g.GroupChatUseCase.GroupChatRepo.FindById(ctx, gid)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("network_error"))
+	}
+
+	if group != nil && group.IsDismiss == 1 {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("group_dissolved"))
+	}
+
+	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx, gid, uid) {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("no_permission_for_action"))
+	}
+
+	if err := g.GroupChatUseCase.Update(ctx, &usecase.GroupUpdateOpt{
+		GroupId:     gid,
+		Description: in.About,
+	}); err != nil {
+		return nil, status.Error(codes.Unknown, g.Locale.Localize("network_error"))
+	}
+
+	return &groupChatPb.EditAboutGroupChatResponse{
 		Success: true,
 	}, nil
 }
