@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	UploadService_SaveFilePart_FullMethodName = "/upload.UploadService/SaveFilePart"
+	UploadService_GetFile_FullMethodName      = "/upload.UploadService/GetFile"
 )
 
 // UploadServiceClient is the client API for UploadService service.
@@ -28,6 +29,8 @@ const (
 type UploadServiceClient interface {
 	// Uploading a file part
 	SaveFilePart(ctx context.Context, in *SaveFilePartRequest, opts ...grpc.CallOption) (*SaveFilePartResponse, error)
+	// Returns content of a whole file or its part
+	GetFile(ctx context.Context, in *GetFileRequest, opts ...grpc.CallOption) (*GetFileResponse, error)
 }
 
 type uploadServiceClient struct {
@@ -48,12 +51,24 @@ func (c *uploadServiceClient) SaveFilePart(ctx context.Context, in *SaveFilePart
 	return out, nil
 }
 
+func (c *uploadServiceClient) GetFile(ctx context.Context, in *GetFileRequest, opts ...grpc.CallOption) (*GetFileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetFileResponse)
+	err := c.cc.Invoke(ctx, UploadService_GetFile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UploadServiceServer is the server API for UploadService service.
 // All implementations must embed UnimplementedUploadServiceServer
 // for forward compatibility.
 type UploadServiceServer interface {
 	// Uploading a file part
 	SaveFilePart(context.Context, *SaveFilePartRequest) (*SaveFilePartResponse, error)
+	// Returns content of a whole file or its part
+	GetFile(context.Context, *GetFileRequest) (*GetFileResponse, error)
 	mustEmbedUnimplementedUploadServiceServer()
 }
 
@@ -66,6 +81,9 @@ type UnimplementedUploadServiceServer struct{}
 
 func (UnimplementedUploadServiceServer) SaveFilePart(context.Context, *SaveFilePartRequest) (*SaveFilePartResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveFilePart not implemented")
+}
+func (UnimplementedUploadServiceServer) GetFile(context.Context, *GetFileRequest) (*GetFileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFile not implemented")
 }
 func (UnimplementedUploadServiceServer) mustEmbedUnimplementedUploadServiceServer() {}
 func (UnimplementedUploadServiceServer) testEmbeddedByValue()                       {}
@@ -106,6 +124,24 @@ func _UploadService_SaveFilePart_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UploadService_GetFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UploadServiceServer).GetFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UploadService_GetFile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UploadServiceServer).GetFile(ctx, req.(*GetFileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UploadService_ServiceDesc is the grpc.ServiceDesc for UploadService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -116,6 +152,10 @@ var UploadService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveFilePart",
 			Handler:    _UploadService_SaveFilePart_Handler,
+		},
+		{
+			MethodName: "GetFile",
+			Handler:    _UploadService_GetFile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

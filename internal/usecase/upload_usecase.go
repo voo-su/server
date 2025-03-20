@@ -27,6 +27,7 @@ type UploadUseCase struct {
 	Conf          *config.Config
 	Locale        locale.ILocale
 	Source        *infrastructure.Source
+	FileRepo      *postgresRepo.FileRepository
 	FileSplitRepo *postgresRepo.FileSplitRepository
 	Minio         minio.IMinio
 }
@@ -35,6 +36,7 @@ func NewUploadUseCase(
 	conf *config.Config,
 	locale locale.ILocale,
 	source *infrastructure.Source,
+	fileRepo *postgresRepo.FileRepository,
 	fileSplitRepo *postgresRepo.FileSplitRepository,
 	minio minio.IMinio,
 ) *UploadUseCase {
@@ -42,6 +44,7 @@ func NewUploadUseCase(
 		Conf:          conf,
 		Locale:        locale,
 		Source:        source,
+		FileRepo:      fileRepo,
 		FileSplitRepo: fileSplitRepo,
 		Minio:         minio,
 	}
@@ -200,18 +203,18 @@ func (u *UploadUseCase) saveFilePart(fileID int64, filePart int32, data []byte) 
 	return nil
 }
 
-func (u *UploadUseCase) AssembleFileParts(ctx context.Context, fileId int64, totalParts int32, fileExt string) (string, error) {
+func (u *UploadUseCase) AssembleFileParts(ctx context.Context, uid int, fileId int64, totalParts int32, originalName string, fileExt string) (string, error) {
 	objectName := strutil.GenMediaObjectName(fileExt, 200, 200)
-
 	uploadId, err := u.Minio.InitiateMultipartUpload(u.Conf.Minio.GetBucket(), objectName)
 	if err != nil {
 		return "", err
 	}
 
 	var partsInfo []minio.ObjectPart
+	var totalSize int64
+
 	for i := int32(0); i < totalParts; i++ {
 		objectPartPath := fmt.Sprintf("%d/%d.part", fileId, i)
-
 		obj, err := u.Minio.GetObject(u.Conf.Minio.Bucket, objectPartPath)
 		if err != nil {
 			return "", fmt.Errorf("ошибка получения части %d из MinIO: %v", i, err)
@@ -221,6 +224,8 @@ func (u *UploadUseCase) AssembleFileParts(ctx context.Context, fileId int64, tot
 		if err != nil {
 			return "", fmt.Errorf("ошибка чтения данных части %d: %v", i, err)
 		}
+
+		totalSize += int64(len(partData))
 
 		uploadInfo, err := u.Minio.PutObjectPart(u.Conf.Minio.Bucket, objectName, uploadId, int(i+1), bytes.NewReader(partData), int64(len(partData)))
 		if err != nil {
@@ -237,5 +242,41 @@ func (u *UploadUseCase) AssembleFileParts(ctx context.Context, fileId int64, tot
 		return "", fmt.Errorf("ошибка завершения сборки файла: %v", err)
 	}
 
+	if err := u.FileRepo.Create(ctx, &postgresModel.File{
+		OriginalName: originalName,
+		ObjectName:   objectName,
+		Size:         int(totalSize),
+		MimeType:     fileExt,
+		CreatedBy:    uid,
+		CreatedAt:    time.Now(),
+	}); err != nil {
+		return "", fmt.Errorf("ошибка сохранения информации о файле в базе: %v", err)
+	}
+
 	return objectName, nil
+}
+
+func (u *UploadUseCase) GetFile(ctx context.Context, fileId uuid.UUID, offset int64, limit int32) ([]byte, error) {
+	file, err := u.FileRepo.FindByWhere(ctx, "id = ?", fileId)
+	if err != nil {
+		return nil, err
+	}
+
+	obj, err := u.Minio.GetObject(u.Conf.Minio.Bucket, file.ObjectName)
+	if err != nil {
+		return nil, fmt.Errorf("файл не найден: %v", err)
+	}
+	defer obj.Close()
+
+	if _, err := obj.Seek(offset, io.SeekStart); err != nil {
+		return nil, fmt.Errorf("ошибка при установке offset: %v", err)
+	}
+
+	data := make([]byte, limit)
+	n, err := obj.Read(data)
+	if err != nil && err != io.EOF {
+		return nil, fmt.Errorf("ошибка при чтении файла: %v", err)
+	}
+
+	return data[:n], nil
 }

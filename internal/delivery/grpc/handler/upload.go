@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/google/uuid"
 	"log"
 	"time"
 	uploadPb "voo.su/api/grpc/pb"
@@ -41,5 +43,25 @@ func (u *Upload) SaveFilePart(ctx context.Context, in *uploadPb.SaveFilePartRequ
 
 	return &uploadPb.SaveFilePartResponse{
 		Success: true,
+	}, nil
+}
+
+func (u *Upload) GetFile(ctx context.Context, in *uploadPb.GetFileRequest) (*uploadPb.GetFileResponse, error) {
+	if in.GetDocumentLocation() == nil {
+		return nil, fmt.Errorf("некорректный запрос: отсутствует document_location")
+	}
+
+	fileId, err := uuid.Parse(in.GetDocumentLocation().GetId())
+	if err != nil {
+		return nil, errors.New(u.Locale.Localize("network_error"))
+	}
+
+	bytes, err := u.UploadUseCase.GetFile(ctx, fileId, in.GetOffset(), in.GetLimit())
+	if err != nil {
+		return nil, errors.New("ошибка")
+	}
+
+	return &uploadPb.GetFileResponse{
+		Bytes: bytes,
 	}, nil
 }

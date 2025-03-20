@@ -69,7 +69,7 @@ func (m *Message) Send(ctx *ginutil.Context) error {
 }
 
 func (m *Message) onSendText(ctx *ginutil.Context) error {
-	params := &entity.TextMessageRequest{}
+	params := &v1Pb.TextMessageRequest{}
 	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
 		return ctx.InvalidParams(err)
 	}

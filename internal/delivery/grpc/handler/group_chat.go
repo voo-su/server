@@ -80,6 +80,7 @@ func (g *GroupChat) GetGroupChat(ctx context.Context, in *groupChatPb.GetGroupCh
 	return &groupChatPb.GetGroupChatResponse{
 		Id:      int64(group.Id),
 		Name:    group.Name,
+		About:   group.Description,
 		Avatar:  group.Avatar,
 		Members: countMembers,
 	}, nil

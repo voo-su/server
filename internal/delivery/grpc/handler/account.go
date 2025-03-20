@@ -97,7 +97,7 @@ func (a *Account) UpdateProfilePhoto(ctx context.Context, in *accountPb.UpdatePr
 	}
 
 	fileExt := strutil.ExtractFileExtension(inputFile.GetName())
-	finalPath, err := a.UploadUseCase.AssembleFileParts(ctx, inputFile.GetId(), inputFile.GetParts(), fileExt)
+	finalPath, err := a.UploadUseCase.AssembleFileParts(ctx, uid, inputFile.GetId(), inputFile.GetParts(), inputFile.GetName(), fileExt)
 	if err != nil {
 		log.Printf("ошибка сборки файла: %v", err)
 		return nil, errors.New("ошибка сборки файла")

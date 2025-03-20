@@ -46,10 +46,22 @@ ALTER TABLE group_chat_members RENAME COLUMN min_record_id TO min_message_id;
 ALTER TABLE message_votes RENAME COLUMN record_id TO message_id;
 ALTER TABLE message_delete RENAME COLUMN record_id TO message_id;
 
---UPDATE--
 ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
 ALTER TABLE users ALTER COLUMN email SET DEFAULT NULL;
 ALTER TABLE users ALTER COLUMN about DROP NOT NULL;
 ALTER TABLE users ALTER COLUMN about SET DEFAULT NULL;
 
 CREATE UNIQUE INDEX unique_lower_email ON users (LOWER(email)) WHERE email IS NOT NULL;
+
+--UPDATE--
+
+CREATE TABLE files
+(
+    id            uuid      DEFAULT gen_random_uuid(),
+    original_name TEXT         NOT NULL,
+    object_name   TEXT         NOT NULL,
+    size          INTEGER      NOT NULL,
+    mime_type     VARCHAR(255) NOT NULL,
+    created_by    INTEGER      NOT NULL,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

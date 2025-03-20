@@ -29,4 +29,5 @@ var ProviderSet = wire.NewSet(
 	repository.NewProjectTaskCommentRepository,
 	repository.NewProjectTaskCoexecutorRepository,
 	repository.NewProjectTaskWatcherRepository,
+	repository.NewFileRepository,
 )

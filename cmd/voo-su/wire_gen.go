@@ -148,7 +148,8 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		GroupChatMemberUseCase: groupChatMemberUseCase,
 		StorageUseCase:         storageUseCase,
 	}
-	uploadUseCase := usecase.NewUploadUseCase(conf, iLocale, source, fileSplitRepository, iMinio)
+	fileRepository := repository2.NewFileRepository(db)
+	uploadUseCase := usecase.NewUploadUseCase(conf, iLocale, source, fileRepository, fileSplitRepository, iMinio)
 	upload := &v1.Upload{
 		Conf:          conf,
 		Locale:        iLocale,
@@ -444,7 +445,8 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	auth := handler3.NewAuthHandler(conf, iLocale, authUseCase, ipAddressUseCase, chatUseCase, botUseCase, messageUseCase)
 	pushTokenRepository := repository2.NewPushTokenRepository(db)
 	userUseCase := usecase.NewUserUseCase(conf, iLocale, source, userRepository, userSessionRepository, pushTokenRepository, iMinio)
-	uploadUseCase := usecase.NewUploadUseCase(conf, iLocale, source, fileSplitRepository, iMinio)
+	fileRepository := repository2.NewFileRepository(db)
+	uploadUseCase := usecase.NewUploadUseCase(conf, iLocale, source, fileRepository, fileSplitRepository, iMinio)
 	account := handler3.NewAccountHandler(iLocale, userUseCase, authUseCase, chatUseCase, uploadUseCase)
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	chatChat := chat3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, iNatsClient)
