@@ -129,7 +129,7 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		ContactUseCase:        contactUseCase,
 		MessageUseCase:        messageUseCase,
 	}
-	groupChatUseCase := usecase.NewGroupChatUseCase(iLocale, source, groupChatRepository, groupChatMemberRepository, sequenceRepository, relationCacheRepository, redisLockCacheRepository)
+	groupChatUseCase := usecase.NewGroupChatUseCase(conf, iLocale, source, groupChatRepository, groupChatMemberRepository, sequenceRepository, relationCacheRepository, redisLockCacheRepository, iMinio)
 	chat := &v1.Chat{
 		Locale:           iLocale,
 		ChatUseCase:      chatUseCase,
@@ -450,9 +450,9 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	account := handler3.NewAccountHandler(iLocale, userUseCase, authUseCase, chatUseCase, uploadUseCase)
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	chatChat := chat3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, iNatsClient)
-	groupChatUseCase := usecase.NewGroupChatUseCase(iLocale, source, groupChatRepository, groupChatMemberRepository, sequenceRepository, relationCacheRepository, redisLockCacheRepository)
+	groupChatUseCase := usecase.NewGroupChatUseCase(conf, iLocale, source, groupChatRepository, groupChatMemberRepository, sequenceRepository, relationCacheRepository, redisLockCacheRepository, iMinio)
 	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(iLocale, source, groupChatMemberRepository)
-	groupChat := handler3.NewGroupChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, groupChatUseCase, groupChatMemberUseCase)
+	groupChat := handler3.NewGroupChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, groupChatUseCase, groupChatMemberUseCase, uploadUseCase)
 	contact := handler3.NewContactHandler(conf, iLocale, contactUseCase, userUseCase)
 	upload := handler3.NewUploadHandler(conf, iLocale, uploadUseCase)
 	appProvider := &grpc.AppProvider{

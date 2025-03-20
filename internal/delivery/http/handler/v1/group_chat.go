@@ -127,9 +127,12 @@ func (g *GroupChat) Setting(ctx *ginutil.Context) error {
 	if err := g.GroupChatUseCase.Update(ctx.Ctx(), &usecase.GroupUpdateOpt{
 		GroupId:     int(params.GroupId),
 		Name:        params.GroupName,
-		Avatar:      params.Avatar,
 		Description: params.Description,
 	}); err != nil {
+		return ctx.Error(err.Error())
+	}
+
+	if err := g.GroupChatUseCase.UpdateAvatar(ctx.Ctx(), int(params.GroupId), params.Avatar); err != nil {
 		return ctx.Error(err.Error())
 	}
 

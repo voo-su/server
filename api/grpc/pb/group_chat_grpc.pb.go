@@ -28,6 +28,7 @@ const (
 	GroupChatService_DeleteGroupChat_FullMethodName         = "/group_chat.GroupChatService/DeleteGroupChat"
 	GroupChatService_EditNameGroupChat_FullMethodName       = "/group_chat.GroupChatService/EditNameGroupChat"
 	GroupChatService_EditAboutGroupChat_FullMethodName      = "/group_chat.GroupChatService/EditAboutGroupChat"
+	GroupChatService_EditPhotoGroupChat_FullMethodName      = "/group_chat.GroupChatService/EditPhotoGroupChat"
 )
 
 // GroupChatServiceClient is the client API for GroupChatService service.
@@ -52,6 +53,8 @@ type GroupChatServiceClient interface {
 	EditNameGroupChat(ctx context.Context, in *EditNameGroupChatRequest, opts ...grpc.CallOption) (*EditNameGroupChatResponse, error)
 	// Editing the group chat description
 	EditAboutGroupChat(ctx context.Context, in *EditAboutGroupChatRequest, opts ...grpc.CallOption) (*EditAboutGroupChatResponse, error)
+	// Editing the group chat photo
+	EditPhotoGroupChat(ctx context.Context, in *EditPhotoGroupChatRequest, opts ...grpc.CallOption) (*EditPhotoGroupChatResponse, error)
 }
 
 type groupChatServiceClient struct {
@@ -152,6 +155,16 @@ func (c *groupChatServiceClient) EditAboutGroupChat(ctx context.Context, in *Edi
 	return out, nil
 }
 
+func (c *groupChatServiceClient) EditPhotoGroupChat(ctx context.Context, in *EditPhotoGroupChatRequest, opts ...grpc.CallOption) (*EditPhotoGroupChatResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EditPhotoGroupChatResponse)
+	err := c.cc.Invoke(ctx, GroupChatService_EditPhotoGroupChat_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GroupChatServiceServer is the server API for GroupChatService service.
 // All implementations must embed UnimplementedGroupChatServiceServer
 // for forward compatibility.
@@ -174,6 +187,8 @@ type GroupChatServiceServer interface {
 	EditNameGroupChat(context.Context, *EditNameGroupChatRequest) (*EditNameGroupChatResponse, error)
 	// Editing the group chat description
 	EditAboutGroupChat(context.Context, *EditAboutGroupChatRequest) (*EditAboutGroupChatResponse, error)
+	// Editing the group chat photo
+	EditPhotoGroupChat(context.Context, *EditPhotoGroupChatRequest) (*EditPhotoGroupChatResponse, error)
 	mustEmbedUnimplementedGroupChatServiceServer()
 }
 
@@ -210,6 +225,9 @@ func (UnimplementedGroupChatServiceServer) EditNameGroupChat(context.Context, *E
 }
 func (UnimplementedGroupChatServiceServer) EditAboutGroupChat(context.Context, *EditAboutGroupChatRequest) (*EditAboutGroupChatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EditAboutGroupChat not implemented")
+}
+func (UnimplementedGroupChatServiceServer) EditPhotoGroupChat(context.Context, *EditPhotoGroupChatRequest) (*EditPhotoGroupChatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditPhotoGroupChat not implemented")
 }
 func (UnimplementedGroupChatServiceServer) mustEmbedUnimplementedGroupChatServiceServer() {}
 func (UnimplementedGroupChatServiceServer) testEmbeddedByValue()                          {}
@@ -394,6 +412,24 @@ func _GroupChatService_EditAboutGroupChat_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GroupChatService_EditPhotoGroupChat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EditPhotoGroupChatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupChatServiceServer).EditPhotoGroupChat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GroupChatService_EditPhotoGroupChat_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupChatServiceServer).EditPhotoGroupChat(ctx, req.(*EditPhotoGroupChatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GroupChatService_ServiceDesc is the grpc.ServiceDesc for GroupChatService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -436,6 +472,10 @@ var GroupChatService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EditAboutGroupChat",
 			Handler:    _GroupChatService_EditAboutGroupChat_Handler,
+		},
+		{
+			MethodName: "EditPhotoGroupChat",
+			Handler:    _GroupChatService_EditPhotoGroupChat_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

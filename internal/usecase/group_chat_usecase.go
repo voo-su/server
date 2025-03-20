@@ -6,6 +6,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"time"
+	"voo.su/internal/config"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure"
@@ -14,12 +15,14 @@ import (
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
+	"voo.su/pkg/minio"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
 
 type GroupChatUseCase struct {
+	Conf               *config.Config
 	Locale             locale.ILocale
 	Source             *infrastructure.Source
 	GroupChatRepo      *postgresRepo.GroupChatRepository
@@ -27,9 +30,11 @@ type GroupChatUseCase struct {
 	SequenceRepo       *postgresRepo.SequenceRepository
 	RelationCache      *redisRepo.RelationCacheRepository
 	RedisLockCacheRepo *redisRepo.RedisLockCacheRepository
+	Minio              minio.IMinio
 }
 
 func NewGroupChatUseCase(
+	conf *config.Config,
 	locale locale.ILocale,
 	source *infrastructure.Source,
 	groupChatRepo *postgresRepo.GroupChatRepository,
@@ -37,8 +42,10 @@ func NewGroupChatUseCase(
 	sequenceRepo *postgresRepo.SequenceRepository,
 	relationCache *redisRepo.RelationCacheRepository,
 	redisLockCacheRepo *redisRepo.RedisLockCacheRepository,
+	minio minio.IMinio,
 ) *GroupChatUseCase {
 	return &GroupChatUseCase{
+		Conf:               conf,
 		Locale:             locale,
 		Source:             source,
 		GroupChatRepo:      groupChatRepo,
@@ -46,6 +53,7 @@ func NewGroupChatUseCase(
 		SequenceRepo:       sequenceRepo,
 		RelationCache:      relationCache,
 		RedisLockCacheRepo: redisLockCacheRepo,
+		Minio:              minio,
 	}
 }
 
@@ -151,14 +159,12 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 type GroupUpdateOpt struct {
 	GroupId     int
 	Name        string
-	Avatar      string
 	Description string
 }
 
 func (g *GroupChatUseCase) Update(ctx context.Context, opt *GroupUpdateOpt) error {
 	_, err := g.GroupChatRepo.UpdateById(ctx, opt.GroupId, map[string]any{
 		"group_name":  opt.Name,
-		"avatar":      opt.Avatar,
 		"description": opt.Description,
 	})
 	return err
@@ -553,4 +559,25 @@ func (g *GroupChatUseCase) List(userId int) ([]*entity.GroupItem, error) {
 	}
 
 	return items, nil
+}
+func (g *GroupChatUseCase) UpdateAvatar(ctx context.Context, uid int, avatar string) error {
+	_, err := g.GroupChatRepo.UpdateById(ctx, uid, map[string]any{
+		"avatar": avatar,
+	})
+	if err != nil {
+		return errors.New(g.Locale.Localize("personal_info_update_error"))
+	}
+
+	return nil
+}
+
+func (g *GroupChatUseCase) UpdateAvatarFullPath(ctx context.Context, uid int, avatarPath string) error {
+	_, err := g.GroupChatRepo.UpdateById(ctx, uid, map[string]any{
+		"avatar": g.Minio.PublicUrl(g.Conf.Minio.GetBucket(), avatarPath),
+	})
+	if err != nil {
+		return errors.New(g.Locale.Localize("personal_info_update_error"))
+	}
+
+	return nil
 }

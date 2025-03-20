@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log"
+	"strings"
 	groupChatPb "voo.su/api/grpc/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/constant"
@@ -13,6 +14,7 @@ import (
 	"voo.su/internal/usecase"
 	"voo.su/pkg/grpcutil"
 	"voo.su/pkg/locale"
+	"voo.su/pkg/strutil"
 )
 
 type GroupChat struct {
@@ -24,6 +26,7 @@ type GroupChat struct {
 	MessageUseCase         usecase.IMessageUseCase
 	GroupChatUseCase       *usecase.GroupChatUseCase
 	GroupChatMemberUseCase *usecase.GroupChatMemberUseCase
+	UploadUseCase          *usecase.UploadUseCase
 }
 
 func NewGroupChatHandler(
@@ -34,6 +37,7 @@ func NewGroupChatHandler(
 	messageUseCase *usecase.MessageUseCase,
 	groupChatUseCase *usecase.GroupChatUseCase,
 	groupChatMemberUseCase *usecase.GroupChatMemberUseCase,
+	uploadUseCase *usecase.UploadUseCase,
 ) *GroupChat {
 	return &GroupChat{
 		Conf:                   conf,
@@ -43,6 +47,7 @@ func NewGroupChatHandler(
 		MessageUseCase:         messageUseCase,
 		GroupChatUseCase:       groupChatUseCase,
 		GroupChatMemberUseCase: groupChatMemberUseCase,
+		UploadUseCase:          uploadUseCase,
 	}
 }
 
@@ -282,4 +287,36 @@ func (g *GroupChat) EditAboutGroupChat(ctx context.Context, in *groupChatPb.Edit
 	return &groupChatPb.EditAboutGroupChatResponse{
 		Success: true,
 	}, nil
+}
+
+func (g *GroupChat) EditPhotoGroupChat(ctx context.Context, in *groupChatPb.EditPhotoGroupChatRequest) (*groupChatPb.EditPhotoGroupChatResponse, error) {
+	uid := grpcutil.UserId(ctx)
+	gid := int(in.Id)
+
+	photo := in.GetPhoto()
+	if photo.GetEmpty() != nil {
+		if err := g.GroupChatUseCase.UpdateAvatar(ctx, gid, ""); err != nil {
+			log.Printf("не удалось обновить аватар: %v", err)
+			return nil, status.Error(codes.Unknown, "не удалось обновить")
+		}
+
+	} else if file := photo.GetFile(); file != nil {
+		if file.GetId() == 0 || file.GetParts() == 0 || strings.TrimSpace(file.GetName()) == "" {
+			return nil, fmt.Errorf("неверные параметры файла")
+		}
+
+		fileExt := strutil.ExtractFileExtension(file.GetName())
+		finalPath, err := g.UploadUseCase.AssembleFileParts(ctx, uid, file.GetId(), file.GetParts(), file.GetName(), fileExt)
+		if err != nil {
+			log.Printf("ошибка сборки файла: %v", err)
+			return nil, status.Error(codes.Unknown, "ошибка сборки файла")
+		}
+
+		if err := g.GroupChatUseCase.UpdateAvatarFullPath(ctx, gid, finalPath); err != nil {
+			log.Printf("не удалось обновить аватар: %v", err)
+			return nil, status.Error(codes.Unknown, "не удалось обновить")
+		}
+	}
+
+	return &groupChatPb.EditPhotoGroupChatResponse{Success: true}, nil
 }
