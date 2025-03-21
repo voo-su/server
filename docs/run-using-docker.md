@@ -11,7 +11,7 @@ Before starting, ensure you have the following tools installed:
 Step 1: Clone the VooSu server repository with all its submodules
 
 ```bash
-git clone --recursive https://github.com/voo-su/server.git
+git clone --recursive https://github.com/voo-su/server.git -b main
 ```
 
 Step 2: Navigate to the 'server' directory
@@ -20,19 +20,13 @@ Step 2: Navigate to the 'server' directory
 cd server
 ```
 
-Step 3: Create the necessary directory structure for the web-client and clone the web-client repository
-
-```bash
-mkdir -p web/web-client && git clone https://github.com/voo-su/web.git web/web-client
-```
-
-Step 4: Set the correct permissions for the 'run-docker.sh' script
+Step 3: Set the correct permissions for the 'run-docker.sh' script
 
 ```bash
 chmod 775 ./scripts/run-docker.sh
 ```
 
-Step 5: Run the Docker setup script
+Step 4: Run the Docker setup script
 
 ```bash
 ./scripts/run-docker.sh

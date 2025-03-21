@@ -2,6 +2,8 @@
 
 set -x
 
+mkdir -p web/web-client && git clone https://github.com/voo-su/web.git web/web-client -d main
+
 docker compose -f docker-compose.yaml up -d
 
 if ! docker inspect -f '{{.State.Running}}' postgres &>/dev/null; then
