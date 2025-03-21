@@ -9,11 +9,13 @@ import (
 	"voo.su/internal/delivery/http/handler/manager"
 	v1 "voo.su/internal/delivery/http/handler/v1"
 	"voo.su/internal/delivery/http/router"
+	clickhouseRepo "voo.su/internal/infrastructure/clickhouse/repository"
 )
 
 type AppProvider struct {
-	Conf   *config.Config
-	Engine *gin.Engine
+	Conf             *config.Config
+	Engine           *gin.Engine
+	LoggerRepository *clickhouseRepo.LoggerRepository
 }
 
 var ProviderSet = wire.NewSet(

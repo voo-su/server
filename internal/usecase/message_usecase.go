@@ -26,7 +26,6 @@ import (
 	"voo.su/pkg/encrypt"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/nats"
 	"voo.su/pkg/strutil"
@@ -927,7 +926,7 @@ func (m *MessageUseCase) loadReply(_ context.Context, data *postgresModel.Messag
 
 	extra := make(map[string]any)
 	if err := jsonutil.Decode(data.Extra, &extra); err != nil {
-		logger.Errorf("MessageUseCase json decode err: %s", err.Error())
+		log.Fatalf("MessageUseCase json decode err: %s", err.Error())
 		return
 	}
 
@@ -1076,7 +1075,7 @@ func (m *MessageUseCase) afterHandle(ctx context.Context, record *postgresModel.
 	}
 
 	if err := m.Source.Redis().Publish(ctx, constant.ImTopicChat, content).Err(); err != nil {
-		logger.Errorf(m.Locale.Localize("notification_sending_error"), err.Error())
+		log.Fatalf(m.Locale.Localize("notification_sending_error"), err.Error())
 	}
 
 	m.writeMessageToQueue(record.UserId, userIds, record)

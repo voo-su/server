@@ -33,7 +33,11 @@ type Channel struct {
 }
 
 func NewChannel(name string, outChan chan *SenderContent) *Channel {
-	return &Channel{name: name, node: cmap.New[*Client](), outChan: outChan}
+	return &Channel{
+		name:    name,
+		node:    cmap.New[*Client](),
+		outChan: outChan,
+	}
 }
 
 func (c *Channel) Name() string {
@@ -54,7 +58,7 @@ func (c *Channel) Write(data *SenderContent) {
 	select {
 	case c.outChan <- data:
 	case <-timer.C:
-		log.Printf("Channel timeout %s, channel length: %d \n", c.name, len(c.outChan))
+		//log.Printf("Channel timeout %s, channel length: %d \n", c.name, len(c.outChan))
 	}
 }
 
@@ -73,7 +77,7 @@ func (c *Channel) Start(ctx context.Context) error {
 		case <-ctx.Done():
 			return fmt.Errorf("exit channel: %s", c.Name())
 		case <-timer.C:
-			fmt.Printf("Channel name:%s unix:%d len:%d \n", c.name, time.Now().Unix(), len(c.outChan))
+			//fmt.Printf("Channel name:%s unix:%d len:%d \n", c.name, time.Now().Unix(), len(c.outChan))
 		case val, ok := <-c.outChan:
 			if !ok {
 				return fmt.Errorf("outchan closing: %s", c.Name())

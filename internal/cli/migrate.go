@@ -4,7 +4,10 @@ import (
 	"database/sql"
 	"gorm.io/gorm"
 	"log"
+	"os"
 	vooSu "voo.su"
+	clickhouseRepo "voo.su/internal/infrastructure/clickhouse/repository"
+	"voo.su/internal/provider"
 	"voo.su/pkg/migrate"
 
 	"github.com/urfave/cli/v2"
@@ -12,11 +15,14 @@ import (
 )
 
 type MigrateProvider struct {
-	Conf *config.Config
-	DB   *gorm.DB
+	Conf             *config.Config
+	DB               *gorm.DB
+	LoggerRepository *clickhouseRepo.LoggerRepository
 }
 
 func Migrate(ctx *cli.Context, app *MigrateProvider) error {
+	log.SetOutput(provider.NewLoggerWriter(app.Conf, os.Stdout, app.LoggerRepository))
+
 	if err := Postgres(app.Conf); err != nil {
 		return err
 	}

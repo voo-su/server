@@ -3,11 +3,11 @@ package chat
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strconv"
 	"voo.su/internal/constant"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	redisModel "voo.su/internal/infrastructure/redis/model"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/socket"
 )
 
@@ -18,7 +18,7 @@ type ConsumeMessageRevoke struct {
 func (h *Handler) onConsumeMessageRevoke(ctx context.Context, body []byte) {
 	var in ConsumeMessageRevoke
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeMessageRevoke json decode err: %s", err.Error())
+		log.Fatalf("onConsumeMessageRevoke json decode err: %s", err.Error())
 		return
 	}
 

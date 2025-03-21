@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"github.com/urfave/cli/v2"
 	"gorm.io/gorm"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"voo.su/internal/cli/handler/queue"
 	"voo.su/internal/config"
+	clickhouseRepo "voo.su/internal/infrastructure/clickhouse/repository"
+	"voo.su/internal/provider"
 )
 
 type QueueJobs struct {
@@ -17,12 +20,15 @@ type QueueJobs struct {
 }
 
 type QueueProvider struct {
-	Conf *config.Config
-	DB   *gorm.DB
-	Jobs *QueueJobs
+	Conf             *config.Config
+	DB               *gorm.DB
+	Jobs             *QueueJobs
+	LoggerRepository *clickhouseRepo.LoggerRepository
 }
 
 func Queue(ctx *cli.Context, app *QueueProvider) error {
+	log.SetOutput(provider.NewLoggerWriter(app.Conf, os.Stdout, app.LoggerRepository))
+
 	if err := app.Jobs.EmailHandle.Handle(ctx.Context); err != nil {
 		fmt.Println("EmailHandle>>", err)
 	}

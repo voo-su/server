@@ -8,4 +8,5 @@ var ProviderSet = wire.NewSet(
 	wire.Struct(new(Middleware), "*"),
 
 	NewAuthMiddleware,
+	NewLoggingMiddleware,
 )

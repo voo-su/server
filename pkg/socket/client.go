@@ -166,7 +166,7 @@ func (c *Client) loopWrite() {
 		timer.Reset(15 * time.Second)
 		select {
 		case <-timer.C:
-			log.Printf("Client cid:%d uid:%d time:%d", c.cid, c.uid, time.Now().Unix())
+		//	log.Printf("Client cid:%d uid:%d time:%d", c.cid, c.uid, time.Now().Unix())
 		case data, ok := <-c.outChan:
 			if !ok || c.Closed() {
 				return

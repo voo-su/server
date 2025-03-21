@@ -5,7 +5,6 @@ import (
 	cliV2 "github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
@@ -13,6 +12,8 @@ import (
 	"voo.su/api/grpc/pb"
 	"voo.su/internal/config"
 	"voo.su/internal/delivery/grpc/middleware"
+	clickhouseRepo "voo.su/internal/infrastructure/clickhouse/repository"
+	"voo.su/internal/provider"
 )
 
 type AppProvider struct {
@@ -24,9 +25,12 @@ type AppProvider struct {
 	GroupChatHandler pb.GroupChatServiceServer
 	ContactHandler   pb.ContactServiceServer
 	UploadHandler    pb.UploadServiceServer
+	LoggerRepository *clickhouseRepo.LoggerRepository
 }
 
 func Run(ctx2 *cliV2.Context, app *AppProvider) error {
+	log.SetOutput(provider.NewLoggerWriter(app.Conf, os.Stdout, app.LoggerRepository))
+
 	ctx := context.Background()
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -43,15 +47,13 @@ func Run(ctx2 *cliV2.Context, app *AppProvider) error {
 			return err
 		}
 
-		grpclog.SetLoggerV2(grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr))
-
 		srv := grpc.NewServer(
 			grpc.ChainUnaryInterceptor(
-				middleware.UnaryLoggingInterceptor,
+				app.Middleware.Logging.UnaryLoggingInterceptor,
 				app.Middleware.Auth.UnaryAuthInterceptor,
 			),
 			grpc.ChainStreamInterceptor(
-				middleware.StreamLoggingInterceptor,
+				app.Middleware.Logging.StreamLoggingInterceptor,
 				app.Middleware.Auth.StreamAuthInterceptor,
 			),
 		)

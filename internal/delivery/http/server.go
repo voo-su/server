@@ -3,19 +3,21 @@ package http
 import (
 	"context"
 	"errors"
+	"github.com/gin-gonic/gin"
+	"github.com/urfave/cli/v2"
+	"golang.org/x/sync/errgroup"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli/v2"
-	"golang.org/x/sync/errgroup"
+	"voo.su/internal/provider"
 )
 
 func Run(ctx *cli.Context, app *AppProvider) error {
+	log.SetOutput(provider.NewLoggerWriter(app.Conf, os.Stdout, app.LoggerRepository))
+
 	if app.Conf.App.Env == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}

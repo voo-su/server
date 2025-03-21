@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	LogPath    string     = "/var/log/voo-su.log"
 	LevelDebug slog.Level = -4
 	LevelInfo  slog.Level = 0
 	LevelWarn  slog.Level = 4
@@ -23,11 +24,11 @@ func Std() *slog.Logger {
 	return slog.Default()
 }
 
-func InitLogger(filePath string, level slog.Level, topic string) {
-	if err := os.MkdirAll(path.Dir(filePath), os.ModePerm); err != nil {
+func InitLogger(level slog.Level, topic string) {
+	if err := os.MkdirAll(path.Dir(LogPath), os.ModePerm); err != nil {
 		panic(err)
 	}
-	src, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	src, err := os.OpenFile(LogPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}

@@ -3,6 +3,7 @@ package v1
 import (
 	"encoding/json"
 	"gorm.io/gorm"
+	"log"
 	"regexp"
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/domain/entity"
@@ -10,7 +11,6 @@ import (
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/locale"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/timeutil"
 )
 
@@ -109,12 +109,12 @@ func (a *Account) Push(ctx *ginutil.Context) error {
 
 	var in entity.WebPush
 	if err := json.Unmarshal([]byte(params.Subscription), &in); err != nil {
-		logger.Errorf("%s: %s", a.Locale.Localize("decode_error"), err)
+		log.Fatalf("%s: %s", a.Locale.Localize("decode_error"), err)
 		return ctx.Error(a.Locale.Localize("general_error"))
 	}
 
 	if err := a.UserUseCase.WebPushInit(ctx.Ctx(), int64(uid), session.Id, &in); err != nil {
-		logger.Errorf("%s: %s", a.Locale.Localize("decode_error"), err)
+		log.Fatalf("%s: %s", a.Locale.Localize("decode_error"), err)
 		return ctx.Error(a.Locale.Localize("general_error"))
 	}
 

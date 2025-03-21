@@ -3,9 +3,9 @@ package chat
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strconv"
 	"voo.su/internal/constant"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/socket"
 )
 
@@ -18,7 +18,7 @@ type ConsumeMessageRead struct {
 func (h *Handler) onConsumeMessageRead(ctx context.Context, body []byte) {
 	var in ConsumeMessageRead
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeContactApply json decode err: %s", err.Error())
+		log.Fatalf("onConsumeContactApply json decode err: %s", err.Error())
 		return
 	}
 

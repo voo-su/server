@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/status"
+	"log"
 	"strconv"
 	"time"
 	authPb "voo.su/api/grpc/pb"
@@ -53,7 +53,7 @@ func NewAuthHandler(
 func (a *Auth) Login(ctx context.Context, in *authPb.AuthLoginRequest) (*authPb.AuthLoginResponse, error) {
 	token, err := a.AuthUseCase.Login(ctx, constant.GuardGrpcAuth, in.Email)
 	if err != nil {
-		grpclog.Errorf("AuthHandler Login: %v", err)
+		log.Printf("AuthHandler Login: %v", err)
 		return nil, status.Error(codes.FailedPrecondition, a.Locale.Localize("token_creation_error"))
 	}
 

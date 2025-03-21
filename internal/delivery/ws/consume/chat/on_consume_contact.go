@@ -3,10 +3,10 @@ package chat
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strconv"
 	"voo.su/internal/constant"
 	"voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/socket"
 	"voo.su/pkg/timeutil"
@@ -20,7 +20,7 @@ type ConsumeContactStatus struct {
 func (h *Handler) onConsumeContactStatus(ctx context.Context, body []byte) {
 	var in ConsumeContactStatus
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeContactStatus json decode err: %s", err)
+		log.Fatalf("onConsumeContactStatus json decode err: %s", err)
 		return
 	}
 	contactIds := h.ContactUseCase.GetContactIds(ctx, in.UserId)
@@ -50,7 +50,7 @@ type ConsumeContactApply struct {
 func (h *Handler) onConsumeContactApply(ctx context.Context, body []byte) {
 	var in ConsumeContactApply
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeContactApply json decode err: %s", err.Error())
+		log.Fatalf("onConsumeContactApply json decode err: %s", err.Error())
 		return
 	}
 

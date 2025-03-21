@@ -38,7 +38,5 @@ func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
 }
 
 func NewGenerateInjector(conf *config.Config) *cli.GenerateProvider {
-
-	// TODO
-	panic(wire.Build(cli.GenerateProviderSet))
+	panic(wire.Build(provider.ProviderSet, cli.GenerateProviderSet))
 }

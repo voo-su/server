@@ -3,17 +3,17 @@ package chat
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strconv"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/socket"
 )
 
 func (h *Handler) onConsumeChatKeyboard(ctx context.Context, body []byte) {
 	var in entity.ConsumeChatKeyboard
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeChatKeyboard json decode err: %s", err.Error())
+		log.Fatalf("onConsumeChatKeyboard json decode err: %s", err.Error())
 		return
 	}
 

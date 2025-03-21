@@ -40,20 +40,20 @@ build:
 
 .PHONY: http
 http:
-	go run ./cmd/voo-su http
+	go run ./cmd/voo-su -c ./config-dev/voo-su.yaml http
 
 .PHONY: ws
 ws:
-	go run ./cmd/voo-su ws
+	go run ./cmd/voo-su -c ./config-dev/voo-su.yaml ws
 
 .PHONY: grpc
 grpc:
-	go run ./cmd/voo-su grpc
+	go run ./cmd/voo-su -c ./config-dev/voo-su.yaml grpc
 
 .PHONY: cli-cron
 cli-cron:
-	go run ./cmd/voo-su cli-cron
+	go run ./cmd/voo-su -c ./config-dev/voo-su.yaml cli-cron
 
 .PHONY: cli-queue
 cli-queue:
-	go run ./cmd/voo-su cli-queue
+	go run ./cmd/voo-su -c ./config-dev/voo-su.yaml cli-queue

@@ -1,17 +1,10 @@
 package config
 
-import "fmt"
-
 type App struct {
 	Env         string `yaml:"env"`
 	DefaultLang string `yaml:"default_lang"`
 	Jwt         *Jwt   `yaml:"jwt"`
 	Cors        *Cors  `yaml:"cors"`
-}
-
-func (a App) LogPath(filename string) string {
-	// TODO
-	return fmt.Sprintf("/var/log/voo-su/%s", filename)
 }
 
 func (a *App) GetEnv() string {

@@ -271,9 +271,11 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	}
 	accessLogRepository := repository3.NewAccessLogRepository(conn)
 	engine := router.NewRouter(conf, iLocale, handlerHandler, jwtTokenCacheRepository, accessLogRepository)
+	loggerRepository := repository3.NewLoggerRepository(conn)
 	appProvider := &http.AppProvider{
-		Conf:   conf,
-		Engine: engine,
+		Conf:             conf,
+		Engine:           engine,
+		LoggerRepository: loggerRepository,
 	}
 	return appProvider
 }
@@ -370,13 +372,15 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	providers := &provider.Providers{
 		EmailClient: email,
 	}
+	loggerRepository := repository3.NewLoggerRepository(conn)
 	appProvider := &ws.AppProvider{
-		Conf:      conf,
-		Locale:    iLocale,
-		Engine:    engine,
-		Coroutine: server,
-		Handler:   handlerHandler,
-		Providers: providers,
+		Conf:             conf,
+		Locale:           iLocale,
+		Engine:           engine,
+		Coroutine:        server,
+		Handler:          handlerHandler,
+		Providers:        providers,
+		LoggerRepository: loggerRepository,
 	}
 	return appProvider
 }
@@ -384,8 +388,13 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	iLocale := provider.NewLocale(conf)
 	authMiddleware := middleware.NewAuthMiddleware(conf, iLocale)
+	conn := provider.NewClickHouseClient(conf, iLocale)
+	accessGrpcLogRepository := repository3.NewAccessGrpcLogRepository(conn)
+	accessGrpcStreamLogRepository := repository3.NewAccessGrpcStreamLogRepository(conn)
+	loggingMiddleware := middleware.NewLoggingMiddleware(accessGrpcLogRepository, accessGrpcStreamLogRepository)
 	middlewareMiddleware := middleware.Middleware{
-		Auth: authMiddleware,
+		Auth:    authMiddleware,
+		Logging: loggingMiddleware,
 	}
 	email := provider.NewEmailClient(conf)
 	client := provider.NewRedisClient(conf, iLocale)
@@ -395,7 +404,6 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	groupChatMemberRepository := repository2.NewGroupMemberRepository(db, relationCacheRepository)
 	userRepository := repository2.NewUserRepository(db)
 	userSessionRepository := repository2.NewUserSessionRepository(db)
-	conn := provider.NewClickHouseClient(conf, iLocale)
 	authCodeRepository := repository3.NewAuthCodeRepository(conn)
 	jwtTokenCacheRepository := repository.NewJwtTokenCacheRepository(client)
 	authUseCase := usecase.NewAuthUseCase(conf, iLocale, email, smsCacheRepository, groupChatMemberRepository, userRepository, userSessionRepository, authCodeRepository, jwtTokenCacheRepository)
@@ -455,6 +463,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	groupChat := handler3.NewGroupChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, groupChatUseCase, groupChatMemberUseCase, uploadUseCase)
 	contact := handler3.NewContactHandler(conf, iLocale, contactUseCase, userUseCase)
 	upload := handler3.NewUploadHandler(conf, iLocale, uploadUseCase)
+	loggerRepository := repository3.NewLoggerRepository(conn)
 	appProvider := &grpc.AppProvider{
 		Conf:             conf,
 		Middleware:       middlewareMiddleware,
@@ -464,6 +473,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 		GroupChatHandler: groupChat,
 		ContactHandler:   contact,
 		UploadHandler:    upload,
+		LoggerRepository: loggerRepository,
 	}
 	return appProvider
 }
@@ -482,9 +492,12 @@ func NewCronInjector(conf *config.Config) *cli.CronProvider {
 		ClearTmpFile:      clearTmpFile,
 		ClearExpireServer: clearExpireServer,
 	}
+	conn := provider.NewClickHouseClient(conf, iLocale)
+	loggerRepository := repository3.NewLoggerRepository(conn)
 	cronProvider := &cli.CronProvider{
-		Conf:    conf,
-		Crontab: crontab,
+		Conf:             conf,
+		Crontab:          crontab,
+		LoggerRepository: loggerRepository,
 	}
 	return cronProvider
 }
@@ -508,10 +521,12 @@ func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
 		EmailHandle: emailHandle,
 		PushHandle:  pushHandle,
 	}
+	loggerRepository := repository3.NewLoggerRepository(conn)
 	queueProvider := &cli.QueueProvider{
-		Conf: conf,
-		DB:   db,
-		Jobs: queueJobs,
+		Conf:             conf,
+		DB:               db,
+		Jobs:             queueJobs,
+		LoggerRepository: loggerRepository,
 	}
 	return queueProvider
 }
@@ -519,14 +534,23 @@ func NewQueueInjector(conf *config.Config) *cli.QueueProvider {
 func NewMigrateInjector(conf *config.Config) *cli.MigrateProvider {
 	iLocale := provider.NewLocale(conf)
 	db := provider.NewPostgresqlClient(conf, iLocale)
+	conn := provider.NewClickHouseClient(conf, iLocale)
+	loggerRepository := repository3.NewLoggerRepository(conn)
 	migrateProvider := &cli.MigrateProvider{
-		Conf: conf,
-		DB:   db,
+		Conf:             conf,
+		DB:               db,
+		LoggerRepository: loggerRepository,
 	}
 	return migrateProvider
 }
 
 func NewGenerateInjector(conf *config.Config) *cli.GenerateProvider {
-	generateProvider := &cli.GenerateProvider{}
+	iLocale := provider.NewLocale(conf)
+	conn := provider.NewClickHouseClient(conf, iLocale)
+	loggerRepository := repository3.NewLoggerRepository(conn)
+	generateProvider := &cli.GenerateProvider{
+		Conf:             conf,
+		LoggerRepository: loggerRepository,
+	}
 	return generateProvider
 }

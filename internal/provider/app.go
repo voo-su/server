@@ -4,6 +4,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"os"
 	"voo.su/internal/config"
+	"voo.su/pkg/logger"
 )
 
 type App struct {
@@ -66,5 +67,6 @@ func (a *App) createSubcommands(commands []Command) []*cli.Command {
 }
 
 func (a *App) Run() {
+	logger.InitLogger(logger.LevelInfo, a.app.Name)
 	_ = a.app.Run(os.Args)
 }

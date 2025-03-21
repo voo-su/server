@@ -12,7 +12,6 @@ import (
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/infrastructure"
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/nats"
 	"voo.su/pkg/push"
 	webPush "voo.su/pkg/push/web_push"
@@ -39,7 +38,7 @@ func (p *PushHandle) Handle(ctx context.Context) error {
 func (p *PushHandle) Router(message string) {
 	var in entity.PushPayload
 	if err := json.Unmarshal([]byte(message), &in); err != nil {
-		logger.Errorf("Push json decode err: %s", err)
+		log.Fatalf("Push json decode err: %s", err)
 		return
 	}
 

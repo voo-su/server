@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	clickhouseRepo "voo.su/internal/infrastructure/clickhouse/repository"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/socket"
 
@@ -27,15 +28,18 @@ import (
 var ErrServerClosed = errors.New("server shutdown")
 
 type AppProvider struct {
-	Conf      *config.Config
-	Locale    locale.ILocale
-	Engine    *gin.Engine
-	Coroutine *process.Server
-	Handler   *handler.Handler
-	Providers *provider.Providers
+	Conf             *config.Config
+	Locale           locale.ILocale
+	Engine           *gin.Engine
+	Coroutine        *process.Server
+	Handler          *handler.Handler
+	Providers        *provider.Providers
+	LoggerRepository *clickhouseRepo.LoggerRepository
 }
 
 func Run(ctx *cli.Context, app *AppProvider) error {
+	log.SetOutput(provider.NewLoggerWriter(app.Conf, os.Stdout, app.LoggerRepository))
+
 	eg, groupCtx := errgroup.WithContext(ctx.Context)
 
 	if app.Conf.App.Env == "prod" {

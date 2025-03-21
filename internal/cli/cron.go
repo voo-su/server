@@ -12,6 +12,8 @@ import (
 	"syscall"
 	"voo.su/internal/cli/handler/cron"
 	"voo.su/internal/config"
+	clickhouseRepo "voo.su/internal/infrastructure/clickhouse/repository"
+	"voo.su/internal/provider"
 )
 
 type ICrontab interface {
@@ -31,11 +33,14 @@ type Crontab struct {
 }
 
 type CronProvider struct {
-	Conf    *config.Config
-	Crontab *Crontab
+	Conf             *config.Config
+	Crontab          *Crontab
+	LoggerRepository *clickhouseRepo.LoggerRepository
 }
 
 func Cron(ctx *cli.Context, app *CronProvider) error {
+	log.SetOutput(provider.NewLoggerWriter(app.Conf, os.Stdout, app.LoggerRepository))
+
 	c := crontab.New()
 
 	tbl := table.NewWriter()

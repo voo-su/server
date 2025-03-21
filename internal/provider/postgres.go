@@ -21,7 +21,7 @@ func NewPostgresqlClient(conf *config.Config, locale locale.ILocale) *gorm.DB {
 	}
 
 	if conf.App.Env == "dev" {
-		writer, _ := os.OpenFile(conf.App.LogPath("postgres.log"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+		writer, _ := os.OpenFile("/var/log/voo-su.log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 		gormConfig.Logger = logger.New(
 			log.New(writer, "", log.LstdFlags),
 			logger.Config{

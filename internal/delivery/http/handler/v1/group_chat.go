@@ -11,7 +11,6 @@ import (
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/timeutil"
 )
@@ -312,7 +311,7 @@ func (g *GroupChat) AssignAdmin(ctx *ginutil.Context) error {
 	}
 
 	if err := g.GroupChatMemberUseCase.SetLeaderStatus(ctx.Ctx(), int(params.GroupId), int(params.UserId), leader); err != nil {
-		logger.Errorf("%s:%s", g.Locale.Localize("failed_to_set_admin_info"), err.Error())
+		log.Fatalf("%s:%s", g.Locale.Localize("failed_to_set_admin_info"), err.Error())
 		return ctx.Error(g.Locale.Localize("failed_to_set_admin_info"))
 	}
 

@@ -11,7 +11,6 @@ import (
 	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
 	"voo.su/pkg"
-	"voo.su/pkg/logger"
 )
 
 type SequenceRepository struct {
@@ -53,12 +52,12 @@ func (s *SequenceRepository) try(ctx context.Context, userId int, receiverId int
 			Select("COALESCE(max(sequence),0)").
 			Scan(&seq).
 			Error; err != nil {
-			logger.Errorf("Всего последовательностей, ошибка: %s", err.Error())
+			log.Fatalf("Всего последовательностей, ошибка: %s", err.Error())
 			return err
 		}
 
 		if err := s.SequenceCacheRepo.Set(ctx, userId, receiverId, seq); err != nil {
-			logger.Errorf("Установка последовательности, ошибка: %s", err.Error())
+			log.Fatalf("Установка последовательности, ошибка: %s", err.Error())
 			return err
 		}
 	} else if result < time.Hour {

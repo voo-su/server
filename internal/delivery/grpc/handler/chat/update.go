@@ -12,7 +12,6 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/pkg/grpcutil"
-	"voo.su/pkg/logger"
 )
 
 func (c *Chat) GetUpdates(req *chatPb.UpdatesRequest, stream chatPb.ChatService_GetUpdatesServer) error {
@@ -88,7 +87,7 @@ func (c *Chat) GetUpdates(req *chatPb.UpdatesRequest, stream chatPb.ChatService_
 		case constant.SubEventImMessage:
 			var _in entity.ConsumeMessage
 			if err := json.Unmarshal([]byte(in.Data), &_in); err != nil {
-				logger.Errorf("Ошибка декодирования JSON: %s", err.Error())
+				log.Fatalf("Ошибка декодирования JSON: %s", err.Error())
 				return
 			}
 			fmt.Println(_in)
@@ -99,7 +98,7 @@ func (c *Chat) GetUpdates(req *chatPb.UpdatesRequest, stream chatPb.ChatService_
 		case constant.SubEventImMessageKeyboard:
 			var _in entity.ConsumeChatKeyboard
 			if err := json.Unmarshal([]byte(in.Data), &_in); err != nil {
-				logger.Errorf("Ошибка декодирования JSON: %s", err.Error())
+				log.Fatalf("Ошибка декодирования JSON: %s", err.Error())
 				return
 			}
 

@@ -64,7 +64,7 @@ func (c *ChatEvent) OnMessage(client socket.IClient, message []byte) {
 }
 
 func (c *ChatEvent) OnClose(client socket.IClient, code int, text string) {
-	log.Printf("Closing a client: %v, %v, %s, %v, %s", client.Uid(), client.Cid(), client.Channel().Name(), code, text)
+	//log.Printf("Closing a client: %v, %v, %s, %v, %s", client.Uid(), client.Cid(), client.Channel().Name(), code, text)
 	ctx := context.TODO()
 	ids := c.GroupChatMemberRepo.GetUserGroupIds(ctx, client.Uid())
 	rooms := make([]*redisModel.RoomOption, 0, len(ids))

@@ -6,7 +6,6 @@ import (
 	"voo.su/internal/constant"
 	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/pkg/jsonutil"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/socket"
 )
 
@@ -35,7 +34,7 @@ func (h *Handler) onReadMessage(ctx context.Context, client socket.IClient, data
 	}
 
 	if err := h.MemberUseCase.Source.Postgres().Create(items).Error; err != nil {
-		logger.Errorf("onReadMessage Create err: %s", err)
+		log.Fatalf("onReadMessage Create err: %s", err)
 		return
 	}
 

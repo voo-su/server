@@ -1,5 +1,6 @@
 package middleware
 
 type Middleware struct {
-	Auth *AuthMiddleware
+	Auth    *AuthMiddleware
+	Logging *LoggingMiddleware
 }

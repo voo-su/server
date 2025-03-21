@@ -3,11 +3,11 @@ package chat
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strconv"
 	"voo.su/internal/constant"
 	"voo.su/internal/infrastructure/postgres/model"
 	redisModel "voo.su/internal/infrastructure/redis/model"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/socket"
 )
 
@@ -25,7 +25,7 @@ type ConsumeGroupApply struct {
 func (h *Handler) onConsumeGroupJoin(ctx context.Context, body []byte) {
 	var in ConsumeGroupJoin
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeGroupJoin json decode err: %s", err.Error())
+		log.Fatalf("onConsumeGroupJoin json decode err: %s", err.Error())
 		return
 	}
 
@@ -54,7 +54,7 @@ func (h *Handler) onConsumeGroupJoin(ctx context.Context, body []byte) {
 func (h *Handler) onConsumeGroupApply(ctx context.Context, body []byte) {
 	var in ConsumeGroupApply
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeGroupApply json decode err: %s", err.Error())
+		log.Fatalf("onConsumeGroupApply json decode err: %s", err.Error())
 		return
 	}
 

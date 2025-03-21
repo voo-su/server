@@ -3,10 +3,10 @@ package chat
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strconv"
 	"voo.su/internal/constant"
 	redisModel "voo.su/internal/infrastructure/redis/model"
-	"voo.su/pkg/logger"
 	"voo.su/pkg/socket"
 )
 
@@ -20,7 +20,7 @@ type ConsumeMessage struct {
 func (h *Handler) onConsumeMessage(ctx context.Context, body []byte) {
 	var in ConsumeMessage
 	if err := json.Unmarshal(body, &in); err != nil {
-		logger.Errorf("onConsumeMessage json decode err: %s", err.Error())
+		log.Fatalf("onConsumeMessage json decode err: %s", err.Error())
 		return
 	}
 
