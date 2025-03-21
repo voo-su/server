@@ -457,7 +457,7 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	uploadUseCase := usecase.NewUploadUseCase(conf, iLocale, source, fileRepository, fileSplitRepository, iMinio)
 	account := handler3.NewAccountHandler(iLocale, userUseCase, authUseCase, chatUseCase, uploadUseCase)
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
-	chatChat := chat3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, iNatsClient)
+	chatChat := chat3.NewChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, iNatsClient, uploadUseCase)
 	groupChatUseCase := usecase.NewGroupChatUseCase(conf, iLocale, source, groupChatRepository, groupChatMemberRepository, sequenceRepository, relationCacheRepository, redisLockCacheRepository, iMinio)
 	groupChatMemberUseCase := usecase.NewGroupMemberUseCase(iLocale, source, groupChatMemberRepository)
 	groupChat := handler3.NewGroupChatHandler(conf, iLocale, contactUseCase, chatUseCase, messageUseCase, groupChatUseCase, groupChatMemberUseCase, uploadUseCase)

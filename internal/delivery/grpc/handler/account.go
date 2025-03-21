@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -100,12 +99,12 @@ func (a *Account) UpdateProfilePhoto(ctx context.Context, in *accountPb.UpdatePr
 	finalPath, err := a.UploadUseCase.AssembleFileParts(ctx, uid, inputFile.GetId(), inputFile.GetParts(), inputFile.GetName(), fileExt)
 	if err != nil {
 		log.Printf("ошибка сборки файла: %v", err)
-		return nil, errors.New("ошибка сборки файла")
+		return nil, status.Error(codes.Unknown, "ошибка сборки файла")
 	}
 
 	if err := a.UserUseCase.UpdateUserAvatar(ctx, uid, finalPath); err != nil {
 		log.Printf("не удалось обновить аватар: %v", err)
-		return nil, errors.New("не удалось обновить аватар")
+		return nil, status.Error(codes.Unknown, "не удалось обновить аватар")
 	}
 
 	return &accountPb.UpdateProfilePhotoResponse{Success: true}, nil

@@ -436,6 +436,16 @@ func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *entit
 }
 
 func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *entity.SendImage) error {
+	if req.ReplyToMsgId != 0 {
+		message, err := m.MessageRepo.FindById(ctx, int(req.ReplyToMsgId))
+		if err != nil {
+
+		}
+		if message != nil {
+			req.QuoteId = message.MsgId
+		}
+	}
+
 	data := &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeImage,

@@ -235,12 +235,13 @@ type SendText struct {
 }
 
 type SendImage struct {
-	Receiver MessageReceiver
-	Url      string
-	Width    int32
-	Height   int32
-	QuoteId  string
-	Content  string
+	Receiver     MessageReceiver
+	Url          string
+	Width        int32
+	Height       int32
+	QuoteId      string
+	Content      string
+	ReplyToMsgId int64
 }
 
 type SendVideo struct {

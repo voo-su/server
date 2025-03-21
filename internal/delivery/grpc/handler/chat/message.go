@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"log"
 	chatPb "voo.su/api/grpc/pb"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/grpcutil"
 	"voo.su/pkg/jsonutil"
+	"voo.su/pkg/strutil"
 )
 
 func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*chatPb.GetHistoryResponse, error) {
@@ -179,9 +181,35 @@ func (c *Chat) SendMessage(ctx context.Context, in *chatPb.SendMessageRequest) (
 	}, nil
 }
 
-func (c *Chat) SendPhoto(ctx context.Context, in *chatPb.SendPhotoRequest) (*chatPb.SendPhotoResponse, error) {
-	// TODO
-	return &chatPb.SendPhotoResponse{}, nil
+func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*chatPb.SendMediaResponse, error) {
+	uid := grpcutil.UserId(ctx)
+	media := in.GetMedia()
+	file := media.GetFile()
+
+	fileExt := strutil.ExtractFileExtension(file.GetName())
+	finalPath, err := c.UploadUseCase.AssembleFileParts(ctx, uid, file.GetId(), file.GetParts(), file.GetName(), fileExt)
+	if err != nil {
+		log.Printf("ошибка сборки файла: %v", err)
+		return nil, status.Error(codes.Unknown, "ошибка сборки файла")
+	}
+
+	if err := c.MessageUseCase.SendImage(ctx, uid, &entity.SendImage{
+		Receiver: entity.MessageReceiver{
+			ChatType:   in.Receiver.ChatType,
+			ReceiverId: int32(in.Receiver.ReceiverId),
+		},
+		Url: c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), finalPath),
+		//Width:   params.Width,
+		//Height:  params.Height,
+		ReplyToMsgId: in.ReplyToMsgId,
+	}); err != nil {
+		log.Println(err)
+		return nil, status.Error(codes.Unknown, "не удалось")
+	}
+
+	return &chatPb.SendMediaResponse{
+		Success: true,
+	}, nil
 }
 
 func (c *Chat) ViewMessages(ctx context.Context, in *chatPb.ViewMessagesRequest) (*chatPb.ViewMessagesResponse, error) {

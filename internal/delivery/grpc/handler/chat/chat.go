@@ -28,6 +28,7 @@ type Chat struct {
 	mu             sync.Mutex
 	userChannels   map[int64]chan *chatPb.Update
 	Nats           nats.INatsClient
+	UploadUseCase  *usecase.UploadUseCase
 }
 
 func NewChatHandler(
@@ -37,6 +38,7 @@ func NewChatHandler(
 	chatUseCase *usecase.ChatUseCase,
 	messageUseCase *usecase.MessageUseCase,
 	nats nats.INatsClient,
+	uploadUseCase *usecase.UploadUseCase,
 ) *Chat {
 	return &Chat{
 		Conf:           conf,
@@ -46,6 +48,7 @@ func NewChatHandler(
 		MessageUseCase: messageUseCase,
 		userChannels:   make(map[int64]chan *chatPb.Update),
 		Nats:           nats,
+		UploadUseCase:  uploadUseCase,
 	}
 }
 

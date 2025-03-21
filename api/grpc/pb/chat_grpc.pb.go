@@ -23,7 +23,7 @@ const (
 	ChatService_GetChats_FullMethodName       = "/chat.ChatService/GetChats"
 	ChatService_GetHistory_FullMethodName     = "/chat.ChatService/GetHistory"
 	ChatService_SendMessage_FullMethodName    = "/chat.ChatService/SendMessage"
-	ChatService_SendPhoto_FullMethodName      = "/chat.ChatService/SendPhoto"
+	ChatService_SendMedia_FullMethodName      = "/chat.ChatService/SendMedia"
 	ChatService_ViewMessages_FullMethodName   = "/chat.ChatService/ViewMessages"
 	ChatService_DeleteMessages_FullMethodName = "/chat.ChatService/DeleteMessages"
 )
@@ -40,8 +40,8 @@ type ChatServiceClient interface {
 	GetHistory(ctx context.Context, in *GetHistoryRequest, opts ...grpc.CallOption) (*GetHistoryResponse, error)
 	// Sends a text message to the specified receiver
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
-	// Sends a photo to the specified receiver
-	SendPhoto(ctx context.Context, in *SendPhotoRequest, opts ...grpc.CallOption) (*SendPhotoResponse, error)
+	// Sends a media file to the specified receiver
+	SendMedia(ctx context.Context, in *SendMediaRequest, opts ...grpc.CallOption) (*SendMediaResponse, error)
 	// Marks the specified messages as viewed by the receiver
 	ViewMessages(ctx context.Context, in *ViewMessagesRequest, opts ...grpc.CallOption) (*ViewMessagesResponse, error)
 	// Deletes specific messages from the chat (optional: revoke them)
@@ -105,10 +105,10 @@ func (c *chatServiceClient) SendMessage(ctx context.Context, in *SendMessageRequ
 	return out, nil
 }
 
-func (c *chatServiceClient) SendPhoto(ctx context.Context, in *SendPhotoRequest, opts ...grpc.CallOption) (*SendPhotoResponse, error) {
+func (c *chatServiceClient) SendMedia(ctx context.Context, in *SendMediaRequest, opts ...grpc.CallOption) (*SendMediaResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SendPhotoResponse)
-	err := c.cc.Invoke(ctx, ChatService_SendPhoto_FullMethodName, in, out, cOpts...)
+	out := new(SendMediaResponse)
+	err := c.cc.Invoke(ctx, ChatService_SendMedia_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -147,8 +147,8 @@ type ChatServiceServer interface {
 	GetHistory(context.Context, *GetHistoryRequest) (*GetHistoryResponse, error)
 	// Sends a text message to the specified receiver
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
-	// Sends a photo to the specified receiver
-	SendPhoto(context.Context, *SendPhotoRequest) (*SendPhotoResponse, error)
+	// Sends a media file to the specified receiver
+	SendMedia(context.Context, *SendMediaRequest) (*SendMediaResponse, error)
 	// Marks the specified messages as viewed by the receiver
 	ViewMessages(context.Context, *ViewMessagesRequest) (*ViewMessagesResponse, error)
 	// Deletes specific messages from the chat (optional: revoke them)
@@ -175,8 +175,8 @@ func (UnimplementedChatServiceServer) GetHistory(context.Context, *GetHistoryReq
 func (UnimplementedChatServiceServer) SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
 }
-func (UnimplementedChatServiceServer) SendPhoto(context.Context, *SendPhotoRequest) (*SendPhotoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendPhoto not implemented")
+func (UnimplementedChatServiceServer) SendMedia(context.Context, *SendMediaRequest) (*SendMediaResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendMedia not implemented")
 }
 func (UnimplementedChatServiceServer) ViewMessages(context.Context, *ViewMessagesRequest) (*ViewMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ViewMessages not implemented")
@@ -270,20 +270,20 @@ func _ChatService_SendMessage_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ChatService_SendPhoto_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SendPhotoRequest)
+func _ChatService_SendMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendMediaRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServiceServer).SendPhoto(ctx, in)
+		return srv.(ChatServiceServer).SendMedia(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ChatService_SendPhoto_FullMethodName,
+		FullMethod: ChatService_SendMedia_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServiceServer).SendPhoto(ctx, req.(*SendPhotoRequest))
+		return srv.(ChatServiceServer).SendMedia(ctx, req.(*SendMediaRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -344,8 +344,8 @@ var ChatService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ChatService_SendMessage_Handler,
 		},
 		{
-			MethodName: "SendPhoto",
-			Handler:    _ChatService_SendPhoto_Handler,
+			MethodName: "SendMedia",
+			Handler:    _ChatService_SendMedia_Handler,
 		},
 		{
 			MethodName: "ViewMessages",
