@@ -2,7 +2,7 @@
 
 set -x
 
-docker compose -f docker-compose.dev.yaml up -d
+docker compose -f docker-compose.yaml up -d
 
 if ! docker inspect -f '{{.State.Running}}' postgres &>/dev/null; then
     echo "The PostgreSQL container is not running."
