@@ -79,12 +79,12 @@ func GenMediaObjectName(ext string, width, height int) string {
 	)
 
 	switch ext {
-	case "png", "jpeg", "jpg", "gif", "webp", "svg", "ico":
+	case "png", "jpeg", "jpg", "gif", "webp", "svg", "ico", "bmp", "tiff", "raw", "heif", "heic":
 		mediaType = "images"
 		fileName = GenImageName(ext, width, height)
-	case "mp3", "wav", "aac", "ogg", "flac":
+	case "mp3", "wav", "aac", "ogg", "flac", "m4a", "opus", "amr", "wma":
 		mediaType = "audio"
-	case "mp4", "avi", "mov", "wmv", "mkv":
+	case "mp4", "avi", "mov", "wmv", "mkv", "flv", "webm", "3gp", "mpg", "mpeg", "rm", "rmvb":
 		mediaType = "videos"
 	}
 

@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log"
+	"strings"
 	chatPb "voo.su/api/grpc/pb"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
@@ -183,28 +184,86 @@ func (c *Chat) SendMessage(ctx context.Context, in *chatPb.SendMessageRequest) (
 
 func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*chatPb.SendMediaResponse, error) {
 	uid := grpcutil.UserId(ctx)
-	media := in.GetMedia()
-	file := media.GetFile()
 
-	fileExt := strutil.ExtractFileExtension(file.GetName())
-	finalPath, err := c.UploadUseCase.AssembleFileParts(ctx, uid, file.GetId(), file.GetParts(), file.GetName(), fileExt)
-	if err != nil {
-		log.Printf("ошибка сборки файла: %v", err)
-		return nil, status.Error(codes.Unknown, "ошибка сборки файла")
+	receiver := entity.MessageReceiver{
+		ChatType:   in.Receiver.ChatType,
+		ReceiverId: int32(in.Receiver.ReceiverId),
 	}
 
-	if err := c.MessageUseCase.SendImage(ctx, uid, &entity.SendImage{
-		Receiver: entity.MessageReceiver{
-			ChatType:   in.Receiver.ChatType,
-			ReceiverId: int32(in.Receiver.ReceiverId),
-		},
-		Url: c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), finalPath),
-		//Width:   params.Width,
-		//Height:  params.Height,
-		ReplyToMsgId: in.ReplyToMsgId,
-	}); err != nil {
-		log.Println(err)
-		return nil, status.Error(codes.Unknown, "не удалось")
+	switch media := in.Media.Media.(type) {
+	case *chatPb.InputMedia_Photo:
+		file := media.Photo.GetFile()
+		fileExt := strutil.ExtractFileExtension(file.GetName())
+
+		filePath, err := c.UploadUseCase.AssembleFileParts(ctx, uid, file.GetId(), file.GetParts(), file.GetName(), fileExt)
+		if err != nil {
+			log.Printf("ошибка сборки файла: %v", err)
+			return nil, status.Error(codes.Unknown, "ошибка сборки файла")
+		}
+
+		if err := c.MessageUseCase.SendImage(ctx, uid, &entity.SendImage{
+			Receiver: receiver,
+			Url:      c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), filePath.FilePath),
+			//Width:   params.Width,
+			//Height:  params.Height,
+			ReplyToMsgId: in.ReplyToMsgId,
+			Content:      in.Message,
+		}); err != nil {
+			log.Println(err)
+			return nil, status.Error(codes.Unknown, "не удалось")
+		}
+
+	case *chatPb.InputMedia_Document:
+		file := media.Document.GetFile()
+		mimeType := media.Document.GetMimeType()
+		attributes := media.Document.GetAttributes()
+		fileExt := strutil.ExtractFileExtension(file.GetName())
+
+		filePath, err := c.UploadUseCase.AssembleFileParts(ctx, uid, file.GetId(), file.GetParts(), file.GetName(), fileExt)
+		if err != nil {
+			log.Printf("ошибка сборки файла: %v", err)
+			return nil, status.Error(codes.Unknown, "ошибка сборки файла")
+		}
+
+		switch {
+		case strings.HasPrefix(mimeType, "video/"):
+			if err := c.MessageUseCase.SendVideo(ctx, uid, &entity.SendVideo{
+				Receiver: receiver,
+				Url:      c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), filePath.FilePath),
+				Duration: attributes.GetVideo().GetDuration(),
+				Size:     int32(filePath.Size),
+				//Cover:    params.Cover,
+				Content: in.Message,
+			}); err != nil {
+				log.Println(err)
+				return nil, status.Error(codes.Unknown, "не удалось")
+			}
+		case strings.HasPrefix(mimeType, "audio/"):
+			if err := c.MessageUseCase.SendAudio(ctx, uid, &entity.SendAudio{
+				Receiver: receiver,
+				Url:      c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), filePath.FilePath),
+				Size:     int32(filePath.Size),
+				Content:  in.Message,
+			}); err != nil {
+				log.Println(err)
+				return nil, status.Error(codes.Unknown, "не удалось")
+			}
+		default:
+			if err := c.MessageUseCase.SendBotFile(ctx, uid, &entity.SendBotFile{
+				Receiver:     receiver,
+				Drive:        1,
+				OriginalName: attributes.GetFilename().GetFileName(),
+				FileExt:      fileExt,
+				FileSize:     int(filePath.Size),
+				FilePath:     c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), filePath.FilePath),
+				Content:      in.Message,
+			}); err != nil {
+				log.Println(err)
+				return nil, status.Error(codes.Unknown, "не удалось")
+			}
+		}
+	default:
+		return nil, status.Error(codes.Unknown, c.Locale.Localize("general_error"))
 	}
 
 	return &chatPb.SendMediaResponse{

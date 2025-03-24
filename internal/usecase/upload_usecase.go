@@ -203,33 +203,38 @@ func (u *UploadUseCase) saveFilePart(fileID int64, filePart int32, data []byte) 
 	return nil
 }
 
-func (u *UploadUseCase) AssembleFileParts(ctx context.Context, uid int, fileId int64, totalParts int32, originalName string, fileExt string) (string, error) {
+type AssembleFilePart struct {
+	FilePath string
+	Size     int64
+}
+
+func (u *UploadUseCase) AssembleFileParts(ctx context.Context, uid int, fileId int64, totalParts int32, originalName string, fileExt string) (*AssembleFilePart, error) {
 	objectName := strutil.GenMediaObjectName(fileExt, 200, 200)
+
+	var totalSize int64
 	uploadId, err := u.Minio.InitiateMultipartUpload(u.Conf.Minio.GetBucket(), objectName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	var partsInfo []minio.ObjectPart
-	var totalSize int64
-
+	var partsInfo = make([]minio.ObjectPart, 0)
 	for i := int32(0); i < totalParts; i++ {
 		objectPartPath := fmt.Sprintf("%d/%d.part", fileId, i)
 		obj, err := u.Minio.GetObject(u.Conf.Minio.Bucket, objectPartPath)
 		if err != nil {
-			return "", fmt.Errorf("ошибка получения части %d из MinIO: %v", i, err)
+			return nil, fmt.Errorf("ошибка получения части %d из MinIO: %v", i, err)
 		}
 
 		partData, err := io.ReadAll(obj)
 		if err != nil {
-			return "", fmt.Errorf("ошибка чтения данных части %d: %v", i, err)
+			return nil, fmt.Errorf("ошибка чтения данных части %d: %v", i, err)
 		}
 
 		totalSize += int64(len(partData))
 
 		uploadInfo, err := u.Minio.PutObjectPart(u.Conf.Minio.Bucket, objectName, uploadId, int(i+1), bytes.NewReader(partData), int64(len(partData)))
 		if err != nil {
-			return "", fmt.Errorf("ошибка загрузки части %d: %v", i, err)
+			return nil, fmt.Errorf("ошибка загрузки части %d: %v", i, err)
 		}
 
 		partsInfo = append(partsInfo, minio.ObjectPart{
@@ -239,7 +244,7 @@ func (u *UploadUseCase) AssembleFileParts(ctx context.Context, uid int, fileId i
 	}
 
 	if err := u.Minio.CompleteMultipartUpload(u.Conf.Minio.Bucket, objectName, uploadId, partsInfo); err != nil {
-		return "", fmt.Errorf("ошибка завершения сборки файла: %v", err)
+		return nil, fmt.Errorf("ошибка завершения сборки файла: %v", err)
 	}
 
 	if err := u.FileRepo.Create(ctx, &postgresModel.File{
@@ -250,10 +255,13 @@ func (u *UploadUseCase) AssembleFileParts(ctx context.Context, uid int, fileId i
 		CreatedBy:    uid,
 		CreatedAt:    time.Now(),
 	}); err != nil {
-		return "", fmt.Errorf("ошибка сохранения информации о файле в базе: %v", err)
+		return nil, fmt.Errorf("ошибка сохранения информации о файле в базе: %v", err)
 	}
 
-	return objectName, nil
+	return &AssembleFilePart{
+		FilePath: objectName,
+		Size:     totalSize,
+	}, nil
 }
 
 func (u *UploadUseCase) GetFile(ctx context.Context, fileId uuid.UUID, offset int64, limit int32) ([]byte, error) {

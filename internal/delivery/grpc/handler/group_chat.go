@@ -312,7 +312,7 @@ func (g *GroupChat) EditPhotoGroupChat(ctx context.Context, in *groupChatPb.Edit
 			return nil, status.Error(codes.Unknown, "ошибка сборки файла")
 		}
 
-		if err := g.GroupChatUseCase.UpdateAvatarFullPath(ctx, gid, finalPath); err != nil {
+		if err := g.GroupChatUseCase.UpdateAvatarFullPath(ctx, gid, finalPath.FilePath); err != nil {
 			log.Printf("не удалось обновить аватар: %v", err)
 			return nil, status.Error(codes.Unknown, "не удалось обновить")
 		}
