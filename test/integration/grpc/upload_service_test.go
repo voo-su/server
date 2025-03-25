@@ -55,6 +55,8 @@ func TestSaveFile(t *testing.T) {
 		}
 		part++
 	}
+
+	log.Printf("Количество частей: %d", part)
 }
 
 func TestGetFile(t *testing.T) {

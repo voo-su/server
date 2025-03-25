@@ -313,6 +313,162 @@ func (*InputPhotoEmpty) Descriptor() ([]byte, []int) {
 	return file_common_common_proto_rawDescGZIP(), []int{4}
 }
 
+type DocumentAttributeVideo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Duration      int32                  `protobuf:"varint,1,opt,name=duration,proto3" json:"duration,omitempty"` // Video duration in seconds
+	Width         int32                  `protobuf:"varint,2,opt,name=width,proto3" json:"width,omitempty"`       // Video width in pixels
+	Height        int32                  `protobuf:"varint,3,opt,name=height,proto3" json:"height,omitempty"`     // Video height in pixels
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DocumentAttributeVideo) Reset() {
+	*x = DocumentAttributeVideo{}
+	mi := &file_common_common_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DocumentAttributeVideo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DocumentAttributeVideo) ProtoMessage() {}
+
+func (x *DocumentAttributeVideo) ProtoReflect() protoreflect.Message {
+	mi := &file_common_common_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DocumentAttributeVideo.ProtoReflect.Descriptor instead.
+func (*DocumentAttributeVideo) Descriptor() ([]byte, []int) {
+	return file_common_common_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *DocumentAttributeVideo) GetDuration() int32 {
+	if x != nil {
+		return x.Duration
+	}
+	return 0
+}
+
+func (x *DocumentAttributeVideo) GetWidth() int32 {
+	if x != nil {
+		return x.Width
+	}
+	return 0
+}
+
+func (x *DocumentAttributeVideo) GetHeight() int32 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+type DocumentAttributeAudio struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Duration      int32                  `protobuf:"varint,1,opt,name=duration,proto3" json:"duration,omitempty"` // Audio file duration in seconds
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DocumentAttributeAudio) Reset() {
+	*x = DocumentAttributeAudio{}
+	mi := &file_common_common_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DocumentAttributeAudio) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DocumentAttributeAudio) ProtoMessage() {}
+
+func (x *DocumentAttributeAudio) ProtoReflect() protoreflect.Message {
+	mi := &file_common_common_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DocumentAttributeAudio.ProtoReflect.Descriptor instead.
+func (*DocumentAttributeAudio) Descriptor() ([]byte, []int) {
+	return file_common_common_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *DocumentAttributeAudio) GetDuration() int32 {
+	if x != nil {
+		return x.Duration
+	}
+	return 0
+}
+
+func (x *DocumentAttributeAudio) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type DocumentAttributeFilename struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FileName      string                 `protobuf:"bytes,1,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DocumentAttributeFilename) Reset() {
+	*x = DocumentAttributeFilename{}
+	mi := &file_common_common_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DocumentAttributeFilename) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DocumentAttributeFilename) ProtoMessage() {}
+
+func (x *DocumentAttributeFilename) ProtoReflect() protoreflect.Message {
+	mi := &file_common_common_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DocumentAttributeFilename.ProtoReflect.Descriptor instead.
+func (*DocumentAttributeFilename) Descriptor() ([]byte, []int) {
+	return file_common_common_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DocumentAttributeFilename) GetFileName() string {
+	if x != nil {
+		return x.FileName
+	}
+	return ""
+}
+
 var File_common_common_proto protoreflect.FileDescriptor
 
 var file_common_common_proto_rawDesc = string([]byte{
@@ -340,9 +496,24 @@ var file_common_common_proto_rawDesc = string([]byte{
 	0x28, 0x0b, 0x32, 0x11, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x49, 0x6e, 0x70, 0x75,
 	0x74, 0x46, 0x69, 0x6c, 0x65, 0x48, 0x00, 0x52, 0x04, 0x66, 0x69, 0x6c, 0x65, 0x42, 0x07, 0x0a,
 	0x05, 0x70, 0x68, 0x6f, 0x74, 0x6f, 0x22, 0x11, 0x0a, 0x0f, 0x49, 0x6e, 0x70, 0x75, 0x74, 0x50,
-	0x68, 0x6f, 0x74, 0x6f, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x1b, 0x5a, 0x19, 0x76, 0x6f, 0x6f,
-	0x2e, 0x73, 0x75, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2f, 0x70, 0x62, 0x2f,
-	0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x68, 0x6f, 0x74, 0x6f, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x62, 0x0a, 0x16, 0x44, 0x6f, 0x63,
+	0x75, 0x6d, 0x65, 0x6e, 0x74, 0x41, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x56, 0x69,
+	0x64, 0x65, 0x6f, 0x12, 0x1a, 0x0a, 0x08, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12,
+	0x14, 0x0a, 0x05, 0x77, 0x69, 0x64, 0x74, 0x68, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05,
+	0x77, 0x69, 0x64, 0x74, 0x68, 0x12, 0x16, 0x0a, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x22, 0x48, 0x0a,
+	0x16, 0x44, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x41, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75,
+	0x74, 0x65, 0x41, 0x75, 0x64, 0x69, 0x6f, 0x12, 0x1a, 0x0a, 0x08, 0x64, 0x75, 0x72, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x64, 0x75, 0x72, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x38, 0x0a, 0x19, 0x44, 0x6f, 0x63, 0x75, 0x6d,
+	0x65, 0x6e, 0x74, 0x41, 0x74, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x46, 0x69, 0x6c, 0x65,
+	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x6e, 0x61, 0x6d,
+	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x66, 0x69, 0x6c, 0x65, 0x4e, 0x61, 0x6d,
+	0x65, 0x42, 0x1b, 0x5a, 0x19, 0x76, 0x6f, 0x6f, 0x2e, 0x73, 0x75, 0x2f, 0x61, 0x70, 0x69, 0x2f,
+	0x67, 0x72, 0x70, 0x63, 0x2f, 0x70, 0x62, 0x2f, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 })
 
 var (
@@ -357,13 +528,16 @@ func file_common_common_proto_rawDescGZIP() []byte {
 	return file_common_common_proto_rawDescData
 }
 
-var file_common_common_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_common_common_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_common_common_proto_goTypes = []any{
 	(*EntityNotifySettings)(nil),      // 0: common.EntityNotifySettings
 	(*InputFile)(nil),                 // 1: common.InputFile
 	(*InputDocumentFileLocation)(nil), // 2: common.InputDocumentFileLocation
 	(*InputPhoto)(nil),                // 3: common.InputPhoto
 	(*InputPhotoEmpty)(nil),           // 4: common.InputPhotoEmpty
+	(*DocumentAttributeVideo)(nil),    // 5: common.DocumentAttributeVideo
+	(*DocumentAttributeAudio)(nil),    // 6: common.DocumentAttributeAudio
+	(*DocumentAttributeFilename)(nil), // 7: common.DocumentAttributeFilename
 }
 var file_common_common_proto_depIdxs = []int32{
 	4, // 0: common.InputPhoto.empty:type_name -> common.InputPhotoEmpty
@@ -390,7 +564,7 @@ func file_common_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_common_proto_rawDesc), len(file_common_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

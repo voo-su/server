@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type MessageItem struct {
 	Id         int    `json:"id"`
@@ -22,6 +25,7 @@ type MessageItem struct {
 	Extra      any    `json:"extra"`
 	Extra0     string `json:"extra0"`
 	QuoteId    string `json:"quote_id"`
+	FileId     *uuid.UUID
 }
 
 type QueryGetHistoryOpt struct {
@@ -34,24 +38,25 @@ type QueryGetHistoryOpt struct {
 }
 
 type QueryMessageItem struct {
-	Id         int       `json:"id"`
-	MsgId      string    `json:"msg_id"`
-	Sequence   int64     `json:"sequence"`
-	ChatType   int       `json:"chat_type"`
-	MsgType    int       `json:"msg_type"`
-	UserId     int       `json:"user_id"`
-	ReceiverId int       `json:"receiver_id"`
-	IsRevoke   int       `json:"is_revoke"`
-	IsMark     int       `json:"is_mark"`
-	IsRead     int       `json:"is_read"`
-	QuoteId    string    `json:"quote_id"`
-	Content    string    `json:"content"`
-	CreatedAt  time.Time `json:"created_at"`
-	Username   string    `json:"username"`
-	Name       string    `json:"name"`
-	Surname    string    `json:"surname"`
-	Avatar     string    `json:"avatar"`
-	Extra      string    `json:"extra"`
+	Id         int        `json:"id"`
+	MsgId      string     `json:"msg_id"`
+	Sequence   int64      `json:"sequence"`
+	ChatType   int        `json:"chat_type"`
+	MsgType    int        `json:"msg_type"`
+	UserId     int        `json:"user_id"`
+	ReceiverId int        `json:"receiver_id"`
+	IsRevoke   int        `json:"is_revoke"`
+	IsMark     int        `json:"is_mark"`
+	IsRead     int        `json:"is_read"`
+	QuoteId    string     `json:"quote_id"`
+	Content    string     `json:"content"`
+	CreatedAt  time.Time  `json:"created_at"`
+	Username   string     `json:"username"`
+	Name       string     `json:"name"`
+	Surname    string     `json:"surname"`
+	Avatar     string     `json:"avatar"`
+	Extra      string     `json:"extra"`
+	FileId     *uuid.UUID `json:"file_id"`
 }
 
 type MessageExtraGroupMembers struct {
@@ -242,6 +247,7 @@ type SendImage struct {
 	QuoteId      string
 	Content      string
 	ReplyToMsgId int64
+	FileId       *uuid.UUID
 }
 
 type SendVideo struct {
@@ -251,6 +257,7 @@ type SendVideo struct {
 	Size     int32
 	Cover    string
 	Content  string
+	FileId   *uuid.UUID
 }
 
 type SendAudio struct {
@@ -258,6 +265,7 @@ type SendAudio struct {
 	Url      string
 	Size     int32
 	Content  string
+	FileId   *uuid.UUID
 }
 
 type SendFile struct {
@@ -273,6 +281,7 @@ type SendBotFile struct {
 	FileSize     int
 	FilePath     string
 	Content      string
+	FileId       *uuid.UUID
 }
 
 type SendLogin struct {

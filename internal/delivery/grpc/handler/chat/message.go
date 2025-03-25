@@ -77,9 +77,15 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 				fmt.Println(err)
 			}
 
+			var _id string
+			if item.FileId != nil {
+				_id = item.FileId.String()
+			}
+
 			messageItem.Media = &chatPb.MessageMedia{
 				Media: &chatPb.MessageMedia_MessageMediaPhoto{
 					MessageMediaPhoto: &chatPb.MessageMediaPhoto{
+						Id:   _id,
 						File: file.Url,
 					},
 				},
@@ -91,12 +97,17 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 			if err := jsonutil.Decode(item.Extra0, &file); err != nil {
 				fmt.Println(err)
 			}
-
+			var _id string
+			if item.FileId != nil {
+				_id = item.FileId.String()
+			}
 			messageItem.Media = &chatPb.MessageMedia{
 				Media: &chatPb.MessageMedia_MessageMediaDocument{
 					MessageMediaDocument: &chatPb.MessageMediaDocument{
-						File:     file.Url,
+						Id:       _id,
 						MimeType: "video/" + file.Suffix,
+						Size:     int32(file.Size),
+						File:     file.Url,
 					},
 				},
 			}
@@ -208,6 +219,7 @@ func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*cha
 			//Height:  params.Height,
 			ReplyToMsgId: in.ReplyToMsgId,
 			Content:      in.Message,
+			FileId:       &filePath.FileId,
 		}); err != nil {
 			log.Println(err)
 			return nil, status.Error(codes.Unknown, "не удалось")
@@ -234,6 +246,7 @@ func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*cha
 				Size:     int32(filePath.Size),
 				//Cover:    params.Cover,
 				Content: in.Message,
+				FileId:  &filePath.FileId,
 			}); err != nil {
 				log.Println(err)
 				return nil, status.Error(codes.Unknown, "не удалось")
@@ -244,6 +257,7 @@ func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*cha
 				Url:      c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), filePath.FilePath),
 				Size:     int32(filePath.Size),
 				Content:  in.Message,
+				FileId:   &filePath.FileId,
 			}); err != nil {
 				log.Println(err)
 				return nil, status.Error(codes.Unknown, "не удалось")
@@ -257,6 +271,7 @@ func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*cha
 				FileSize:     int(filePath.Size),
 				FilePath:     c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), filePath.FilePath),
 				Content:      in.Message,
+				FileId:       &filePath.FileId,
 			}); err != nil {
 				log.Println(err)
 				return nil, status.Error(codes.Unknown, "не удалось")

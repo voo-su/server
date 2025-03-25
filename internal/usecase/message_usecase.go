@@ -158,6 +158,7 @@ func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHis
 			"messages.extra",
 			"messages.quote_id",
 			"messages.created_at",
+			"messages.file_id",
 			"users.username",
 			"users.name as name",
 			"users.surname as surname",
@@ -322,6 +323,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 			IsMark:     item.IsMark,
 			IsRead:     item.IsRead,
 			QuoteId:    item.QuoteId,
+			FileId:     item.FileId,
 			CreatedAt:  timeutil.FormatDatetime(item.CreatedAt),
 			Extra:      make(map[string]any),
 		}
@@ -458,6 +460,7 @@ func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *entity.Sen
 		}),
 		QuoteId: req.QuoteId,
 		Content: req.Content,
+		FileId:  req.FileId,
 	}
 
 	return m.save(ctx, data)
@@ -477,6 +480,7 @@ func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *entity.Sen
 			Duration: int(req.Duration),
 		}),
 		Content: req.Content,
+		FileId:  req.FileId,
 	}
 
 	return m.save(ctx, data)
@@ -495,6 +499,7 @@ func (m *MessageUseCase) SendAudio(ctx context.Context, uid int, req *entity.Sen
 			Duration: 0,
 		}),
 		Content: req.Content,
+		FileId:  req.FileId,
 	}
 
 	return m.save(ctx, data)
@@ -577,6 +582,7 @@ func (m *MessageUseCase) SendBotFile(ctx context.Context, uid int, req *entity.S
 			Path:   req.FilePath,
 		}),
 		Content: req.Content,
+		FileId:  req.FileId,
 	}
 	return m.save(ctx, data)
 }

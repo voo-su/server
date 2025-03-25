@@ -180,10 +180,10 @@ func (u *UploadUseCase) merge(info *postgresModel.FileSplit) error {
 	return nil
 }
 
-func (u *UploadUseCase) RetrySaveFilePart(maxRetries int, fileId int64, filePart int32, data []byte) error {
+func (u *UploadUseCase) RetrySaveFilePart(uid int, maxRetries int, fileId int64, filePart int32, data []byte) error {
 	var lastErr error
 	for i := 0; i < maxRetries; i++ {
-		if err := u.saveFilePart(fileId, filePart, data); err != nil {
+		if err := u.saveFilePart(uid, fileId, filePart, data); err != nil {
 			lastErr = err
 			log.Printf("Ошибка при сохранении части %d (попытка %d/%d): %v", filePart, i+1, maxRetries, err)
 			time.Sleep(time.Second * time.Duration(i+1))
@@ -194,8 +194,8 @@ func (u *UploadUseCase) RetrySaveFilePart(maxRetries int, fileId int64, filePart
 	return lastErr
 }
 
-func (u *UploadUseCase) saveFilePart(fileID int64, filePart int32, data []byte) error {
-	partPath := fmt.Sprintf("%d/%d.part", fileID, filePart)
+func (u *UploadUseCase) saveFilePart(uid int, fileId int64, filePart int32, data []byte) error {
+	partPath := fmt.Sprintf("chunks/u%d/%d/%d.part", uid, fileId, filePart)
 	if err := u.Minio.Write(u.Conf.Minio.Bucket, partPath, data); err != nil {
 		return fmt.Errorf("не удалось сохранить часть %d в MinIO: %v", filePart, err)
 	}
@@ -204,22 +204,28 @@ func (u *UploadUseCase) saveFilePart(fileID int64, filePart int32, data []byte) 
 }
 
 type AssembleFilePart struct {
+	FileId   uuid.UUID
 	FilePath string
 	Size     int64
 }
 
 func (u *UploadUseCase) AssembleFileParts(ctx context.Context, uid int, fileId int64, totalParts int32, originalName string, fileExt string) (*AssembleFilePart, error) {
-	objectName := strutil.GenMediaObjectName(fileExt, 200, 200)
+	const maxPartSize = 5 * 1024 * 1024
 
+	objectName := strutil.GenMediaObjectName(fileExt, 200, 200)
 	var totalSize int64
+
 	uploadId, err := u.Minio.InitiateMultipartUpload(u.Conf.Minio.GetBucket(), objectName)
 	if err != nil {
 		return nil, err
 	}
 
-	var partsInfo = make([]minio.ObjectPart, 0)
+	var partsInfo []minio.ObjectPart
+	var buffer bytes.Buffer
+	partNumber := 1
+
 	for i := int32(0); i < totalParts; i++ {
-		objectPartPath := fmt.Sprintf("%d/%d.part", fileId, i)
+		objectPartPath := fmt.Sprintf("chunks/u%d/%d/%d.part", uid, fileId, i)
 		obj, err := u.Minio.GetObject(u.Conf.Minio.Bucket, objectPartPath)
 		if err != nil {
 			return nil, fmt.Errorf("ошибка получения части %d из MinIO: %v", i, err)
@@ -231,34 +237,44 @@ func (u *UploadUseCase) AssembleFileParts(ctx context.Context, uid int, fileId i
 		}
 
 		totalSize += int64(len(partData))
+		buffer.Write(partData)
 
-		uploadInfo, err := u.Minio.PutObjectPart(u.Conf.Minio.Bucket, objectName, uploadId, int(i+1), bytes.NewReader(partData), int64(len(partData)))
-		if err != nil {
-			return nil, fmt.Errorf("ошибка загрузки части %d: %v", i, err)
+		if buffer.Len() >= maxPartSize || i == totalParts-1 {
+			uploadInfo, err := u.Minio.PutObjectPart(
+				u.Conf.Minio.Bucket, objectName, uploadId, partNumber,
+				bytes.NewReader(buffer.Bytes()), int64(buffer.Len()),
+			)
+			if err != nil {
+				return nil, fmt.Errorf("ошибка загрузки части %d: %v", partNumber, err)
+			}
+
+			partsInfo = append(partsInfo, minio.ObjectPart{
+				PartNumber: uploadInfo.PartNumber,
+				ETag:       uploadInfo.ETag,
+			})
+
+			partNumber++
+			buffer.Reset()
 		}
-
-		partsInfo = append(partsInfo, minio.ObjectPart{
-			PartNumber: uploadInfo.PartNumber,
-			ETag:       uploadInfo.ETag,
-		})
 	}
 
 	if err := u.Minio.CompleteMultipartUpload(u.Conf.Minio.Bucket, objectName, uploadId, partsInfo); err != nil {
 		return nil, fmt.Errorf("ошибка завершения сборки файла: %v", err)
 	}
-
-	if err := u.FileRepo.Create(ctx, &postgresModel.File{
+	file := &postgresModel.File{
 		OriginalName: originalName,
 		ObjectName:   objectName,
 		Size:         int(totalSize),
 		MimeType:     fileExt,
 		CreatedBy:    uid,
 		CreatedAt:    time.Now(),
-	}); err != nil {
+	}
+	if err := u.FileRepo.Create(ctx, file); err != nil {
 		return nil, fmt.Errorf("ошибка сохранения информации о файле в базе: %v", err)
 	}
 
 	return &AssembleFilePart{
+		FileId:   file.Id,
 		FilePath: objectName,
 		Size:     totalSize,
 	}, nil

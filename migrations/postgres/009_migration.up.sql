@@ -53,8 +53,6 @@ ALTER TABLE users ALTER COLUMN about SET DEFAULT NULL;
 
 CREATE UNIQUE INDEX unique_lower_email ON users (LOWER(email)) WHERE email IS NOT NULL;
 
---UPDATE--
-
 CREATE TABLE files
 (
     id            uuid      DEFAULT gen_random_uuid(),
@@ -65,3 +63,7 @@ CREATE TABLE files
     created_by    INTEGER      NOT NULL,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+--UPDATE--
+
+alter table messages add file_id uuid default NULL;
