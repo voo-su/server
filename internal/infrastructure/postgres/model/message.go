@@ -20,6 +20,7 @@ type Message struct {
 	Content    string     `gorm:"column:content"`
 	Extra      string     `gorm:"column:extra;DEFAULT:{}"`
 	FileId     *uuid.UUID `gorm:"column:file_id;DEFAULT:NULL"`
+	ReplyTo    int        `gorm:"column:reply_to;DEFAULT:NULL"`
 	CreatedAt  time.Time  `gorm:"column:created_at;NOT NULL"`
 	UpdatedAt  time.Time  `gorm:"column:updated_at;NOT NULL"`
 }

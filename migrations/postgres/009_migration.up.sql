@@ -64,6 +64,45 @@ CREATE TABLE files
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+alter table messages add file_id uuid default NULL;
+
 --UPDATE--
 
-alter table messages add file_id uuid default NULL;
+CREATE TABLE message_forwarded
+(
+    id                  SERIAL PRIMARY KEY,
+    original_message_id INTEGER REFERENCES messages (id) ON DELETE CASCADE,
+    new_message_id      INTEGER REFERENCES messages (id) ON DELETE CASCADE,
+    user_id             INTEGER NOT NULL,
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE messages ADD COLUMN reply_to INTEGER REFERENCES messages(id) ON DELETE SET NULL;
+
+CREATE TABLE message_invited_members
+(
+    id         SERIAL PRIMARY KEY,
+    message_id INTEGER REFERENCES messages (id) ON DELETE CASCADE,
+    user_id    INTEGER REFERENCES users (id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (message_id, user_id)
+);
+
+CREATE TABLE message_auth_logs
+(
+    id         SERIAL PRIMARY KEY,
+    ip_address VARCHAR,
+    user_agent TEXT,
+    user_id    INTEGER REFERENCES users (id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE message_media
+(
+    id         SERIAL PRIMARY KEY,
+    message_id INTEGER NOT NULL,
+    file_id    UUID    NOT NULL,
+    duration   INTEGER,
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_message FOREIGN KEY (message_id) REFERENCES messages (id)
+);
