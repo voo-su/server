@@ -74,8 +74,6 @@ type IMessageUseCase interface {
 	Vote(ctx context.Context, uid int, msgId int64, optionsValue string) (*postgresRepo.VoteStatistics, error)
 
 	Revoke(ctx context.Context, uid int, msgId string) error
-
-	GetMessageByMsgId(ctx context.Context, msgId string) (int, error)
 }
 
 var _ IMessageUseCase = (*MessageUseCase)(nil)
@@ -88,9 +86,12 @@ type MessageUseCase struct {
 	Minio               minio.IMinio
 	GroupChatMemberRepo *postgresRepo.GroupChatMemberRepository
 	FileSplitRepo       *postgresRepo.FileSplitRepository
-	MessageVoteRepo     *postgresRepo.MessageVoteRepository
 	Sequence            *postgresRepo.SequenceRepository
 	MessageRepo         *postgresRepo.MessageRepository
+	MessageVoteRepo     *postgresRepo.MessageVoteRepository
+	MessageLoginRepo    *postgresRepo.MessageLoginRepository
+	MessageCodeRepo     *postgresRepo.MessageCodeRepository
+	MessageLocationRepo *postgresRepo.MessageLocationRepository
 	BotRepo             *postgresRepo.BotRepository
 	GroupChatRepo       *postgresRepo.GroupChatRepository
 	ContactRepo         *postgresRepo.ContactRepository
@@ -273,8 +274,8 @@ func (m *MessageUseCase) GetForwardMessages(ctx context.Context, uid int, messag
 			"users.avatar AS avatar",
 		}
 	)
-	tx := m.Source.Postgres().Table("messages").
-		Select(fields).
+	tx := m.Source.Postgres().Select(fields).
+		Table("messages").
 		Joins("LEFT JOIN users ON messages.user_id = users.id").
 		Where("messages.id IN ?", extra.MsgIds).
 		Order("messages.sequence ASC")
@@ -289,9 +290,21 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 	var (
 		votes     []int
 		voteItems []*postgresModel.MessageVote
+
+		login      []int
+		loginItems []*postgresModel.MessageLogin
+
+		media      []int
+		mediaItems []*postgresModel.MessageMedia
 	)
 	for _, item := range items {
 		switch item.MsgType {
+		case constant.ChatMsgTypeImage, constant.ChatMsgTypeVideo, constant.ChatMsgTypeAudio, constant.ChatMsgTypeFile:
+			media = append(media, item.Id)
+
+		case constant.ChatMsgTypeLogin:
+			login = append(login, item.Id)
+
 		case constant.ChatMsgTypeVote:
 			votes = append(votes, item.Id)
 		}
@@ -299,9 +312,38 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 
 	hashVotes := make(map[int]*postgresModel.MessageVote)
 	if len(votes) > 0 {
-		m.Source.Postgres().Model(&postgresModel.MessageVote{}).Where("message_id IN ?", votes).Scan(&voteItems)
+		m.Source.Postgres().
+			Model(&postgresModel.MessageVote{}).
+			Where("message_id IN ?", votes).
+			Scan(&voteItems)
 		for i := range voteItems {
 			hashVotes[voteItems[i].MessageId] = voteItems[i]
+		}
+	}
+
+	hashLogin := make(map[int]*postgresModel.MessageLogin)
+	if len(login) > 0 {
+		_ = m.Source.Postgres().
+			Model(&postgresModel.MessageLogin{}).
+			Where("message_id IN ?", login).
+			Scan(&loginItems).
+			Error
+
+		for i := range loginItems {
+			hashLogin[loginItems[i].MessageId] = loginItems[i]
+		}
+	}
+
+	hashMedia := make(map[int]*postgresModel.MessageMedia)
+	if len(media) > 0 {
+		_ = m.Source.Postgres().
+			Model(&postgresModel.MessageMedia{}).
+			Where("message_id IN ?", media).
+			Scan(&mediaItems).
+			Error
+
+		for i := range mediaItems {
+			hashMedia[mediaItems[i].MessageId] = mediaItems[i]
 		}
 	}
 
@@ -310,7 +352,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 		data := &entity.MessageItem{
 			Id:         item.Id,
 			MsgId:      item.MsgId,
-			Sequence:   int(item.Sequence),
+			Sequence:   item.Sequence,
 			ChatType:   item.ChatType,
 			MsgType:    item.MsgType,
 			UserId:     item.UserId,
@@ -323,7 +365,6 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 			IsMark:     item.IsMark,
 			IsRead:     item.IsRead,
 			QuoteId:    item.QuoteId,
-			FileId:     item.FileId,
 			CreatedAt:  timeutil.FormatDatetime(item.CreatedAt),
 			Extra:      make(map[string]any),
 		}
@@ -332,12 +373,68 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 			data.Content = item.Content
 		}
 
-		data.Extra0 = item.Extra
-
 		_ = jsonutil.Decode(item.Extra, &data.Extra)
 		switch item.MsgType {
 		//case constant.ChatMsgSysGroupCreate:
 		//    fmt.Println(item.Extra.OwnerId)
+
+		case constant.ChatMsgTypeLogin:
+			if val, ok := hashLogin[item.Id]; ok {
+				data.Extra = map[string]any{
+					"ip":       val.IpAddress,
+					"agent":    val.UserAgent,
+					"address":  val.Address,
+					"datetime": val.CreatedAt,
+				}
+			}
+
+		case constant.ChatMsgTypeImage:
+			if val, ok := hashMedia[item.Id]; ok {
+				data.Media = &entity.MediaItem{
+					Type:   entity.MediaTypeImage,
+					FileId: item.FileId,
+					Url:    val.Url,
+					Width:  val.Width,
+					Height: val.Height,
+				}
+			}
+		case constant.ChatMsgTypeVideo:
+			if val, ok := hashMedia[item.Id]; ok {
+				data.Media = &entity.MediaItem{
+					Type:     entity.MediaTypeVideo,
+					FileId:   item.FileId,
+					Url:      val.Url,
+					Size:     val.Size,
+					Cover:    val.Cover,
+					MimeType: val.MimeType,
+					Duration: val.Duration,
+				}
+			}
+		case constant.ChatMsgTypeAudio:
+			if val, ok := hashMedia[item.Id]; ok {
+				data.Media = &entity.MediaItem{
+					Type:     entity.MediaTypeAudio,
+					FileId:   item.FileId,
+					Url:      val.Url,
+					Name:     val.Name,
+					Size:     val.Size,
+					MimeType: val.MimeType,
+					Duration: val.Duration,
+				}
+			}
+
+		case constant.ChatMsgTypeFile:
+			if val, ok := hashMedia[item.Id]; ok {
+				data.Media = &entity.MediaItem{
+					Type:     entity.MediaTypeFile,
+					FileId:   item.FileId,
+					Url:      val.Url,
+					Name:     val.Name,
+					Size:     val.Size,
+					MimeType: val.MimeType,
+					Drive:    val.Drive,
+				}
+			}
 		case constant.ChatMsgTypeVote:
 			if value, ok := hashVotes[item.Id]; ok {
 				options := make(map[string]any)
@@ -413,16 +510,16 @@ func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *entity.Send
 		}
 	}
 
-	data := &postgresModel.Message{
+	_, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeText,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 		Content:    strutil.EscapeHtml(req.Content),
 		QuoteId:    req.QuoteId,
-	}
+	})
 
-	return m.save(ctx, data)
+	return err
 }
 
 func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *entity.TextMessageRequest) error {
@@ -433,8 +530,9 @@ func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *entit
 		ReceiverId: int(req.Receiver.ReceiverId),
 		Content:    html.EscapeString(req.Content),
 	}
+	_, err := m.save(ctx, data)
 
-	return m.save(ctx, data)
+	return err
 }
 
 func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *entity.SendImage) error {
@@ -448,61 +546,75 @@ func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *entity.Sen
 		}
 	}
 
-	data := &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeImage,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.MessageExtraImage{
-			Url:    req.Url,
-			Width:  int(req.Width),
-			Height: int(req.Height),
-		}),
-		QuoteId: req.QuoteId,
-		Content: req.Content,
-		FileId:  req.FileId,
+		QuoteId:    req.QuoteId,
+		Content:    req.Content,
+		FileId:     req.FileId,
+	})
+
+	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageMedia{
+		MessageId: message.Id,
+		Url:       req.Url,
+		Width:     req.Width,
+		Height:    req.Height,
+		CreatedAt: time.Now(),
+	}).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - SendImage.MessageMedia: %v", err)
 	}
 
-	return m.save(ctx, data)
+	return err
 }
 
 func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *entity.SendVideo) error {
-	data := &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeVideo,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.MessageExtraVideo{
-			Cover:    req.Cover,
-			Suffix:   strutil.FileSuffix(req.Url),
-			Size:     int(req.Size),
-			Url:      req.Url,
-			Duration: int(req.Duration),
-		}),
-		Content: req.Content,
-		FileId:  req.FileId,
+		Content:    req.Content,
+		FileId:     req.FileId,
+	})
+
+	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageMedia{
+		MessageId: message.Id,
+		Cover:     req.Cover,
+		MimeType:  "video/" + strutil.FileSuffix(req.Url),
+		Size:      int(req.Size),
+		Url:       req.Url,
+		Duration:  int(req.Duration),
+		CreatedAt: time.Now(),
+	}).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - SendVideo.MessageMedia: %v", err)
 	}
 
-	return m.save(ctx, data)
+	return err
 }
 
 func (m *MessageUseCase) SendAudio(ctx context.Context, uid int, req *entity.SendAudio) error {
-	data := &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeAudio,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.MessageExtraAudio{
-			Suffix:   strutil.FileSuffix(req.Url),
-			Size:     int(req.Size),
-			Url:      req.Url,
-			Duration: 0,
-		}),
-		Content: req.Content,
-		FileId:  req.FileId,
+		Content:    req.Content,
+		FileId:     req.FileId,
+	})
+
+	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageMedia{
+		MessageId: message.Id,
+		MimeType:  "audio/" + strutil.FileSuffix(req.Url),
+		Size:      int(req.Size),
+		Url:       req.Url,
+		CreatedAt: time.Now(),
+	}).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - SendAudio.MessageMedia: %v", err)
 	}
 
-	return m.save(ctx, data)
+	return err
 }
 
 func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *entity.SendFile) error {
@@ -535,56 +647,69 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *entity.Send
 		ReceiverId: int(req.Receiver.ReceiverId),
 	}
 
+	media := &postgresModel.MessageMedia{}
+
 	switch entity.GetMediaType(file.FileExt) {
 	case constant.MediaFileAudio:
 		data.MsgType = constant.ChatMsgTypeAudio
-		data.Extra = jsonutil.Encode(&entity.MessageExtraAudio{
-			Suffix:   file.FileExt,
+		media = &postgresModel.MessageMedia{
+			MimeType: "audio/" + file.FileExt,
 			Size:     int(file.FileSize),
 			Url:      publicUrl,
-			Duration: 0,
-		})
+		}
 	case constant.MediaFileVideo:
 		data.MsgType = constant.ChatMsgTypeVideo
-		data.Extra = jsonutil.Encode(&entity.MessageExtraVideo{
-			Cover:    "",
-			Suffix:   file.FileExt,
+		media = &postgresModel.MessageMedia{
+			MimeType: "video/" + file.FileExt,
 			Size:     int(file.FileSize),
 			Url:      publicUrl,
-			Duration: 0,
-		})
+		}
 	case constant.MediaFileOther:
+		media = &postgresModel.MessageMedia{
+			Drive:    file.Drive,
+			Name:     file.OriginalName,
+			MimeType: "application/" + file.FileExt,
+			Size:     int(file.FileSize),
+			Url:      filePath,
+		}
 		data.MsgType = constant.ChatMsgTypeFile
-		data.Extra = jsonutil.Encode(&entity.MessageExtraFile{
-			Drive:  file.Drive,
-			Name:   file.OriginalName,
-			Suffix: file.FileExt,
-			Size:   int(file.FileSize),
-			Path:   filePath,
-		})
 	}
 
-	return m.save(ctx, data)
+	message, err := m.save(ctx, data)
+
+	media.MessageId = message.Id
+
+	if err := m.Source.Postgres().WithContext(ctx).Create(media).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - SendFile.MessageMedia: %v", err)
+	}
+
+	return err
 }
 
 func (m *MessageUseCase) SendBotFile(ctx context.Context, uid int, req *entity.SendBotFile) error {
-	data := &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		MsgId:      strutil.NewMsgId(),
 		ChatType:   int(req.Receiver.ChatType),
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 		MsgType:    constant.ChatMsgTypeFile,
-		Extra: jsonutil.Encode(&entity.MessageExtraFile{
-			Drive:  req.Drive,
-			Name:   req.OriginalName,
-			Suffix: req.FileExt,
-			Size:   req.FileSize,
-			Path:   req.FilePath,
-		}),
-		Content: req.Content,
-		FileId:  req.FileId,
+		Content:    req.Content,
+		FileId:     req.FileId,
+	})
+
+	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageMedia{
+		MessageId: message.Id,
+		Drive:     req.Drive,
+		Name:      req.OriginalName,
+		MimeType:  "application/" + req.FileExt,
+		Size:      req.FileSize,
+		Url:       req.FilePath,
+		CreatedAt: time.Now(),
+	}).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - SendBotFile.MessageMedia: %v", err)
 	}
-	return m.save(ctx, data)
+
+	return err
 }
 
 func (m *MessageUseCase) SendVote(ctx context.Context, uid int, req *v1Pb.VoteMessageRequest) error {
@@ -689,20 +814,24 @@ func (m *MessageUseCase) SendMixedMessage(ctx context.Context, uid int, req *v1P
 		})
 	}
 
-	data := &postgresModel.Message{
+	// TODO
+	_, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeMixed,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra:      jsonutil.Encode(entity.MessageExtraMixed{Items: items}),
-		QuoteId:    req.QuoteId,
-	}
+		Extra: jsonutil.Encode(entity.MessageExtraMixed{
+			Items: items,
+		}),
+		QuoteId: req.QuoteId,
+	})
 
-	return m.save(ctx, data)
+	return err
 }
 
 func (m *MessageUseCase) SendSysOther(ctx context.Context, data *postgresModel.Message) error {
-	return m.save(ctx, data)
+	_, err := m.save(ctx, data)
+	return err
 }
 
 func (m *MessageUseCase) SendLogin(ctx context.Context, uid int, req *entity.SendLogin) error {
@@ -711,20 +840,25 @@ func (m *MessageUseCase) SendLogin(ctx context.Context, uid int, req *entity.Sen
 		return err
 	}
 
-	data := &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   constant.ChatPrivateMode,
 		MsgType:    constant.ChatMsgTypeLogin,
 		UserId:     bot.UserId,
 		ReceiverId: uid,
-		Extra: jsonutil.Encode(&entity.MessageExtraLogin{
-			IP:       req.Ip,
-			Agent:    req.Agent,
-			Address:  req.Address,
-			Datetime: timeutil.DateTime(),
-		}),
+	})
+
+	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageLogin{
+		MessageId: message.Id,
+		IpAddress: req.Ip,
+		UserAgent: req.Agent,
+		Address:   req.Address,
+		UserId:    uid,
+		CreatedAt: time.Now(),
+	}).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - SendLogin.MessageLogin: %v", err)
 	}
 
-	return m.save(ctx, data)
+	return err
 }
 
 func (m *MessageUseCase) SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error {
@@ -736,48 +870,63 @@ func (m *MessageUseCase) SendSticker(ctx context.Context, uid int, req *v1Pb.Sti
 		return err
 	}
 
-	data := &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeImage,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.MessageExtraImage{
-			Url:    sticker.Url,
-			Width:  0,
-			Height: 0,
-		}),
+	})
+
+	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageMedia{
+		MessageId: message.Id,
+		Url:       sticker.Url,
+		CreatedAt: time.Now(),
+	}).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - SendImage.MessageMedia: %v", err)
 	}
 
-	return m.save(ctx, data)
+	return err
 }
 
 func (m *MessageUseCase) SendCode(ctx context.Context, uid int, req *v1Pb.CodeMessageRequest) error {
-	data := &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeCode,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.MessageExtraCode{
-			Lang: req.Lang,
-			Code: req.Code,
-		}),
+	})
+
+	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageCode{
+		MessageId: message.Id,
+		Lang:      req.Lang,
+		Code:      req.Code,
+		CreatedAt: time.Now(),
+	}).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - SendCode.MessageCode: %v", err)
 	}
-	return m.save(ctx, data)
+
+	return err
 }
 
 func (m *MessageUseCase) SendLocation(ctx context.Context, uid int, req *v1Pb.LocationMessageRequest) error {
-	data := &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeLocation,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(&entity.MessageExtraLocation{
-			Longitude:   req.Longitude,
-			Latitude:    req.Latitude,
-			Description: req.Description,
-		}),
+	})
+
+	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageLocation{
+		MessageId:   message.Id,
+		Longitude:   req.Longitude,
+		Latitude:    req.Latitude,
+		Description: req.Description,
+		CreatedAt:   time.Now(),
+	}).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - SendCode.MessageCode: %v", err)
 	}
-	return m.save(ctx, data)
+
+	return err
 }
 
 func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int64, optionsValue string) (*postgresRepo.VoteStatistics, error) {
@@ -907,7 +1056,7 @@ func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) erro
 	return nil
 }
 
-func (m *MessageUseCase) save(ctx context.Context, data *postgresModel.Message) error {
+func (m *MessageUseCase) save(ctx context.Context, data *postgresModel.Message) (*postgresModel.Message, error) {
 	if data.MsgId == "" {
 		data.MsgId = strutil.NewMsgId()
 	}
@@ -916,7 +1065,7 @@ func (m *MessageUseCase) save(ctx context.Context, data *postgresModel.Message) 
 	m.loadSequence(ctx, data)
 
 	if err := m.Source.Postgres().WithContext(ctx).Create(data).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	switch data.MsgType {
@@ -928,7 +1077,7 @@ func (m *MessageUseCase) save(ctx context.Context, data *postgresModel.Message) 
 
 	m.afterHandle(ctx, data)
 
-	return nil
+	return data, nil
 }
 
 func (m *MessageUseCase) loadReply(_ context.Context, data *postgresModel.Message) {
@@ -983,16 +1132,6 @@ func (m *MessageUseCase) loadSequence(ctx context.Context, data *postgresModel.M
 	} else {
 		data.Sequence = m.Sequence.Get(ctx, data.UserId, data.ReceiverId)
 	}
-}
-
-func (m *MessageUseCase) GetMessageByMsgId(ctx context.Context, msgId string) (int, error) {
-	message, err := m.MessageRepo.FindByWhere(ctx, "msg_id = ?", msgId)
-	if err != nil {
-		log.Println(err)
-		return 0, nil
-	}
-
-	return message.Id, nil
 }
 
 func (m *MessageUseCase) writeMessageToQueue(uid int, userIds []int, message *postgresModel.Message) {

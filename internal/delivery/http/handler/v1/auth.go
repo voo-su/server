@@ -97,7 +97,7 @@ func (a *Auth) Verify(ctx *ginutil.Context) error {
 		if err := a.MessageUseCase.SendLogin(ctx.Ctx(), user.Id, &entity.SendLogin{
 			Ip:      ip,
 			Agent:   ctx.Context.GetHeader("user-agent"),
-			Address: address,
+			Address: &address,
 		}); err != nil {
 			log.Printf("Error - Verify - MessageUseCase.SendLogin: %v", err)
 		}

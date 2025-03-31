@@ -2,7 +2,6 @@ package chat
 
 import (
 	"context"
-	"fmt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"log"
@@ -12,7 +11,6 @@ import (
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/grpcutil"
-	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/strutil"
 )
 
@@ -72,93 +70,82 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 		}
 
 		if item.MsgType == constant.ChatMsgTypeImage {
-			var file entity.MessageExtraImage
-			if err := jsonutil.Decode(item.Extra0, &file); err != nil {
-				fmt.Println(err)
-			}
-
-			var _id string
-			if item.FileId != nil {
-				_id = item.FileId.String()
-			}
-
 			messageItem.Media = &chatPb.MessageMedia{
 				Media: &chatPb.MessageMedia_MessageMediaPhoto{
 					MessageMediaPhoto: &chatPb.MessageMediaPhoto{
-						Id:   _id,
-						File: file.Url,
+						//Id:   item.Media.Id.String(),
+						File: item.Media.Url,
 					},
 				},
 			}
 		}
 
 		if item.MsgType == constant.ChatMsgTypeVideo {
-			var file entity.MessageExtraVideo
-			if err := jsonutil.Decode(item.Extra0, &file); err != nil {
-				fmt.Println(err)
-			}
-			var _id string
-			if item.FileId != nil {
-				_id = item.FileId.String()
-			}
 			messageItem.Media = &chatPb.MessageMedia{
 				Media: &chatPb.MessageMedia_MessageMediaDocument{
 					MessageMediaDocument: &chatPb.MessageMediaDocument{
-						Id:       _id,
-						MimeType: "video/" + file.Suffix,
-						Size:     int32(file.Size),
-						File:     file.Url,
+						//Id:       item.Media.Id.String(),
+						MimeType: item.Media.MimeType,
+						Size:     int32(item.Media.Size),
+						File:     item.Media.Url,
 					},
 				},
 			}
 		}
 
 		if item.MsgType == constant.ChatMsgTypeAudio {
-			var file entity.MessageExtraAudio
-			if err := jsonutil.Decode(item.Extra0, &file); err != nil {
-				fmt.Println(err)
-			}
-
 			messageItem.Media = &chatPb.MessageMedia{
 				Media: &chatPb.MessageMedia_MessageMediaDocument{
 					MessageMediaDocument: &chatPb.MessageMediaDocument{
-						File:     file.Url,
-						MimeType: "audio/" + file.Suffix,
+						File:     item.Media.Url,
+						MimeType: item.Media.MimeType,
 					},
 				},
 			}
 		}
 
-		if item.QuoteId != "" {
-			type ReplyData struct {
-				UserId   int    `json:"user_id,omitempty"`
-				Username string `json:"username,omitempty"`
-				MsgType  int    `json:"msg_type,omitempty"`
-				Content  string `json:"content,omitempty"`
-				MsgId    string `json:"msg_id,omitempty"`
-			}
-			type Reply struct {
-				Reply ReplyData `json:"reply,omitempty"`
-			}
-
-			var reply Reply
-			if err := jsonutil.Decode(item.Extra0, &reply); err != nil {
-				fmt.Println(err)
-			}
-
-			mId, err := c.MessageUseCase.GetMessageByMsgId(ctx, item.QuoteId)
-			if err != nil {
-				fmt.Println(err)
-			}
-
-			messageItem.Reply = &chatPb.MessageReply{
-				Id:       int64(mId),
-				MsgType:  int32(reply.Reply.MsgType),
-				UserId:   int64(reply.Reply.UserId),
-				Username: reply.Reply.Username,
-				Content:  reply.Reply.Content,
+		if item.MsgType == constant.ChatMsgTypeFile {
+			messageItem.Media = &chatPb.MessageMedia{
+				Media: &chatPb.MessageMedia_MessageMediaDocument{
+					MessageMediaDocument: &chatPb.MessageMediaDocument{
+						File:     item.Media.Url,
+						MimeType: item.Media.MimeType,
+					},
+				},
 			}
 		}
+
+		// TODO Refactoring
+		//if item.QuoteId != "" {
+		//	type ReplyData struct {
+		//		UserId   int    `json:"user_id,omitempty"`
+		//		Username string `json:"username,omitempty"`
+		//		MsgType  int    `json:"msg_type,omitempty"`
+		//		Content  string `json:"content,omitempty"`
+		//		MsgId    string `json:"msg_id,omitempty"`
+		//	}
+		//	type Reply struct {
+		//		Reply ReplyData `json:"reply,omitempty"`
+		//	}
+		//
+		//	var reply Reply
+		//	if err := jsonutil.Decode(item.Extra0, &reply); err != nil {
+		//		fmt.Println(err)
+		//	}
+		//
+		//	mId, err := c.MessageUseCase.GetMessageByMsgId(ctx, item.QuoteId)
+		//	if err != nil {
+		//		fmt.Println(err)
+		//	}
+		//
+		//	messageItem.Reply = &chatPb.MessageReply{
+		//		Id:       int64(mId),
+		//		MsgType:  int32(reply.Reply.MsgType),
+		//		UserId:   int64(reply.Reply.UserId),
+		//		Username: reply.Reply.Username,
+		//		Content:  reply.Reply.Content,
+		//	}
+		//}
 
 		items = append(items, messageItem)
 	}

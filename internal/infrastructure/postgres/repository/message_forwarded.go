@@ -10,6 +10,6 @@ type MessageForwardedRepository struct {
 	gormutil.Repo[model.MessageForwarded]
 }
 
-func NewMessageForwardedForwardedRepository(db *gorm.DB) *MessageForwardedRepository {
+func NewMessageForwardedRepository(db *gorm.DB) *MessageForwardedRepository {
 	return &MessageForwardedRepository{Repo: gormutil.NewRepo[model.MessageForwarded](db)}
 }

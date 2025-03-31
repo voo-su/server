@@ -88,11 +88,13 @@ CREATE TABLE message_invited_members
     UNIQUE (message_id, user_id)
 );
 
-CREATE TABLE message_auth_logs
+CREATE TABLE message_login
 (
     id         SERIAL PRIMARY KEY,
+    message_id INTEGER REFERENCES messages (id) ON DELETE CASCADE,
     ip_address VARCHAR,
     user_agent TEXT,
+    address    TEXT,
     user_id    INTEGER REFERENCES users (id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -101,8 +103,35 @@ CREATE TABLE message_media
 (
     id         SERIAL PRIMARY KEY,
     message_id INTEGER NOT NULL,
-    file_id    UUID    NOT NULL,
+--     file_id    UUID    NOT NULL,
+    drive      INTEGER,
     duration   INTEGER,
+    url        TEXT,
+    name       VARCHAR(255),
+    size       INTEGER,
+    cover      TEXT,
+    mime_type  VARCHAR(255),
+    width      INTEGER,
+    height     INTEGER,
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_message FOREIGN KEY (message_id) REFERENCES messages (id)
+);
+
+CREATE TABLE message_code
+(
+    id         serial PRIMARY KEY,
+    message_id bigint      NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
+    lang       varchar(50) NOT NULL,
+    code       text        NOT NULL,
+    created_at TIMESTAMP   NOT NULL DEFAULT now()
+);
+
+CREATE TABLE message_location
+(
+    id          serial PRIMARY KEY,
+    message_id  bigint           NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
+    longitude   double precision NOT NULL,
+    latitude    double precision NOT NULL,
+    description text,
+    created_at  TIMESTAMP        NOT NULL DEFAULT now()
 );

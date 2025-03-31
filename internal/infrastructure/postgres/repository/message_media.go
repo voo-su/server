@@ -10,6 +10,6 @@ type MessageMediaRepository struct {
 	gormutil.Repo[model.MessageMedia]
 }
 
-func NewMessageMediaForwardedRepository(db *gorm.DB) *MessageMediaRepository {
+func NewMessageMediaRepository(db *gorm.DB) *MessageMediaRepository {
 	return &MessageMediaRepository{Repo: gormutil.NewRepo[model.MessageMedia](db)}
 }

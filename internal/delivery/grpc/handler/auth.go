@@ -113,7 +113,7 @@ func (a *Auth) Verify(ctx context.Context, in *authPb.AuthVerifyRequest) (*authP
 		if err := a.MessageUseCase.SendLogin(ctx, user.Id, &entity.SendLogin{
 			Ip:      ip,
 			Agent:   userAgent,
-			Address: address,
+			Address: &address,
 		}); err != nil {
 			fmt.Println(err)
 		}

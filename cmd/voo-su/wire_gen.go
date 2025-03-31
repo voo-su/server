@@ -73,9 +73,10 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	sequenceRepository := repository2.NewSequenceRepository(db, sequenceCacheRepository)
 	messageForward := logic.NewMessageForward(iLocale, source, sequenceRepository)
 	fileSplitRepository := repository2.NewFileSplitRepository(db)
+	messageRepository := repository2.NewMessageRepository(db)
 	voteCacheRepository := repository.NewVoteCacheRepository(client)
 	messageVoteRepository := repository2.NewMessageVoteRepository(db, voteCacheRepository)
-	messageRepository := repository2.NewMessageRepository(db)
+	messageLoginRepository := repository2.NewMessageLoginRepository(db)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
 	contactRepository := repository2.NewContactRepository(db, relationCacheRepository)
 	iNatsClient := provider.NewNatsClient(conf)
@@ -87,9 +88,10 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 		Minio:               iMinio,
 		GroupChatMemberRepo: groupChatMemberRepository,
 		FileSplitRepo:       fileSplitRepository,
-		MessageVoteRepo:     messageVoteRepository,
 		Sequence:            sequenceRepository,
 		MessageRepo:         messageRepository,
+		MessageVoteRepo:     messageVoteRepository,
+		MessageLoginRepo:    messageLoginRepository,
 		BotRepo:             botRepository,
 		GroupChatRepo:       groupChatRepository,
 		ContactRepo:         contactRepository,
@@ -324,9 +326,10 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	messageForward := logic.NewMessageForward(iLocale, source, sequenceRepository)
 	iMinio := provider.NewMinioClient(conf)
 	fileSplitRepository := repository2.NewFileSplitRepository(db)
+	messageRepository := repository2.NewMessageRepository(db)
 	voteCacheRepository := repository.NewVoteCacheRepository(client)
 	messageVoteRepository := repository2.NewMessageVoteRepository(db, voteCacheRepository)
-	messageRepository := repository2.NewMessageRepository(db)
+	messageLoginRepository := repository2.NewMessageLoginRepository(db)
 	botRepository := repository2.NewBotRepository(db)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
 	contactRepository := repository2.NewContactRepository(db, relationCacheRepository)
@@ -338,9 +341,10 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 		Minio:               iMinio,
 		GroupChatMemberRepo: groupChatMemberRepository,
 		FileSplitRepo:       fileSplitRepository,
-		MessageVoteRepo:     messageVoteRepository,
 		Sequence:            sequenceRepository,
 		MessageRepo:         messageRepository,
+		MessageVoteRepo:     messageVoteRepository,
+		MessageLoginRepo:    messageLoginRepository,
 		BotRepo:             botRepository,
 		GroupChatRepo:       groupChatRepository,
 		ContactRepo:         contactRepository,
@@ -424,9 +428,10 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	sequenceRepository := repository2.NewSequenceRepository(db, sequenceCacheRepository)
 	messageForward := logic.NewMessageForward(iLocale, source, sequenceRepository)
 	fileSplitRepository := repository2.NewFileSplitRepository(db)
+	messageRepository := repository2.NewMessageRepository(db)
 	voteCacheRepository := repository.NewVoteCacheRepository(client)
 	messageVoteRepository := repository2.NewMessageVoteRepository(db, voteCacheRepository)
-	messageRepository := repository2.NewMessageRepository(db)
+	messageLoginRepository := repository2.NewMessageLoginRepository(db)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
 	contactRepository := repository2.NewContactRepository(db, relationCacheRepository)
 	iNatsClient := provider.NewNatsClient(conf)
@@ -438,9 +443,10 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 		Minio:               iMinio,
 		GroupChatMemberRepo: groupChatMemberRepository,
 		FileSplitRepo:       fileSplitRepository,
-		MessageVoteRepo:     messageVoteRepository,
 		Sequence:            sequenceRepository,
 		MessageRepo:         messageRepository,
+		MessageVoteRepo:     messageVoteRepository,
+		MessageLoginRepo:    messageLoginRepository,
 		BotRepo:             botRepository,
 		GroupChatRepo:       groupChatRepository,
 		ContactRepo:         contactRepository,

@@ -27,7 +27,11 @@ func (h *Handler) onConsumeMessage(ctx context.Context, body []byte) {
 	var clientIds []int64
 	if in.ChatType == constant.ChatPrivateMode {
 		for _, val := range [2]int64{in.SenderId, in.ReceiverId} {
-			ids := h.ClientCache.GetUidFromClientIds(ctx, h.Conf.ServerId(), socket.Session.Chat.Name(), strconv.FormatInt(val, 10))
+			ids := h.ClientCache.GetUidFromClientIds(ctx,
+				h.Conf.ServerId(),
+				socket.Session.Chat.Name(),
+				strconv.FormatInt(val, 10),
+			)
 
 			clientIds = append(clientIds, ids...)
 		}
