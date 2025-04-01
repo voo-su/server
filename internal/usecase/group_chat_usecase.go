@@ -17,7 +17,6 @@ import (
 	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
 	"voo.su/pkg/sliceutil"
-	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
 
@@ -125,7 +124,6 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 		}
 
 		message := &postgresModel.Message{
-			MsgId:      strutil.NewMsgId(),
 			ChatType:   constant.ChatGroupMode,
 			ReceiverId: group.Id,
 			MsgType:    constant.ChatMsgSysGroupCreate,
@@ -218,7 +216,6 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 	}
 
 	message := &postgresModel.Message{
-		MsgId:      strutil.NewMsgId(),
 		ChatType:   constant.ChatGroupMode,
 		ReceiverId: groupId,
 		MsgType:    constant.ChatMsgSysGroupMemberQuit,
@@ -347,7 +344,6 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 	}
 
 	message := &postgresModel.Message{
-		MsgId:      strutil.NewMsgId(),
 		ChatType:   constant.ChatGroupMode,
 		ReceiverId: opt.GroupId,
 		MsgType:    constant.ChatMsgSysGroupMemberJoin,
@@ -456,7 +452,6 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 	}
 
 	message := &postgresModel.Message{
-		MsgId:      strutil.NewMsgId(),
 		Sequence:   g.SequenceRepo.Get(ctx, 0, opt.GroupId),
 		ChatType:   constant.ChatGroupMode,
 		ReceiverId: opt.GroupId,

@@ -34,7 +34,7 @@ func GetChatMsgTypeMapping(locale locale.ILocale, msgType int) string {
 		constant.ChatMsgTypeFile:                  locale.Localize("file"),
 		constant.ChatMsgTypeLocation:              locale.Localize("location"),
 		constant.ChatMsgTypeCard:                  locale.Localize("contact_info"),
-		constant.ChatMsgTypeForward:               locale.Localize("forwarded_message"),
+		constant.ChatMsgTypeForwarded:             locale.Localize("forwarded_message"),
 		constant.ChatMsgTypeLogin:                 locale.Localize("login_notification"),
 		constant.ChatMsgTypeVote:                  locale.Localize("vote"),
 		constant.ChatMsgTypeCode:                  locale.Localize("code"),

@@ -103,7 +103,7 @@ CREATE TABLE message_media
 (
     id         SERIAL PRIMARY KEY,
     message_id INTEGER NOT NULL,
---     file_id    UUID    NOT NULL,
+    file_id    UUID    NOT NULL,
     drive      INTEGER,
     duration   INTEGER,
     url        TEXT,

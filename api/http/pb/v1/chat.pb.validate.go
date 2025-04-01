@@ -1791,7 +1791,7 @@ func (m *TextMessageRequest) validate(all bool) error {
 		}
 	}
 
-	// no validation rules for QuoteId
+	// no validation rules for ReplyToMsgId
 
 	if len(errors) > 0 {
 		return TextMessageRequestMultiError(errors)
@@ -1934,7 +1934,7 @@ func (m *ImageMessageRequest) validate(all bool) error {
 
 	// no validation rules for Size
 
-	// no validation rules for QuoteId
+	// no validation rules for ReplyToMsgId
 
 	if len(errors) > 0 {
 		return ImageMessageRequestMultiError(errors)
@@ -3037,7 +3037,7 @@ func (m *MixedMessageRequest) validate(all bool) error {
 
 	}
 
-	// no validation rules for QuoteId
+	// no validation rules for ReplyToMsgId
 
 	if len(errors) > 0 {
 		return MixedMessageRequestMultiError(errors)
@@ -3866,8 +3866,6 @@ func (m *DeleteMessageRequest) validate(all bool) error {
 
 	// no validation rules for ReceiverId
 
-	// no validation rules for MsgIds
-
 	if len(errors) > 0 {
 		return DeleteMessageRequestMultiError(errors)
 	}
@@ -3970,7 +3968,7 @@ func (m *RevokeMessageRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for MsgId
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return RevokeMessageRequestMultiError(errors)

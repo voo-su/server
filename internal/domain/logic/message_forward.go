@@ -49,7 +49,7 @@ func (m *MessageForward) Verify(ctx context.Context, uid int, req *v1Pb.ForwardM
 	}
 
 	query.Where("chat_type = ?", req.Receiver.ChatType).
-		Where("msg_type in ?", []int{1, 2, 3, 4, 5, 6, 7, 8, constant.ChatMsgTypeForward}).
+		Where("msg_type in ?", []int{1, 2, 3, 4, 5, 6, 7, 8, constant.ChatMsgTypeForwarded}).
 		Where("is_revoke = ?", 0)
 
 	var count int64
@@ -89,16 +89,15 @@ func (m *MessageForward) MultiMergeForward(ctx context.Context, uid int, req *v1
 	}
 
 	extra := jsonutil.Encode(entity.MessageExtraForward{
-		MsgIds:   ids,
+		Ids:      ids,
 		Messages: tmpMessages,
 	})
 
 	messages := make([]*postgresModel.Message, 0, len(receives))
 	for _, item := range receives {
 		data := &postgresModel.Message{
-			MsgId:      strutil.NewMsgId(),
 			ChatType:   item["chat_type"],
-			MsgType:    constant.ChatMsgTypeForward,
+			MsgType:    constant.ChatMsgTypeForwarded,
 			UserId:     uid,
 			ReceiverId: item["receiver_id"],
 			Extra:      extra,
@@ -161,7 +160,6 @@ func (m *MessageForward) MultiSplitForward(ctx context.Context, uid int, req *v1
 
 		for i, item := range messages {
 			items = append(items, &postgresModel.Message{
-				MsgId:      strutil.NewMsgId(),
 				ChatType:   v["chat_type"],
 				MsgType:    item.MsgType,
 				UserId:     uid,

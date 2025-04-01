@@ -23,7 +23,6 @@ import (
 	postgresRepo "voo.su/internal/infrastructure/postgres/repository"
 	redisModel "voo.su/internal/infrastructure/redis/model"
 	redisRepo "voo.su/internal/infrastructure/redis/repository"
-	"voo.su/pkg/encrypt"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/minio"
@@ -73,33 +72,35 @@ type IMessageUseCase interface {
 
 	Vote(ctx context.Context, uid int, msgId int64, optionsValue string) (*postgresRepo.VoteStatistics, error)
 
-	Revoke(ctx context.Context, uid int, msgId string) error
+	Revoke(ctx context.Context, uid int, msgId int64) error
 }
 
 var _ IMessageUseCase = (*MessageUseCase)(nil)
 
 type MessageUseCase struct {
-	Conf                *config.Config
-	Locale              locale.ILocale
-	Source              *infrastructure.Source
-	MessageForward      *logic.MessageForward
-	Minio               minio.IMinio
-	GroupChatMemberRepo *postgresRepo.GroupChatMemberRepository
-	FileSplitRepo       *postgresRepo.FileSplitRepository
-	Sequence            *postgresRepo.SequenceRepository
-	MessageRepo         *postgresRepo.MessageRepository
-	MessageVoteRepo     *postgresRepo.MessageVoteRepository
-	MessageLoginRepo    *postgresRepo.MessageLoginRepository
-	MessageCodeRepo     *postgresRepo.MessageCodeRepository
-	MessageLocationRepo *postgresRepo.MessageLocationRepository
-	BotRepo             *postgresRepo.BotRepository
-	GroupChatRepo       *postgresRepo.GroupChatRepository
-	ContactRepo         *postgresRepo.ContactRepository
-	UnreadCache         *redisRepo.UnreadCacheRepository
-	MessageCache        *redisRepo.MessageCacheRepository
-	ServerCache         *redisRepo.ServerCacheRepository
-	ClientCache         *redisRepo.ClientCacheRepository
-	Nats                nats.INatsClient
+	Conf                 *config.Config
+	Locale               locale.ILocale
+	Source               *infrastructure.Source
+	MessageForward       *logic.MessageForward
+	Minio                minio.IMinio
+	GroupChatMemberRepo  *postgresRepo.GroupChatMemberRepository
+	FileSplitRepo        *postgresRepo.FileSplitRepository
+	Sequence             *postgresRepo.SequenceRepository
+	UserRepo             *postgresRepo.UserRepository
+	MessageRepo          *postgresRepo.MessageRepository
+	MessageVoteRepo      *postgresRepo.MessageVoteRepository
+	MessageLoginRepo     *postgresRepo.MessageLoginRepository
+	MessageCodeRepo      *postgresRepo.MessageCodeRepository
+	MessageLocationRepo  *postgresRepo.MessageLocationRepository
+	MessageForwardedRepo *postgresRepo.MessageForwardedRepository
+	BotRepo              *postgresRepo.BotRepository
+	GroupChatRepo        *postgresRepo.GroupChatRepository
+	ContactRepo          *postgresRepo.ContactRepository
+	UnreadCache          *redisRepo.UnreadCacheRepository
+	MessageCache         *redisRepo.MessageCacheRepository
+	ServerCache          *redisRepo.ServerCacheRepository
+	ClientCache          *redisRepo.ClientCacheRepository
+	Nats                 nats.INatsClient
 }
 
 func (m *MessageUseCase) IsAccess(ctx context.Context, opt *entity.MessageAccess) error {
@@ -144,13 +145,11 @@ func (m *MessageUseCase) IsAccess(ctx context.Context, opt *entity.MessageAccess
 
 func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHistoryOpt) ([]*entity.MessageItem, error) {
 	var (
-		items  = make([]*entity.QueryMessageItem, 0, opt.Limit)
 		fields = []string{
 			"messages.id",
 			"messages.sequence",
 			"messages.chat_type",
 			"messages.msg_type",
-			"messages.msg_id",
 			"messages.user_id",
 			"messages.receiver_id",
 			"messages.is_revoke",
@@ -159,23 +158,20 @@ func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHis
 			"messages.extra",
 			"messages.quote_id",
 			"messages.created_at",
-			"messages.file_id",
-			"users.username",
-			"users.name as name",
-			"users.surname as surname",
-			"users.avatar as avatar",
 		}
+		items = make([]*entity.QueryMessageItem, 0, opt.Limit)
 	)
-	query := m.Source.Postgres().WithContext(ctx).Table("messages")
-	query.Joins("LEFT JOIN users ON messages.user_id = users.id")
-	query.Joins("LEFT JOIN message_delete ON messages.id = message_delete.message_id AND message_delete.user_id = ?", opt.UserId)
+	query := m.Source.Postgres().WithContext(ctx).Select(fields).
+		Table("messages").
+		Joins("LEFT JOIN message_delete ON messages.id = message_delete.message_id AND message_delete.user_id = ?", opt.UserId)
 	if opt.MessageId > 0 {
 		query.Where("messages.sequence < ?", opt.MessageId)
 	}
 
 	if opt.ChatType == constant.ChatPrivateMode {
-		subQuery := m.Source.Postgres().Where("messages.user_id = ? AND messages.receiver_id = ?", opt.UserId, opt.ReceiverId)
-		subQuery.Or("messages.user_id = ? AND messages.receiver_id = ?", opt.ReceiverId, opt.UserId)
+		subQuery := m.Source.Postgres().
+			Where("messages.user_id = ? AND messages.receiver_id = ?", opt.UserId, opt.ReceiverId).
+			Or("messages.user_id = ? AND messages.receiver_id = ?", opt.ReceiverId, opt.UserId)
 		query.Where(subQuery)
 	} else {
 		query.Where("messages.receiver_id = ?", opt.ReceiverId)
@@ -185,12 +181,15 @@ func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHis
 		query.Where("messages.msg_type in ?", opt.MsgType)
 	}
 
-	query.Where("messages.chat_type = ?", opt.ChatType)
-	query.Where("COALESCE(message_delete.id,0) = 0")
-	query.Select(fields).Order("messages.sequence desc").Limit(opt.Limit)
+	query.Where("messages.chat_type = ?", opt.ChatType).
+		Where("COALESCE(message_delete.id,0) = 0").
+		Order("messages.sequence desc").
+		Limit(opt.Limit)
+
 	if err := query.Scan(&items).Error; err != nil {
 		return nil, err
 	}
+
 	if len(items) == 0 {
 		return make([]*entity.MessageItem, 0), nil
 	}
@@ -200,11 +199,8 @@ func (m *MessageUseCase) GetHistory(ctx context.Context, opt *entity.QueryGetHis
 
 func (m *MessageUseCase) GetMessage(ctx context.Context, messageId int64) (*entity.MessageItem, error) {
 	var (
-		err    error
-		item   *entity.QueryMessageItem
 		fields = []string{
 			"messages.id",
-			"messages.msg_id",
 			"messages.sequence",
 			"messages.chat_type",
 			"messages.msg_type",
@@ -214,13 +210,12 @@ func (m *MessageUseCase) GetMessage(ctx context.Context, messageId int64) (*enti
 			"messages.content",
 			"messages.extra",
 			"messages.created_at",
-			"users.username",
-			"users.avatar as avatar",
 		}
+		err  error
+		item *entity.QueryMessageItem
 	)
 	query := m.Source.Postgres().
 		Table("messages").
-		Joins("LEFT JOIN users on messages.user_id = users.id").
 		Where("messages.id = ?", messageId)
 	if err = query.Select(fields).Take(&item).Error; err != nil {
 		return nil, err
@@ -260,7 +255,6 @@ func (m *MessageUseCase) GetForwardMessages(ctx context.Context, uid int, messag
 		items  = make([]*entity.QueryMessageItem, 0)
 		fields = []string{
 			"messages.id",
-			"messages.msg_id",
 			"messages.sequence",
 			"messages.chat_type",
 			"messages.msg_type",
@@ -270,14 +264,11 @@ func (m *MessageUseCase) GetForwardMessages(ctx context.Context, uid int, messag
 			"messages.content",
 			"messages.extra",
 			"messages.created_at",
-			"users.username",
-			"users.avatar AS avatar",
 		}
 	)
 	tx := m.Source.Postgres().Select(fields).
 		Table("messages").
-		Joins("LEFT JOIN users ON messages.user_id = users.id").
-		Where("messages.id IN ?", extra.MsgIds).
+		Where("messages.id IN ?", extra.Ids).
 		Order("messages.sequence ASC")
 	if err := tx.Scan(&items).Error; err != nil {
 		return nil, err
@@ -288,16 +279,23 @@ func (m *MessageUseCase) GetForwardMessages(ctx context.Context, uid int, messag
 
 func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.QueryMessageItem) ([]*entity.MessageItem, error) {
 	var (
-		votes     []int
-		voteItems []*postgresModel.MessageVote
+		ids  []int
+		uIds []int
+
+		media      []int
+		mediaItems []*postgresModel.MessageMedia
 
 		login      []int
 		loginItems []*postgresModel.MessageLogin
 
-		media      []int
-		mediaItems []*postgresModel.MessageMedia
+		votes     []int
+		voteItems []*postgresModel.MessageVote
 	)
+
 	for _, item := range items {
+		ids = append(ids, item.Id)
+		uIds = append(uIds, item.UserId)
+
 		switch item.MsgType {
 		case constant.ChatMsgTypeImage, constant.ChatMsgTypeVideo, constant.ChatMsgTypeAudio, constant.ChatMsgTypeFile:
 			media = append(media, item.Id)
@@ -312,10 +310,13 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 
 	hashVotes := make(map[int]*postgresModel.MessageVote)
 	if len(votes) > 0 {
-		m.Source.Postgres().
+		if err := m.Source.Postgres().
 			Model(&postgresModel.MessageVote{}).
 			Where("message_id IN ?", votes).
-			Scan(&voteItems)
+			Scan(&voteItems).Error; err != nil {
+			log.Printf("Error - IMessageUseCase - HandleMessages.MessageVote: %v", err)
+		}
+
 		for i := range voteItems {
 			hashVotes[voteItems[i].MessageId] = voteItems[i]
 		}
@@ -323,11 +324,13 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 
 	hashLogin := make(map[int]*postgresModel.MessageLogin)
 	if len(login) > 0 {
-		_ = m.Source.Postgres().
+		if err := m.Source.Postgres().
 			Model(&postgresModel.MessageLogin{}).
 			Where("message_id IN ?", login).
 			Scan(&loginItems).
-			Error
+			Error; err != nil {
+			log.Printf("Error - IMessageUseCase - HandleMessages.MessageLogin: %v", err)
+		}
 
 		for i := range loginItems {
 			hashLogin[loginItems[i].MessageId] = loginItems[i]
@@ -336,14 +339,53 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 
 	hashMedia := make(map[int]*postgresModel.MessageMedia)
 	if len(media) > 0 {
-		_ = m.Source.Postgres().
+		if err := m.Source.Postgres().
 			Model(&postgresModel.MessageMedia{}).
 			Where("message_id IN ?", media).
 			Scan(&mediaItems).
-			Error
+			Error; err != nil {
+			log.Printf("Error - IMessageUseCase - HandleMessages.MessageMedia: %v", err)
+		}
 
 		for i := range mediaItems {
 			hashMedia[mediaItems[i].MessageId] = mediaItems[i]
+		}
+	}
+
+	var forwardedMessages []*entity.MessageReply
+	if err := m.Source.Postgres().Select([]string{
+		"messages.id AS id",
+		"messages.user_id AS user_id",
+		"messages.content AS content",
+		"messages.msg_type AS msg_type",
+		"message_forwarded.new_message_id AS new_message_id",
+	}).
+		Table("message_forwarded").
+		Joins("LEFT JOIN messages on message_forwarded.original_message_id = messages.id").
+		Where("message_forwarded.new_message_id IN ?", ids).
+		Scan(&forwardedMessages).
+		Error; err != nil {
+		log.Printf("Error - IMessageUseCase - HandleMessages.MessageReply: %v", err)
+	}
+
+	forwardedMap := make(map[int]*entity.MessageReply)
+	for i := range forwardedMessages {
+		uIds = append(uIds, forwardedMessages[i].UserId)
+		forwardedMap[forwardedMessages[i].NewMessageId] = forwardedMessages[i]
+	}
+
+	hashUsers := make(map[int]*postgresModel.User)
+	if len(uIds) > 0 {
+		var users []*postgresModel.User
+		if err := m.Source.Postgres().
+			Where("id IN ?", uIds).
+			Find(&users).
+			Error; err != nil {
+			log.Printf("Error - IMessageUseCase - HandleMessages.MessageMedia: %v", err)
+		}
+
+		for i := range users {
+			hashUsers[users[i].Id] = users[i]
 		}
 	}
 
@@ -351,40 +393,55 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 	for _, item := range items {
 		data := &entity.MessageItem{
 			Id:         item.Id,
-			MsgId:      item.MsgId,
 			Sequence:   item.Sequence,
 			ChatType:   item.ChatType,
 			MsgType:    item.MsgType,
 			UserId:     item.UserId,
 			ReceiverId: item.ReceiverId,
-			Username:   item.Username,
-			Name:       item.Name,
-			Surname:    item.Surname,
-			Avatar:     item.Avatar,
 			IsRevoke:   item.IsRevoke,
 			IsMark:     item.IsMark,
 			IsRead:     item.IsRead,
-			QuoteId:    item.QuoteId,
 			CreatedAt:  timeutil.FormatDatetime(item.CreatedAt),
-			Extra:      make(map[string]any),
+		}
+
+		if u, ok := hashUsers[item.UserId]; ok {
+			data.Username = u.Username
+			data.Name = u.Name
+			data.Surname = u.Surname
+			data.Avatar = u.Avatar
 		}
 
 		if item.IsRevoke == 0 {
 			data.Content = item.Content
 		}
 
-		_ = jsonutil.Decode(item.Extra, &data.Extra)
+		if fw, ok := forwardedMap[item.Id]; ok {
+			reply := &entity.Reply{
+				Id:      fw.Id,
+				Content: fw.Content,
+				MsgType: fw.MsgType,
+			}
+
+			if u, ok := hashUsers[fw.UserId]; ok {
+				reply.Username = u.Username
+				reply.UserId = u.Id
+			}
+
+			data.Reply = reply
+		}
+
 		switch item.MsgType {
 		//case constant.ChatMsgSysGroupCreate:
-		//    fmt.Println(item.Extra.OwnerId)
+		//    fmt.Println(item)
 
 		case constant.ChatMsgTypeLogin:
 			if val, ok := hashLogin[item.Id]; ok {
-				data.Extra = map[string]any{
-					"ip":       val.IpAddress,
-					"agent":    val.UserAgent,
-					"address":  val.Address,
-					"datetime": val.CreatedAt,
+				data.Service = &entity.ServiceItem{
+					Type:      entity.ServiceTypeChatMsgTypeLogin,
+					Ip:        val.IpAddress,
+					Agent:     val.UserAgent,
+					Address:   val.Address,
+					CreatedAt: val.CreatedAt,
 				}
 			}
 
@@ -392,7 +449,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 			if val, ok := hashMedia[item.Id]; ok {
 				data.Media = &entity.MediaItem{
 					Type:   entity.MediaTypeImage,
-					FileId: item.FileId,
+					FileId: val.FileId,
 					Url:    val.Url,
 					Width:  val.Width,
 					Height: val.Height,
@@ -402,7 +459,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 			if val, ok := hashMedia[item.Id]; ok {
 				data.Media = &entity.MediaItem{
 					Type:     entity.MediaTypeVideo,
-					FileId:   item.FileId,
+					FileId:   val.FileId,
 					Url:      val.Url,
 					Size:     val.Size,
 					Cover:    val.Cover,
@@ -414,7 +471,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 			if val, ok := hashMedia[item.Id]; ok {
 				data.Media = &entity.MediaItem{
 					Type:     entity.MediaTypeAudio,
-					FileId:   item.FileId,
+					FileId:   val.FileId,
 					Url:      val.Url,
 					Name:     val.Name,
 					Size:     val.Size,
@@ -427,7 +484,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 			if val, ok := hashMedia[item.Id]; ok {
 				data.Media = &entity.MediaItem{
 					Type:     entity.MediaTypeFile,
-					FileId:   item.FileId,
+					FileId:   val.FileId,
 					Url:      val.Url,
 					Name:     val.Name,
 					Size:     val.Size,
@@ -468,19 +525,20 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 					statistics = res
 				}
 
-				data.Extra = map[string]any{
-					"detail": map[string]any{
-						"id":            value.Id,
-						"message_id":    value.MessageId,
-						"title":         value.Title,
-						"answer_mode":   value.AnswerMode,
-						"status":        value.Status,
-						"answer_option": opts,
-						"answer_num":    value.AnswerNum,
-						"answered_num":  value.AnsweredNum,
+				data.Media = &entity.MediaItem{
+					Type: entity.MediaTypeVote,
+					Detail: entity.DetailVote{
+						Id:           value.Id,
+						MessageId:    value.MessageId,
+						Title:        value.Title,
+						AnswerMode:   value.AnswerMode,
+						Status:       value.Status,
+						AnswerOption: opts,
+						AnswerNum:    value.AnswerNum,
+						AnsweredNum:  value.AnsweredNum,
 					},
-					"statistics": statistics,
-					"vote_users": users,
+					Statistics: statistics,
+					VoteUsers:  users,
 				}
 			}
 		}
@@ -500,23 +558,13 @@ func (m *MessageUseCase) GetMessageByMessageId(ctx context.Context, messageId in
 }
 
 func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *entity.SendText) error {
-	if req.ReplyToMsgId != 0 {
-		message, err := m.MessageRepo.FindById(ctx, int(req.ReplyToMsgId))
-		if err != nil {
-
-		}
-		if message != nil {
-			req.QuoteId = message.MsgId
-		}
-	}
-
 	_, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeText,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 		Content:    strutil.EscapeHtml(req.Content),
-		QuoteId:    req.QuoteId,
+		ReplyTo:    int(req.ReplyToMsgId),
 	})
 
 	return err
@@ -536,28 +584,18 @@ func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *entit
 }
 
 func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *entity.SendImage) error {
-	if req.ReplyToMsgId != 0 {
-		message, err := m.MessageRepo.FindById(ctx, int(req.ReplyToMsgId))
-		if err != nil {
-
-		}
-		if message != nil {
-			req.QuoteId = message.MsgId
-		}
-	}
-
 	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeImage,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
-		QuoteId:    req.QuoteId,
+		ReplyTo:    int(req.ReplyToMsgId),
 		Content:    req.Content,
-		FileId:     req.FileId,
 	})
 
 	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageMedia{
 		MessageId: message.Id,
+		FileId:    req.FileId,
 		Url:       req.Url,
 		Width:     req.Width,
 		Height:    req.Height,
@@ -576,11 +614,11 @@ func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *entity.Sen
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 		Content:    req.Content,
-		FileId:     req.FileId,
 	})
 
 	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageMedia{
 		MessageId: message.Id,
+		FileId:    req.FileId,
 		Cover:     req.Cover,
 		MimeType:  "video/" + strutil.FileSuffix(req.Url),
 		Size:      int(req.Size),
@@ -601,11 +639,11 @@ func (m *MessageUseCase) SendAudio(ctx context.Context, uid int, req *entity.Sen
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 		Content:    req.Content,
-		FileId:     req.FileId,
 	})
 
 	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageMedia{
 		MessageId: message.Id,
+		FileId:    req.FileId,
 		MimeType:  "audio/" + strutil.FileSuffix(req.Url),
 		Size:      int(req.Size),
 		Url:       req.Url,
@@ -641,7 +679,6 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *entity.Send
 	}
 
 	data := &postgresModel.Message{
-		MsgId:      encrypt.Md5(req.UploadId),
 		ChatType:   int(req.Receiver.ChatType),
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
@@ -688,17 +725,16 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *entity.Send
 
 func (m *MessageUseCase) SendBotFile(ctx context.Context, uid int, req *entity.SendBotFile) error {
 	message, err := m.save(ctx, &postgresModel.Message{
-		MsgId:      strutil.NewMsgId(),
 		ChatType:   int(req.Receiver.ChatType),
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 		MsgType:    constant.ChatMsgTypeFile,
 		Content:    req.Content,
-		FileId:     req.FileId,
 	})
 
 	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageMedia{
 		MessageId: message.Id,
+		FileId:    req.FileId,
 		Drive:     req.Drive,
 		Name:      req.OriginalName,
 		MimeType:  "application/" + req.FileExt,
@@ -714,7 +750,6 @@ func (m *MessageUseCase) SendBotFile(ctx context.Context, uid int, req *entity.S
 
 func (m *MessageUseCase) SendVote(ctx context.Context, uid int, req *v1Pb.VoteMessageRequest) error {
 	data := &postgresModel.Message{
-		MsgId:      strutil.NewMsgId(),
 		ChatType:   constant.ChatGroupMode,
 		MsgType:    constant.ChatMsgTypeVote,
 		UserId:     uid,
@@ -814,7 +849,6 @@ func (m *MessageUseCase) SendMixedMessage(ctx context.Context, uid int, req *v1P
 		})
 	}
 
-	// TODO
 	_, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeMixed,
@@ -823,7 +857,7 @@ func (m *MessageUseCase) SendMixedMessage(ctx context.Context, uid int, req *v1P
 		Extra: jsonutil.Encode(entity.MessageExtraMixed{
 			Items: items,
 		}),
-		QuoteId: req.QuoteId,
+		ReplyTo: int(req.ReplyToMsgId),
 	})
 
 	return err
@@ -1017,9 +1051,9 @@ func (m *MessageUseCase) Vote(ctx context.Context, uid int, msgId int64, options
 	return info, nil
 }
 
-func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) error {
+func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId int64) error {
 	var record postgresModel.Message
-	if err := m.Source.Postgres().First(&record, "msg_id = ?", msgId).Error; err != nil {
+	if err := m.Source.Postgres().First(&record, "id = ?", msgId).Error; err != nil {
 		return err
 	}
 
@@ -1047,7 +1081,7 @@ func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) erro
 	body := map[string]any{
 		"event": constant.SubEventImMessageRevoke,
 		"data": jsonutil.Encode(map[string]any{
-			"msg_id": record.MsgId,
+			"id": record.Id,
 		}),
 	}
 
@@ -1057,16 +1091,13 @@ func (m *MessageUseCase) Revoke(ctx context.Context, uid int, msgId string) erro
 }
 
 func (m *MessageUseCase) save(ctx context.Context, data *postgresModel.Message) (*postgresModel.Message, error) {
-	if data.MsgId == "" {
-		data.MsgId = strutil.NewMsgId()
-	}
-
-	m.loadReply(ctx, data)
 	m.loadSequence(ctx, data)
 
 	if err := m.Source.Postgres().WithContext(ctx).Create(data).Error; err != nil {
 		return nil, err
 	}
+
+	m.loadReply(ctx, data)
 
 	switch data.MsgType {
 	case constant.ChatMsgTypeText:
@@ -1080,50 +1111,27 @@ func (m *MessageUseCase) save(ctx context.Context, data *postgresModel.Message) 
 	return data, nil
 }
 
-func (m *MessageUseCase) loadReply(_ context.Context, data *postgresModel.Message) {
-	if data.QuoteId == "" {
+func (m *MessageUseCase) loadReply(ctx context.Context, data *postgresModel.Message) {
+	if data.ReplyTo == 0 {
 		return
 	}
 
-	if data.Extra == "" {
-		data.Extra = "{}"
-	}
-
-	extra := make(map[string]any)
-	if err := jsonutil.Decode(data.Extra, &extra); err != nil {
-		log.Fatalf("MessageUseCase json decode err: %s", err.Error())
-		return
-	}
-
-	var record postgresModel.Message
+	var message postgresModel.Message
 	if err := m.Source.Postgres().
 		Table("messages").
-		Find(&record, "msg_id = ?", data.QuoteId).Error; err != nil {
+		Find(&message, "id = ?", data.ReplyTo).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - loadReply.Message: %v", err)
 		return
 	}
 
-	var user postgresModel.User
-	if err := m.Source.Postgres().
-		Table("users").
-		Select("username").
-		Find(&user, "id = ?", record.UserId).Error; err != nil {
-		return
+	if err := m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageForwarded{
+		OriginalMessageId: message.Id,
+		NewMessageId:      data.Id,
+		UserId:            data.UserId,
+		CreatedAt:         time.Now(),
+	}).Error; err != nil {
+		log.Printf("Error - IMessageUseCase - loadReply.MessageForwarded: %v", err)
 	}
-
-	reply := entity.Reply{
-		UserId:   record.UserId,
-		Username: user.Username,
-		MsgType:  1,
-		Content:  record.Content,
-		MsgId:    record.MsgId,
-	}
-
-	if record.MsgType != constant.ChatMsgTypeText {
-		reply.Content = entity.GetChatMsgTypeMapping(m.Locale, record.MsgType)
-	}
-
-	extra["reply"] = reply
-	data.Extra = jsonutil.Encode(extra)
 }
 
 func (m *MessageUseCase) loadSequence(ctx context.Context, data *postgresModel.Message) {

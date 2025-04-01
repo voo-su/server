@@ -12,7 +12,7 @@ import (
 )
 
 type ConsumeMessageRevoke struct {
-	MsgId string `json:"msg_id"`
+	Id int64 `json:"id"`
 }
 
 func (h *Handler) onConsumeMessageRevoke(ctx context.Context, body []byte) {
@@ -23,7 +23,7 @@ func (h *Handler) onConsumeMessageRevoke(ctx context.Context, body []byte) {
 	}
 
 	var record postgresModel.Message
-	if err := h.Source.Postgres().First(&record, "msg_id = ?", in.MsgId).Error; err != nil {
+	if err := h.Source.Postgres().First(&record, "id = ?", in.Id).Error; err != nil {
 		return
 	}
 
@@ -49,10 +49,10 @@ func (h *Handler) onConsumeMessageRevoke(ctx context.Context, body []byte) {
 	c.SetAck(true)
 	c.SetReceive(clientIds...)
 	c.SetMessage(constant.PushEventImMessageRevoke, map[string]any{
+		"id":          record.Id,
 		"chat_type":   record.ChatType,
 		"sender_id":   record.UserId,
 		"receiver_id": record.ReceiverId,
-		"msg_id":      record.MsgId,
 		"text":        h.Locale.Localize("message_deleted"),
 	})
 	socket.Session.Chat.Write(c)

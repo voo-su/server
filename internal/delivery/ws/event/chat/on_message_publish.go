@@ -74,7 +74,7 @@ func (h *Handler) onTextMessage(ctx context.Context, client socket.IClient, data
 }
 
 type StickerMessage struct {
-	MsgId   string                     `json:"msg_id"`
+	Id      string                     `json:"id"`
 	Event   string                     `json:"event"`
 	Content v1Pb.StickerMessageRequest `json:"content"`
 }
@@ -88,7 +88,7 @@ func (h *Handler) onStickerMessage(_ context.Context, _ socket.IClient, data []b
 }
 
 type ImageMessage struct {
-	MsgId   string                   `json:"msg_id"`
+	Id      string                   `json:"id"`
 	Event   string                   `json:"event"`
 	Content v1Pb.ImageMessageRequest `json:"content"`
 }
@@ -102,7 +102,7 @@ func (h *Handler) onImageMessage(_ context.Context, _ socket.IClient, data []byt
 }
 
 type FileMessage struct {
-	MsgId   string                   `json:"msg_id"`
+	Id      string                   `json:"id"`
 	Event   string                   `json:"event"`
 	Content v1Pb.ImageMessageRequest `json:"content"`
 }
@@ -116,7 +116,7 @@ func (h *Handler) onFileMessage(_ context.Context, _ socket.IClient, data []byte
 }
 
 type VoteMessage struct {
-	MsgId   string                  `json:"msg_id"`
+	Id      string                  `json:"id"`
 	Event   string                  `json:"event"`
 	Content v1Pb.VoteMessageRequest `json:"content"`
 }
@@ -169,7 +169,7 @@ func (h *Handler) onCodeMessage(ctx context.Context, client socket.IClient, data
 }
 
 type LocationMessage struct {
-	MsgId   string                      `json:"msg_id"`
+	Id      string                      `json:"id"`
 	Event   string                      `json:"event"`
 	Content v1Pb.LocationMessageRequest `json:"content"`
 }

@@ -12,8 +12,8 @@ import (
 type MessageRead struct {
 	Event   string `json:"event"`
 	Content struct {
-		MsgIds     []string `json:"msg_ids"`
-		ReceiverId int      `json:"receiver_id"`
+		Ids        []int `json:"ids"`
+		ReceiverId int   `json:"receiver_id"`
 	} `json:"content"`
 }
 
@@ -24,10 +24,10 @@ func (h *Handler) onReadMessage(ctx context.Context, client socket.IClient, data
 		return
 	}
 
-	items := make([]model.MessageRead, 0, len(in.Content.MsgIds))
-	for _, msgId := range in.Content.MsgIds {
+	items := make([]model.MessageRead, 0, len(in.Content.Ids))
+	for _, msgId := range in.Content.Ids {
 		items = append(items, model.MessageRead{
-			MsgId:      msgId,
+			MessageId:  msgId,
 			UserId:     client.Uid(),
 			ReceiverId: in.Content.ReceiverId,
 		})
@@ -40,7 +40,7 @@ func (h *Handler) onReadMessage(ctx context.Context, client socket.IClient, data
 
 	if err := h.MemberUseCase.Source.Postgres().
 		Model(&model.Message{}).
-		Where("msg_id in ? AND receiver_id = ? AND is_read = ?", in.Content.MsgIds, client.Uid(), 0).
+		Where("id in ? AND receiver_id = ? AND is_read = ?", in.Content.Ids, client.Uid(), 0).
 		Update("is_read", 1).Error; err != nil {
 		log.Printf("onReadMessage Update err:  %s", err)
 		return
@@ -51,7 +51,7 @@ func (h *Handler) onReadMessage(ctx context.Context, client socket.IClient, data
 		"data": jsonutil.Encode(map[string]any{
 			"sender_id":   client.Uid(),
 			"receiver_id": in.Content.ReceiverId,
-			"msg_ids":     in.Content.MsgIds,
+			"ids":         in.Content.Ids,
 		}),
 	}))
 }

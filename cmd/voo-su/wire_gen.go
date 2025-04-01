@@ -77,29 +77,36 @@ func NewHttpInjector(conf *config.Config) *http.AppProvider {
 	voteCacheRepository := repository.NewVoteCacheRepository(client)
 	messageVoteRepository := repository2.NewMessageVoteRepository(db, voteCacheRepository)
 	messageLoginRepository := repository2.NewMessageLoginRepository(db)
+	messageCodeRepository := repository2.NewMessageCodeRepository(db)
+	messageLocationRepository := repository2.NewMessageLocationRepository(db)
+	messageForwardedRepository := repository2.NewMessageForwardedRepository(db)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
 	contactRepository := repository2.NewContactRepository(db, relationCacheRepository)
 	iNatsClient := provider.NewNatsClient(conf)
 	messageUseCase := &usecase.MessageUseCase{
-		Conf:                conf,
-		Locale:              iLocale,
-		Source:              source,
-		MessageForward:      messageForward,
-		Minio:               iMinio,
-		GroupChatMemberRepo: groupChatMemberRepository,
-		FileSplitRepo:       fileSplitRepository,
-		Sequence:            sequenceRepository,
-		MessageRepo:         messageRepository,
-		MessageVoteRepo:     messageVoteRepository,
-		MessageLoginRepo:    messageLoginRepository,
-		BotRepo:             botRepository,
-		GroupChatRepo:       groupChatRepository,
-		ContactRepo:         contactRepository,
-		UnreadCache:         unreadCacheRepository,
-		MessageCache:        messageCacheRepository,
-		ServerCache:         serverCacheRepository,
-		ClientCache:         clientCacheRepository,
-		Nats:                iNatsClient,
+		Conf:                 conf,
+		Locale:               iLocale,
+		Source:               source,
+		MessageForward:       messageForward,
+		Minio:                iMinio,
+		GroupChatMemberRepo:  groupChatMemberRepository,
+		FileSplitRepo:        fileSplitRepository,
+		Sequence:             sequenceRepository,
+		UserRepo:             userRepository,
+		MessageRepo:          messageRepository,
+		MessageVoteRepo:      messageVoteRepository,
+		MessageLoginRepo:     messageLoginRepository,
+		MessageCodeRepo:      messageCodeRepository,
+		MessageLocationRepo:  messageLocationRepository,
+		MessageForwardedRepo: messageForwardedRepository,
+		BotRepo:              botRepository,
+		GroupChatRepo:        groupChatRepository,
+		ContactRepo:          contactRepository,
+		UnreadCache:          unreadCacheRepository,
+		MessageCache:         messageCacheRepository,
+		ServerCache:          serverCacheRepository,
+		ClientCache:          clientCacheRepository,
+		Nats:                 iNatsClient,
 	}
 	auth := &v1.Auth{
 		Conf:             conf,
@@ -326,33 +333,41 @@ func NewWsInjector(conf *config.Config) *ws.AppProvider {
 	messageForward := logic.NewMessageForward(iLocale, source, sequenceRepository)
 	iMinio := provider.NewMinioClient(conf)
 	fileSplitRepository := repository2.NewFileSplitRepository(db)
+	userRepository := repository2.NewUserRepository(db)
 	messageRepository := repository2.NewMessageRepository(db)
 	voteCacheRepository := repository.NewVoteCacheRepository(client)
 	messageVoteRepository := repository2.NewMessageVoteRepository(db, voteCacheRepository)
 	messageLoginRepository := repository2.NewMessageLoginRepository(db)
+	messageCodeRepository := repository2.NewMessageCodeRepository(db)
+	messageLocationRepository := repository2.NewMessageLocationRepository(db)
+	messageForwardedRepository := repository2.NewMessageForwardedRepository(db)
 	botRepository := repository2.NewBotRepository(db)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
 	contactRepository := repository2.NewContactRepository(db, relationCacheRepository)
 	messageUseCase := &usecase.MessageUseCase{
-		Conf:                conf,
-		Locale:              iLocale,
-		Source:              source,
-		MessageForward:      messageForward,
-		Minio:               iMinio,
-		GroupChatMemberRepo: groupChatMemberRepository,
-		FileSplitRepo:       fileSplitRepository,
-		Sequence:            sequenceRepository,
-		MessageRepo:         messageRepository,
-		MessageVoteRepo:     messageVoteRepository,
-		MessageLoginRepo:    messageLoginRepository,
-		BotRepo:             botRepository,
-		GroupChatRepo:       groupChatRepository,
-		ContactRepo:         contactRepository,
-		UnreadCache:         unreadCacheRepository,
-		MessageCache:        messageCacheRepository,
-		ServerCache:         serverCacheRepository,
-		ClientCache:         clientCacheRepository,
-		Nats:                iNatsClient,
+		Conf:                 conf,
+		Locale:               iLocale,
+		Source:               source,
+		MessageForward:       messageForward,
+		Minio:                iMinio,
+		GroupChatMemberRepo:  groupChatMemberRepository,
+		FileSplitRepo:        fileSplitRepository,
+		Sequence:             sequenceRepository,
+		UserRepo:             userRepository,
+		MessageRepo:          messageRepository,
+		MessageVoteRepo:      messageVoteRepository,
+		MessageLoginRepo:     messageLoginRepository,
+		MessageCodeRepo:      messageCodeRepository,
+		MessageLocationRepo:  messageLocationRepository,
+		MessageForwardedRepo: messageForwardedRepository,
+		BotRepo:              botRepository,
+		GroupChatRepo:        groupChatRepository,
+		ContactRepo:          contactRepository,
+		UnreadCache:          unreadCacheRepository,
+		MessageCache:         messageCacheRepository,
+		ServerCache:          serverCacheRepository,
+		ClientCache:          clientCacheRepository,
+		Nats:                 iNatsClient,
 	}
 	contactUseCase := usecase.NewContactUseCase(iLocale, source, contactRepository)
 	handler3 := &chat2.Handler{
@@ -432,29 +447,36 @@ func NewGrpcInjector(conf *config.Config) *grpc.AppProvider {
 	voteCacheRepository := repository.NewVoteCacheRepository(client)
 	messageVoteRepository := repository2.NewMessageVoteRepository(db, voteCacheRepository)
 	messageLoginRepository := repository2.NewMessageLoginRepository(db)
+	messageCodeRepository := repository2.NewMessageCodeRepository(db)
+	messageLocationRepository := repository2.NewMessageLocationRepository(db)
+	messageForwardedRepository := repository2.NewMessageForwardedRepository(db)
 	groupChatRepository := repository2.NewGroupChatRepository(db)
 	contactRepository := repository2.NewContactRepository(db, relationCacheRepository)
 	iNatsClient := provider.NewNatsClient(conf)
 	messageUseCase := &usecase.MessageUseCase{
-		Conf:                conf,
-		Locale:              iLocale,
-		Source:              source,
-		MessageForward:      messageForward,
-		Minio:               iMinio,
-		GroupChatMemberRepo: groupChatMemberRepository,
-		FileSplitRepo:       fileSplitRepository,
-		Sequence:            sequenceRepository,
-		MessageRepo:         messageRepository,
-		MessageVoteRepo:     messageVoteRepository,
-		MessageLoginRepo:    messageLoginRepository,
-		BotRepo:             botRepository,
-		GroupChatRepo:       groupChatRepository,
-		ContactRepo:         contactRepository,
-		UnreadCache:         unreadCacheRepository,
-		MessageCache:        messageCacheRepository,
-		ServerCache:         serverCacheRepository,
-		ClientCache:         clientCacheRepository,
-		Nats:                iNatsClient,
+		Conf:                 conf,
+		Locale:               iLocale,
+		Source:               source,
+		MessageForward:       messageForward,
+		Minio:                iMinio,
+		GroupChatMemberRepo:  groupChatMemberRepository,
+		FileSplitRepo:        fileSplitRepository,
+		Sequence:             sequenceRepository,
+		UserRepo:             userRepository,
+		MessageRepo:          messageRepository,
+		MessageVoteRepo:      messageVoteRepository,
+		MessageLoginRepo:     messageLoginRepository,
+		MessageCodeRepo:      messageCodeRepository,
+		MessageLocationRepo:  messageLocationRepository,
+		MessageForwardedRepo: messageForwardedRepository,
+		BotRepo:              botRepository,
+		GroupChatRepo:        groupChatRepository,
+		ContactRepo:          contactRepository,
+		UnreadCache:          unreadCacheRepository,
+		MessageCache:         messageCacheRepository,
+		ServerCache:          serverCacheRepository,
+		ClientCache:          clientCacheRepository,
+		Nats:                 iNatsClient,
 	}
 	auth := handler3.NewAuthHandler(conf, iLocale, authUseCase, ipAddressUseCase, chatUseCase, botUseCase, messageUseCase)
 	pushTokenRepository := repository2.NewPushTokenRepository(db)

@@ -26,7 +26,6 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 			items := make([]*chatPb.MessageItem, 0)
 
 			items = append(items, &chatPb.MessageItem{
-				//Id: strutil.NewMsgId(),
 				Receiver: &chatPb.Receiver{
 					ChatType:   receiver.ChatType,
 					ReceiverId: receiver.ReceiverId,
@@ -73,7 +72,7 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 			messageItem.Media = &chatPb.MessageMedia{
 				Media: &chatPb.MessageMedia_MessageMediaPhoto{
 					MessageMediaPhoto: &chatPb.MessageMediaPhoto{
-						//Id:   item.Media.Id.String(),
+						Id:   item.Media.FileId.String(),
 						File: item.Media.Url,
 					},
 				},
@@ -84,7 +83,7 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 			messageItem.Media = &chatPb.MessageMedia{
 				Media: &chatPb.MessageMedia_MessageMediaDocument{
 					MessageMediaDocument: &chatPb.MessageMediaDocument{
-						//Id:       item.Media.Id.String(),
+						Id:       item.Media.FileId.String(),
 						MimeType: item.Media.MimeType,
 						Size:     int32(item.Media.Size),
 						File:     item.Media.Url,
@@ -97,6 +96,7 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 			messageItem.Media = &chatPb.MessageMedia{
 				Media: &chatPb.MessageMedia_MessageMediaDocument{
 					MessageMediaDocument: &chatPb.MessageMediaDocument{
+						Id:       item.Media.FileId.String(),
 						File:     item.Media.Url,
 						MimeType: item.Media.MimeType,
 					},
@@ -108,6 +108,7 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 			messageItem.Media = &chatPb.MessageMedia{
 				Media: &chatPb.MessageMedia_MessageMediaDocument{
 					MessageMediaDocument: &chatPb.MessageMediaDocument{
+						Id:       item.Media.FileId.String(),
 						File:     item.Media.Url,
 						MimeType: item.Media.MimeType,
 					},
@@ -115,37 +116,16 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 			}
 		}
 
-		// TODO Refactoring
-		//if item.QuoteId != "" {
-		//	type ReplyData struct {
-		//		UserId   int    `json:"user_id,omitempty"`
-		//		Username string `json:"username,omitempty"`
-		//		MsgType  int    `json:"msg_type,omitempty"`
-		//		Content  string `json:"content,omitempty"`
-		//		MsgId    string `json:"msg_id,omitempty"`
-		//	}
-		//	type Reply struct {
-		//		Reply ReplyData `json:"reply,omitempty"`
-		//	}
-		//
-		//	var reply Reply
-		//	if err := jsonutil.Decode(item.Extra0, &reply); err != nil {
-		//		fmt.Println(err)
-		//	}
-		//
-		//	mId, err := c.MessageUseCase.GetMessageByMsgId(ctx, item.QuoteId)
-		//	if err != nil {
-		//		fmt.Println(err)
-		//	}
-		//
-		//	messageItem.Reply = &chatPb.MessageReply{
-		//		Id:       int64(mId),
-		//		MsgType:  int32(reply.Reply.MsgType),
-		//		UserId:   int64(reply.Reply.UserId),
-		//		Username: reply.Reply.Username,
-		//		Content:  reply.Reply.Content,
-		//	}
-		//}
+		if item.Reply != nil {
+			reply := item.Reply
+			messageItem.Reply = &chatPb.MessageReply{
+				Id:       int64(reply.Id),
+				MsgType:  int32(reply.MsgType),
+				UserId:   int64(reply.UserId),
+				Username: reply.Username,
+				Content:  reply.Content,
+			}
+		}
 
 		items = append(items, messageItem)
 	}
@@ -206,7 +186,7 @@ func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*cha
 			//Height:  params.Height,
 			ReplyToMsgId: in.ReplyToMsgId,
 			Content:      in.Message,
-			FileId:       &filePath.FileId,
+			FileId:       filePath.FileId,
 		}); err != nil {
 			log.Println(err)
 			return nil, status.Error(codes.Unknown, "не удалось")
@@ -233,7 +213,7 @@ func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*cha
 				Size:     int32(filePath.Size),
 				//Cover:    params.Cover,
 				Content: in.Message,
-				FileId:  &filePath.FileId,
+				FileId:  filePath.FileId,
 			}); err != nil {
 				log.Println(err)
 				return nil, status.Error(codes.Unknown, "не удалось")
@@ -244,7 +224,7 @@ func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*cha
 				Url:      c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), filePath.FilePath),
 				Size:     int32(filePath.Size),
 				Content:  in.Message,
-				FileId:   &filePath.FileId,
+				FileId:   filePath.FileId,
 			}); err != nil {
 				log.Println(err)
 				return nil, status.Error(codes.Unknown, "не удалось")
@@ -258,7 +238,7 @@ func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*cha
 				FileSize:     int(filePath.Size),
 				FilePath:     c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), filePath.FilePath),
 				Content:      in.Message,
-				FileId:       &filePath.FileId,
+				FileId:       filePath.FileId,
 			}); err != nil {
 				log.Println(err)
 				return nil, status.Error(codes.Unknown, "не удалось")
@@ -289,7 +269,7 @@ func (c *Chat) DeleteMessages(ctx context.Context, in *chatPb.DeleteMessagesRequ
 		UserId:     uid,
 		ChatType:   int(in.Receiver.ChatType),
 		ReceiverId: int(in.Receiver.ReceiverId),
-		MsgIds:     in.MessageIds,
+		Ids:        in.MessageIds,
 	}); err != nil {
 		return nil, status.Error(codes.Unknown, err.Error())
 	}

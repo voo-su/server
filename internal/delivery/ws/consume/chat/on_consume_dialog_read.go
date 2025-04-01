@@ -10,9 +10,9 @@ import (
 )
 
 type ConsumeMessageRead struct {
-	SenderId   int      `json:"sender_id"`
-	ReceiverId int      `json:"receiver_id"`
-	MsgIds     []string `json:"msg_ids"`
+	Ids        []int64 `json:"ids"`
+	SenderId   int     `json:"sender_id"`
+	ReceiverId int     `json:"receiver_id"`
 }
 
 func (h *Handler) onConsumeMessageRead(ctx context.Context, body []byte) {
@@ -31,9 +31,9 @@ func (h *Handler) onConsumeMessageRead(ctx context.Context, body []byte) {
 	c.SetAck(true)
 	c.SetReceive(clientIds...)
 	c.SetMessage(constant.PushEventImMessageRead, map[string]any{
+		"ids":         in.Ids,
 		"sender_id":   in.SenderId,
 		"receiver_id": in.ReceiverId,
-		"msg_ids":     in.MsgIds,
 	})
 	socket.Session.Chat.Write(c)
 }

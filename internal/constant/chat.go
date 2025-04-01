@@ -46,22 +46,21 @@ const (
 )
 
 const (
-	ChatMsgTypeText     = 1
-	ChatMsgTypeCode     = 2
-	ChatMsgTypeImage    = 3
-	ChatMsgTypeAudio    = 4
-	ChatMsgTypeVideo    = 5
-	ChatMsgTypeFile     = 6
-	ChatMsgTypeLocation = 7
-	ChatMsgTypeCard     = 8
-	ChatMsgTypeForward  = 9
-	ChatMsgTypeLogin    = 10
-	ChatMsgTypeVote     = 11
-	ChatMsgTypeMixed    = 12
-)
+	ChatMsgTypeText      = 1
+	ChatMsgTypeCode      = 2
+	ChatMsgTypeImage     = 3
+	ChatMsgTypeAudio     = 4
+	ChatMsgTypeVideo     = 5
+	ChatMsgTypeFile      = 6
+	ChatMsgTypeLocation  = 7
+	ChatMsgTypeCard      = 8
+	ChatMsgTypeForwarded = 9
+	ChatMsgTypeLogin     = 10
+	ChatMsgTypeVote      = 11
+	ChatMsgTypeMixed     = 12
 
-const (
-	ChatMsgSysText                   = 1000
+	ChatMsgSysText = 1000
+
 	ChatMsgSysGroupCreate            = 1101
 	ChatMsgSysGroupMemberJoin        = 1102
 	ChatMsgSysGroupMemberQuit        = 1103
@@ -73,5 +72,4 @@ const (
 	ChatMsgSysGroupMemberMuted       = 1109
 	ChatMsgSysGroupMemberCancelMuted = 1110
 	ChatMsgSysGroupAds               = 1111
-	ChatMsgSysGroupTransfer          = 1113
 )

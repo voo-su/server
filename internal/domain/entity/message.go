@@ -7,25 +7,24 @@ import (
 )
 
 type MessageItem struct {
-	Id         int        `json:"id"`
-	Sequence   int        `json:"sequence"`
-	MsgId      string     `json:"msg_id"`
-	ChatType   int        `json:"chat_type"`
-	MsgType    int        `json:"msg_type"`
-	UserId     int        `json:"user_id"`
-	ReceiverId int        `json:"receiver_id"`
-	Username   string     `json:"username"`
-	Name       string     `json:"name"`
-	Surname    string     `json:"surname"`
-	Avatar     string     `json:"avatar"`
-	IsRevoke   int        `json:"is_revoke"`
-	IsMark     int        `json:"is_mark"`
-	IsRead     int        `json:"is_read"`
-	Content    string     `json:"content"`
-	CreatedAt  string     `json:"created_at"`
-	Extra      any        `json:"extra"`
-	QuoteId    string     `json:"quote_id"`
-	Media      *MediaItem `json:"media,omitempty"`
+	Id         int          `json:"id"`
+	Sequence   int          `json:"sequence"`
+	ChatType   int          `json:"chat_type"`
+	MsgType    int          `json:"msg_type"`
+	UserId     int          `json:"user_id"`
+	ReceiverId int          `json:"receiver_id"`
+	Username   string       `json:"username"`
+	Name       string       `json:"name"`
+	Surname    string       `json:"surname"`
+	Avatar     string       `json:"avatar"`
+	IsRevoke   int          `json:"is_revoke"`
+	IsMark     int          `json:"is_mark"`
+	IsRead     int          `json:"is_read"`
+	Content    string       `json:"content"`
+	CreatedAt  string       `json:"created_at"`
+	Reply      *Reply       `json:"reply,omitempty"`
+	Media      *MediaItem   `json:"media,omitempty"`
+	Service    *ServiceItem `json:"service,omitempty"`
 }
 
 type MediaType int
@@ -35,20 +34,54 @@ const (
 	MediaTypeVideo MediaType = constant.ChatMsgTypeVideo
 	MediaTypeAudio MediaType = constant.ChatMsgTypeAudio
 	MediaTypeFile  MediaType = constant.ChatMsgTypeFile
+	MediaTypeVote  MediaType = constant.ChatMsgTypeVote
 )
 
 type MediaItem struct {
-	Type     MediaType  `json:"type"`
-	FileId   *uuid.UUID `json:"file_id"`
-	MimeType string     `json:"content_type"`
-	Url      string     `json:"url"`
-	Name     string     `json:"name"`
-	Size     int        `json:"size"`
-	Duration int        `json:"duration"`
-	Width    int32      `json:"width"`
-	Height   int32      `json:"height"`
-	Cover    string     `json:"cover"`
-	Drive    int        `json:"drive"`
+	Type     MediaType `json:"type"`
+	FileId   uuid.UUID `json:"file_id"`
+	MimeType string    `json:"content_type"`
+	Url      string    `json:"url"`
+	Name     string    `json:"name"`
+	Size     int       `json:"size"`
+	Duration int       `json:"duration"`
+	Width    int32     `json:"width"`
+	Height   int32     `json:"height"`
+	Cover    string    `json:"cover"`
+	Drive    int       `json:"drive"`
+
+	//
+	Detail     DetailVote `json:"detail,omitempty"`
+	Statistics any        `json:"statistics,omitempty"`
+	VoteUsers  []int      `json:"vote_users,omitempty"`
+}
+
+type DetailVote struct {
+	Id           int    `json:"id"`
+	MessageId    int    `json:"message_id"`
+	Title        string `json:"title"`
+	AnswerMode   int    `json:"answer_mode"`
+	Status       int    `json:"status"`
+	AnswerOption []any  `json:"answer_option"`
+	AnswerNum    int    `json:"answer_num"`
+	AnsweredNum  int    `json:"answered_num"`
+}
+
+type ServiceType int
+
+const (
+	ServiceTypeMsgSysText       ServiceType = constant.ChatMsgSysText
+	ServiceTypeChatMsgTypeLogin ServiceType = constant.ChatMsgTypeLogin
+)
+
+type ServiceItem struct {
+	Type ServiceType `json:"type"`
+	//
+	Ip      string  `json:"ip,omitempty"`
+	Agent   string  `json:"agent,omitempty"`
+	Address *string `json:"address,omitempty"`
+
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type QueryGetHistoryOpt struct {
@@ -61,25 +94,17 @@ type QueryGetHistoryOpt struct {
 }
 
 type QueryMessageItem struct {
-	Id         int        `json:"id"`
-	MsgId      string     `json:"msg_id"`
-	Sequence   int        `json:"sequence"`
-	ChatType   int        `json:"chat_type"`
-	MsgType    int        `json:"msg_type"`
-	UserId     int        `json:"user_id"`
-	ReceiverId int        `json:"receiver_id"`
-	IsRevoke   int        `json:"is_revoke"`
-	IsMark     int        `json:"is_mark"`
-	IsRead     int        `json:"is_read"`
-	QuoteId    string     `json:"quote_id"`
-	Content    string     `json:"content"`
-	CreatedAt  time.Time  `json:"created_at"`
-	Username   string     `json:"username"`
-	Name       string     `json:"name"`
-	Surname    string     `json:"surname"`
-	Avatar     string     `json:"avatar"`
-	Extra      string     `json:"extra"`
-	FileId     *uuid.UUID `json:"file_id"`
+	Id         int       `json:"id"`
+	Sequence   int       `json:"sequence"`
+	ChatType   int       `json:"chat_type"`
+	MsgType    int       `json:"msg_type"`
+	UserId     int       `json:"user_id"`
+	ReceiverId int       `json:"receiver_id"`
+	IsRevoke   int       `json:"is_revoke"`
+	IsMark     int       `json:"is_mark"`
+	IsRead     int       `json:"is_read"`
+	Content    string    `json:"content"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type MessageExtraGroupMembers struct {
@@ -87,30 +112,27 @@ type MessageExtraGroupMembers struct {
 	Username string `gorm:"column:username;" json:"username"`
 }
 
-type Reply struct {
-	UserId   int    `json:"user_id,omitempty"`
-	Username string `json:"username,omitempty"`
-	MsgType  int    `json:"msg_type,omitempty"`
-	Content  string `json:"content,omitempty"`
-	MsgId    string `json:"msg_id,omitempty"`
+type MessageReply struct {
+	Id           int    `gorm:"id"`
+	Content      string `gorm:"content"`
+	MsgType      int    `gorm:"msg_type"`
+	UserId       int    `gorm:"user_id"`
+	NewMessageId int    `gorm:"new_message_id"`
 }
 
-//type MessageExtraCode struct {
-//	Lang string `json:"translations"`
-//	Code string `json:"code"`
-//}
-//
-//type MessageExtraLocation struct {
-//	Longitude   string `json:"longitude"`
-//	Latitude    string `json:"latitude"`
-//	Description string `json:"description"`
-//}
+type Reply struct {
+	Id       int    `json:"id"`
+	MsgType  int    `json:"msg_type"`
+	Content  string `json:"content"`
+	UserId   int    `json:"user_id"`
+	Username string `json:"username"`
+}
 
 type MessageExtraForward struct {
 	ChatType   int              `json:"chat_type"`
 	UserId     int              `json:"user_id"`
 	ReceiverId int              `json:"receiver_id"`
-	MsgIds     []int            `json:"msg_ids"`
+	Ids        []int            `json:"ids"`
 	Messages   []map[string]any `json:"messages"`
 }
 
@@ -131,23 +153,6 @@ type MessageExtraImage struct {
 	Height int    `json:"height"`
 }
 
-//type MessageExtraAudio struct {
-//	Name     string `json:"name"`
-//	Suffix   string `json:"suffix"`
-//	Size     int    `json:"size"`
-//	Url      string `json:"url"`
-//	Duration int    `json:"duration"`
-//}
-
-//type MessageExtraVideo struct {
-//	Name     string `json:"name"`
-//	Cover    string `json:"cover"`
-//	Suffix   string `json:"suffix"`
-//	Size     int    `json:"size"`
-//	Url      string `json:"url"`
-//	Duration int    `json:"duration"`
-//}
-
 type MessageExtraGroupCreate struct {
 	OwnerId   int                        `json:"owner_id"`
 	OwnerName string                     `json:"owner_name"`
@@ -160,13 +165,6 @@ type MessageExtraGroupJoin struct {
 	Members   []MessageExtraGroupMembers `json:"members"`
 }
 
-//type MessageExtraGroupTransfer struct {
-//	OldOwnerId   int    `json:"old_owner_id"`
-//	OldOwnerName string `json:"old_owner_name"`
-//	NewOwnerId   int    `json:"new_owner_id"`
-//	NewOwnerName string `json:"new_owner_name"`
-//}
-
 type MessageExtraGroupMuted struct {
 	OwnerId   int    `json:"owner_id"`
 	OwnerName string `json:"owner_name"`
@@ -176,23 +174,6 @@ type MessageExtraGroupCancelMuted struct {
 	OwnerId   int    `json:"owner_id"`
 	OwnerName string `json:"owner_name"`
 }
-
-//type MessageExtraGroupMemberMuted struct {
-//	OwnerId   int                        `json:"owner_id"`
-//	OwnerName string                     `json:"owner_name"`
-//	Members   []MessageExtraGroupMembers `json:"members"`
-//}
-
-//type MessageExtraGroupMemberCancelMuted struct {
-//	OwnerId   int                        `json:"owner_id"`
-//	OwnerName string                     `json:"owner_name"`
-//	Members   []MessageExtraGroupMembers `json:"members"`
-//}
-
-//type MessageExtraGroupDismissed struct {
-//	OwnerId   int    `json:"owner_id"`
-//	OwnerName string `json:"owner_name"`
-//}
 
 type MessageExtraGroupMemberQuit struct {
 	OwnerId   int    `json:"owner_id"`
@@ -205,22 +186,12 @@ type MessageExtraGroupMemberKicked struct {
 	Members   []MessageExtraGroupMembers `json:"members"`
 }
 
-//type MessageExtraGroupMessageRevoke struct {
-//	OwnerId         int    `json:"owner_id"`
-//	OwnerName       string `json:"owner_name"`
-//	RevokeMessageId string `json:"revoke_message_id"`
-//}
-
 type MessageExtraGroupAds struct {
 	OwnerId   int    `json:"owner_id"`
 	OwnerName string `json:"owner_name"`
 	Title     string `json:"title"`
 	Content   string `json:"content"`
 }
-
-//type MessageExtraText struct {
-//	Content string `json:"content"`
-//}
 
 type MessageExtraMixedItem struct {
 	Type    int    `json:"type"`
@@ -247,7 +218,6 @@ type MessageReceiver struct {
 type SendText struct {
 	Receiver     MessageReceiver
 	Content      string
-	QuoteId      string
 	ReplyToMsgId int64
 }
 
@@ -256,10 +226,9 @@ type SendImage struct {
 	Url          string
 	Width        int32
 	Height       int32
-	QuoteId      string
 	Content      string
 	ReplyToMsgId int64
-	FileId       *uuid.UUID
+	FileId       uuid.UUID
 }
 
 type SendVideo struct {
@@ -269,7 +238,7 @@ type SendVideo struct {
 	Size     int32
 	Cover    string
 	Content  string
-	FileId   *uuid.UUID
+	FileId   uuid.UUID
 }
 
 type SendAudio struct {
@@ -277,7 +246,7 @@ type SendAudio struct {
 	Url      string
 	Size     int32
 	Content  string
-	FileId   *uuid.UUID
+	FileId   uuid.UUID
 }
 
 type SendFile struct {
@@ -293,7 +262,7 @@ type SendBotFile struct {
 	FileSize     int
 	FilePath     string
 	Content      string
-	FileId       *uuid.UUID
+	FileId       uuid.UUID
 }
 
 type SendLogin struct {
@@ -308,9 +277,9 @@ type Mention struct {
 }
 
 type TextMessageRequest struct {
-	Receiver *MessageReceiver
-	Type     string
-	Content  string
-	Mention  *Mention
-	QuoteId  string
+	Receiver     *MessageReceiver
+	Type         string
+	Content      string
+	Mention      *Mention
+	ReplyToMsgId int64
 }

@@ -104,7 +104,7 @@ message TextMessageRequest {
     string type = 2 [(tagger.tags) = "label:\"type\""];
     string content = 3 [(tagger.tags) = "binding:\"required\" label:\"content\""];
     Mention mention = 4 [(tagger.tags) = "label:\"mention\""];
-    string quote_id = 5 [(tagger.tags) = "label:\"quote_id\""];
+    int64 reply_to_msg_id = 5 [(tagger.tags) = "label:\"reply_to_msg_id\""];
 }
 
 message ImageMessageRequest {
@@ -114,7 +114,7 @@ message ImageMessageRequest {
     int32 width = 4 [(tagger.tags) = "binding:\"required\" label:\"width\""];
     int32 height = 5 [(tagger.tags) = "binding:\"required\" label:\"height\""];
     int32 size = 6 [(tagger.tags) = "binding:\"required\" label:\"size\""];
-    string quote_id = 7 [(tagger.tags) = "label:\"quote_id\""];
+    int64 reply_to_msg_id = 7 [(tagger.tags) = "json:\"reply_to_msg_id\" label:\"reply_to_msg_id\""];
 }
 
 message VideoMessageRequest {
@@ -181,7 +181,7 @@ message MixedMessageRequest {
     MessageReceiver receiver = 1 [(tagger.tags) = "label:\"receiver\""];
     string type = 2 [(tagger.tags) = "label:\"type\""];
     repeated Item items = 3 [(tagger.tags) = "label:\"items\""];
-    string quote_id = 4 [(tagger.tags) = "label:\"quote_id\""];
+    int64 reply_to_msg_id = 4 [(tagger.tags) = "json:\"reply_to_msg_id\" label:\"reply_to_msg_id\""];
 }
 
 message CodeMessageRequest {
@@ -225,9 +225,9 @@ message VoteMessageHandleRequest {
 message DeleteMessageRequest {
     int64 chat_type = 1 [(tagger.tags) = "form:\"chat_type\" json:\"chat_type\" binding:\"required,oneof=1 2\" label:\"chat_type\""];
     int64 receiver_id = 2 [(tagger.tags) = "form:\"receiver_id\" json:\"receiver_id\" binding:\"required,numeric,gt=0\" label:\"receiver_id\""];
-    string msg_ids = 3 [(tagger.tags) = "form:\"msg_ids\" json:\"msg_ids\" binding:\"required,ids\" label:\"msg_ids\""];
+    repeated int64 ids = 3 [(tagger.tags) = "form:\"ids\" json:\"ids\" binding:\"required,ids\" label:\"ids\""];
 }
 
 message RevokeMessageRequest {
-    string msg_id = 1 [(tagger.tags) = "form:\"msg_id\" json:\"msg_id\" binding:\"required\" label:\"msg_id\""];
+    int64 id = 1 [(tagger.tags) = "form:\"id\" json:\"id\" binding:\"required\" label:\"id\""];
 }

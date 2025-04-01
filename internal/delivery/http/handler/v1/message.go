@@ -13,8 +13,6 @@ import (
 	"voo.su/pkg/ginutil"
 	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
-	"voo.su/pkg/sliceutil"
-	"voo.su/pkg/strutil"
 	"voo.su/pkg/timeutil"
 )
 
@@ -80,7 +78,8 @@ func (m *Message) onSendText(ctx *ginutil.Context) error {
 			ReceiverId: params.Receiver.ReceiverId,
 		},
 		Content: params.Content,
-		QuoteId: params.QuoteId,
+		//QuoteId: params.QuoteId,
+		ReplyToMsgId: params.ReplyToMsgId,
 	}); err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -99,10 +98,10 @@ func (m *Message) onSendImage(ctx *ginutil.Context) error {
 			ChatType:   params.Receiver.ChatType,
 			ReceiverId: params.Receiver.ReceiverId,
 		},
-		Url:     params.Url,
-		Width:   params.Width,
-		Height:  params.Height,
-		QuoteId: params.QuoteId,
+		Url:          params.Url,
+		Width:        params.Width,
+		Height:       params.Height,
+		ReplyToMsgId: params.ReplyToMsgId,
 	}); err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -290,7 +289,7 @@ func (m *Message) Revoke(ctx *ginutil.Context) error {
 		return ctx.InvalidParams(err)
 	}
 
-	if err := m.MessageUseCase.Revoke(ctx.Ctx(), ctx.UserId(), params.MsgId); err != nil {
+	if err := m.MessageUseCase.Revoke(ctx.Ctx(), ctx.UserId(), params.Id); err != nil {
 		return ctx.Error(err.Error())
 	}
 
@@ -304,10 +303,10 @@ func (m *Message) Delete(ctx *ginutil.Context) error {
 	}
 
 	if err := m.ChatUseCase.DeleteRecordList(ctx.Ctx(), &usecase.RemoveRecordListOpt{
+		Ids:        params.Ids,
 		UserId:     ctx.UserId(),
 		ChatType:   int(params.ChatType),
 		ReceiverId: int(params.ReceiverId),
-		MsgIds:     sliceutil.ParseIdsToInt64(params.MsgIds),
 	}); err != nil {
 		return ctx.Error(err.Error())
 	}
@@ -347,7 +346,6 @@ func (m *Message) GetHistory(ctx *ginutil.Context) error {
 				"content":     m.Locale.Localize("insufficient_permissions_to_view_messages"),
 				"created_at":  timeutil.DateTime(),
 				"id":          1,
-				"msg_id":      strutil.NewMsgId(),
 				"msg_type":    constant.ChatMsgSysText,
 				"receiver_id": params.ReceiverId,
 				"chat_type":   params.ChatType,
