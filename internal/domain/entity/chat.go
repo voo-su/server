@@ -60,6 +60,33 @@ func GetChatMsgTypeMapping(locale locale.ILocale, msgType int) string {
 	return locale.Localize("unknown")
 }
 
+type EventType int
+
+func (e EventType) String() string {
+	switch e {
+	case constant.EventTypeGroupCreate:
+		return "group_create"
+	case constant.EventTypeGroupRename:
+		return "group_rename"
+	case constant.EventTypeAvatarChange:
+		return "avatar_change"
+	case constant.EventTypeUserAdd:
+		return "user_add"
+	case constant.EventTypeUserRemove:
+		return "user_remove"
+	case constant.EventTypeUserLeave:
+		return "user_leave"
+	case constant.EventTypeUserInvite:
+		return "user_invite"
+	case constant.EventTypeRoleChange:
+		return "role_change"
+	case constant.EventTypeSystemBroadcast:
+		return "system_broadcast"
+	default:
+		return "unknown"
+	}
+}
+
 type Message struct {
 	Id         int64  `json:"id"`
 	ChatType   int    `json:"chat_type"`

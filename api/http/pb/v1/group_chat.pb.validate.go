@@ -1709,7 +1709,7 @@ func (m *GroupChatRemoveMemberRequest) validate(all bool) error {
 
 	// no validation rules for GroupId
 
-	// no validation rules for MembersIds
+	// no validation rules for MemberId
 
 	if len(errors) > 0 {
 		return GroupChatRemoveMemberRequestMultiError(errors)

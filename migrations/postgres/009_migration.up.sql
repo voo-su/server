@@ -79,15 +79,6 @@ CREATE TABLE message_forwarded
 
 ALTER TABLE messages ADD COLUMN reply_to INTEGER REFERENCES messages(id) ON DELETE SET NULL;
 
-CREATE TABLE message_invited_members
-(
-    id         SERIAL PRIMARY KEY,
-    message_id INTEGER REFERENCES messages (id) ON DELETE CASCADE,
-    user_id    INTEGER REFERENCES users (id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (message_id, user_id)
-);
-
 CREATE TABLE message_login
 (
     id         SERIAL PRIMARY KEY,
@@ -135,3 +126,20 @@ CREATE TABLE message_location
     description text,
     created_at  TIMESTAMP        NOT NULL DEFAULT now()
 );
+
+CREATE TABLE message_system
+(
+    id             BIGSERIAL PRIMARY KEY,
+    chat_type      SMALLINT  NOT NULL,
+    receiver_id    BIGINT,
+    message_id     BIGINT    REFERENCES messages (id) ON DELETE SET NULL,
+    user_id        BIGINT    REFERENCES users (id) ON DELETE SET NULL,
+    target_user_id BIGINT    REFERENCES users (id) ON DELETE SET NULL,
+    event_type     INTEGER   NOT NULL,
+    old_value      JSONB,
+    new_value      JSONB,
+    description    TEXT,
+    created_at     TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_system_messages_chat ON message_system (chat_type, receiver_id);

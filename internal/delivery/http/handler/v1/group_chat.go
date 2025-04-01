@@ -284,7 +284,7 @@ func (g *GroupChat) RemoveMembers(ctx *ginutil.Context) error {
 	err := g.GroupChatUseCase.RemoveMember(ctx.Ctx(), &usecase.GroupRemoveMembersOpt{
 		UserId:    uid,
 		GroupId:   int(params.GroupId),
-		MemberIds: sliceutil.ParseIds(params.MembersIds),
+		MemberIds: []int{int(params.MemberId)},
 	})
 
 	if err != nil {

@@ -279,11 +279,12 @@ func (m *MessageUseCase) GetForwardMessages(ctx context.Context, uid int, messag
 
 func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.QueryMessageItem) ([]*entity.MessageItem, error) {
 	var (
-		ids   []int
-		uIds  []int
-		media []int
-		login []int
-		votes []int
+		ids       []int
+		uIds      []int
+		mediaId   []int
+		loginId   []int
+		voteId    []int
+		systemIds []int
 	)
 
 	for _, item := range items {
@@ -291,23 +292,55 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 		uIds = append(uIds, item.UserId)
 
 		switch item.MsgType {
-		case constant.ChatMsgTypeImage, constant.ChatMsgTypeVideo, constant.ChatMsgTypeAudio, constant.ChatMsgTypeFile:
-			media = append(media, item.Id)
+		case constant.ChatMsgTypeImage,
+			constant.ChatMsgTypeVideo,
+			constant.ChatMsgTypeAudio,
+			constant.ChatMsgTypeFile:
+			mediaId = append(mediaId, item.Id)
 
 		case constant.ChatMsgTypeLogin:
-			login = append(login, item.Id)
+			loginId = append(loginId, item.Id)
 
 		case constant.ChatMsgTypeVote:
-			votes = append(votes, item.Id)
+			voteId = append(voteId, item.Id)
+
+		case constant.ChatMsgSysGroupCreate,
+			constant.ChatMsgSysGroupMemberJoin,
+			constant.ChatMsgSysGroupMemberQuit,
+			constant.ChatMsgSysGroupMemberKicked,
+			constant.ChatMsgSysGroupMessageRevoke,
+			constant.ChatMsgSysGroupDismissed,
+			constant.ChatMsgSysGroupMuted,
+			constant.ChatMsgSysGroupCancelMuted,
+			constant.ChatMsgSysGroupMemberMuted,
+			constant.ChatMsgSysGroupMemberCancelMuted,
+			constant.ChatMsgSysGroupAds:
+			systemIds = append(systemIds, item.Id)
+		}
+	}
+
+	hashSystem := make(map[int]*postgresModel.MessageSystem)
+	if len(systemIds) > 0 {
+		var systemItems []*postgresModel.MessageSystem
+		if err := m.Source.Postgres().
+			Model(&postgresModel.MessageSystem{}).
+			Where("message_id IN ?", systemIds).
+			Scan(&systemItems).
+			Error; err != nil {
+			log.Printf("Error - IMessageUseCase - HandleMessages.MessageSystem: %v", err)
+		}
+		for i := range systemItems {
+			uIds = append(uIds, systemItems[i].UserId, systemItems[i].TargetUserId)
+			hashSystem[systemItems[i].MessageId] = systemItems[i]
 		}
 	}
 
 	hashVotes := make(map[int]*postgresModel.MessageVote)
-	if len(votes) > 0 {
+	if len(voteId) > 0 {
 		var voteItems []*postgresModel.MessageVote
 		if err := m.Source.Postgres().
 			Model(&postgresModel.MessageVote{}).
-			Where("message_id IN ?", votes).
+			Where("message_id IN ?", voteId).
 			Scan(&voteItems).Error; err != nil {
 			log.Printf("Error - IMessageUseCase - HandleMessages.MessageVote: %v", err)
 		}
@@ -318,11 +351,11 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 	}
 
 	hashLogin := make(map[int]*postgresModel.MessageLogin)
-	if len(login) > 0 {
+	if len(loginId) > 0 {
 		var loginItems []*postgresModel.MessageLogin
 		if err := m.Source.Postgres().
 			Model(&postgresModel.MessageLogin{}).
-			Where("message_id IN ?", login).
+			Where("message_id IN ?", loginId).
 			Scan(&loginItems).
 			Error; err != nil {
 			log.Printf("Error - IMessageUseCase - HandleMessages.MessageLogin: %v", err)
@@ -334,11 +367,11 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 	}
 
 	hashMedia := make(map[int]*postgresModel.MessageMedia)
-	if len(media) > 0 {
+	if len(mediaId) > 0 {
 		var mediaItems []*postgresModel.MessageMedia
 		if err := m.Source.Postgres().
 			Model(&postgresModel.MessageMedia{}).
-			Where("message_id IN ?", media).
+			Where("message_id IN ?", mediaId).
 			Scan(&mediaItems).
 			Error; err != nil {
 			log.Printf("Error - IMessageUseCase - HandleMessages.MessageMedia: %v", err)
@@ -427,20 +460,6 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 		}
 
 		switch item.MsgType {
-		//case constant.ChatMsgSysGroupCreate:
-		//    fmt.Println(item)
-
-		case constant.ChatMsgTypeLogin:
-			if val, ok := hashLogin[item.Id]; ok {
-				data.Service = &entity.ServiceItem{
-					Type:      entity.ServiceTypeChatMsgTypeLogin,
-					Ip:        val.IpAddress,
-					Agent:     val.UserAgent,
-					Address:   val.Address,
-					CreatedAt: val.CreatedAt,
-				}
-			}
-
 		case constant.ChatMsgTypeImage:
 			if val, ok := hashMedia[item.Id]; ok {
 				data.Media = &entity.MediaItem{
@@ -537,6 +556,107 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 					VoteUsers:  users,
 				}
 			}
+
+		case constant.ChatMsgTypeLogin:
+			if val, ok := hashLogin[item.Id]; ok {
+				data.Service = &entity.ServiceItem{
+					Type:      entity.ServiceTypeChatMsgTypeLogin,
+					CreatedAt: val.CreatedAt,
+					Action: entity.ServiceLogin{
+						Ip:      val.IpAddress,
+						Agent:   val.UserAgent,
+						Address: val.Address,
+					},
+				}
+			}
+
+		case constant.ChatMsgSysGroupCreate:
+			if val, ok := hashSystem[item.Id]; ok {
+				action := entity.ServiceItemGroupCreateMessage{}
+
+				if u, ok := hashUsers[val.UserId]; ok {
+					action.OwnerId = u.Id
+					action.OwnerName = u.Name
+				}
+
+				data.Service = &entity.ServiceItem{
+					Type:      entity.ServiceTypeChatMsgSysGroupCreate,
+					CreatedAt: val.CreatedAt,
+					Action:    action,
+				}
+			}
+
+		case constant.ChatMsgSysGroupMemberJoin:
+			if val, ok := hashSystem[item.Id]; ok {
+				member := entity.ServiceItemMember{}
+				if u, ok := hashUsers[val.TargetUserId]; ok {
+					member = entity.ServiceItemMember{
+						UserId:   u.Id,
+						Username: u.Username,
+						Name:     u.Name,
+					}
+				}
+				action := entity.ServiceItemGroupJoinMessage{
+					Member: member,
+				}
+
+				if u, ok := hashUsers[val.UserId]; ok {
+					action.OwnerId = u.Id
+					action.OwnerName = u.Name
+				}
+
+				data.Service = &entity.ServiceItem{
+					Type:      entity.ServiceTypeChatMsgSysGroupMemberJoin,
+					CreatedAt: val.CreatedAt,
+					Action:    action,
+				}
+			}
+
+			// TODO
+		case constant.ChatMsgSysGroupMemberQuit:
+			// TODO
+
+		case constant.ChatMsgSysGroupMemberKicked:
+			if val, ok := hashSystem[item.Id]; ok {
+				member := entity.ServiceItemMember{}
+				if u, ok := hashUsers[val.TargetUserId]; ok {
+					member = entity.ServiceItemMember{
+						UserId:   u.Id,
+						Username: u.Username,
+						Name:     u.Name,
+					}
+				}
+				action := entity.ServiceItemGroupMemberKickedMessage{
+					Member: member,
+				}
+
+				if u, ok := hashUsers[val.UserId]; ok {
+					action.OwnerId = u.Id
+					action.OwnerName = u.Name
+				}
+
+				data.Service = &entity.ServiceItem{
+					Type:      entity.ServiceTypeChatMsgSysGroupMemberKicked,
+					CreatedAt: val.CreatedAt,
+					Action:    action,
+				}
+			}
+
+		case constant.ChatMsgSysGroupMessageRevoke:
+			// TODO
+		case constant.ChatMsgSysGroupDismissed:
+			// TODO
+		case constant.ChatMsgSysGroupMuted:
+			// TODO
+		case constant.ChatMsgSysGroupCancelMuted:
+			// TODO
+		case constant.ChatMsgSysGroupMemberMuted:
+			// TODO
+		case constant.ChatMsgSysGroupMemberCancelMuted:
+			// TODO
+		case constant.ChatMsgSysGroupAds:
+			// TODO
+
 		}
 		newItems = append(newItems, data)
 	}

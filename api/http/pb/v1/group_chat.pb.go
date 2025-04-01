@@ -772,8 +772,8 @@ func (*GroupChatSettingResponse) Descriptor() ([]byte, []int) {
 
 type GroupChatRemoveMemberRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	GroupId       int32                  `protobuf:"varint,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty" binding:"required"`
-	MembersIds    string                 `protobuf:"bytes,2,opt,name=members_ids,json=membersIds,proto3" json:"members_ids,omitempty" binding:"required,ids"`
+	GroupId       int64                  `protobuf:"varint,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty" binding:"required"`
+	MemberId      int64                  `protobuf:"varint,2,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty" binding:"required"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -808,18 +808,18 @@ func (*GroupChatRemoveMemberRequest) Descriptor() ([]byte, []int) {
 	return file_v1_group_chat_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *GroupChatRemoveMemberRequest) GetGroupId() int32 {
+func (x *GroupChatRemoveMemberRequest) GetGroupId() int64 {
 	if x != nil {
 		return x.GroupId
 	}
 	return 0
 }
 
-func (x *GroupChatRemoveMemberRequest) GetMembersIds() string {
+func (x *GroupChatRemoveMemberRequest) GetMemberId() int64 {
 	if x != nil {
-		return x.MembersIds
+		return x.MemberId
 	}
-	return ""
+	return 0
 }
 
 type GroupChatRemoveMemberResponse struct {
@@ -2198,11 +2198,10 @@ const file_v1_group_chat_proto_rawDesc = "" +
 	"group_name\x18\x02 \x01(\tB\x17\x9a\x84\x9e\x03\x12binding:\"required\"R\tgroupName\x12\x16\n" +
 	"\x06avatar\x18\x03 \x01(\tR\x06avatar\x128\n" +
 	"\vdescription\x18\x04 \x01(\tB\x16\x9a\x84\x9e\x03\x11binding:\"max=255\"R\vdescription\"\x1a\n" +
-	"\x18GroupChatSettingResponse\"\x90\x01\n" +
+	"\x18GroupChatSettingResponse\"\x88\x01\n" +
 	"\x1cGroupChatRemoveMemberRequest\x122\n" +
-	"\bgroup_id\x18\x01 \x01(\x05B\x17\x9a\x84\x9e\x03\x12binding:\"required\"R\agroupId\x12<\n" +
-	"\vmembers_ids\x18\x02 \x01(\tB\x1b\x9a\x84\x9e\x03\x16binding:\"required,ids\"R\n" +
-	"membersIds\"\x1f\n" +
+	"\bgroup_id\x18\x01 \x01(\x03B\x17\x9a\x84\x9e\x03\x12binding:\"required\"R\agroupId\x124\n" +
+	"\tmember_id\x18\x02 \x01(\x03B\x17\x9a\x84\x9e\x03\x12binding:\"required\"R\bmemberId\"\x1f\n" +
 	"\x1dGroupChatRemoveMemberResponse\"\xba\x01\n" +
 	"\x1bGroupChatAssignAdminRequest\x122\n" +
 	"\bgroup_id\x18\x01 \x01(\x05B\x17\x9a\x84\x9e\x03\x12binding:\"required\"R\agroupId\x120\n" +

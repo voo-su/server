@@ -89,6 +89,7 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 			Select("id AS user_id", "username").
 			Where("id IN ?", opt.MemberIds).
 			Scan(&addMembers)
+
 		for _, val := range uids {
 			leader := 0
 			if opt.UserId == val {
@@ -128,13 +129,44 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 			ReceiverId: group.Id,
 			MsgType:    constant.ChatMsgSysGroupCreate,
 			Sequence:   g.SequenceRepo.Get(ctx, 0, group.Id),
-			Extra: jsonutil.Encode(entity.MessageExtraGroupCreate{
-				OwnerId:   user.Id,
-				OwnerName: user.Username,
-				Members:   addMembers,
-			}),
 		}
 		if err = tx.Create(message).Error; err != nil {
+			return err
+		}
+
+		if err = tx.Create(&postgresModel.MessageSystem{
+			ChatType:   constant.ChatGroupMode,
+			ReceiverId: group.Id,
+			MessageId:  message.Id,
+			UserId:     opt.UserId,
+			EventType:  constant.EventTypeGroupCreate,
+		}).Error; err != nil {
+			return err
+		}
+
+		messageSystem := make([]postgresModel.MessageSystem, 0, len(uids))
+		for _, val := range uids {
+			memberMessage := &postgresModel.Message{
+				ChatType:   constant.ChatGroupMode,
+				ReceiverId: group.Id,
+				MsgType:    constant.ChatMsgSysGroupMemberJoin,
+				Sequence:   g.SequenceRepo.Get(ctx, 0, group.Id),
+			}
+			if err = tx.Create(memberMessage).Error; err != nil {
+				return err
+			}
+
+			messageSystem = append(messageSystem, postgresModel.MessageSystem{
+				ChatType:     constant.ChatGroupMode,
+				ReceiverId:   group.Id,
+				MessageId:    memberMessage.Id,
+				UserId:       opt.UserId,
+				TargetUserId: val,
+				EventType:    constant.EventTypeUserInvite,
+			})
+		}
+
+		if err = tx.CreateInBatches(messageSystem, 225).Error; err != nil {
 			return err
 		}
 
@@ -456,11 +488,6 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 		ChatType:   constant.ChatGroupMode,
 		ReceiverId: opt.GroupId,
 		MsgType:    constant.ChatMsgSysGroupMemberKicked,
-		Extra: jsonutil.Encode(&entity.MessageExtraGroupMemberKicked{
-			OwnerId:   memberMaps[opt.UserId].Id,
-			OwnerName: memberMaps[opt.UserId].Username,
-			Members:   members,
-		}),
 	}
 	err := g.Source.Postgres().Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&postgresModel.GroupChatMember{}).
@@ -473,7 +500,26 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 			return err
 		}
 
-		return tx.Create(message).Error
+		if err = tx.Create(message).Error; err != nil {
+			return err
+		}
+
+		var messageSystem []postgresModel.MessageSystem
+		for _, mid := range members {
+			messageSystem = append(messageSystem, postgresModel.MessageSystem{
+				ChatType:     constant.ChatGroupMode,
+				ReceiverId:   opt.GroupId,
+				MessageId:    message.Id,
+				UserId:       opt.UserId,
+				TargetUserId: mid.UserId,
+				EventType:    constant.EventTypeUserInvite,
+			})
+		}
+
+		if err = tx.CreateInBatches(messageSystem, 225).Error; err != nil {
+			return err
+		}
+		return nil
 	})
 	if err != nil {
 		return err

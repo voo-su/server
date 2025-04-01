@@ -73,3 +73,17 @@ const (
 	ChatMsgSysGroupMemberCancelMuted = 1110
 	ChatMsgSysGroupAds               = 1111
 )
+
+// TODO iota
+const (
+	EventTypeUnknown         = 0
+	EventTypeGroupCreate     = 1
+	EventTypeGroupRename     = 2
+	EventTypeAvatarChange    = 3
+	EventTypeUserAdd         = 4
+	EventTypeUserRemove      = 5
+	EventTypeUserLeave       = 6
+	EventTypeUserInvite      = 7
+	EventTypeRoleChange      = 8
+	EventTypeSystemBroadcast = 9
+)

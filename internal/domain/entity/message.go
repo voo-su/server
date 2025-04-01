@@ -67,23 +67,6 @@ type DetailVote struct {
 	AnsweredNum  int    `json:"answered_num"`
 }
 
-type ServiceType int
-
-const (
-	ServiceTypeMsgSysText       ServiceType = constant.ChatMsgSysText
-	ServiceTypeChatMsgTypeLogin ServiceType = constant.ChatMsgTypeLogin
-)
-
-type ServiceItem struct {
-	Type ServiceType `json:"type"`
-	//
-	Ip      string  `json:"ip,omitempty"`
-	Agent   string  `json:"agent,omitempty"`
-	Address *string `json:"address,omitempty"`
-
-	CreatedAt time.Time `json:"created_at"`
-}
-
 type QueryGetHistoryOpt struct {
 	ChatType   int
 	UserId     int
