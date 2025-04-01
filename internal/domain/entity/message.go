@@ -40,7 +40,7 @@ const (
 type MediaItem struct {
 	Type     MediaType `json:"type"`
 	FileId   uuid.UUID `json:"file_id"`
-	MimeType string    `json:"content_type"`
+	MimeType string    `json:"mime_type"`
 	Url      string    `json:"url"`
 	Name     string    `json:"name"`
 	Size     int       `json:"size"`

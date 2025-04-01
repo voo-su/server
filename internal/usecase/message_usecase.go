@@ -279,17 +279,11 @@ func (m *MessageUseCase) GetForwardMessages(ctx context.Context, uid int, messag
 
 func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.QueryMessageItem) ([]*entity.MessageItem, error) {
 	var (
-		ids  []int
-		uIds []int
-
-		media      []int
-		mediaItems []*postgresModel.MessageMedia
-
-		login      []int
-		loginItems []*postgresModel.MessageLogin
-
-		votes     []int
-		voteItems []*postgresModel.MessageVote
+		ids   []int
+		uIds  []int
+		media []int
+		login []int
+		votes []int
 	)
 
 	for _, item := range items {
@@ -310,6 +304,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 
 	hashVotes := make(map[int]*postgresModel.MessageVote)
 	if len(votes) > 0 {
+		var voteItems []*postgresModel.MessageVote
 		if err := m.Source.Postgres().
 			Model(&postgresModel.MessageVote{}).
 			Where("message_id IN ?", votes).
@@ -324,6 +319,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 
 	hashLogin := make(map[int]*postgresModel.MessageLogin)
 	if len(login) > 0 {
+		var loginItems []*postgresModel.MessageLogin
 		if err := m.Source.Postgres().
 			Model(&postgresModel.MessageLogin{}).
 			Where("message_id IN ?", login).
@@ -339,6 +335,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 
 	hashMedia := make(map[int]*postgresModel.MessageMedia)
 	if len(media) > 0 {
+		var mediaItems []*postgresModel.MessageMedia
 		if err := m.Source.Postgres().
 			Model(&postgresModel.MessageMedia{}).
 			Where("message_id IN ?", media).
@@ -346,7 +343,6 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 			Error; err != nil {
 			log.Printf("Error - IMessageUseCase - HandleMessages.MessageMedia: %v", err)
 		}
-
 		for i := range mediaItems {
 			hashMedia[mediaItems[i].MessageId] = mediaItems[i]
 		}
@@ -558,7 +554,7 @@ func (m *MessageUseCase) GetMessageByMessageId(ctx context.Context, messageId in
 }
 
 func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *entity.SendText) error {
-	_, err := m.save(ctx, &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeText,
 		UserId:     uid,
@@ -567,18 +563,21 @@ func (m *MessageUseCase) SendText(ctx context.Context, uid int, req *entity.Send
 		ReplyTo:    int(req.ReplyToMsgId),
 	})
 
+	m.afterHandle(ctx, message)
+
 	return err
 }
 
 func (m *MessageUseCase) SendSystemText(ctx context.Context, uid int, req *entity.TextMessageRequest) error {
-	data := &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgSysText,
 		UserId:     uid,
 		ReceiverId: int(req.Receiver.ReceiverId),
 		Content:    html.EscapeString(req.Content),
-	}
-	_, err := m.save(ctx, data)
+	})
+
+	m.afterHandle(ctx, message)
 
 	return err
 }
@@ -603,6 +602,8 @@ func (m *MessageUseCase) SendImage(ctx context.Context, uid int, req *entity.Sen
 	}).Error; err != nil {
 		log.Printf("Error - IMessageUseCase - SendImage.MessageMedia: %v", err)
 	}
+
+	m.afterHandle(ctx, message)
 
 	return err
 }
@@ -629,6 +630,8 @@ func (m *MessageUseCase) SendVideo(ctx context.Context, uid int, req *entity.Sen
 		log.Printf("Error - IMessageUseCase - SendVideo.MessageMedia: %v", err)
 	}
 
+	m.afterHandle(ctx, message)
+
 	return err
 }
 
@@ -651,6 +654,8 @@ func (m *MessageUseCase) SendAudio(ctx context.Context, uid int, req *entity.Sen
 	}).Error; err != nil {
 		log.Printf("Error - IMessageUseCase - SendAudio.MessageMedia: %v", err)
 	}
+
+	m.afterHandle(ctx, message)
 
 	return err
 }
@@ -720,6 +725,8 @@ func (m *MessageUseCase) SendFile(ctx context.Context, uid int, req *entity.Send
 		log.Printf("Error - IMessageUseCase - SendFile.MessageMedia: %v", err)
 	}
 
+	m.afterHandle(ctx, message)
+
 	return err
 }
 
@@ -744,6 +751,8 @@ func (m *MessageUseCase) SendBotFile(ctx context.Context, uid int, req *entity.S
 	}).Error; err != nil {
 		log.Printf("Error - IMessageUseCase - SendBotFile.MessageMedia: %v", err)
 	}
+
+	m.afterHandle(ctx, message)
 
 	return err
 }
@@ -849,7 +858,7 @@ func (m *MessageUseCase) SendMixedMessage(ctx context.Context, uid int, req *v1P
 		})
 	}
 
-	_, err := m.save(ctx, &postgresModel.Message{
+	message, err := m.save(ctx, &postgresModel.Message{
 		ChatType:   int(req.Receiver.ChatType),
 		MsgType:    constant.ChatMsgTypeMixed,
 		UserId:     uid,
@@ -860,11 +869,16 @@ func (m *MessageUseCase) SendMixedMessage(ctx context.Context, uid int, req *v1P
 		ReplyTo: int(req.ReplyToMsgId),
 	})
 
+	m.afterHandle(ctx, message)
+
 	return err
 }
 
 func (m *MessageUseCase) SendSysOther(ctx context.Context, data *postgresModel.Message) error {
-	_, err := m.save(ctx, data)
+	message, err := m.save(ctx, data)
+
+	m.afterHandle(ctx, message)
+
 	return err
 }
 
@@ -891,6 +905,8 @@ func (m *MessageUseCase) SendLogin(ctx context.Context, uid int, req *entity.Sen
 	}).Error; err != nil {
 		log.Printf("Error - IMessageUseCase - SendLogin.MessageLogin: %v", err)
 	}
+
+	m.afterHandle(ctx, message)
 
 	return err
 }
@@ -919,6 +935,8 @@ func (m *MessageUseCase) SendSticker(ctx context.Context, uid int, req *v1Pb.Sti
 		log.Printf("Error - IMessageUseCase - SendImage.MessageMedia: %v", err)
 	}
 
+	m.afterHandle(ctx, message)
+
 	return err
 }
 
@@ -938,6 +956,8 @@ func (m *MessageUseCase) SendCode(ctx context.Context, uid int, req *v1Pb.CodeMe
 	}).Error; err != nil {
 		log.Printf("Error - IMessageUseCase - SendCode.MessageCode: %v", err)
 	}
+
+	m.afterHandle(ctx, message)
 
 	return err
 }
@@ -959,6 +979,8 @@ func (m *MessageUseCase) SendLocation(ctx context.Context, uid int, req *v1Pb.Lo
 	}).Error; err != nil {
 		log.Printf("Error - IMessageUseCase - SendCode.MessageCode: %v", err)
 	}
+
+	m.afterHandle(ctx, message)
 
 	return err
 }
@@ -1105,8 +1127,6 @@ func (m *MessageUseCase) save(ctx context.Context, data *postgresModel.Message) 
 	default:
 		data.Content = entity.GetChatMsgTypeMapping(m.Locale, data.MsgType)
 	}
-
-	m.afterHandle(ctx, data)
 
 	return data, nil
 }
