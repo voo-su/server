@@ -139,7 +139,7 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 			ReceiverId: group.Id,
 			MessageId:  message.Id,
 			UserId:     opt.UserId,
-			EventType:  constant.EventTypeGroupCreate,
+			EventType:  constant.ChatMsgSysGroupCreate,
 		}).Error; err != nil {
 			return err
 		}
@@ -149,7 +149,7 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 			memberMessage := &postgresModel.Message{
 				ChatType:   constant.ChatGroupMode,
 				ReceiverId: group.Id,
-				MsgType:    constant.ChatMsgSysGroupMemberJoin,
+				MsgType:    constant.ChatMsgSysGroupUserInvite,
 				Sequence:   g.SequenceRepo.Get(ctx, 0, group.Id),
 			}
 			if err = tx.Create(memberMessage).Error; err != nil {
@@ -162,7 +162,7 @@ func (g *GroupChatUseCase) Create(ctx context.Context, opt *GroupCreateOpt) (int
 				MessageId:    memberMessage.Id,
 				UserId:       opt.UserId,
 				TargetUserId: val,
-				EventType:    constant.EventTypeUserInvite,
+				EventType:    constant.ChatMsgSysGroupUserInvite,
 			})
 		}
 
@@ -250,12 +250,8 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 	message := &postgresModel.Message{
 		ChatType:   constant.ChatGroupMode,
 		ReceiverId: groupId,
-		MsgType:    constant.ChatMsgSysGroupMemberQuit,
+		MsgType:    constant.ChatMsgSysGroupUserLeave,
 		Sequence:   g.SequenceRepo.Get(ctx, 0, groupId),
-		Extra: jsonutil.Encode(&entity.MessageExtraGroupMemberQuit{
-			OwnerId:   user.Id,
-			OwnerName: user.Username,
-		}),
 	}
 	err := g.Source.Postgres().Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&postgresModel.GroupChatMember{}).
@@ -268,6 +264,17 @@ func (g *GroupChatUseCase) Secede(ctx context.Context, groupId int, uid int) err
 		}
 
 		if err = tx.Create(message).Error; err != nil {
+			return err
+		}
+
+		if err = tx.Create(&postgresModel.MessageSystem{
+			ChatType:     constant.ChatGroupMode,
+			ReceiverId:   groupId,
+			MessageId:    message.Id,
+			UserId:       uid,
+			TargetUserId: user.Id,
+			EventType:    constant.ChatMsgSysGroupUserLeave,
+		}).Error; err != nil {
 			return err
 		}
 
@@ -378,7 +385,7 @@ func (g *GroupChatUseCase) Invite(ctx context.Context, opt *GroupInviteOpt) erro
 	message := &postgresModel.Message{
 		ChatType:   constant.ChatGroupMode,
 		ReceiverId: opt.GroupId,
-		MsgType:    constant.ChatMsgSysGroupMemberJoin,
+		MsgType:    constant.ChatMsgSysGroupUserInvite,
 		Sequence:   g.SequenceRepo.Get(ctx, 0, opt.GroupId),
 	}
 
@@ -487,7 +494,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 		Sequence:   g.SequenceRepo.Get(ctx, 0, opt.GroupId),
 		ChatType:   constant.ChatGroupMode,
 		ReceiverId: opt.GroupId,
-		MsgType:    constant.ChatMsgSysGroupMemberKicked,
+		MsgType:    constant.ChatMsgSysGroupUserRemove,
 	}
 	err := g.Source.Postgres().Transaction(func(tx *gorm.DB) error {
 		err := tx.Model(&postgresModel.GroupChatMember{}).
@@ -512,7 +519,7 @@ func (g *GroupChatUseCase) RemoveMember(ctx context.Context, opt *GroupRemoveMem
 				MessageId:    message.Id,
 				UserId:       opt.UserId,
 				TargetUserId: mid.UserId,
-				EventType:    constant.EventTypeUserInvite,
+				EventType:    constant.ChatMsgSysGroupUserRemove,
 			})
 		}
 

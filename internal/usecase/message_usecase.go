@@ -70,6 +70,10 @@ type IMessageUseCase interface {
 
 	SendLocation(ctx context.Context, uid int, req *v1Pb.LocationMessageRequest) error
 
+	SendServiceMessageGroupMuted(ctx context.Context, uid int, gid int, mode int) error
+
+	SendServiceMessageGroupAds(ctx context.Context, uid int, gid int, extra entity.MessageExtraGroupAds) error
+
 	Vote(ctx context.Context, uid int, msgId int64, optionsValue string) (*postgresRepo.VoteStatistics, error)
 
 	Revoke(ctx context.Context, uid int, msgId int64) error
@@ -305,15 +309,15 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 			voteId = append(voteId, item.Id)
 
 		case constant.ChatMsgSysGroupCreate,
-			constant.ChatMsgSysGroupMemberJoin,
-			constant.ChatMsgSysGroupMemberQuit,
-			constant.ChatMsgSysGroupMemberKicked,
+			constant.ChatMsgSysGroupUserInvite,
+			constant.ChatMsgSysGroupUserLeave,
+			constant.ChatMsgSysGroupUserRemove,
 			constant.ChatMsgSysGroupMessageRevoke,
 			constant.ChatMsgSysGroupDismissed,
 			constant.ChatMsgSysGroupMuted,
 			constant.ChatMsgSysGroupCancelMuted,
-			constant.ChatMsgSysGroupMemberMuted,
-			constant.ChatMsgSysGroupMemberCancelMuted,
+			constant.ChatMsgSysGroupUserMuted,
+			constant.ChatMsgSysGroupUserCancelMuted,
 			constant.ChatMsgSysGroupAds:
 			systemIds = append(systemIds, item.Id)
 		}
@@ -586,7 +590,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 				}
 			}
 
-		case constant.ChatMsgSysGroupMemberJoin:
+		case constant.ChatMsgSysGroupUserInvite:
 			if val, ok := hashSystem[item.Id]; ok {
 				member := entity.ServiceItemMember{}
 				if u, ok := hashUsers[val.TargetUserId]; ok {
@@ -606,17 +610,17 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 				}
 
 				data.Service = &entity.ServiceItem{
-					Type:      entity.ServiceTypeChatMsgSysGroupMemberJoin,
+					Type:      entity.ServiceTypeChatMsgSysGroupUserInvite,
 					CreatedAt: val.CreatedAt,
 					Action:    action,
 				}
 			}
 
 			// TODO
-		case constant.ChatMsgSysGroupMemberQuit:
+		case constant.ChatMsgSysGroupUserLeave:
 			// TODO
 
-		case constant.ChatMsgSysGroupMemberKicked:
+		case constant.ChatMsgSysGroupUserRemove:
 			if val, ok := hashSystem[item.Id]; ok {
 				member := entity.ServiceItemMember{}
 				if u, ok := hashUsers[val.TargetUserId]; ok {
@@ -636,7 +640,7 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 				}
 
 				data.Service = &entity.ServiceItem{
-					Type:      entity.ServiceTypeChatMsgSysGroupMemberKicked,
+					Type:      entity.ServiceTypeChatMsgSysGroupUserRemove,
 					CreatedAt: val.CreatedAt,
 					Action:    action,
 				}
@@ -650,9 +654,9 @@ func (m *MessageUseCase) HandleMessages(ctx context.Context, items []*entity.Que
 			// TODO
 		case constant.ChatMsgSysGroupCancelMuted:
 			// TODO
-		case constant.ChatMsgSysGroupMemberMuted:
+		case constant.ChatMsgSysGroupUserMuted:
 			// TODO
-		case constant.ChatMsgSysGroupMemberCancelMuted:
+		case constant.ChatMsgSysGroupUserCancelMuted:
 			// TODO
 		case constant.ChatMsgSysGroupAds:
 			// TODO
@@ -1098,6 +1102,60 @@ func (m *MessageUseCase) SendLocation(ctx context.Context, uid int, req *v1Pb.Lo
 		CreatedAt:   time.Now(),
 	}).Error; err != nil {
 		log.Printf("Error - IMessageUseCase - SendCode.MessageCode: %v", err)
+	}
+
+	m.afterHandle(ctx, message)
+
+	return err
+}
+
+func (m *MessageUseCase) SendServiceMessageGroupMuted(ctx context.Context, uid int, gid int, mode int) error {
+	var msgType int
+	if mode == 1 {
+		msgType = constant.ChatMsgSysGroupMuted
+	} else {
+		msgType = constant.ChatMsgSysGroupCancelMuted
+	}
+
+	message, err := m.save(ctx, &postgresModel.Message{
+		MsgType:    msgType,
+		ChatType:   constant.ChatTypeGroup,
+		UserId:     uid,
+		ReceiverId: gid,
+	})
+
+	if err = m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageSystem{
+		ChatType:   constant.ChatGroupMode,
+		ReceiverId: gid,
+		MessageId:  message.Id,
+		UserId:     uid,
+		EventType:  msgType,
+	}).Error; err != nil {
+		return err
+	}
+
+	m.afterHandle(ctx, message)
+
+	return err
+}
+
+func (m *MessageUseCase) SendServiceMessageGroupAds(ctx context.Context, uid int, gid int, extra entity.MessageExtraGroupAds) error {
+	message, err := m.save(ctx, &postgresModel.Message{
+		ChatType:   constant.ChatTypeGroup,
+		MsgType:    constant.ChatMsgSysGroupAds,
+		UserId:     uid,
+		ReceiverId: gid,
+	})
+
+	if err = m.Source.Postgres().WithContext(ctx).Create(&postgresModel.MessageSystem{
+		ChatType:   constant.ChatGroupMode,
+		ReceiverId: gid,
+		MessageId:  message.Id,
+		UserId:     uid,
+		EventType:  constant.ChatMsgSysGroupAds,
+		OldValue:   jsonutil.Encode(extra),
+	}).Error; err != nil {
+		return err
 	}
 
 	m.afterHandle(ctx, message)

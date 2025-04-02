@@ -8,11 +8,11 @@ import (
 type ServiceType int
 
 const (
-	ServiceTypeMsgSysText                  ServiceType = constant.ChatMsgSysText
-	ServiceTypeChatMsgTypeLogin            ServiceType = constant.ChatMsgTypeLogin
-	ServiceTypeChatMsgSysGroupCreate       ServiceType = constant.ChatMsgSysGroupCreate
-	ServiceTypeChatMsgSysGroupMemberJoin   ServiceType = constant.ChatMsgSysGroupMemberJoin
-	ServiceTypeChatMsgSysGroupMemberKicked ServiceType = constant.ChatMsgSysGroupMemberKicked
+	ServiceTypeMsgSysText                ServiceType = constant.ChatMsgSysText
+	ServiceTypeChatMsgTypeLogin          ServiceType = constant.ChatMsgTypeLogin
+	ServiceTypeChatMsgSysGroupCreate     ServiceType = constant.ChatMsgSysGroupCreate
+	ServiceTypeChatMsgSysGroupUserInvite ServiceType = constant.ChatMsgSysGroupUserInvite
+	ServiceTypeChatMsgSysGroupUserRemove ServiceType = constant.ChatMsgSysGroupUserRemove
 )
 
 type ServiceItem struct {
@@ -86,7 +86,7 @@ type ServiceItemGroupMemberKickedMessage struct {
 }
 
 func (s ServiceItemGroupMemberKickedMessage) MessageType() ServiceType {
-	return ServiceTypeChatMsgSysGroupMemberKicked
+	return ServiceTypeChatMsgSysGroupUserRemove
 }
 
 type ServiceItemGroupMemberMutedMessage struct {

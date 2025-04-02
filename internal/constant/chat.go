@@ -45,7 +45,11 @@ const (
 	VoteAnswerModeSingleChoice = 0
 )
 
+// TODO iota
+
 const (
+	ChatMsgTypeUnknown = 0
+
 	ChatMsgTypeText      = 1
 	ChatMsgTypeCode      = 2
 	ChatMsgTypeImage     = 3
@@ -61,29 +65,18 @@ const (
 
 	ChatMsgSysText = 1000
 
-	ChatMsgSysGroupCreate            = 1101
-	ChatMsgSysGroupMemberJoin        = 1102
-	ChatMsgSysGroupMemberQuit        = 1103
-	ChatMsgSysGroupMemberKicked      = 1104
-	ChatMsgSysGroupMessageRevoke     = 1105
-	ChatMsgSysGroupDismissed         = 1106
-	ChatMsgSysGroupMuted             = 1107
-	ChatMsgSysGroupCancelMuted       = 1108
-	ChatMsgSysGroupMemberMuted       = 1109
-	ChatMsgSysGroupMemberCancelMuted = 1110
-	ChatMsgSysGroupAds               = 1111
-)
-
-// TODO iota
-const (
-	EventTypeUnknown         = 0
-	EventTypeGroupCreate     = 1
-	EventTypeGroupRename     = 2
-	EventTypeAvatarChange    = 3
-	EventTypeUserAdd         = 4
-	EventTypeUserRemove      = 5
-	EventTypeUserLeave       = 6
-	EventTypeUserInvite      = 7
-	EventTypeRoleChange      = 8
-	EventTypeSystemBroadcast = 9
+	ChatMsgSysGroupCreate           = 1101
+	ChatMsgSysGroupUserInvite       = 1102
+	ChatMsgSysGroupUserLeave        = 1103
+	ChatMsgSysGroupUserRemove       = 1104
+	ChatMsgSysGroupMessageRevoke    = 1105
+	ChatMsgSysGroupDismissed        = 1106
+	ChatMsgSysGroupMuted            = 1107
+	ChatMsgSysGroupCancelMuted      = 1108
+	ChatMsgSysGroupUserMuted        = 1109
+	ChatMsgSysGroupUserCancelMuted  = 1110
+	ChatMsgSysGroupAds              = 1111
+	ChatMsgSysGroupRenameChange     = 1112
+	ChatMsgSysGroupAvatarChange     = 1113
+	ChatMsgSysGroupAvatarRoleChange = 1113
 )

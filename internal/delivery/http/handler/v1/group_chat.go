@@ -6,10 +6,8 @@ import (
 	v1Pb "voo.su/api/http/pb/v1"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
-	postgresModel "voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
-	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/sliceutil"
 	"voo.su/pkg/timeutil"
@@ -358,6 +356,7 @@ func (g *GroupChat) Mute(ctx *ginutil.Context) error {
 	if group.IsDismiss == 1 {
 		return ctx.Error(g.Locale.Localize("group_dissolved"))
 	}
+
 	if !g.GroupChatMemberUseCase.MemberRepo.IsLeader(ctx.Ctx(), int(params.GroupId), uid) {
 		return ctx.Error(g.Locale.Localize("access_rights_missing"))
 	}
@@ -377,34 +376,7 @@ func (g *GroupChat) Mute(ctx *ginutil.Context) error {
 		return ctx.Success(v1Pb.GroupChatMuteResponse{})
 	}
 
-	user, err := g.UserUseCase.UserRepo.FindById(ctx.Ctx(), uid)
-	if err != nil {
-		return err
-	}
-
-	var extra any
-	var msgType int
-	if params.Mode == 1 {
-		msgType = constant.ChatMsgSysGroupMuted
-		extra = entity.MessageExtraGroupMuted{
-			OwnerId:   user.Id,
-			OwnerName: user.Username,
-		}
-	} else {
-		msgType = constant.ChatMsgSysGroupCancelMuted
-		extra = entity.MessageExtraGroupCancelMuted{
-			OwnerId:   user.Id,
-			OwnerName: user.Username,
-		}
-	}
-
-	if err := g.MessageUseCase.SendSysOther(ctx.Ctx(), &postgresModel.Message{
-		MsgType:    msgType,
-		ChatType:   constant.ChatTypeGroup,
-		UserId:     uid,
-		ReceiverId: int(params.GroupId),
-		Extra:      jsonutil.Encode(extra),
-	}); err != nil {
+	if err := g.MessageUseCase.SendServiceMessageGroupMuted(ctx.Ctx(), uid, int(params.GroupId), int(params.Mode)); err != nil {
 		log.Println(err)
 	}
 

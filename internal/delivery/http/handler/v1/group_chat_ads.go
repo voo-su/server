@@ -1,13 +1,11 @@
 package v1
 
 import (
+	"log"
 	v1Pb "voo.su/api/http/pb/v1"
-	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
-	"voo.su/internal/infrastructure/postgres/model"
 	"voo.su/internal/usecase"
 	"voo.su/pkg/ginutil"
-	"voo.su/pkg/jsonutil"
 	"voo.su/pkg/locale"
 	"voo.su/pkg/timeutil"
 )
@@ -60,18 +58,13 @@ func (g *GroupChatAds) CreateAndUpdate(ctx *ginutil.Context) error {
 		return ctx.Error(err.Error())
 	}
 
-	_ = g.MessageUseCase.SendSysOther(ctx.Ctx(), &model.Message{
-		ChatType:   constant.ChatTypeGroup,
-		MsgType:    constant.ChatMsgSysGroupAds,
-		UserId:     uid,
-		ReceiverId: int(params.GroupId),
-		Extra: jsonutil.Encode(entity.MessageExtraGroupAds{
-			OwnerId:   uid,
-			OwnerName: "magomedcoder",
-			Title:     params.Title,
-			Content:   params.Content,
-		}),
-	})
+	if err := g.MessageUseCase.SendServiceMessageGroupAds(ctx.Ctx(), uid, int(params.GroupId),
+		entity.MessageExtraGroupAds{
+			Title:   params.Title,
+			Content: params.Content,
+		}); err != nil {
+		log.Println(err)
+	}
 
 	return ctx.Success(nil, msg)
 }

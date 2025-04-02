@@ -136,44 +136,15 @@ type MessageExtraImage struct {
 	Height int    `json:"height"`
 }
 
-type MessageExtraGroupCreate struct {
-	OwnerId   int                        `json:"owner_id"`
-	OwnerName string                     `json:"owner_name"`
-	Members   []MessageExtraGroupMembers `json:"members"`
-}
-
 type MessageExtraGroupJoin struct {
 	OwnerId   int                        `json:"owner_id"`
 	OwnerName string                     `json:"owner_name"`
 	Members   []MessageExtraGroupMembers `json:"members"`
 }
 
-type MessageExtraGroupMuted struct {
-	OwnerId   int    `json:"owner_id"`
-	OwnerName string `json:"owner_name"`
-}
-
-type MessageExtraGroupCancelMuted struct {
-	OwnerId   int    `json:"owner_id"`
-	OwnerName string `json:"owner_name"`
-}
-
-type MessageExtraGroupMemberQuit struct {
-	OwnerId   int    `json:"owner_id"`
-	OwnerName string `json:"owner_name"`
-}
-
-type MessageExtraGroupMemberKicked struct {
-	OwnerId   int                        `json:"owner_id"`
-	OwnerName string                     `json:"owner_name"`
-	Members   []MessageExtraGroupMembers `json:"members"`
-}
-
 type MessageExtraGroupAds struct {
-	OwnerId   int    `json:"owner_id"`
-	OwnerName string `json:"owner_name"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }
 
 type MessageExtraMixedItem struct {
