@@ -8,6 +8,7 @@ import (
 	"log"
 	"strings"
 	chatPb "voo.su/api/grpc/pb"
+	commonPb "voo.su/api/grpc/pb/common"
 	"voo.su/internal/constant"
 	"voo.su/internal/domain/entity"
 	"voo.su/internal/usecase"
@@ -124,6 +125,16 @@ func (c *Chat) GetHistory(ctx context.Context, in *chatPb.GetHistoryRequest) (*c
 					MessageMediaDocument: &chatPb.MessageMediaDocument{
 						File:     file.Url,
 						MimeType: "audio/" + file.Suffix,
+						Attribute: &chatPb.DocumentAttribute{
+							Attributes: &chatPb.DocumentAttribute_Audio{
+								Audio: &commonPb.DocumentAttributeAudio{
+									Duration:  int32(file.Duration),
+									Title:     file.Title,
+									Performer: file.Performer,
+									Voice:     file.Voice,
+								},
+							},
+						},
 					},
 				},
 			}
@@ -253,11 +264,14 @@ func (c *Chat) SendMedia(ctx context.Context, in *chatPb.SendMediaRequest) (*cha
 			}
 		case strings.HasPrefix(mimeType, "audio/"):
 			if err := c.MessageUseCase.SendAudio(ctx, uid, &entity.SendAudio{
-				Receiver: receiver,
-				Url:      c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), filePath.FilePath),
-				Size:     int32(filePath.Size),
-				Content:  in.Message,
-				FileId:   &filePath.FileId,
+				Receiver:  receiver,
+				Url:       c.UploadUseCase.Minio.PublicUrl(c.Conf.Minio.GetBucket(), filePath.FilePath),
+				Size:      int32(filePath.Size),
+				Content:   in.Message,
+				FileId:    &filePath.FileId,
+				Voice:     attributes.GetAudio().GetVoice(),
+				Title:     attributes.GetAudio().GetTitle(),
+				Performer: attributes.GetAudio().GetPerformer(),
 			}); err != nil {
 				log.Println(err)
 				return nil, status.Error(codes.Unknown, "не удалось")

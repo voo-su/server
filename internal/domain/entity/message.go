@@ -125,6 +125,10 @@ type MessageExtraAudio struct {
 	Size     int    `json:"size"`
 	Url      string `json:"url"`
 	Duration int    `json:"duration"`
+
+	Voice     bool   `json:"voice"`
+	Title     string `json:"title"`
+	Performer string `json:"performer"`
 }
 
 type MessageExtraVideo struct {
@@ -261,11 +265,14 @@ type SendVideo struct {
 }
 
 type SendAudio struct {
-	Receiver MessageReceiver
-	Url      string
-	Size     int32
-	Content  string
-	FileId   *uuid.UUID
+	Receiver  MessageReceiver
+	Url       string
+	Size      int32
+	Content   string
+	FileId    *uuid.UUID
+	Voice     bool
+	Title     string
+	Performer string
 }
 
 type SendFile struct {
