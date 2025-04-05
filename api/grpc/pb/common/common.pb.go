@@ -376,7 +376,9 @@ func (x *DocumentAttributeVideo) GetHeight() int32 {
 type DocumentAttributeAudio struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Duration      int32                  `protobuf:"varint,1,opt,name=duration,proto3" json:"duration,omitempty"` // Audio file duration in seconds
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Performer     string                 `protobuf:"bytes,3,opt,name=performer,proto3" json:"performer,omitempty"`
+	Voice         bool                   `protobuf:"varint,4,opt,name=voice,proto3" json:"voice,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -418,11 +420,25 @@ func (x *DocumentAttributeAudio) GetDuration() int32 {
 	return 0
 }
 
-func (x *DocumentAttributeAudio) GetName() string {
+func (x *DocumentAttributeAudio) GetTitle() string {
 	if x != nil {
-		return x.Name
+		return x.Title
 	}
 	return ""
+}
+
+func (x *DocumentAttributeAudio) GetPerformer() string {
+	if x != nil {
+		return x.Performer
+	}
+	return ""
+}
+
+func (x *DocumentAttributeAudio) GetVoice() bool {
+	if x != nil {
+		return x.Voice
+	}
+	return false
 }
 
 type DocumentAttributeFilename struct {
@@ -494,10 +510,12 @@ const file_common_common_proto_rawDesc = "" +
 	"\x16DocumentAttributeVideo\x12\x1a\n" +
 	"\bduration\x18\x01 \x01(\x05R\bduration\x12\x14\n" +
 	"\x05width\x18\x02 \x01(\x05R\x05width\x12\x16\n" +
-	"\x06height\x18\x03 \x01(\x05R\x06height\"H\n" +
+	"\x06height\x18\x03 \x01(\x05R\x06height\"~\n" +
 	"\x16DocumentAttributeAudio\x12\x1a\n" +
-	"\bduration\x18\x01 \x01(\x05R\bduration\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"8\n" +
+	"\bduration\x18\x01 \x01(\x05R\bduration\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1c\n" +
+	"\tperformer\x18\x03 \x01(\tR\tperformer\x12\x14\n" +
+	"\x05voice\x18\x04 \x01(\bR\x05voice\"8\n" +
 	"\x19DocumentAttributeFilename\x12\x1b\n" +
 	"\tfile_name\x18\x01 \x01(\tR\bfileNameB\x1bZ\x19voo.su/api/grpc/pb/commonb\x06proto3"
 

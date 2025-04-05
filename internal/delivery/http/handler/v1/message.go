@@ -37,7 +37,6 @@ func (m *Message) transfer(ctx *ginutil.Context, typeValue string) error {
 		mapping["file"] = m.onSendFile
 		mapping["vote"] = m.onSendVote
 		mapping["forward"] = m.onSendForward
-		mapping["mixed"] = m.onMixedMessage
 		mapping["sticker"] = m.onSendSticker
 		mapping["code"] = m.onSendCode
 	}
@@ -198,19 +197,6 @@ func (m *Message) onSendVote(ctx *ginutil.Context) error {
 	}
 
 	if err := m.MessageUseCase.SendVote(ctx.Ctx(), ctx.UserId(), params); err != nil {
-		return ctx.Error(err.Error())
-	}
-
-	return ctx.Success(nil)
-}
-
-func (m *Message) onMixedMessage(ctx *ginutil.Context) error {
-	params := &v1Pb.MixedMessageRequest{}
-	if err := ctx.Context.ShouldBindBodyWith(params, binding.JSON); err != nil {
-		return ctx.InvalidParams(err)
-	}
-
-	if err := m.MessageUseCase.SendMixedMessage(ctx.Ctx(), ctx.UserId(), params); err != nil {
 		return ctx.Error(err.Error())
 	}
 

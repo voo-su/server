@@ -60,8 +60,6 @@ type IMessageUseCase interface {
 
 	SendSysOther(ctx context.Context, data *postgresModel.Message) error
 
-	SendMixedMessage(ctx context.Context, uid int, req *v1Pb.MixedMessageRequest) error
-
 	SendLogin(ctx context.Context, uid int, req *entity.SendLogin) error
 
 	SendSticker(ctx context.Context, uid int, req *v1Pb.StickerMessageRequest) error
@@ -971,31 +969,6 @@ func (m *MessageUseCase) SendForward(ctx context.Context, uid int, req *v1Pb.For
 	})
 
 	return nil
-}
-
-func (m *MessageUseCase) SendMixedMessage(ctx context.Context, uid int, req *v1Pb.MixedMessageRequest) error {
-	items := make([]*entity.MessageExtraMixedItem, 0)
-	for _, item := range req.Items {
-		items = append(items, &entity.MessageExtraMixedItem{
-			Type:    int(item.Type),
-			Content: item.Content,
-		})
-	}
-
-	message, err := m.save(ctx, &postgresModel.Message{
-		ChatType:   int(req.Receiver.ChatType),
-		MsgType:    constant.ChatMsgTypeMixed,
-		UserId:     uid,
-		ReceiverId: int(req.Receiver.ReceiverId),
-		Extra: jsonutil.Encode(entity.MessageExtraMixed{
-			Items: items,
-		}),
-		ReplyTo: int(req.ReplyToMsgId),
-	})
-
-	m.afterHandle(ctx, message)
-
-	return err
 }
 
 func (m *MessageUseCase) SendSysOther(ctx context.Context, data *postgresModel.Message) error {

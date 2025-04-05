@@ -50,6 +50,10 @@ type MediaItem struct {
 	Cover    string    `json:"cover"`
 	Drive    int       `json:"drive"`
 
+	Voice     bool   `json:"voice"`
+	Title     string `json:"title"`
+	Performer string `json:"performer"`
+
 	//
 	Detail     DetailVote `json:"detail,omitempty"`
 	Statistics any        `json:"statistics,omitempty"`
@@ -147,16 +151,6 @@ type MessageExtraGroupAds struct {
 	Content string `json:"content"`
 }
 
-type MessageExtraMixedItem struct {
-	Type    int    `json:"type"`
-	Content string `json:"content"`
-	Link    string `json:"link,omitempty"`
-}
-
-type MessageExtraMixed struct {
-	Items []*MessageExtraMixedItem `json:"items"`
-}
-
 type MessageAccess struct {
 	ChatType          int
 	UserId            int
@@ -196,11 +190,14 @@ type SendVideo struct {
 }
 
 type SendAudio struct {
-	Receiver MessageReceiver
-	Url      string
-	Size     int32
-	Content  string
-	FileId   uuid.UUID
+	Receiver  MessageReceiver
+	Url       string
+	Size      int32
+	Content   string
+	FileId    uuid.UUID
+	Voice     bool
+	Title     string
+	Performer string
 }
 
 type SendFile struct {

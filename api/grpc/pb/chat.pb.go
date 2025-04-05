@@ -796,7 +796,6 @@ type MessageItem struct {
 	// 9  - Forwarded message
 	// 10 - Login / Authentication
 	// 11 - Voting
-	// 12 - Mixed content
 	//
 	// System Events (msg_type):
 	// 1000 - System message
@@ -811,7 +810,6 @@ type MessageItem struct {
 	// 1109 - Member muted in the group
 	// 1110 - Member unmuted in the group
 	// 1111 - Advertisement in the group
-	// 1113 - Group ownership transferred
 	MsgType       int32         `protobuf:"varint,3,opt,name=msg_type,json=msgType,proto3" json:"msg_type,omitempty"`
 	UserId        int64         `protobuf:"varint,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Content       string        `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"`
@@ -1055,7 +1053,9 @@ type MessageMediaDocument struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	MimeType      string                 `protobuf:"bytes,2,opt,name=mime_type,json=mimeType,proto3" json:"mime_type,omitempty"`
 	Size          int32                  `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"` // File size in bytes
-	File          string                 `protobuf:"bytes,4,opt,name=file,proto3" json:"file,omitempty"`  // TODO Скоро будет удален
+	Thumb         string                 `protobuf:"bytes,4,opt,name=thumb,proto3" json:"thumb,omitempty"`
+	Attribute     *DocumentAttribute     `protobuf:"bytes,5,opt,name=attribute,proto3" json:"attribute,omitempty"`
+	File          string                 `protobuf:"bytes,6,opt,name=file,proto3" json:"file,omitempty"` // TODO Скоро будет удален
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1109,6 +1109,20 @@ func (x *MessageMediaDocument) GetSize() int32 {
 		return x.Size
 	}
 	return 0
+}
+
+func (x *MessageMediaDocument) GetThumb() string {
+	if x != nil {
+		return x.Thumb
+	}
+	return ""
+}
+
+func (x *MessageMediaDocument) GetAttribute() *DocumentAttribute {
+	if x != nil {
+		return x.Attribute
+	}
+	return nil
 }
 
 func (x *MessageMediaDocument) GetFile() string {
@@ -1990,12 +2004,14 @@ const file_chat_proto_rawDesc = "" +
 	"\x05media\"7\n" +
 	"\x11MessageMediaPhoto\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04file\x18\x02 \x01(\tR\x04file\"k\n" +
+	"\x04file\x18\x02 \x01(\tR\x04file\"\xb8\x01\n" +
 	"\x14MessageMediaDocument\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\tmime_type\x18\x02 \x01(\tR\bmimeType\x12\x12\n" +
-	"\x04size\x18\x03 \x01(\x05R\x04size\x12\x12\n" +
-	"\x04file\x18\x04 \x01(\tR\x04file\"\x88\x01\n" +
+	"\x04size\x18\x03 \x01(\x05R\x04size\x12\x14\n" +
+	"\x05thumb\x18\x04 \x01(\tR\x05thumb\x125\n" +
+	"\tattribute\x18\x05 \x01(\v2\x17.chat.DocumentAttributeR\tattribute\x12\x12\n" +
+	"\x04file\x18\x06 \x01(\tR\x04file\"\x88\x01\n" +
 	"\fMessageReply\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bmsg_type\x18\x02 \x01(\x05R\amsgType\x12\x17\n" +
@@ -2128,39 +2144,40 @@ var file_chat_proto_depIdxs = []int32{
 	16, // 15: chat.MessageItem.reply:type_name -> chat.MessageReply
 	14, // 16: chat.MessageMedia.message_media_photo:type_name -> chat.MessageMediaPhoto
 	15, // 17: chat.MessageMedia.message_media_document:type_name -> chat.MessageMediaDocument
-	0,  // 18: chat.SendMessageRequest.receiver:type_name -> chat.Receiver
-	30, // 19: chat.InputMediaUploadedPhoto.file:type_name -> common.InputFile
-	31, // 20: chat.DocumentAttribute.video:type_name -> common.DocumentAttributeVideo
-	32, // 21: chat.DocumentAttribute.audio:type_name -> common.DocumentAttributeAudio
-	33, // 22: chat.DocumentAttribute.filename:type_name -> common.DocumentAttributeFilename
-	30, // 23: chat.InputMediaUploadedDocument.file:type_name -> common.InputFile
-	20, // 24: chat.InputMediaUploadedDocument.attributes:type_name -> chat.DocumentAttribute
-	19, // 25: chat.InputMedia.photo:type_name -> chat.InputMediaUploadedPhoto
-	21, // 26: chat.InputMedia.document:type_name -> chat.InputMediaUploadedDocument
-	0,  // 27: chat.SendMediaRequest.receiver:type_name -> chat.Receiver
-	22, // 28: chat.SendMediaRequest.media:type_name -> chat.InputMedia
-	0,  // 29: chat.ViewMessagesRequest.receiver:type_name -> chat.Receiver
-	0,  // 30: chat.ViewMessagesResponse.receiver:type_name -> chat.Receiver
-	0,  // 31: chat.DeleteMessagesRequest.receiver:type_name -> chat.Receiver
-	1,  // 32: chat.ChatService.GetUpdates:input_type -> chat.UpdatesRequest
-	7,  // 33: chat.ChatService.GetChats:input_type -> chat.GetChatsRequest
-	10, // 34: chat.ChatService.GetHistory:input_type -> chat.GetHistoryRequest
-	17, // 35: chat.ChatService.SendMessage:input_type -> chat.SendMessageRequest
-	23, // 36: chat.ChatService.SendMedia:input_type -> chat.SendMediaRequest
-	25, // 37: chat.ChatService.ViewMessages:input_type -> chat.ViewMessagesRequest
-	27, // 38: chat.ChatService.DeleteMessages:input_type -> chat.DeleteMessagesRequest
-	2,  // 39: chat.ChatService.GetUpdates:output_type -> chat.Update
-	8,  // 40: chat.ChatService.GetChats:output_type -> chat.GetChatsResponse
-	11, // 41: chat.ChatService.GetHistory:output_type -> chat.GetHistoryResponse
-	18, // 42: chat.ChatService.SendMessage:output_type -> chat.SendMessageResponse
-	24, // 43: chat.ChatService.SendMedia:output_type -> chat.SendMediaResponse
-	26, // 44: chat.ChatService.ViewMessages:output_type -> chat.ViewMessagesResponse
-	28, // 45: chat.ChatService.DeleteMessages:output_type -> chat.DeleteMessagesResponse
-	39, // [39:46] is the sub-list for method output_type
-	32, // [32:39] is the sub-list for method input_type
-	32, // [32:32] is the sub-list for extension type_name
-	32, // [32:32] is the sub-list for extension extendee
-	0,  // [0:32] is the sub-list for field type_name
+	20, // 18: chat.MessageMediaDocument.attribute:type_name -> chat.DocumentAttribute
+	0,  // 19: chat.SendMessageRequest.receiver:type_name -> chat.Receiver
+	30, // 20: chat.InputMediaUploadedPhoto.file:type_name -> common.InputFile
+	31, // 21: chat.DocumentAttribute.video:type_name -> common.DocumentAttributeVideo
+	32, // 22: chat.DocumentAttribute.audio:type_name -> common.DocumentAttributeAudio
+	33, // 23: chat.DocumentAttribute.filename:type_name -> common.DocumentAttributeFilename
+	30, // 24: chat.InputMediaUploadedDocument.file:type_name -> common.InputFile
+	20, // 25: chat.InputMediaUploadedDocument.attributes:type_name -> chat.DocumentAttribute
+	19, // 26: chat.InputMedia.photo:type_name -> chat.InputMediaUploadedPhoto
+	21, // 27: chat.InputMedia.document:type_name -> chat.InputMediaUploadedDocument
+	0,  // 28: chat.SendMediaRequest.receiver:type_name -> chat.Receiver
+	22, // 29: chat.SendMediaRequest.media:type_name -> chat.InputMedia
+	0,  // 30: chat.ViewMessagesRequest.receiver:type_name -> chat.Receiver
+	0,  // 31: chat.ViewMessagesResponse.receiver:type_name -> chat.Receiver
+	0,  // 32: chat.DeleteMessagesRequest.receiver:type_name -> chat.Receiver
+	1,  // 33: chat.ChatService.GetUpdates:input_type -> chat.UpdatesRequest
+	7,  // 34: chat.ChatService.GetChats:input_type -> chat.GetChatsRequest
+	10, // 35: chat.ChatService.GetHistory:input_type -> chat.GetHistoryRequest
+	17, // 36: chat.ChatService.SendMessage:input_type -> chat.SendMessageRequest
+	23, // 37: chat.ChatService.SendMedia:input_type -> chat.SendMediaRequest
+	25, // 38: chat.ChatService.ViewMessages:input_type -> chat.ViewMessagesRequest
+	27, // 39: chat.ChatService.DeleteMessages:input_type -> chat.DeleteMessagesRequest
+	2,  // 40: chat.ChatService.GetUpdates:output_type -> chat.Update
+	8,  // 41: chat.ChatService.GetChats:output_type -> chat.GetChatsResponse
+	11, // 42: chat.ChatService.GetHistory:output_type -> chat.GetHistoryResponse
+	18, // 43: chat.ChatService.SendMessage:output_type -> chat.SendMessageResponse
+	24, // 44: chat.ChatService.SendMedia:output_type -> chat.SendMediaResponse
+	26, // 45: chat.ChatService.ViewMessages:output_type -> chat.ViewMessagesResponse
+	28, // 46: chat.ChatService.DeleteMessages:output_type -> chat.DeleteMessagesResponse
+	40, // [40:47] is the sub-list for method output_type
+	33, // [33:40] is the sub-list for method input_type
+	33, // [33:33] is the sub-list for extension type_name
+	33, // [33:33] is the sub-list for extension extendee
+	0,  // [0:33] is the sub-list for field type_name
 }
 
 func init() { file_chat_proto_init() }

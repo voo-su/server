@@ -38,7 +38,6 @@ func GetChatMsgTypeMapping(locale locale.ILocale, msgType int) string {
 		constant.ChatMsgTypeLogin:               locale.Localize("login_notification"),
 		constant.ChatMsgTypeVote:                locale.Localize("vote"),
 		constant.ChatMsgTypeCode:                locale.Localize("code"),
-		constant.ChatMsgTypeMixed:               locale.Localize("photos"),
 		constant.ChatMsgSysText:                 locale.Localize("system_message"),
 		constant.ChatMsgSysGroupCreate:          locale.Localize("group_creation"),
 		constant.ChatMsgSysGroupUserInvite:      locale.Localize("group_joining"),

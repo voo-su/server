@@ -172,18 +172,6 @@ message ForwardMessageRequest {
     repeated int32 uids = 6 [(tagger.tags) = "label:\"uids\""];
 }
 
-message MixedMessageRequest {
-    message Item {
-        int32 type = 1 [(tagger.tags) = "label:\"type\""];
-        string content = 2 [(tagger.tags) = "label:\"content\""];
-    }
-
-    MessageReceiver receiver = 1 [(tagger.tags) = "label:\"receiver\""];
-    string type = 2 [(tagger.tags) = "label:\"type\""];
-    repeated Item items = 3 [(tagger.tags) = "label:\"items\""];
-    int64 reply_to_msg_id = 4 [(tagger.tags) = "json:\"reply_to_msg_id\" label:\"reply_to_msg_id\""];
-}
-
 message CodeMessageRequest {
     MessageReceiver receiver = 1  [(tagger.tags) = "label:\"receiver\""];
     string type = 2 [(tagger.tags) = "label:\"type\""];

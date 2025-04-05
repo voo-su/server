@@ -61,7 +61,6 @@ const (
 	ChatMsgTypeForwarded = 9
 	ChatMsgTypeLogin     = 10
 	ChatMsgTypeVote      = 11
-	ChatMsgTypeMixed     = 12
 
 	ChatMsgSysText = 1000
 

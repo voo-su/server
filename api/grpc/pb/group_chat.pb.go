@@ -1050,6 +1050,102 @@ func (x *EditPhotoGroupChatResponse) GetSuccess() bool {
 	return false
 }
 
+type EditPermissionsGroupChatRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	CanSendMessages bool                   `protobuf:"varint,2,opt,name=can_send_messages,json=canSendMessages,proto3" json:"can_send_messages,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *EditPermissionsGroupChatRequest) Reset() {
+	*x = EditPermissionsGroupChatRequest{}
+	mi := &file_group_chat_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EditPermissionsGroupChatRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EditPermissionsGroupChatRequest) ProtoMessage() {}
+
+func (x *EditPermissionsGroupChatRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_group_chat_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EditPermissionsGroupChatRequest.ProtoReflect.Descriptor instead.
+func (*EditPermissionsGroupChatRequest) Descriptor() ([]byte, []int) {
+	return file_group_chat_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *EditPermissionsGroupChatRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *EditPermissionsGroupChatRequest) GetCanSendMessages() bool {
+	if x != nil {
+		return x.CanSendMessages
+	}
+	return false
+}
+
+type EditPermissionsGroupChatResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EditPermissionsGroupChatResponse) Reset() {
+	*x = EditPermissionsGroupChatResponse{}
+	mi := &file_group_chat_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EditPermissionsGroupChatResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EditPermissionsGroupChatResponse) ProtoMessage() {}
+
+func (x *EditPermissionsGroupChatResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_group_chat_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EditPermissionsGroupChatResponse.ProtoReflect.Descriptor instead.
+func (*EditPermissionsGroupChatResponse) Descriptor() ([]byte, []int) {
+	return file_group_chat_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *EditPermissionsGroupChatResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 var File_group_chat_proto protoreflect.FileDescriptor
 
 const file_group_chat_proto_rawDesc = "" +
@@ -1111,7 +1207,12 @@ const file_group_chat_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12(\n" +
 	"\x05photo\x18\x02 \x01(\v2\x12.common.InputPhotoR\x05photo\"6\n" +
 	"\x1aEditPhotoGroupChatResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\xc8\a\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"]\n" +
+	"\x1fEditPermissionsGroupChatRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12*\n" +
+	"\x11can_send_messages\x18\x02 \x01(\bR\x0fcanSendMessages\"<\n" +
+	" EditPermissionsGroupChatResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\xbf\b\n" +
 	"\x10GroupChatService\x12Z\n" +
 	"\x0fCreateGroupChat\x12\".group_chat.CreateGroupChatRequest\x1a#.group_chat.CreateGroupChatResponse\x12Q\n" +
 	"\fGetGroupChat\x12\x1f.group_chat.GetGroupChatRequest\x1a .group_chat.GetGroupChatResponse\x12K\n" +
@@ -1123,7 +1224,8 @@ const file_group_chat_proto_rawDesc = "" +
 	"\x0fDeleteGroupChat\x12\".group_chat.DeleteGroupChatRequest\x1a#.group_chat.DeleteGroupChatResponse\x12`\n" +
 	"\x11EditNameGroupChat\x12$.group_chat.EditNameGroupChatRequest\x1a%.group_chat.EditNameGroupChatResponse\x12c\n" +
 	"\x12EditAboutGroupChat\x12%.group_chat.EditAboutGroupChatRequest\x1a&.group_chat.EditAboutGroupChatResponse\x12c\n" +
-	"\x12EditPhotoGroupChat\x12%.group_chat.EditPhotoGroupChatRequest\x1a&.group_chat.EditPhotoGroupChatResponseB\"Z voo.su/api/grpc/pb/group_chat;pbb\x06proto3"
+	"\x12EditPhotoGroupChat\x12%.group_chat.EditPhotoGroupChatRequest\x1a&.group_chat.EditPhotoGroupChatResponse\x12u\n" +
+	"\x18EditPermissionsGroupChat\x12+.group_chat.EditPermissionsGroupChatRequest\x1a,.group_chat.EditPermissionsGroupChatResponseB\"Z voo.su/api/grpc/pb/group_chat;pbb\x06proto3"
 
 var (
 	file_group_chat_proto_rawDescOnce sync.Once
@@ -1137,34 +1239,36 @@ func file_group_chat_proto_rawDescGZIP() []byte {
 	return file_group_chat_proto_rawDescData
 }
 
-var file_group_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_group_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_group_chat_proto_goTypes = []any{
-	(*CreateGroupChatRequest)(nil),          // 0: group_chat.CreateGroupChatRequest
-	(*CreateGroupChatResponse)(nil),         // 1: group_chat.CreateGroupChatResponse
-	(*GetGroupChatRequest)(nil),             // 2: group_chat.GetGroupChatRequest
-	(*GetGroupChatResponse)(nil),            // 3: group_chat.GetGroupChatResponse
-	(*GetMembersRequest)(nil),               // 4: group_chat.GetMembersRequest
-	(*GetMembersResponse)(nil),              // 5: group_chat.GetMembersResponse
-	(*MemberItem)(nil),                      // 6: group_chat.MemberItem
-	(*AddUserToGroupChatRequest)(nil),       // 7: group_chat.AddUserToGroupChatRequest
-	(*AddUserToGroupChatResponse)(nil),      // 8: group_chat.AddUserToGroupChatResponse
-	(*RemoveUserFromGroupChatRequest)(nil),  // 9: group_chat.RemoveUserFromGroupChatRequest
-	(*RemoveUserFromGroupChatResponse)(nil), // 10: group_chat.RemoveUserFromGroupChatResponse
-	(*LeaveGroupChatRequest)(nil),           // 11: group_chat.LeaveGroupChatRequest
-	(*LeaveGroupChatResponse)(nil),          // 12: group_chat.LeaveGroupChatResponse
-	(*DeleteGroupChatRequest)(nil),          // 13: group_chat.DeleteGroupChatRequest
-	(*DeleteGroupChatResponse)(nil),         // 14: group_chat.DeleteGroupChatResponse
-	(*EditNameGroupChatRequest)(nil),        // 15: group_chat.EditNameGroupChatRequest
-	(*EditNameGroupChatResponse)(nil),       // 16: group_chat.EditNameGroupChatResponse
-	(*EditAboutGroupChatRequest)(nil),       // 17: group_chat.EditAboutGroupChatRequest
-	(*EditAboutGroupChatResponse)(nil),      // 18: group_chat.EditAboutGroupChatResponse
-	(*EditPhotoGroupChatRequest)(nil),       // 19: group_chat.EditPhotoGroupChatRequest
-	(*EditPhotoGroupChatResponse)(nil),      // 20: group_chat.EditPhotoGroupChatResponse
-	(*common.InputPhoto)(nil),               // 21: common.InputPhoto
+	(*CreateGroupChatRequest)(nil),           // 0: group_chat.CreateGroupChatRequest
+	(*CreateGroupChatResponse)(nil),          // 1: group_chat.CreateGroupChatResponse
+	(*GetGroupChatRequest)(nil),              // 2: group_chat.GetGroupChatRequest
+	(*GetGroupChatResponse)(nil),             // 3: group_chat.GetGroupChatResponse
+	(*GetMembersRequest)(nil),                // 4: group_chat.GetMembersRequest
+	(*GetMembersResponse)(nil),               // 5: group_chat.GetMembersResponse
+	(*MemberItem)(nil),                       // 6: group_chat.MemberItem
+	(*AddUserToGroupChatRequest)(nil),        // 7: group_chat.AddUserToGroupChatRequest
+	(*AddUserToGroupChatResponse)(nil),       // 8: group_chat.AddUserToGroupChatResponse
+	(*RemoveUserFromGroupChatRequest)(nil),   // 9: group_chat.RemoveUserFromGroupChatRequest
+	(*RemoveUserFromGroupChatResponse)(nil),  // 10: group_chat.RemoveUserFromGroupChatResponse
+	(*LeaveGroupChatRequest)(nil),            // 11: group_chat.LeaveGroupChatRequest
+	(*LeaveGroupChatResponse)(nil),           // 12: group_chat.LeaveGroupChatResponse
+	(*DeleteGroupChatRequest)(nil),           // 13: group_chat.DeleteGroupChatRequest
+	(*DeleteGroupChatResponse)(nil),          // 14: group_chat.DeleteGroupChatResponse
+	(*EditNameGroupChatRequest)(nil),         // 15: group_chat.EditNameGroupChatRequest
+	(*EditNameGroupChatResponse)(nil),        // 16: group_chat.EditNameGroupChatResponse
+	(*EditAboutGroupChatRequest)(nil),        // 17: group_chat.EditAboutGroupChatRequest
+	(*EditAboutGroupChatResponse)(nil),       // 18: group_chat.EditAboutGroupChatResponse
+	(*EditPhotoGroupChatRequest)(nil),        // 19: group_chat.EditPhotoGroupChatRequest
+	(*EditPhotoGroupChatResponse)(nil),       // 20: group_chat.EditPhotoGroupChatResponse
+	(*EditPermissionsGroupChatRequest)(nil),  // 21: group_chat.EditPermissionsGroupChatRequest
+	(*EditPermissionsGroupChatResponse)(nil), // 22: group_chat.EditPermissionsGroupChatResponse
+	(*common.InputPhoto)(nil),                // 23: common.InputPhoto
 }
 var file_group_chat_proto_depIdxs = []int32{
 	6,  // 0: group_chat.GetMembersResponse.items:type_name -> group_chat.MemberItem
-	21, // 1: group_chat.EditPhotoGroupChatRequest.photo:type_name -> common.InputPhoto
+	23, // 1: group_chat.EditPhotoGroupChatRequest.photo:type_name -> common.InputPhoto
 	0,  // 2: group_chat.GroupChatService.CreateGroupChat:input_type -> group_chat.CreateGroupChatRequest
 	2,  // 3: group_chat.GroupChatService.GetGroupChat:input_type -> group_chat.GetGroupChatRequest
 	4,  // 4: group_chat.GroupChatService.GetMembers:input_type -> group_chat.GetMembersRequest
@@ -1175,18 +1279,20 @@ var file_group_chat_proto_depIdxs = []int32{
 	15, // 9: group_chat.GroupChatService.EditNameGroupChat:input_type -> group_chat.EditNameGroupChatRequest
 	17, // 10: group_chat.GroupChatService.EditAboutGroupChat:input_type -> group_chat.EditAboutGroupChatRequest
 	19, // 11: group_chat.GroupChatService.EditPhotoGroupChat:input_type -> group_chat.EditPhotoGroupChatRequest
-	1,  // 12: group_chat.GroupChatService.CreateGroupChat:output_type -> group_chat.CreateGroupChatResponse
-	3,  // 13: group_chat.GroupChatService.GetGroupChat:output_type -> group_chat.GetGroupChatResponse
-	5,  // 14: group_chat.GroupChatService.GetMembers:output_type -> group_chat.GetMembersResponse
-	8,  // 15: group_chat.GroupChatService.AddUserToGroupChat:output_type -> group_chat.AddUserToGroupChatResponse
-	10, // 16: group_chat.GroupChatService.RemoveUserFromGroupChat:output_type -> group_chat.RemoveUserFromGroupChatResponse
-	12, // 17: group_chat.GroupChatService.LeaveGroupChat:output_type -> group_chat.LeaveGroupChatResponse
-	14, // 18: group_chat.GroupChatService.DeleteGroupChat:output_type -> group_chat.DeleteGroupChatResponse
-	16, // 19: group_chat.GroupChatService.EditNameGroupChat:output_type -> group_chat.EditNameGroupChatResponse
-	18, // 20: group_chat.GroupChatService.EditAboutGroupChat:output_type -> group_chat.EditAboutGroupChatResponse
-	20, // 21: group_chat.GroupChatService.EditPhotoGroupChat:output_type -> group_chat.EditPhotoGroupChatResponse
-	12, // [12:22] is the sub-list for method output_type
-	2,  // [2:12] is the sub-list for method input_type
+	21, // 12: group_chat.GroupChatService.EditPermissionsGroupChat:input_type -> group_chat.EditPermissionsGroupChatRequest
+	1,  // 13: group_chat.GroupChatService.CreateGroupChat:output_type -> group_chat.CreateGroupChatResponse
+	3,  // 14: group_chat.GroupChatService.GetGroupChat:output_type -> group_chat.GetGroupChatResponse
+	5,  // 15: group_chat.GroupChatService.GetMembers:output_type -> group_chat.GetMembersResponse
+	8,  // 16: group_chat.GroupChatService.AddUserToGroupChat:output_type -> group_chat.AddUserToGroupChatResponse
+	10, // 17: group_chat.GroupChatService.RemoveUserFromGroupChat:output_type -> group_chat.RemoveUserFromGroupChatResponse
+	12, // 18: group_chat.GroupChatService.LeaveGroupChat:output_type -> group_chat.LeaveGroupChatResponse
+	14, // 19: group_chat.GroupChatService.DeleteGroupChat:output_type -> group_chat.DeleteGroupChatResponse
+	16, // 20: group_chat.GroupChatService.EditNameGroupChat:output_type -> group_chat.EditNameGroupChatResponse
+	18, // 21: group_chat.GroupChatService.EditAboutGroupChat:output_type -> group_chat.EditAboutGroupChatResponse
+	20, // 22: group_chat.GroupChatService.EditPhotoGroupChat:output_type -> group_chat.EditPhotoGroupChatResponse
+	22, // 23: group_chat.GroupChatService.EditPermissionsGroupChat:output_type -> group_chat.EditPermissionsGroupChatResponse
+	13, // [13:24] is the sub-list for method output_type
+	2,  // [2:13] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name
@@ -1203,7 +1309,7 @@ func file_group_chat_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_group_chat_proto_rawDesc), len(file_group_chat_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   21,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
